@@ -16,7 +16,7 @@ The code contained in this package is built in four steps.
 
 
 Open the file CMakeLists.txt in the root directory of the source code tree,
-and change the following line to match your system.
+and change the definition of the variable LOCAL_PREFIX to match your system.
 
 SET(LOCAL_PREFIX "~/local")
 SET(CMAKE_INSTALL_PREFIX ${LOCAL_PREFIX})
@@ -33,6 +33,10 @@ ${CMAKE_PREFIX_PATH}/include, if not installed in a standard system directory
 like /usr/include.
 Similarly, the directory ${CMAKE_PREFIX_PATH}/lib tells CMake where to find
 the Boost libraries if they are not installed in a standard system directory.
+
+By default, both CMAKE_INSTALL_PREFIX and CMAKE_PREFIX_PATH are constructed from
+LOCAL_PREFIX, hence setting only LOCAL_PREFIX to match your system is the only
+change required in most cases.
 
 
 After this variable has been adapted to your system, you may proceed with
