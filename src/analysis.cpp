@@ -13,7 +13,7 @@
 #include "timer.hpp"
 #include "mic.hpp"
 #include "plasma/find.hpp"
-#include "stats.hpp"
+#include "stats_config.hpp"
 
 using namespace std;
 

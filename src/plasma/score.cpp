@@ -17,7 +17,7 @@
 
 #include <cmath>
 #include <iostream>
-#include "../stats.hpp"
+#include "../stats_config.hpp"
 #include "correction.hpp"
 #include "score.hpp"
 

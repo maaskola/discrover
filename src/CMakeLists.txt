@@ -20,8 +20,8 @@ ADD_LIBRARY(dlhmm SHARED association.cpp aux.cpp basedefs.cpp executioninformati
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in"
   "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp" @ONLY)
 
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/stats.hpp.in"
-  "${CMAKE_CURRENT_SOURCE_DIR}/stats.hpp" @ONLY)
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/stats_config.hpp.in"
+  "${CMAKE_CURRENT_SOURCE_DIR}/stats_config.hpp" @ONLY)
 
 ADD_EXECUTABLE(dlhmm-bin main.cpp analysis.cpp "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp")
 
