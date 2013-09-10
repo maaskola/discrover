@@ -1,11 +1,12 @@
 #!/usr/bin/env ruby
+# This script prints length statistics of sequences in FASTA files
 
 require 'bio'
 require 'optparse'
 
 options = {}
 OptionParser.new do |opts|
-  opts.banner = "Usage: example.rb [options] [paths]"
+  opts.banner = "Usage: sl [options] [paths]\nThis script prints length statistics of sequences in FASTA files"
 
   opts.on("-p", "--[no-]path", "Display path column. Defaults to off when only one path argument given, and on otherwise.") do |v|
     options[:path] = v
