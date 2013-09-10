@@ -76,11 +76,24 @@ Please refer to the file INSTALL in the main directory of this package.
 How to run
 ==========
 
+The package contains two binaries, plasma and dlhmm.
+
+Plasma is used to find IUPAC regular expression type motifs, and dlhmm learns
+HMMs. Both use discriminative objective functions.
+If no seeds are specified for dlhmm, plasma will be used to find seeds auto-
+matically.
+
 Please refer to the command line help, which is available after installing with
 
-hmm -h
+dlhmm -h
   or
-hmm --help
+dlhmm --help
+
+Similarly:
+
+plasma -h
+  or
+plasma --help
 
 
 Note that some infrequently used options are hidden by default, and may be shown
