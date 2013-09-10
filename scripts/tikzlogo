@@ -1,0 +1,437 @@
+#!/usr/bin/env ruby
+
+$script_dir = File.dirname(__FILE__)
+$: << $script_dir
+require 'hmm.rb'
+
+require 'optparse'
+require 'ostruct'
+require 'pp'
+require 'tempfile'
+
+options = OpenStruct.new
+options.small = false
+options.color = :default
+options.freqlogo = false
+options.revcomp = false
+options.noaxis = false
+options.noexecute = false
+options.order = :auto
+options.background = false
+options.dna = false
+options.simplematrix = false
+options.verbose = false
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: tikzlogo.rb [options]"
+
+ # Optional argument with keyword completion.
+  opts.on("--order [TYPE]", [:alpha, :freq, :auto],
+          "Select order (alpha, freq, auto)") do |t|
+    options.order = t
+          end
+  opts.on("--color [STYLE]", [:default, :tetrad, :solarized, :prev, :old, :ugly],
+          "Select color scheme (default, tetrad, solarized, prev, old, ugly)") do |t|
+    options.color = t
+          end
+  opts.on("-f", "--freq", "Generate a frequency-type logo instead of information content-type.") do |v|
+    options.freqlogo = v
+  end
+  opts.on("-a", "--noaxis", "Do not plot axis") do |v|
+    options.noaxis = v
+  end
+  opts.on("-s", "--small", "Use only little vertical space") do |v|
+    options.small = v
+  end
+  opts.on("-b", "--bg", "Colorize background instead of letters") do |v|
+    options.background = v
+  end
+  opts.on("-d", "--dna", "Use DNA symbols A, C, G, and T as alphabet. Default is to use RNA.") do |v|
+    options.dna = v
+  end
+  opts.on("-r", "--revcomp", "Plot the reverse complement matrix.") do |v|
+    options.revcomp = v
+  end
+  opts.on("-S", "--simplematrix", "The format of the input is a simple matrix.") do |v|
+    options.simplematrix = v
+  end
+  opts.on("-x", "--noexecute", "Do not immediately execute the commands.") do |v|
+    options.noexecute = v
+  end
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options.verbose = v
+  end
+end.parse!
+
+if options.order == :auto
+  if options.freqlogo
+    options.order = :alpha
+  else
+    options.order = :freq
+  end
+end
+
+# TODO disallow simplematrix + full
+
+def format_float(x, ndigits=7)
+  "%.#{ndigits}f" % x
+end
+
+def seq(from, to, steps)
+  s = []
+  (steps+1).times{|i|
+    s << from * (steps - i) / steps + to * i / steps
+  }
+  s
+end
+
+solarized_definition = <<END
+  SOLARIZED HEX     16/8 TERMCOL  XTERM/HEX   L*A*B      RGB         HSB
+--------- ------- ---- -------  ----------- ---------- ----------- -----------
+base03    #002b36  8/4 brblack  234 #1c1c1c 15 -12 -12   0  43  54 193 100  21
+base02    #073642  0/4 black    235 #262626 20 -12 -12   7  54  66 192  90  26
+base01    #586e75 10/7 brgreen  240 #585858 45 -07 -07  88 110 117 194  25  46
+base00    #657b83 11/7 bryellow 241 #626262 50 -07 -07 101 123 131 195  23  51
+base0     #839496 12/6 brblue   244 #808080 60 -06 -03 131 148 150 186  13  59
+base1     #93a1a1 14/4 brcyan   245 #8a8a8a 65 -05 -02 147 161 161 180   9  63
+base2     #eee8d5  7/7 white    254 #e4e4e4 92 -00  10 238 232 213  44  11  93
+base3     #fdf6e3 15/7 brwhite  230 #ffffd7 97  00  10 253 246 227  44  10  99
+yellow    #b58900  3/3 yellow   136 #af8700 60  10  65 181 137   0  45 100  71
+orange    #cb4b16  9/3 brred    166 #d75f00 50  50  55 203  75  22  18  89  80
+red       #dc322f  1/1 red      160 #d70000 50  65  45 220  50  47   1  79  86
+magenta   #d33682  5/5 magenta  125 #af005f 50  65 -05 211  54 130 331  74  83
+violet    #6c71c4 13/5 brmagenta 61 #5f5faf 50  15 -45 108 113 196 237  45  77
+blue      #268bd2  4/4 blue      33 #0087ff 55 -10 -45  38 139 210 205  82  82
+cyan      #2aa198  6/6 cyan      37 #00afaf 60 -35 -05  42 161 152 175  74  63
+green     #859900  2/2 green     64 #5f8700 60 -20  65 133 153   0  68 100  60
+END
+
+def define_solarized_colors()
+  tikz = <<END
+\\definecolor{colora}{HTML}{B58900}
+\\definecolor{colorc}{HTML}{DC322F}
+\\definecolor{colorg}{HTML}{6C71C4}
+\\definecolor{colort}{HTML}{2AA198}
+END
+end
+
+def define_solarized_alternative_colors()
+  tikz = <<END
+\\definecolor{colora}{HTML}{CB4B16}
+\\definecolor{colorc}{HTML}{D33682}
+\\definecolor{colorg}{HTML}{268BD2}
+\\definecolor{colort}{HTML}{859900}
+END
+end
+
+def define_tetrad_colors()
+  tikz = <<END
+\\definecolor{colora}{HTML}{0FAD00}
+\\definecolor{colorc}{HTML}{FF0000}
+\\definecolor{colorg}{HTML}{FFC600}
+\\definecolor{colort}{HTML}{0011A4}
+END
+end
+
+
+def define_ugly_colors()
+  tikz = <<END
+\\definecolor{colora}{rgb}{0.8,0.6,0.1}
+\\definecolor{colorc}{rgb}{1,0,0}
+\\definecolor{colorg}{rgb}{0,0.666666666,0}
+\\definecolor{colort}{rgb}{0,0,1}
+END
+  tikz
+end
+
+def define_old_colors()
+  tikz = <<END
+\\definecolor{colora}{rgb}{1.0,0.0,0.0}
+\\definecolor{colorc}{rgb}{0.666666666666,0,0.333333333333}
+\\definecolor{colorg}{rgb}{0.333333333333,0.0,0.666666666666}
+\\definecolor{colort}{rgb}{0,0,1}
+END
+  tikz
+end
+
+def define_previous_colors()
+  tikz = <<END
+\\definecolor{colora}{rgb}{0.9,0.6,0.0}
+\\definecolor{colorc}{rgb}{0.35,0.7,0.9}
+\\definecolor{colorg}{rgb}{0,0.45,0.7}
+\\definecolor{colort}{rgb}{0.8,0.4,0.0}
+END
+  tikz
+end
+
+def define_default_colors()
+# \\definecolor{colora}{rgb}{0.0,0.5,0.0}
+  tikz = <<END
+\\definecolor{colora}{rgb}{0.0,0.75,0.0}
+\\definecolor{colorc}{rgb}{0.0,0.0,1.0}
+\\definecolor{colorg}{rgb}{1,0.6470588,0.0}
+\\definecolor{colort}{rgb}{1.0,0.0,0.0}
+END
+  tikz
+end
+
+def define_colors(mode=:default)
+  case mode
+  when :default then
+    define_default_colors()
+  when :solarized then
+    define_solarized_colors()
+  when :tetrad then
+    define_tetrad_colors()
+  when :prev then
+    define_previous_colors()
+  when :old then
+    define_old_colors()
+  when :ugly then
+    define_ugly_colors()
+  end
+end
+
+$tikz_header = <<HERE
+\\documentclass[tikz=true,border=0pt]{standalone}
+%\\documentclass[class=minimal,border=0pt]{standalone}
+%\\documentclass{article}
+\\usepackage{tikz}
+\\usepackage{xcolor}
+\\usepackage{ifthen}
+\\usetikzlibrary{arrows,decorations.pathmorphing,backgrounds,positioning,fit,petri}
+\\begin{document}
+#{define_colors(options.color)}
+\\begin{tikzpicture}[>=latex]
+HERE
+
+$tikz_newpage = <<END
+\\end{tikzpicture}
+\\newpage
+\\begin{tikzpicture}[>=latex]
+END
+
+
+$tikz_footer = <<END
+\\end{tikzpicture}
+\\end{document}
+END
+
+
+
+def gen_a(x,y,width,height, color="colora")
+  x, y, width, height = [x, y, width, height].map{|x| "%f" % x}
+  "\\fill[fill=#{color}, even odd rule] (#{x},#{y}) \\foreach \\x/\\y in {0/0,4/10,6/10,10/0,8/0,6.8/3,3.2/3,2/0,0/0,3.6/4,5/7.5,6.4/4,3.6/4} { -- (#{x} + \\x/10*#{width}, #{y} + \\y/10*#{height}) };"
+end
+
+def gen_c(x,y,width,height, color="colorc")
+  x, y, width, height = [x, y, width, height].map{|x| "%f" % x}
+  s = <<HERE
+\\begin{scope}
+\\clip (#{x},#{y}) rectangle ( #{x}+#{width}, #{y}+#{height}*0.35)
+(#{x},#{y}+#{height}) rectangle ( #{x}+#{width}, #{y}+#{height}-#{height}*0.35);
+\\fill [fill=#{color}, even odd rule]( #{x}+#{width}/2, #{y}+#{height}/2) circle [x radius = #{width}/2, y radius=#{height}/2] ( #{x}+#{width}/2, #{y}+#{height}/2) circle [x radius = #{width}/2*0.8, y radius=#{height}/2*0.8];
+\\end{scope}
+\\begin{scope}
+\\clip ( #{x}, #{y}) rectangle (#{x}+#{width}/2,#{y}+#{height});
+\\fill [fill=#{color}, even odd rule]( #{x}+#{width}/2, #{y}+#{height}/2) circle [x radius = #{width}/2, y radius=#{height}/2] ( #{x}+#{width}/2, #{y}+#{height}/2) circle [x radius = #{width}/2*0.8, y radius=#{height}/2*0.8];
+\\end{scope}
+HERE
+  s
+end
+
+def gen_g(x,y,width,height, color="colorg")
+  x, y, width, height = [x, y, width, height].map{|x| "%f" % x}
+  s = gen_c(x,y,width,height,color) + <<HERE
+\\fill [fill=#{color}] ( #{x}+#{width}/2, #{y}+#{height}*0.45) rectangle ( #{x}+#{width}, #{y}+#{height}*0.35);
+\\fill [fill=#{color}] ( #{x}+#{width}*0.9, #{y}+#{height}*0.45) rectangle ( #{x}+#{width}, #{y});
+HERE
+  s
+end
+
+def gen_u(x,y,width,height,color="colort")
+  x, y, width, height = [x, y, width, height].map{|x| "%f" % x}
+  s = <<END
+\\begin{scope}
+\\clip (#{x},#{y}) rectangle ( #{x}+#{width}, #{y}+#{height}/2);
+\\fill [fill=#{color}, even odd rule]( #{x} + #{width}/2, #{y} + #{height}/2) circle [x radius = #{width}/2, y radius=#{height}/2] ( #{x} + #{width}/2, #{y} + #{height}/2) circle [x radius = #{width}/2*0.8, y radius=#{height}/2*0.8];
+\\end{scope}
+\\fill [fill=#{color}] (#{x},#{y}+#{height}/2) rectangle ( #{x}+0.1*#{width}, #{y}+#{height});
+\\fill [fill=#{color}] (#{x}+0.9*#{width},#{y}+#{height}/2) rectangle ( #{x}+#{width}, #{y}+#{height});
+END
+  s
+end
+
+def gen_t(x,y,width,height,color="colort")
+  x, y, width, height = [x, y, width, height].map{|x| "%f" % x}
+  "\\fill [fill=#{color}] (#{x},#{y}+10/10 *#{height}) \\foreach \\x/\\y in {10/10, 10/9, 6/9, 6/0, 4/0, 4/9, 0/9} { -- (#{x} + \\x/10*#{width}, #{y} + \\y/10*#{height}) };"
+end
+
+def gen_column(x_pos, y_pos, width, height, values, infologo, ordering, background, rna, font_colors, colors, revcomp, verbose)
+  text = ""
+  cumul = 0
+  ic = 1
+  if infologo
+    ic = 2 + values.map{|x| (x > 0 ? x * Math::log(x) / Math::log(2) : 0)}.inject(0){|sum,x| sum+x}
+    ic /= 2
+  end
+  order = [0,1,2,3]
+  if ordering == :freq
+    order = order.sort_by{|j|values[j]}
+  end
+  order.each{|j|
+    h = values[j]
+    if infologo
+      h *= ic
+    end
+    next_cumul = cumul + h
+    next_cumul = [next_cumul, 1].min
+    text += "\\path [fill=#{colors[j]}] (#{format_float(x_pos)},#{format_float(y_pos+height*cumul)}) rectangle (#{x_pos+width},#{format_float(y_pos+height*next_cumul)});\n" if background
+    if not revcomp
+      text += gen_a(format_float(x_pos), format_float(y_pos+height*cumul), width, format_float(height*h), font_colors[0]) + "\n" if j == 0
+      text +=  gen_c(format_float(x_pos), format_float(y_pos+height*cumul), width, format_float(height*h), font_colors[1]) + "\n" if j == 1
+      text +=  gen_g(format_float(x_pos), format_float(y_pos+height*cumul), width, format_float(height*h), font_colors[2]) + "\n" if j == 2
+      text +=  gen_u(format_float(x_pos), format_float(y_pos+height*cumul), width, format_float(height*h), font_colors[3]) + "\n" if j == 3 and rna
+      text +=  gen_t(format_float(x_pos), format_float(y_pos+height*cumul), width, format_float(height*h), font_colors[3]) + "\n" if j == 3 and not rna
+    else
+      text +=  gen_a(format_float(x_pos), format_float(y_pos+height*cumul), width, format_float(height*h), font_colors[0]) + "\n" if j == 3
+      text +=  gen_c(format_float(x_pos), format_float(y_pos+height*cumul), width, format_float(height*h), font_colors[1]) + "\n" if j == 2
+      text +=  gen_g(format_float(x_pos), format_float(y_pos+height*cumul), width, format_float(height*h), font_colors[2]) + "\n" if j == 1
+      text +=  gen_u(format_float(x_pos), format_float(y_pos+height*cumul), width, format_float(height*h), font_colors[3]) + "\n" if j == 0 and rna
+      text +=  gen_t(format_float(x_pos), format_float(y_pos+height*cumul), width, format_float(height*h), font_colors[3]) + "\n" if j == 0 and not rna
+    end
+    cumul = next_cumul
+  }
+  # $stderr.puts cumul if verbose
+  text
+end
+
+def gen_centered_column(x_pos, y_pos, width, height, values, infologo, ordering, background, rna, font_colors, colors, revcomp, verbose)
+  gen_column(x_pos-width/2, y_pos-height/2, width, height, values, infologo, ordering, background, rna, font_colors, colors, revcomp, verbose)
+end
+
+def gen_tex(matrix, f, infologo, background, widths, height, ordering=:alpha, rna=true, axis=true, revcomp=false, verbose=false)
+  if axis
+    f.puts "\\draw (-1pt,-0.1) -- coordinate (y axis mid) (-1pt, #{height} + 0.1);"
+    points = [0, 0.5, 1]
+    labels = ["0", "$\\frac{1}{2}$", "1"]
+    if infologo
+      labels = ["0", "1", "2"]
+    end
+    points.each_with_index{|p, idx|
+      label = labels[idx]
+      f.puts "\\draw (-5pt, #{p*height}) -- (-1pt, #{p*height}) node[anchor=east, inner sep=0, outer sep=0.4em] {#{label}};"
+    }
+    ylabel = "Frequency"
+    if infologo
+      ylabel = "IC [bit]"
+    end
+    f.puts "\\node[rotate=90, inner sep=0] at (-2em, #{height} / 2) {#{ylabel}};"
+    # f.puts "\\node[rotate=90, above=0.8cm, inner sep=0] at (y axis mid) {#{ylabel}};"
+  else
+    # draw an invisible line to keep the full vertical height when drawing an axis
+    f.puts "\\draw [line width=0, color=black!0] (0,0) -- coordinate (y axis mid) (0, #{height});"
+  end
+
+  n = matrix.length
+
+  #  f.puts "\\draw[help lines] (0,0) grid (#{n},2);"
+  # colors = "green yellow orange blue".split(" ")
+  colors = "colora colorc colorg colort".split(" ")
+  font_colors = colors
+  font_colors = ["white"] * 4 if background
+  # font_colors = ["black"] * 4 if background
+  # nucls = "acgt".split("")
+  cumul_x = 0
+  n.times{|i|
+    if not revcomp
+      pos = i
+    else
+      pos = n - i - 1
+    end
+    f.puts gen_column(cumul_x, 0, widths[pos], height, matrix[pos], infologo, ordering, background, rna, font_colors, colors, revcomp, verbose)
+    cumul_x = cumul_x + widths[pos]
+  }
+end
+
+def read_matrix(path)
+  m = []
+  File.open(path){|f|
+  #  f.gets
+    while line = f.gets
+      line.strip!
+      cols = line.split("\t")
+      x = cols[0..3].map{|x| x.to_f }
+      z = x.reduce(:+)
+      x = x.map{|y| y / z}
+      m << x
+    end
+  }
+  puts m.map{|x| x.join("\t")}.join("\n")
+  m
+end
+
+tex_paths = []
+
+factor = 1.0
+if options.small
+  factor = 0.5
+  if options.noaxis
+    factor = 0.25
+  end
+end
+node_width = 0.75 * factor
+node_height = 1.0 * factor
+ARGV.each{|path|
+  direction = (options.revcomp ? "backward" : "forward")
+  out_path = path + ".#{direction}.tex"
+  f = File.open(out_path, "w")
+  f.puts $tikz_header
+  if options.simplematrix
+    e_matrix = read_matrix(path)
+    gen_tex(e_matrix, f, !options.freqlogo, options.background, [node_width] * e_matrix.length, node_height, options.order, ! options.dna, ! options.noaxis, options.revcomp, options.verbose)
+  else
+    File.open(path){|g|
+      hmm = HMM::Parameters.new(g, options.verbose)
+      first = true
+      hmm.motifs.each{|name,range|
+        next if name == "Constitutive" or name == "Special" or name =~ /Background/
+        # puts name,range
+        e_matrix = []
+        topo_order = hmm.topological_order(name)
+        topo_order.each{|x|
+          e_matrix << hmm.emission[x]
+        }
+        widths = [node_width] * e_matrix.length
+        topo_order.each_with_index{|x,idx|
+          next if idx == topo_order.length - 1
+          if x > topo_order[(idx+1)..-1].min
+            widths[idx] = widths[idx] * range.map{|y| hmm.transition[y][x]}.max
+          end
+        }
+        # e_matrix = hmm.emission[range[0]..range[-1]]
+        f.puts $tikz_newpage unless first
+        first = false
+        gen_tex(e_matrix, f, !options.freqlogo, options.background, widths, node_height, options.order, ! options.dna, ! options.noaxis, options.revcomp, options.verbose)
+      }
+    }
+  end
+  f.puts $tikz_footer
+  f.close
+  tex_paths << out_path
+}
+pdf_paths = tex_paths.map{|x| x.gsub(/.tex$/,".pdf")}
+aux_paths = tex_paths.map{|x| x.gsub(/.tex$/,".aux")}
+log_paths = tex_paths.map{|x| x.gsub(/.tex$/,".log")}
+
+tex_paths.each_with_index{|path, idx|
+  dir = File.dirname(path)
+  cmd = "cd #{dir} && pdflatex #{path} && rm #{[tex_paths, aux_paths, log_paths].map{|x| x[idx]}.join(" ")}"
+  puts cmd
+  system(cmd) unless options.noexecute
+}
+
+cmd = "okular #{pdf_paths.join(" ")} &"
+puts cmd
+exec(cmd) unless options.noexecute
+
