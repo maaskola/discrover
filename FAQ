@@ -1,0 +1,28 @@
+
+Frequently asked questions
+==========================
+
+
+Q: Why is it that sometimes running the HMM parameter learning with identical
+parameters and multiple threads does not yield identical results?
+
+A: When using multiple threads, work gets distributed dynamically to the CPU
+cores. As the expected statistics, and the gradient are computed and added
+within each thread, the assignment of chunks of work to the threads is not
+constant. As addition of floating point number is not stable with respect to
+ordering, this leads to numerically differing results.
+However, whenever the sequences contain clearly recognizable motifs, this
+effect should be small, and the motifs should be discovered invariably, albeit
+perhaps not identically.
+
+
+Q: When using hybrid learning mode, why does it appear that the discriminative
+objective functions value does not strictly increase in each iteration, even
+though the reported relative increase may always be positive?
+
+A: During hybrid learning, first a gradient step on the discriminative para-
+meters for the discriminative objective function is applied, followed by an ex-
+pectation maximization step for the generative parameters. The generative
+updates often modify the parameters so as to decrease the objective function's
+values. The reported relative increase of the discriminative objective function
+is measured relative to before it is applied.
