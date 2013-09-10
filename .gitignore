@@ -1,0 +1,9 @@
+CMakeCache.txt
+CMakeFiles
+Makefile
+build
+*~
+data
+_CPack_Packages
+*cmake
+install_manifest.txt

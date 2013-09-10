@@ -1,0 +1,94 @@
+
+dlhmm - discriminative learning of hidden Markov models
+
+Binding site pattern discovery from nucleic acid sequences
+by discriminative learning of hidden Markov models
+
+Copyright 2011, Jonas Maaskola
+
+
+This is free software under the GPL version 3, or later. See the file COPYING
+for detailed conditions of distribution.
+
+
+
+
+This software packages also contains code coming from an R library:
+Mathlib : A C Library of Special Functions
+Copyright (C) 2005-6 Morten Welinder <terra@gnome.org>
+Copyright (C) 2005-10 The R Foundation
+Copyright (C) 2006-10 The R Core Development Team
+Mathlib is free software and distributed under the GNU GPL version 2.
+This software package uses routines from Mathlib to compute Chi-Square
+distribution probabilities by means of the incomplete Gamma function.
+
+
+
+
+Dependencies
+============
+
+This software depends on other software. During the configuration phase it is
+checked whether these packages are found on your system.
+The dependencies are:
+
+
+A C++11 supporting compiler
+This software package is written in C++11, so it is necessary to use an
+up-to-date version of your compiler. The GNU compiler collection supports all
+necessary features to compile this project as of version 4.6.
+
+Cmake
+http://www.cmake.org/
+We use CMake to construct Makefiles to build dlhmm.
+
+Boost C++ libraries
+http://www.boost.org/
+We make use of code in the Boost C++ libraries, so please install it.
+These libraries are available under the Boost License
+http://www.boost.org/users/license.html
+The version of Boost must be recent enough to include the V3 filesystem library.
+
+
+OpenMP
+We use OpenMP to support parallelization. As of version 4.2 the GCC supports
+OpenMP out of the box, so we suggest building with a recent compiler version.
+
+
+R library
+We are using code from the R library to compute the logarithm of the chi-square
+distribution function.  During configuration it is checked if the R library is
+found. If that is the case then we link to it, otherwise code extracted from it
+is built and used.
+
+
+
+
+Building
+========
+
+Please refer to the file INSTALL in the main directory of this package.
+
+
+
+
+
+How to run
+==========
+
+Please refer to the command line help, which is available after installing with
+
+hmm -h
+  or
+hmm --help
+
+
+Note that some infrequently used options are hidden by default, and may be shown
+with the verbose switch:
+
+hmm -hv
+
+Even more obscure options are available by adding the very verbose switch:
+
+hmm -hV
+
