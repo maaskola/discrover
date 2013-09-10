@@ -29,6 +29,7 @@
 
 #ifndef TRAININGMODE_HPP
 #define TRAININGMODE_HPP
+
 #include <iostream>
 #include <vector>
 #include "plasma/specification.hpp"

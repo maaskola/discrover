@@ -1,4 +1,19 @@
-/*
+/* =====================================================================================
+ * Copyright (c) 2012, Jonas Maaskola
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * =====================================================================================
  *
  *       Filename:  polyfit.hpp
@@ -6,13 +21,9 @@
  *    Description:  Source code to handle polynomial fits using least squares and to
  *                  find extrema of quadratic and cubic polynomials.
  *
- *        Version:  1.0
  *        Created:  09/27/2012 03:32:29 PM
- *       Revision:  none
- *       Compiler:  gcc
  *
- *         Author:  Jonas Maaskola <jonas@maaskola.de>
- *   Organization:  
+ *         Author:  Jonas Maaskola (JM), jonas@maaskola.de
  *
  * =====================================================================================
  */

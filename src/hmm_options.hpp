@@ -27,8 +27,9 @@
  * =====================================================================================
  */
 
-#ifndef HMMOPTIONS_HPP
-#define HMMOPTIONS_HPP
+#ifndef HMM_OPTIONS_HPP
+#define HMM_OPTIONS_HPP
+
 #include <string>
 #include <vector>
 #include "plasma/options.hpp"

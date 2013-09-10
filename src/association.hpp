@@ -18,7 +18,7 @@
  *
  *       Filename:  association.hpp
  *
- *    Description:  Header for routines to caluclate various measures of association
+ *    Description:  Header for routines to calculate various measures of association
  *
  *        Created:  Thu Aug 4 22:12:31 2011 +0200
  *
