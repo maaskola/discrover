@@ -77,7 +77,8 @@ make
 
 
 Explanation:
-This will compile the source code. You may make use of parallel building by running
+This will compile the source code. You may make use of parallel building by
+running
 
 make -j N
 
@@ -95,12 +96,26 @@ make install
 
 
 Explanation:
-This will copy the libraries and binaries into the place that you specified in the
-CMakeLists.txt file in step 1.
-If this location is part of your $PATH and $LD_LIBRARY_PATH environment variables
-you can then run the hmm library from anywhere. Try it out! Execute
+This will copy the libraries and binaries into the place that you specified in
+the CMakeLists.txt file in step 1.
 
-hmm -h
+If these locations are part of your $PATH and $LD_LIBRARY_PATH environment
+variables you can then simply run the dlhmm program from anywhere.
+
+Otherwise, you might still have to add the directories you installed to to $PATH
+and $LD_LIBRARY_PATH. This can be done with a command like
+
+export PATH=HERE/bin:$PATH
+export LD_LIBRARY_PATH=HERE/lib:$LD_LIBRARY_PATH
+
+where HERE will have to be the path that you installed to.
+You might consider putting these commands into your ~/.bashrc file or someplace
+similar such that they are executed every time you log into your machine.
+
+
+Finally, try it out! Execute
+
+dlhmm -h
 
 This should present you the help information of the program.
 

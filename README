@@ -1,5 +1,5 @@
 
-dlhmm - discriminative learning of hidden Markov models
+dlhmm - discriminative learning for hidden Markov models
 
 Binding site pattern discovery from nucleic acid sequences
 by discriminative learning of hidden Markov models
@@ -99,9 +99,9 @@ plasma --help
 Note that some infrequently used options are hidden by default, and may be shown
 with the verbose switch:
 
-hmm -hv
+dlhmm -hv
 
 Even more obscure options are available by adding the very verbose switch:
 
-hmm -hV
+dlhmm -hV
 
