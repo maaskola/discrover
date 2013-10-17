@@ -6,4 +6,5 @@ build
 data
 _CPack_Packages
 *cmake
+*swp
 install_manifest.txt
