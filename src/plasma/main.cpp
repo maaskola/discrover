@@ -52,7 +52,7 @@ std::string gen_usage_string()
     program_name + " -f signal.fa -f control.fa -m 4-12 -s freq -d 2 > analysis.txt\n" +
     program_name + " -f signal.fa -f control.fa -m 4-12 -d 2 > analysis.txt\n" +
     program_name + " -f signal.fa -f control.fa -m 4-12 --rdeg 0.2 > analysis.txt\n" +
-    program_name + " -f signal:signal.fa -f control.fa -m 8 -e signal > analysis.txt\n";
+    program_name + " -f signal:signal.fa -f control.fa -m signal:8 > analysis.txt\n";
   return usage;
 }
 
