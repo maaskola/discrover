@@ -49,7 +49,11 @@ bool iupac_included(char q, char r);
 
 std::string iupac_reverse_complement(const std::string &s);
 
-std::string read_fasta_with_boundaries(const std::vector<std::string> &paths, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set, size_t n_seq=0);
+typedef uint32_t seq_index_t;
+typedef uint8_t set_index_t;
+
+std::string read_fasta_with_boundaries(const std::vector<std::string> &paths, std::vector<seq_index_t> &pos2seq, std::vector<set_index_t> &seq2set, size_t n_seq=0);
+std::string collapse_data_collection(const Plasma::DataCollection &collection, std::vector<seq_index_t> &pos2seq, std::vector<set_index_t> &seq2set, std::vector<set_index_t> &set2series);
 
 template <class data_t, class idx_t=size_t, class lcp_t=size_t>
 void list_occurrences(const data_t &x, const data_t &q) {
@@ -107,9 +111,6 @@ class BidirectionalIndex{
   private:
     Index<data_t, idx_t, lcp_t> forward_index, backward_index;
 };
-
-// std::string collapse_data_series(const Plasma::DataSeries &data_series, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set);
-std::string collapse_data_collection(const Plasma::DataCollection &collection, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set, std::vector<size_t> &set2series);
 
 template <class idx_t=size_t, class lcp_t=size_t, class index_t=Index<std::string, idx_t, lcp_t>>
 class NucleotideIndex {
@@ -183,9 +184,12 @@ class NucleotideIndex {
     };
   private:
     std::vector<std::string> paths;
-    std::vector<size_t> pos2seq, seq2set, set2series;
+
+    std::vector<seq_index_t> pos2seq;
+    std::vector<set_index_t> seq2set, set2series;
     index_t index;
 };
+
 template <class idx_t=size_t, class lcp_t=size_t>
 using BidirectionalNucleotideIndex = NucleotideIndex<idx_t, lcp_t, BidirectionalIndex<std::string, idx_t, lcp_t>>;
 

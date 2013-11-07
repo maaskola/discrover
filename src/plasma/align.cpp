@@ -16,6 +16,7 @@
  * =====================================================================================
  */
 
+#include <limits>
 #include "align.hpp"
 #include "fasta.hpp"
 
@@ -143,9 +144,9 @@ string iupac_reverse_complement(const string &s) {
   return(t);
 }
 
-string read_fasta_with_boundaries(const vector<string> &paths, vector<size_t> &pos2seq, vector<size_t> &seq2set, size_t n_seq) {
+string read_fasta_with_boundaries(const vector<string> &paths, vector<seq_index_t> &pos2seq, vector<set_index_t> &seq2set, size_t n_seq) {
   string s = "";
-  size_t set_idx = 0;
+  set_index_t set_idx = 0;
   for(auto &path: paths) {
     if(not boost::filesystem::exists(path)) {
       cout << "Error opening file: " << path << " does not exist." << endl;
@@ -166,27 +167,38 @@ string read_fasta_with_boundaries(const vector<string> &paths, vector<size_t> &p
       in.push(boost::iostreams::bzip2_decompressor());
     in.push(file);
 
-    size_t idx = 0;
+    seq_index_t seq_idx = 0;
     auto parsing = [&](Fasta::Entry &&entry) {
       boost::algorithm::to_lower(entry.sequence);
       s += entry.sequence + "$";
       for(size_t i = 0; i < entry.sequence.size() + 1; i++)
-        pos2seq.push_back(idx);
+        pos2seq.push_back(seq_idx);
       seq2set.push_back(set_idx);
-      idx++;
-      return(n_seq == 0 or idx < n_seq);
+      seq_idx++;
+      if(seq_idx == numeric_limits<seq_index_t>::max()) {
+        cout << "Sequence index type not large enough." << endl
+          << "Please change seq_index_t to a larger type and recompile.";
+        throw;
+      }
+      return(n_seq == 0 or seq_idx < n_seq);
     };
     auto parser = Fasta::make_parser(parsing);
     in >> parser;
     set_idx++;
+    if(set_idx == numeric_limits<set_index_t>::max()) {
+      cout << "Set index type not large enough." << endl
+        << "Please change set_index_t to a larger type and recompile.";
+      throw;
+    }
   }
   return(s);
 }
 
-string collapse_data_series(const Plasma::DataSeries &data_series, vector<size_t> &pos2seq, vector<size_t> &seq2set) {
+
+string collapse_data_series(const Plasma::DataSeries &data_series, vector<seq_index_t> &pos2seq, vector<set_index_t> &seq2set) {
   string s;
-  size_t set_idx = 0;
-  size_t seq_idx = 0;
+  seq_index_t seq_idx = 0;
+  set_index_t set_idx = 0;
   for(auto &data_set: data_series) {
     for(auto &seq: data_set) {
       s += seq.sequence + "$";
@@ -194,17 +206,27 @@ string collapse_data_series(const Plasma::DataSeries &data_series, vector<size_t
         pos2seq.push_back(seq_idx);
       seq2set.push_back(set_idx);
       seq_idx++;
+      if(seq_idx == numeric_limits<seq_index_t>::max()) {
+        cout << "Sequence index type not large enough." << endl
+          << "Please change seq_index_t to a larger type and recompile.";
+        throw;
+      }
     }
     set_idx++;
+    if(set_idx == numeric_limits<set_index_t>::max()) {
+      cout << "Set index type not large enough." << endl
+        << "Please change set_index_t to a larger type and recompile.";
+      throw;
+    }
   }
   return(s);
 }
 
-string collapse_data_collection(const Plasma::DataCollection &collection, vector<size_t> &pos2seq, vector<size_t> &seq2set, vector<size_t> &set2series) {
+string collapse_data_collection(const Plasma::DataCollection &collection, vector<seq_index_t> &pos2seq, vector<set_index_t> &seq2set, vector<set_index_t> &set2series) {
   string s;
-  size_t seq_idx = 0;
-  size_t set_idx = 0;
-  size_t series_idx = 0;
+  seq_index_t seq_idx = 0;
+  set_index_t set_idx = 0;
+  set_index_t series_idx = 0;
   for(auto &series: collection) {
     for(auto &set: series) {
       for(auto &seq: set) {
@@ -213,11 +235,26 @@ string collapse_data_collection(const Plasma::DataCollection &collection, vector
           pos2seq.push_back(seq_idx);
         seq2set.push_back(set_idx);
         seq_idx++;
+        if(seq_idx == numeric_limits<seq_index_t>::max()) {
+          cout << "Sequence index type not large enough." << endl
+            << "Please change seq_index_t to a larger type and recompile.";
+          throw;
+        }
       }
       set2series.push_back(series_idx);
       set_idx++;
+      if(set_idx == numeric_limits<set_index_t>::max()) {
+        cout << "Set index type not large enough." << endl
+          << "Please change set_index_t to a larger type and recompile.";
+        throw;
+      }
     }
     series_idx++;
+    if(series_idx == numeric_limits<set_index_t>::max()) {
+      cout << "Series index type not large enough." << endl
+        << "Please change set_index_t to a larger type and recompile.";
+      throw;
+    }
   }
   return(s);
 }
