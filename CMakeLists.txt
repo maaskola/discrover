@@ -104,6 +104,12 @@ ELSE()
   SET(HAVE_LIBR 0)
 ENDIF()
 
+FIND_PACKAGE(Dreme)
+IF(DREME_FOUND)
+  MESSAGE(INFO " Dreme was found at " ${DREME_DIR})
+ELSE()
+  MESSAGE(WARNING "Dreme was not found")
+ENDIF()
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -std=c++11")
 

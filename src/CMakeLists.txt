@@ -23,7 +23,11 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in"
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/stats_config.hpp.in"
   "${CMAKE_CURRENT_SOURCE_DIR}/stats_config.hpp" @ONLY)
 
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/dreme_config.hpp.in"
+  "${CMAKE_CURRENT_SOURCE_DIR}/dreme_config.hpp" @ONLY)
+
 ADD_EXECUTABLE(dlhmm-bin main.cpp analysis.cpp "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp")
+ADD_EXECUTABLE(rundreme dreme.cpp "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp")
 
 # ADD_EXECUTABLE(mcmc mcmc/montecarlo.cpp) # this is a test program for the Gibbs sampling code
 # ADD_EXECUTABLE(polyfit polyfittest.cpp polyfit.cpp "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp")
