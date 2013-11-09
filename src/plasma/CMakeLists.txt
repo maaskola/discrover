@@ -16,6 +16,8 @@ ADD_LIBRARY(plasma SHARED options.cpp measure.cpp align.cpp fasta.cpp specificat
   aux.cpp correction.cpp plasma.cpp plasma_stats.cpp ../sha1.cpp
   ../timer.cpp "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA1.cpp")
 
+ADD_EXECUTABLE(newanalysis newanalysis.cpp)
+
 ADD_EXECUTABLE(plasma-bin main.cpp)
 SET_TARGET_PROPERTIES(plasma-bin
   PROPERTIES OUTPUT_NAME plasma)
@@ -31,9 +33,11 @@ ELSE()
   TARGET_LINK_LIBRARIES(plasma stats)
 ENDIF()
 
+TARGET_LINK_LIBRARIES(newanalysis plasma ${Boost_PROGRAM_OPTIONS_LIBRARY})
 TARGET_LINK_LIBRARIES(plasma-bin plasma ${Boost_PROGRAM_OPTIONS_LIBRARY})
 IF(GOOGLEPERFTOOLS_FOUND)
   TARGET_LINK_LIBRARIES(plasma-bin ${PROFILER_LIBRARY} ${TCMALLOC_LIBRARY})
+  TARGET_LINK_LIBRARIES(newanalysis ${PROFILER_LIBRARY} ${TCMALLOC_LIBRARY})
 ENDIF()
 
 INSTALL(TARGETS plasma-bin plasma
