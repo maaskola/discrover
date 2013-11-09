@@ -7,4 +7,5 @@ data
 _CPack_Packages
 *cmake
 *swp
+*swo
 install_manifest.txt
