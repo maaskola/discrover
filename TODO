@@ -1,0 +1,9 @@
+* Implement different motif models
+  - simple chain of states - done
+  - chain of states with manual insertion states - done
+  - chain of states with all insertion states
+  - chain of states with insertion and deletion states / Eddy's plan 7
+* Use other regular expression based motif finding tools for seeding
+* Shuffle sequences for discriminative learning when only one set of sequences is given
+* Search one strand against the other
+* find localized motifs
