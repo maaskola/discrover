@@ -64,6 +64,7 @@ namespace Analysis {
   struct options_t {
     Verbosity verbosity;
     Specification::DataSets paths;
+    size_t max_seed_length;
     bool revcomp;
     size_t n_seq;
   };
@@ -75,6 +76,15 @@ namespace Analysis {
   }
 }
 
+bool biggerScore(const NmerStats &a, const NmerStats &b) {
+  return(a.score > b.score);
+}
+
+std::ostream &operator<<(std::ostream &os, const NmerStats &stats) {
+  os << stats.nmer << " " << stats.score;
+  return(os);
+}
+
 int perform_analysis(const Analysis::options_t &options) {
   if(options.verbosity >= Verbosity::verbose)
     for(auto &path: options.paths)
@@ -83,6 +93,15 @@ int perform_analysis(const Analysis::options_t &options) {
   Plasma::DataCollection data_collection(options.paths, options.revcomp, options.n_seq);
 
   NucleotideIndex<size_t, size_t> index(data_collection, options.verbosity);
+
+  std::vector<NmerStats> nmers;
+  for(size_t k = 1; k <= options.max_seed_length; k++)
+    for(auto &nmer: index.nmer_analysis(k, options.verbosity))
+      nmers.push_back(nmer);
+
+  std::sort(begin(nmers), end(nmers), biggerScore);
+  for(auto &nmer: nmers)
+    std::cout << nmer << std::endl;
 
   return EXIT_SUCCESS;
 }
@@ -112,6 +131,7 @@ int main(int argc, const char** argv) {
 
   desc.add_options()
     ("fasta,f", po::value<Specification::DataSets>(&options.paths)->required(), "FASTA file(s) with nucleic acid sequences.")
+    ("k", po::value<size_t>(&options.max_seed_length)->default_value(8), "Consider seeds up to this length. Default = 8")
     ("revcomp,r", po::bool_switch(&options.revcomp), "Also consider the reverse complements of the sequences.")
     ("nseq", po::value<size_t>(&options.n_seq)->default_value(0), "Use only the first N sequences of each file. Use 0 to indicate all sequences.")
     ;

@@ -111,6 +111,11 @@ class BidirectionalIndex{
 // std::string collapse_data_series(const Plasma::DataSeries &data_series, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set);
 std::string collapse_data_collection(const Plasma::DataCollection &collection, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set, std::vector<size_t> &set2series);
 
+struct NmerStats {
+  std::string nmer;
+  double score;
+};
+
 template <class idx_t=size_t, class lcp_t=size_t, class index_t=Index<std::string, idx_t, lcp_t>>
 class NucleotideIndex {
   struct Hit {
@@ -180,6 +185,10 @@ class NucleotideIndex {
       for(auto &s: seqs)
         counts[seq2set[s]]++;
       return(counts);
+    };
+    std::list<NmerStats> nmer_analysis(size_t k, Verbosity verbosity) {
+      std::list<NmerStats> stats;
+      return(stats);
     };
   private:
     std::vector<std::string> paths;
