@@ -29,10 +29,12 @@
 
 #include <ctime>          // for clock()
 #include <sys/times.h>    // for times(struct tms *)
+#include <omp.h>
 #include <boost/program_options.hpp>
 #include "align.hpp"
 #include "specification.hpp"
 #include "data.hpp"
+#include "plasma_cli.hpp"
 #include "../GitSHA1.hpp"
 #include "../verbosity.hpp"
 
@@ -60,48 +62,39 @@ std::string gen_usage_string()
   return usage;
 }
 
-namespace Analysis {
-  struct options_t {
-    Verbosity verbosity;
-    Specification::DataSets paths;
-    size_t max_seed_length;
-    bool revcomp;
-    size_t n_seq;
-  };
-  std::ostream &operator<<(std::ostream &os, const options_t& options) {
-    os << "Verbosity = " << static_cast<int>(options.verbosity) << std::endl;
-    for(auto &path: options.paths)
-      os << "Path = " << path << std::endl;
-    return(os);
-  }
-}
-
-bool biggerScore(const NmerStats &a, const NmerStats &b) {
+bool biggerScore(const Plasma::Result &a, const Plasma::Result &b) {
   return(a.score > b.score);
 }
 
-std::ostream &operator<<(std::ostream &os, const NmerStats &stats) {
-  os << stats.nmer << " " << stats.score;
-  return(os);
-}
-
-int perform_analysis(const Analysis::options_t &options) {
+int perform_analysis(const Plasma::options_t &options, size_t max_seed_length) {
   if(options.verbosity >= Verbosity::verbose)
     for(auto &path: options.paths)
       std::cout << "Using path: " << path << std::endl;
 
   Plasma::DataCollection data_collection(options.paths, options.revcomp, options.n_seq);
+  // Plasma::DataCollection data_collection(options.paths, options.revcomp, options.n_seq, true);
 
   NucleotideIndex<size_t, size_t> index(data_collection, options.verbosity);
 
-  std::vector<NmerStats> nmers;
-  for(size_t k = 1; k <= options.max_seed_length; k++)
-    for(auto &nmer: index.nmer_analysis(k, options.verbosity))
+  std::vector<Plasma::Result> nmers;
+  for(size_t k = 1; k <= max_seed_length; k++)
+    for(auto &nmer: index.nmer_analysis(data_collection,
+          options,
+          options.objectives[0],
+          k,
+          options.verbosity))
       nmers.push_back(nmer);
 
+  if(options.verbosity >= Verbosity::verbose)
+    std::cout << "Got " << nmers.size() << " results." << std::endl;
+
   std::sort(begin(nmers), end(nmers), biggerScore);
-  for(auto &nmer: nmers)
-    std::cout << nmer << std::endl;
+  size_t n = 0;
+  for(auto &nmer: nmers) {
+    if(n++ > 400)
+      break;
+    std::cout << n << "\t" << nmer.motif << "\t" << nmer.score << std::endl;
+  }
 
   return EXIT_SUCCESS;
 }
@@ -113,7 +106,8 @@ int main(int argc, const char** argv) {
   double cpu_time_used;
   start_time = clock();
 
-  Analysis::options_t options;
+  Plasma::options_t options;
+  size_t max_seed_length;
 
   namespace po = boost::program_options;
 
@@ -126,16 +120,17 @@ int main(int argc, const char** argv) {
     ("noisy,V", "Be very verbose about the progress")
     ;
 
+  po::options_description ext_options = gen_iupac_options_description(options);
+
+  ext_options.add_options()
+    ("mxseedlen,k", po::value<size_t>(&max_seed_length)->default_value(8), "Consider seeds up to this length. Default = 8")
+    ;
+
+  desc.add(ext_options);
+
   po::positional_options_description pos;
   pos.add("fasta",-1);
 
-  desc.add_options()
-    ("fasta,f", po::value<Specification::DataSets>(&options.paths)->required(), "FASTA file(s) with nucleic acid sequences.")
-    ("k", po::value<size_t>(&options.max_seed_length)->default_value(8), "Consider seeds up to this length. Default = 8")
-    ("revcomp,r", po::bool_switch(&options.revcomp), "Also consider the reverse complements of the sequences.")
-    ("nseq", po::value<size_t>(&options.n_seq)->default_value(0), "Use only the first N sequences of each file. Use 0 to indicate all sequences.")
-    ;
- 
   po::variables_map vm;
 
   try {
@@ -271,21 +266,47 @@ int main(int argc, const char** argv) {
     return(-1);
   }
 
-  int return_value = perform_analysis(options);
+
+  if(options.motif_specifications.size() == 0) {
+    cout << "Error: you must specify motif lengths of interest with the -m switch." << endl;
+    exit(-1);
+  }
+
+  if(vm.count("threads"))
+    omp_set_num_threads(options.n_threads);
+
+
+  if(options.verbosity >= Verbosity::verbose) {
+    cout << "motif_specifications:"; for(auto &x: options.motif_specifications) cout << " " << x; cout << endl;
+    cout << "paths:"; for(auto &x: options.paths) cout << " " << x; cout << endl;
+    cout << "objectives:"; for(auto &x: options.objectives) cout << " " << x; cout << endl;
+  }
+
+  Specification::harmonize(options.motif_specifications, options.paths, options.objectives);
+
+  if(options.verbosity >= Verbosity::verbose) {
+    cout << "motif_specifications:"; for(auto &x: options.motif_specifications) cout << " " << x; cout << endl;
+    cout << "paths:"; for(auto &x: options.paths) cout << " " << x; cout << endl;
+    cout << "objectives:"; for(auto &x: options.objectives) cout << " " << x; cout << endl;
+  }
+
+
+  int return_value = perform_analysis(options, max_seed_length);
+
 
   end_time = clock();
   cpu_time_used = ((double) (end_time - start_time)) / CLOCKS_PER_SEC;
 
   if(options.verbosity >= Verbosity::info) {
-    cout << "CPU time used = " << cpu_time_used << endl;
+    cerr << "CPU time used = " << cpu_time_used << endl;
     if(options.verbosity >= Verbosity::verbose) {
       tms tm;
       clock_t some_time = times(&tm);
-      cout << "times() return " << ((double) some_time) << endl;
-      cout << "utime = " << tm.tms_utime << endl;
-      cout << "stime = " << tm.tms_stime << endl;
-      cout << "cutime = " << tm.tms_cutime << endl;
-      cout << "cstime = " << tm.tms_cstime << endl;
+      cerr << "times() return " << ((double) some_time) << endl;
+      cerr << "utime = " << tm.tms_utime << endl;
+      cerr << "stime = " << tm.tms_stime << endl;
+      cerr << "cutime = " << tm.tms_cutime << endl;
+      cerr << "cstime = " << tm.tms_cstime << endl;
     }
   }
 

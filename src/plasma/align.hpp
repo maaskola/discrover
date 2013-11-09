@@ -44,6 +44,7 @@
 
 #include "aux.hpp"
 #include "data.hpp"
+#include "score.hpp"
 
 bool iupac_included(char q, char r);
 
@@ -87,6 +88,20 @@ class Index {
     template<class Cmp=std::equal_to<typename data_t::value_type>> std::list<idx_t> find_matches(const data_t &query, Cmp cmp=Cmp()) const {
       return(match(begin(query), end(query), begin(data), end(data), sa, lcp, jmp, cmp));
     };
+    template<class Fnc> void walk(lcp_t k, Verbosity verbosity, Fnc fnc) const {
+      const idx_t n = data.size();
+      idx_t i = 0;
+      while(i < n) {
+        typename data_t::const_iterator start = begin(data) + sa[i];
+        typename data_t::const_iterator stop = start + k;
+        std::list<idx_t> positions;
+        do {
+          if(sa[i]+k < n)
+            positions.push_back(sa[i]);
+        } while (lcp[i++] >= k);
+        fnc(start, stop, positions);
+      }
+    };
   private:
     data_t data;               // the original data
     std::vector<idx_t> sa;     // suffix array
@@ -110,11 +125,6 @@ class BidirectionalIndex{
 
 // std::string collapse_data_series(const Plasma::DataSeries &data_series, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set);
 std::string collapse_data_collection(const Plasma::DataCollection &collection, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set, std::vector<size_t> &set2series);
-
-struct NmerStats {
-  std::string nmer;
-  double score;
-};
 
 template <class idx_t=size_t, class lcp_t=size_t, class index_t=Index<std::string, idx_t, lcp_t>>
 class NucleotideIndex {
@@ -186,8 +196,38 @@ class NucleotideIndex {
         counts[seq2set[s]]++;
       return(counts);
     };
-    std::list<NmerStats> nmer_analysis(size_t k, Verbosity verbosity) {
-      std::list<NmerStats> stats;
+    std::list<Plasma::Result> nmer_analysis(const Plasma::DataCollection &data_collection, const Plasma::options_t &options, const Plasma::Objective &objective, lcp_t k, Verbosity verbosity) const {
+      if(verbosity >= Verbosity::verbose)
+        std::cerr << "Doing walk for word of length " << k << "." << std::endl;
+      std::list<Plasma::Result> stats;
+      const size_t nfiles = paths.size();
+      auto fnc = [&](const std::string::const_iterator &start, const std::string::const_iterator &stop, const std::list<idx_t> &positions) {
+        const std::string word(start, stop);
+        if(word.find("$") == std::string::npos) {
+          if(verbosity >= Verbosity::debug)
+            std::cerr << "Registering word " << word << std::endl;
+
+          std::vector<idx_t> seqs;
+          for(auto &p: positions)
+            seqs.push_back(pos2seq[p]);
+
+          std::sort(begin(seqs), end(seqs));
+          seqs.resize(std::unique(begin(seqs), end(seqs)) - begin(seqs));
+
+          Plasma::Stats::OccurrenceCounts counts(nfiles, 0);
+          for(auto &s: seqs)
+            counts(seq2set[s])++;
+
+          double score = compute_score(data_collection, counts, options, objective, k, 0);
+          Plasma::Result s(objective);
+          s.motif = word;
+          s.score = score;
+          s.log_p = 0;
+          s.counts = counts;
+          stats.push_back(s);
+        }
+      };
+      index.walk(k, verbosity, fnc);
       return(stats);
     };
   private:
