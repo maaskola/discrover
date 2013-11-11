@@ -1,9 +1,10 @@
 INCLUDE(UseLATEX)
 
 ADD_LATEX_DOCUMENT(documentation.tex
-    #BIBFILES mybib.bib
-    IMAGE_DIRS images
-    DEFAULT_PDF
+  CONFIGURE documentation.tex
+  #BIBFILES mybib.bib
+  IMAGE_DIRS images
+  DEFAULT_PDF
 )
 ADD_CUSTOM_COMMAND(TARGET pdf POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
