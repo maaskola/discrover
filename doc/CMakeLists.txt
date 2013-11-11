@@ -2,7 +2,7 @@ INCLUDE(UseLATEX)
 
 ADD_LATEX_DOCUMENT(documentation.tex
   CONFIGURE documentation.tex
-  #BIBFILES mybib.bib
+  BIBFILES documentation.bib
   IMAGE_DIRS images
   DEFAULT_PDF
 )
