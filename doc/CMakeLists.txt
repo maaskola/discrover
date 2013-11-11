@@ -3,7 +3,7 @@ INCLUDE(UseLATEX)
 ADD_LATEX_DOCUMENT(documentation.tex
   CONFIGURE documentation.tex
   BIBFILES documentation.bib
-  IMAGE_DIRS images
+  # IMAGE_DIRS images
   DEFAULT_PDF
 )
 ADD_CUSTOM_COMMAND(TARGET pdf POST_BUILD
