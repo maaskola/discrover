@@ -122,6 +122,238 @@ namespace Plasma {
       viterbi_dump(res.motif, collection, cerr, options);
   }
 
+  bool admissible(const std::string &word, const score_map_t &previous) {
+    return previous.find(word) == end(previous);
+  }
+
+  std::list<std::string> modifications(const std::string &original_word, const std::string &word, size_t position) {
+    std::list<std::string> l;
+    char c = tolower(original_word[position]);
+    std::string replacements;
+    switch(c) {
+      case 'a':
+        replacements = "amrwvhdn";
+        break;
+      case 'c':
+        replacements = "msyvhbn";
+        break;
+      case 'g':
+        replacements = "grskvbdn";
+        break;
+      case 't':
+      case 'u':
+        replacements = "twykhbdn";
+        break;
+      case 'n':
+        replacements = "acgtmrwsykvhbdn";
+        break;
+      default:
+        throw("Error: unrecognized letter.");
+    }
+    for(auto &r: replacements)
+      if(r != word[position]) {
+        string w(word);
+        w[position] = r;
+        l.push_back(w);
+      }
+    return(l);
+  }
+
+  /** This exectues the FIRE algorithm to find discriminative IUPAC motifs.
+   */
+  Results Plasma::find_fire(size_t length, const Objective &objective) {
+    Results results;
+    if(options.verbosity >= Verbosity::verbose)
+      cout << "Finding motif of length " << length << " using the FIRE approach with top " << options.max_candidates << " candidated by " << measure2string(objective.measure) << "." << endl;
+
+    Timer my_timer;
+    set<size_t> degeneracies;
+    for(auto &d: options.degeneracies)
+      degeneracies.insert(d);
+    size_t max_degeneracy;
+    if(degeneracies.empty())
+      max_degeneracy = 3 * length;
+    else
+      max_degeneracy = *degeneracies.rbegin();
+    max_degeneracy = min<size_t>(max_degeneracy, 3 * length * options.rel_degeneracy);
+    if(options.per_degeneracy) {
+      for(size_t i = 0; i <= max_degeneracy; i++)
+        degeneracies.insert(i);
+    }
+
+    if(needs_rebuilding and max_degeneracy > 0)
+      rebuild_index();
+
+    size_t degeneracy = 0;
+
+    rev_map_t candidates;
+    size_t n_candidates = 0;
+
+    string best_motif;
+    double max_score = -numeric_limits<double>::infinity();
+    bool best_motif_changed = true;
+
+    if(options.verbosity >= Verbosity::verbose)
+      cerr << "Starting to get word counts." << endl;
+    hash_map_t word_counts = get_word_counts(collection, length, options);
+    if(options.measure_runtime) {
+      cerr << "Got words for length " << length << " in " << my_timer.tock() << " \u00b5s." << endl;
+      my_timer.tick();
+    }
+
+    //    if(options.verbosity >= Verbosity::debug)
+    //      print_counts(word_counts);
+
+
+    // TODO: instead of just using the N words, the FIRE approach uses randomization test for significance,
+    // and stops once 10 consecutive words have failed the test
+    for(auto &iter: word_counts) {
+      if(options.verbosity >= Verbosity::debug)
+        cout << "Candidate " << iter.first << endl;
+      double score = compute_score(collection, iter.second, options, objective, length, degeneracy);
+
+      if(options.verbosity >= Verbosity::debug)
+        cout << "score = " << score << endl;
+      if(score > max_score) {
+        max_score = score;
+        best_motif = iter.first;
+        if(options.verbosity >= Verbosity::debug)
+          cout << "motif = " << best_motif << " score = " << score << " " << iter.second << endl;
+      }
+      candidates.insert({score, iter.first});
+      n_candidates++;
+      if(n_candidates > options.max_candidates) {
+        candidates.erase(begin(candidates));
+        n_candidates--;
+      }
+    }
+
+    if(options.measure_runtime) {
+      cerr << "Initial scoring for length " << length << " took " << my_timer.tock() << " \u00b5s." << endl;
+      my_timer.tick();
+    }
+
+
+    // add one undetermined nucleotide on each side
+    for(auto &candidate: candidates) {
+      candidate.second = "n" + candidate.second + "n";
+    }
+
+    score_map_t examined_words;
+
+    for(auto &candidate: candidates) {
+      const string original_word = candidate.second;
+      const size_t word_len = original_word.size();
+
+      const size_t n_repetitions = 10;
+
+      if(options.verbosity >= Verbosity::debug)
+        std::cout << "FIRE considers motif " << original_word << " " << candidate.first << endl;
+
+      for(size_t idx_repetition = 0; idx_repetition < n_repetitions; idx_repetition++) {
+        string word = original_word;
+        double previous_score = candidate.first;
+
+        bool tried_all_positions = false;
+
+        if(options.verbosity >= Verbosity::debug)
+          std::cout << "FIRE starts repetition " << idx_repetition << " for motif " << original_word << endl;
+
+        while(not tried_all_positions) {
+          vector<size_t> remaining_positions;
+          for(size_t i = 0; i < word.size(); i++)
+            remaining_positions.push_back(i);
+
+          score_map_t tried;
+
+          while(not remaining_positions.empty()) {
+            if(options.verbosity >= Verbosity::everything) {
+              std::cout << "FIRE remaining positions:";
+              for(auto &x: remaining_positions)
+                std::cout << " " << x;
+              std::cout << std::endl;
+            }
+
+            const size_t position_idx = rand() % remaining_positions.size();
+            const size_t position = remaining_positions[position_idx];
+            remaining_positions.erase(begin(remaining_positions) + position_idx);
+
+            if(options.verbosity >= Verbosity::debug)
+              std::cout << "FIRE tries modifications to position " << position << " of motif " << original_word << endl;
+
+            for(auto &modified_word: modifications(original_word, word, position)) {
+              if(not admissible(modified_word, examined_words))
+                continue;
+
+              // find occurrences
+              vector<size_t> counts_vec;
+              if(options.word_stats)
+                counts_vec = index.word_hits_by_file(modified_word);
+              else
+                counts_vec = index.seq_hits_by_file(modified_word, options.revcomp);
+              Stats::OccurrenceCounts counts(counts_vec.size());
+              for(size_t i = 0; i < counts_vec.size(); i++)
+                counts[i] = counts_vec[i];
+              if(options.word_stats and options.revcomp) {
+                counts_vec = index.word_hits_by_file(reverse_complement(modified_word));
+                for(size_t i = 0; i < counts_vec.size(); i++)
+                  counts[i] += counts_vec[i];
+              }
+
+              double score = compute_score(collection, counts, options, objective, word_len, motif_degeneracy(modified_word));
+
+              tried[modified_word] = score;
+              examined_words[modified_word] = score;
+
+              if(options.verbosity >= Verbosity::debug)
+                std::cout << "FIRE: modified word " << modified_word << " -> " << score << endl;
+            }
+
+            double achieved_score = previous_score;
+            string best = word;
+            for(auto &x: tried)
+              if(x.second > achieved_score) {
+                achieved_score = x.second;
+                best = x.first;
+              }
+
+            if(best != word) {
+              word = best;
+              previous_score = achieved_score;
+              if(options.verbosity >= Verbosity::verbose)
+                std::cout << "FIRE: increased score: " << word << " " << achieved_score << endl;
+              break;
+            }
+          }
+
+          tried_all_positions = remaining_positions.empty();
+        }
+      }
+    }
+
+    max_score = -numeric_limits<double>::infinity();
+
+    for(auto &x: examined_words)
+      if(x.second > max_score) {
+        max_score = x.second;
+        best_motif = x.first;
+      }
+
+    Stats::OccurrenceCounts best_contrast = count_motif(collection, best_motif, options);
+    double log_p = -compute_score(collection, best_contrast, options, objective, length, motif_degeneracy(best_motif), Measures::Discrete::Measure::CorrectedLogpGtest);
+    Result result(objective);
+    result.motif = best_motif;
+    result.score = max_score;
+    result.log_p = log_p;
+    result.counts = best_contrast;
+    results.push_back(result);
+
+    if(options.verbosity >= Verbosity::verbose)
+      std::cout << "FIRE found: " << best_motif << " " << max_score << " " << log_p << endl;
+
+    return(results);
+  }
+
   /** This exectues a progressive algorithm to find discriminative IUPAC motifs.
    * It starts with degeneracy 0 and incrementally allows more degeneracy.
    * For each level of degeneracy the top N generalizations of the motifs of the
@@ -360,6 +592,22 @@ namespace Plasma {
       Plasma plasma(*this);
       for(size_t i = 0; i < n_motifs; i++) {
         Results new_results;
+        for(auto &result: plasma.find_fire(length, objective)) {
+          if(options.verbosity >= Verbosity::verbose)
+            cout << "Got results: " << result.motif << " " << result.score << endl;
+          bool allowed = not options.strict;
+          if(not allowed) {
+            if(objective.measure == Measures::Discrete::Measure::CorrectedLogpGtest and result.score > 0) // note that logp are stored as their negative in order to be maximized like the other scores
+              allowed = true;
+            else {
+              double log_p = -compute_score(collection, result, options, Measures::Discrete::Measure::CorrectedLogpGtest);
+              if(log_p < 0)
+                allowed = true;
+            }
+          }
+          if(allowed)
+            new_results.push_back(result);
+        }
         for(auto &result: plasma.find_breadth(length, objective)) {
           if(options.verbosity >= Verbosity::verbose)
             cout << "Got results: " << result.motif << " " << result.score << endl;
@@ -405,6 +653,22 @@ namespace Plasma {
     for(size_t i = 0; i < n_motifs; i++) {
       Results new_results;
       for(auto length: motif.lengths) {
+        for(auto &result: plasma.find_fire(length, objective)) {
+          if(options.verbosity >= Verbosity::verbose)
+            cout << "Got results: " << result.motif << " " << result.score << endl;
+          bool allowed = not options.strict;
+          if(not allowed) {
+            if(objective.measure == Measures::Discrete::Measure::CorrectedLogpGtest and result.score > 0) // note that logp are stored as their negative in order to be maximized like the other scores
+              allowed = true;
+            else {
+              double log_p = -compute_score(collection, result, options, Measures::Discrete::Measure::CorrectedLogpGtest);
+              if(log_p < 0)
+                allowed = true;
+            }
+          }
+          if(allowed)
+            new_results.push_back(result);
+        }
         for(auto &result: plasma.find_breadth(length, objective)) {
           if(options.verbosity >= Verbosity::verbose)
             cout << "Got results: " << result.motif << " " << result.score << endl;

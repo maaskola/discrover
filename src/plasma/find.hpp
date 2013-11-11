@@ -44,6 +44,7 @@ namespace Plasma {
     Plasma(const options_t &options_t);
     Plasma(const DataCollection &collection_, const options_t &opt);
     Results find_breadth(size_t length, const Objective &objective);
+    Results find_fire(size_t length, const Objective &objective);
     Results find_all(const Specification::Motif &motif, const Objective &objective, size_t n_motifs) const;
     Results find_multiple(const Specification::Motif &motif, const Objective &objective, size_t n_motifs) const;
     void apply_mask(const std::string &motif);
