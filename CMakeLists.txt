@@ -113,4 +113,5 @@ git_describe(GIT_DESCRIPTION)
 
 ADD_SUBDIRECTORY(src build)
 ADD_SUBDIRECTORY(scripts)
+ADD_SUBDIRECTORY(doc build/doc)
 
