@@ -30,6 +30,7 @@ namespace Plasma {
     motif_specifications({}),
     objectives(),
     algorithm(Algorithm::Plasma),
+    fire_options(Options::FIRE()),
     n_threads(1),
     revcomp(false),
     strict(false),
@@ -48,6 +49,16 @@ namespace Plasma {
     dump_viterbi(false),
     no_enrichment_filter(false)
     { };
+
+  namespace Options {
+    FIRE::FIRE() :
+      add5nt(1),
+      add3nt(1),
+      nr_rand_tests(10),
+      redundancy_threshold(5.0)
+      { };
+  }
+
 
   istream &operator>>(istream &in, OccurrenceFilter &filter) {
     string token;

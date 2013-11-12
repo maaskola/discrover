@@ -66,6 +66,16 @@ namespace Plasma {
 
   std::ostream &operator<<(std::ostream &out, const Objectives &objectives);
 
+  namespace Options {
+    struct FIRE {
+      FIRE();
+      size_t add5nt;
+      size_t add3nt;
+      size_t nr_rand_tests;
+      double redundancy_threshold;
+    };
+  }
+
   struct options_t {
     options_t();
 
@@ -74,6 +84,8 @@ namespace Plasma {
     Objectives objectives;
 
     Algorithm algorithm;
+
+    Options::FIRE fire_options;
 
     size_t n_threads;
     bool revcomp;

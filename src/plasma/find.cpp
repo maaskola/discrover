@@ -259,10 +259,12 @@ namespace Plasma {
     }
 
 
-    // add one undetermined nucleotide on each side
-    // TODO: make the number of 5' and 3' nucleotides configurable
+    // add undetermined nucleotides on each side
     for(auto &candidate: candidates) {
-      candidate.second = "n" + candidate.second + "n";
+      for(size_t i = 0; i < options.fire_options.add5nt; i++)
+        candidate.second = "n" + candidate.second;
+      for(size_t i = 0; i < options.fire_options.add3nt; i++)
+        candidate.second = candidate.second + "n";
     }
 
     score_map_t examined_words;

@@ -66,7 +66,7 @@ boost::program_options::options_description gen_iupac_options_description(Plasma
       ;
 
   desc.add_options()
-    (form_switch(prefix, "algorithm", allow_short).c_str(), po::value<Plasma::Algorithm>(&options.algorithm)->default_value(Plasma::Algorithm::Plasma, "plasma"), "Which algorithm to use for seeding. Available are 'plasma', 'fire', and 'all'. Multiple algorithms can be used by separating them by comma.")
+    (form_switch(prefix, "algo", allow_short).c_str(), po::value<Plasma::Algorithm>(&options.algorithm)->default_value(Plasma::Algorithm::Plasma, "plasma"), "Which algorithm to use for seeding. Available are 'plasma', 'fire', and 'all'. Multiple algorithms can be used by separating them by comma.")
     (form_switch(prefix, "nmotif", allow_short).c_str(), po::value<size_t>(&options.n_motifs)->default_value(1), "How many motifs to determine.")
     (form_switch(prefix, "any", false).c_str(), po::bool_switch(&options.no_enrichment_filter), "Whether to allow motifs enriched in the opposite direction.")
     (form_switch(prefix, "filter", false).c_str(), po::value<Plasma::OccurrenceFilter>(&options.occurrence_filter)->default_value(Plasma::OccurrenceFilter::mask_occurrence, "mask"), "How to filter motif occurrences upon identifying a motif. Available are 'remove' and 'mask'.")
@@ -91,6 +91,18 @@ boost::program_options::options_description gen_iupac_options_description(Plasma
     options.measure_runtime = false;
     options.dump_viterbi = false;
   }
+
+  po::options_description fire_desc("FIRE seeding algorithm options", cols);
+  string fire_prefix = "fire_";
+  fire_desc.add_options()
+    (form_switch(fire_prefix, "nucl5", false).c_str(), po::value<size_t>(&options.fire_options.add5nt)->default_value(1), "Extend seeds by this many nucleotides on the 5' side.")
+    (form_switch(fire_prefix, "nucl3", false).c_str(), po::value<size_t>(&options.fire_options.add3nt)->default_value(1), "Extend seeds by this many nucleotides on the 3' side.")
+    (form_switch(fire_prefix, "signif", false).c_str(), po::value<size_t>(&options.fire_options.nr_rand_tests)->default_value(10), "Accept seeds until this many randomization tests fail.")
+    (form_switch(fire_prefix, "redund", false).c_str(), po::value<double>(&options.fire_options.redundancy_threshold)->default_value(5.0), "The threshold that controls redundancy in seed optimization.")
+    ;
+
+  desc.add(fire_desc);
+
   return(desc);
 }
 
