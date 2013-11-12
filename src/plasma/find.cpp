@@ -31,7 +31,7 @@
 using namespace std;
 
 namespace Seeding {
-  Plasma::Plasma(const options_t &opt) : options(opt), collection(options.paths, options.revcomp, options.n_seq), index_ready(false), needs_rebuilding(false) {
+  Plasma::Plasma(const Options &opt) : options(opt), collection(options.paths, options.revcomp, options.n_seq), index_ready(false), needs_rebuilding(false) {
     if(options.verbosity >= Verbosity::verbose)
       cerr << "Data loaded - constructor 1." << endl;
 
@@ -44,15 +44,15 @@ namespace Seeding {
 
     // TODO reenable this check further down in the code
     // if((options.objective.measure == Measures::Discrete::Measure::signal_frequency or options.objective.measure == Measures::Discrete::Measure::control_frequency)
-    // j    and options.degeneracies.empty() and options.rel_degeneracy == 1)
-    // j  options.rel_degeneracy = 0.2;
+    // j    and options.plasma.degeneracies.empty() and options.plasma.rel_degeneracy == 1)
+    // j  options.plasma.rel_degeneracy = 0.2;
 
-    if(options.degeneracies.empty() or
-        find_if(begin(options.degeneracies), end(options.degeneracies), [](size_t a) { return(a!=0); }) != end(options.degeneracies))
+    if(options.plasma.degeneracies.empty() or
+        find_if(begin(options.plasma.degeneracies), end(options.plasma.degeneracies), [](size_t a) { return(a!=0); }) != end(options.plasma.degeneracies))
       needs_rebuilding = true;
   }
 
-  Plasma::Plasma(const DataCollection &collection_, const options_t &opt) : options(opt), collection(collection_), index_ready(false), needs_rebuilding(false) {
+  Plasma::Plasma(const DataCollection &collection_, const Options &opt) : options(opt), collection(collection_), index_ready(false), needs_rebuilding(false) {
     if(options.verbosity >= Verbosity::verbose)
       cerr << "Data loaded - constructor 2." << endl;
 
@@ -64,15 +64,15 @@ namespace Seeding {
 
     // TODO reenable this check further down in the code
     // if((options.objective.measure == Measures::Discrete::Measure::signal_frequency or options.objective.measure == Measures::Discrete::Measure::control_frequency)
-    //     and options.degeneracies.empty() and options.rel_degeneracy == 1)
-    //   options.rel_degeneracy = 0.2;
+    //     and options.plasma.degeneracies.empty() and options.plasma.rel_degeneracy == 1)
+    //   options.plasma.rel_degeneracy = 0.2;
 
-    if(options.degeneracies.empty() or
-        find_if(begin(options.degeneracies), end(options.degeneracies), [](size_t a) { return(a!=0); }) != end(options.degeneracies))
+    if(options.plasma.degeneracies.empty() or
+        find_if(begin(options.plasma.degeneracies), end(options.plasma.degeneracies), [](size_t a) { return(a!=0); }) != end(options.plasma.degeneracies))
       needs_rebuilding = true;
   }
 
-  void report(ostream &os, const Objective &objective, const string &motif, const DataCollection &collection, const options_t &options) {
+  void report(ostream &os, const Objective &objective, const string &motif, const DataCollection &collection, const Options &options) {
     Result result(objective);
     result.motif = motif;
     result.counts = count_motif(collection, motif, options);
@@ -81,7 +81,7 @@ namespace Seeding {
     report(os, result, collection, options);
   }
 
-  void report(ostream &os, const Result &res, const DataCollection &collection, const options_t &options) {
+  void report(ostream &os, const Result &res, const DataCollection &collection, const Options &options) {
     // TODO make more comprehensive
     // TODO add word counts
     // TODO print PWM of occurrences
@@ -94,7 +94,7 @@ namespace Seeding {
     os << "Information content [bit / pos]   " << information_content(res.motif) / res.motif.length() << endl;
     os << "Degeneracy                        " << motif_degeneracy(res.motif) << endl;
 
-    options_t no_ps = options;
+    Options no_ps = options;
     no_ps.pseudo_count = 0;
     double x = -compute_score(collection, res, options, Measures::Discrete::Measure::CorrectedLogpGtest);
     for(auto &objective: options.objectives)
@@ -190,19 +190,19 @@ namespace Seeding {
   Results Plasma::find_fire(size_t length, const Objective &objective) {
     Results results;
     if(options.verbosity >= Verbosity::verbose)
-      cout << "Finding motif of length " << length << " using the FIRE approach with top " << options.max_candidates << " candidated by " << measure2string(objective.measure) << "." << endl;
+      cout << "Finding motif of length " << length << " using the FIRE approach with top " << options.plasma.max_candidates << " candidates by " << measure2string(objective.measure) << "." << endl;
 
     Timer my_timer;
     set<size_t> degeneracies;
-    for(auto &d: options.degeneracies)
+    for(auto &d: options.plasma.degeneracies)
       degeneracies.insert(d);
     size_t max_degeneracy;
     if(degeneracies.empty())
       max_degeneracy = 3 * length;
     else
       max_degeneracy = *degeneracies.rbegin();
-    max_degeneracy = min<size_t>(max_degeneracy, 3 * length * options.rel_degeneracy);
-    if(options.per_degeneracy) {
+    max_degeneracy = min<size_t>(max_degeneracy, 3 * length * options.plasma.rel_degeneracy);
+    if(options.plasma.per_degeneracy) {
       for(size_t i = 0; i <= max_degeneracy; i++)
         degeneracies.insert(i);
     }
@@ -247,7 +247,7 @@ namespace Seeding {
       }
       candidates.insert({score, iter.first});
       n_candidates++;
-      if(n_candidates > options.max_candidates) {
+      if(n_candidates > options.plasma.max_candidates) {
         candidates.erase(begin(candidates));
         n_candidates--;
       }
@@ -261,9 +261,9 @@ namespace Seeding {
 
     // add undetermined nucleotides on each side
     for(auto &candidate: candidates) {
-      for(size_t i = 0; i < options.fire_options.add5nt; i++)
+      for(size_t i = 0; i < options.fire.add5nt; i++)
         candidate.second = "n" + candidate.second;
-      for(size_t i = 0; i < options.fire_options.add3nt; i++)
+      for(size_t i = 0; i < options.fire.add3nt; i++)
         candidate.second = candidate.second + "n";
     }
 
@@ -399,22 +399,22 @@ namespace Seeding {
   Results Plasma::find_breadth(size_t length, const Objective &objective) {
     Results results;
     if(options.verbosity >= Verbosity::verbose)
-      cout << "Finding motif of length " << length << " using top " << options.max_candidates << " breadth search by " << measure2string(objective.measure) << "." << endl;
+      cout << "Finding motif of length " << length << " using top " << options.plasma.max_candidates << " breadth search by " << measure2string(objective.measure) << "." << endl;
 
 //    if(options.verbosity >= Verbosity::debug)
 //      os << "set signal / control = " << options.set_sizes.signal.size() << " " << options.set_sizes.control.size() << endl;
 
     Timer my_timer;
     set<size_t> degeneracies;
-    for(auto &d: options.degeneracies)
+    for(auto &d: options.plasma.degeneracies)
       degeneracies.insert(d);
     size_t max_degeneracy;
     if(degeneracies.empty())
       max_degeneracy = 3 * length;
     else
       max_degeneracy = *degeneracies.rbegin();
-    max_degeneracy = min<size_t>(max_degeneracy, 3 * length * options.rel_degeneracy);
-    if(options.per_degeneracy) {
+    max_degeneracy = min<size_t>(max_degeneracy, 3 * length * options.plasma.rel_degeneracy);
+    if(options.plasma.per_degeneracy) {
       for(size_t i = 0; i <= max_degeneracy; i++)
         degeneracies.insert(i);
     }
@@ -458,7 +458,7 @@ namespace Seeding {
       }
       candidates.insert({score, iter.first});
       n_candidates++;
-      if(n_candidates > options.max_candidates) {
+      if(n_candidates > options.plasma.max_candidates) {
         candidates.erase(begin(candidates));
         n_candidates--;
       }
@@ -573,7 +573,7 @@ namespace Seeding {
               cout << "ax " << generalization << " " << generalization_score << endl;
             candidates.insert({generalization_score, generalization});
             n_candidates++;
-            if(n_candidates > options.max_candidates) {
+            if(n_candidates > options.plasma.max_candidates) {
               candidates.erase(begin(candidates));
               n_candidates--;
             }
@@ -792,7 +792,7 @@ namespace Seeding {
     t.detach();
   }
 
-  void viterbi_dump(const string &motif, const DataSet &data_set, ostream &out, const options_t &options) {
+  void viterbi_dump(const string &motif, const DataSet &data_set, ostream &out, const Options &options) {
     out << "# " << data_set.path << " details following" << endl;
     for(auto &seq: data_set) {
       size_t n_sites = 0;
@@ -830,7 +830,7 @@ namespace Seeding {
 
 
 
-  void viterbi_dump(const string &motif, const DataCollection &collection, ostream &out, const options_t &options) {
+  void viterbi_dump(const string &motif, const DataCollection &collection, ostream &out, const Options &options) {
     for(auto &series: collection)
       for(auto &set: series)
         viterbi_dump(motif, set, out, options);

@@ -63,7 +63,7 @@ int main(int argc, const char** argv) {
   double cpu_time_used;
   start_time = clock();
 
-  Seeding::options_t options;
+  Seeding::Options options;
 
   namespace po = boost::program_options;
 
@@ -260,7 +260,7 @@ int main(int argc, const char** argv) {
   else {
     sort(begin(results), end(results), [](const res_t &a, const res_t &b) { return(a.log_p <= b.log_p); });
     Seeding::DataCollection original_ds = ds;
-    Seeding::options_t opts = options;
+    Seeding::Options opts = options;
     opts.occurrence_filter = Seeding::OccurrenceFilter::RemoveSequences;
     for(auto &r: results) {
       report(cout, r, original_ds, options);

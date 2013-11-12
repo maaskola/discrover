@@ -33,7 +33,7 @@ string form_switch(const string &prefix, const string& s, bool add_short=true) {
     return(prefix + s);
 }
 
-boost::program_options::options_description gen_iupac_options_description(Seeding::options_t &options,
+boost::program_options::options_description gen_iupac_options_description(Seeding::Options &options,
     const string &prefix,
     const string &name,
     size_t cols,
@@ -70,10 +70,10 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
     (form_switch(prefix, "nmotif", allow_short).c_str(), po::value<size_t>(&options.n_motifs)->default_value(1), "How many motifs to determine.")
     (form_switch(prefix, "any", false).c_str(), po::bool_switch(&options.no_enrichment_filter), "Whether to allow motifs enriched in the opposite direction.")
     (form_switch(prefix, "filter", false).c_str(), po::value<Seeding::OccurrenceFilter>(&options.occurrence_filter)->default_value(Seeding::OccurrenceFilter::MaskOccurrences, "mask"), "How to filter motif occurrences upon identifying a motif. Available are 'remove' and 'mask'.")
-    (form_switch(prefix, "cand", allow_short).c_str(), po::value<size_t>(&options.max_candidates)->default_value(100), "How many candidates to maintain.")
-    (form_switch(prefix, "deg", allow_short).c_str(), po::value<vector<size_t>>(&options.degeneracies), "Which degrees of degeneracy to consider. May be given multiple times. A sequence of length N has a maximal degeneracy of 3*N. Unlimited if unspecified.")
-    (form_switch(prefix, "rdeg", false).c_str(), po::value<double>(&options.rel_degeneracy)->default_value(1), "Limit relative degeneracy. 1 corresponds to full degeneracy, and 0 to no degeneracy. For a sequence of length N the degeneracy is maximally 3*N. Thus for a motif of length 8 a maximal relative degeneracy of 0.2 allows (rounded down) 4 degrees of degeneracy.")
-    (form_switch(prefix, "generalize", allow_short).c_str(), po::bool_switch(&options.per_degeneracy), "Whether to report the best motifs at each level of degeneracy. Default is to report only the best motif across all levels of degeneracy. In addition, the best motifs of levels of degeneracy given by --deg will be reported.")
+    (form_switch(prefix, "cand", allow_short).c_str(), po::value<size_t>(&options.plasma.max_candidates)->default_value(100), "How many candidates to maintain.")
+    (form_switch(prefix, "deg", allow_short).c_str(), po::value<vector<size_t>>(&options.plasma.degeneracies), "Which degrees of degeneracy to consider. May be given multiple times. A sequence of length N has a maximal degeneracy of 3*N. Unlimited if unspecified.")
+    (form_switch(prefix, "rdeg", false).c_str(), po::value<double>(&options.plasma.rel_degeneracy)->default_value(1), "Limit relative degeneracy. 1 corresponds to full degeneracy, and 0 to no degeneracy. For a sequence of length N the degeneracy is maximally 3*N. Thus for a motif of length 8 a maximal relative degeneracy of 0.2 allows (rounded down) 4 degrees of degeneracy.")
+    (form_switch(prefix, "generalize", allow_short).c_str(), po::bool_switch(&options.plasma.per_degeneracy), "Whether to report the best motifs at each level of degeneracy. Default is to report only the best motif across all levels of degeneracy. In addition, the best motifs of levels of degeneracy given by --deg will be reported.")
     (form_switch(prefix, "keepall", false).c_str(), po::bool_switch(&options.keep_all), "Whether to report for each motif specification the best result for each length. Default is to report only the single best motif for each motif specification.")
     (form_switch(prefix, "strict", false).c_str(), po::bool_switch(&options.strict), "Do not allow insignificant seeds.")
     ;
@@ -95,10 +95,10 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
   po::options_description fire_desc("FIRE seeding algorithm options", cols);
   string fire_prefix = "fire_";
   fire_desc.add_options()
-    (form_switch(fire_prefix, "nucl5", false).c_str(), po::value<size_t>(&options.fire_options.add5nt)->default_value(1), "Extend seeds by this many nucleotides on the 5' side.")
-    (form_switch(fire_prefix, "nucl3", false).c_str(), po::value<size_t>(&options.fire_options.add3nt)->default_value(1), "Extend seeds by this many nucleotides on the 3' side.")
-    (form_switch(fire_prefix, "signif", false).c_str(), po::value<size_t>(&options.fire_options.nr_rand_tests)->default_value(10), "Accept seeds until this many randomization tests fail.")
-    (form_switch(fire_prefix, "redund", false).c_str(), po::value<double>(&options.fire_options.redundancy_threshold)->default_value(5.0), "The threshold that controls redundancy in seed optimization.")
+    (form_switch(fire_prefix, "nucl5", false).c_str(), po::value<size_t>(&options.fire.add5nt)->default_value(1), "Extend seeds by this many nucleotides on the 5' side.")
+    (form_switch(fire_prefix, "nucl3", false).c_str(), po::value<size_t>(&options.fire.add3nt)->default_value(1), "Extend seeds by this many nucleotides on the 3' side.")
+    (form_switch(fire_prefix, "signif", false).c_str(), po::value<size_t>(&options.fire.nr_rand_tests)->default_value(10), "Accept seeds until this many randomization tests fail.")
+    (form_switch(fire_prefix, "redund", false).c_str(), po::value<double>(&options.fire.redundancy_threshold)->default_value(5.0), "The threshold that controls redundancy in seed optimization.")
     ;
 
   desc.add(fire_desc);

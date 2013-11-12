@@ -66,7 +66,7 @@ namespace Seeding {
 
   std::ostream &operator<<(std::ostream &out, const Objectives &objectives);
 
-  namespace Options {
+  struct Options {
     struct FIRE {
       FIRE();
       size_t add5nt;
@@ -74,10 +74,15 @@ namespace Seeding {
       size_t nr_rand_tests;
       double redundancy_threshold;
     };
-  }
+    struct Plasma {
+      Plasma();
+      size_t max_candidates;
+      std::vector<size_t> degeneracies;
+      double rel_degeneracy;
+      bool per_degeneracy;
+    };
 
-  struct options_t {
-    options_t();
+    Options();
 
     Specification::DataSets paths;
     Specification::Motifs motif_specifications;
@@ -85,7 +90,8 @@ namespace Seeding {
 
     Algorithm algorithm;
 
-    Options::FIRE fire_options;
+    Plasma plasma;
+    FIRE fire;
 
     size_t n_threads;
     bool revcomp;
@@ -96,10 +102,6 @@ namespace Seeding {
     bool measure_runtime;
     size_t n_motifs;
     OccurrenceFilter occurrence_filter;
-    size_t max_candidates;
-    std::vector<size_t> degeneracies;
-    double rel_degeneracy;
-    bool per_degeneracy;
     bool keep_all;
     Verbosity verbosity;
     bool dump_viterbi;

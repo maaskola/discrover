@@ -118,7 +118,7 @@ void fixup_seeding_options(hmm_options &options) {
 // TODO REACTIVATE    options.seeding.objective = {measure2iupac_objective(options.measure);
   // options.seeding.objective = Seeding::Objective::corrected_logp_gtest;
   if(options.seeding.objectives.size() == 1 and begin(options.seeding.objectives)->measure == Measures::Discrete::Measure::SignalFrequency)
-    options.seeding.rel_degeneracy = 0.2;
+    options.seeding.plasma.rel_degeneracy = 0.2;
   options.seeding.paths = options.paths;
   options.seeding.n_threads = options.n_threads;
   options.seeding.n_seq = options.n_seq;

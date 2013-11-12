@@ -169,19 +169,19 @@ Seeding::Stats::OccurrenceCounts reduce_count(const Seeding::Stats::OccurrenceCo
   return(counts);
 }
 
-double compute_score(const Seeding::DataCollection &collection, const Seeding::Result &result, const Seeding::options_t &options, Measures::Discrete::Measure measure, bool do_correction) {
+double compute_score(const Seeding::DataCollection &collection, const Seeding::Result &result, const Seeding::Options &options, Measures::Discrete::Measure measure, bool do_correction) {
   return(compute_score(collection, result.counts, options, result, result.motif.length(), Seeding::motif_degeneracy(result.motif), measure, do_correction));
 }
 
 double compute_score(const Seeding::DataCollection &collection,
     const Seeding::Stats::OccurrenceCounts &counts,
-    const Seeding::options_t &options,
+    const Seeding::Options &options,
     const Seeding::Objective &objective,
     size_t length,
     size_t degeneracy,
     Measures::Discrete::Measure measure,
     bool do_correction) {
-// double compute_score(const Seeding::DataCollection &collection, const Seeding::Stats::OccurrenceCounts &counts, const Seeding::options_t &options, Measures::Discrete::Measure measure, size_t length, size_t degeneracy, bool do_correction) {
+// double compute_score(const Seeding::DataCollection &collection, const Seeding::Stats::OccurrenceCounts &counts, const Seeding::Options &options, Measures::Discrete::Measure measure, size_t length, size_t degeneracy, bool do_correction) {
   if(options.verbosity >= Verbosity::debug) {
     cout << "compute_score(Seeding::DataCollection)" << endl;
     cout << "counts = " << counts << endl;
@@ -210,7 +210,7 @@ double compute_score(const Seeding::DataCollection &collection,
   return(score);
 }
 
-double compute_score(const Seeding::DataSeries &data_series, const Seeding::Stats::OccurrenceCounts &counts, const Seeding::options_t &options, Measures::Discrete::Measure measure, size_t length, size_t degeneracy, const string &motif_name, bool do_correction) {
+double compute_score(const Seeding::DataSeries &data_series, const Seeding::Stats::OccurrenceCounts &counts, const Seeding::Options &options, Measures::Discrete::Measure measure, size_t length, size_t degeneracy, const string &motif_name, bool do_correction) {
   if(measure == Measures::Discrete::Measure::Undefined) {
     cout << "Error in compute_score: Measures::Discrete::Measure::undefined." << endl;
     exit(-1);

@@ -25,12 +25,13 @@ using namespace std;
 
 namespace Seeding {
 
-  options_t::options_t() :
+  Options::Options() :
     paths(),
     motif_specifications({}),
     objectives(),
     algorithm(Algorithm::Plasma),
-    fire_options(Options::FIRE()),
+    plasma(Plasma()),
+    fire(FIRE()),
     n_threads(1),
     revcomp(false),
     strict(false),
@@ -40,24 +41,25 @@ namespace Seeding {
     measure_runtime(false),
     n_motifs(1),
     occurrence_filter(OccurrenceFilter::RemoveSequences),
-    max_candidates(100),
-    degeneracies(),
-    rel_degeneracy(1),
-    per_degeneracy(false),
     keep_all(false),
     verbosity(Verbosity::info),
     dump_viterbi(false),
     no_enrichment_filter(false)
     { };
 
-  namespace Options {
-    FIRE::FIRE() :
-      add5nt(1),
-      add3nt(1),
-      nr_rand_tests(10),
-      redundancy_threshold(5.0)
-      { };
-  }
+  Options::Plasma::Plasma() :
+    max_candidates(100),
+    degeneracies(),
+    rel_degeneracy(1),
+    per_degeneracy(false)
+  { };
+
+  Options::FIRE::FIRE() :
+    add5nt(1),
+    add3nt(1),
+    nr_rand_tests(10),
+    redundancy_threshold(5.0)
+  { };
 
 
   istream &operator>>(istream &in, OccurrenceFilter &filter) {

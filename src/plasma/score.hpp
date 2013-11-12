@@ -53,19 +53,19 @@ double compute_mcc(double a, double b, double c, double d);
 double compute_delta_frequency(double a, double b, double c, double d);
 
 /** Compute the score
- * If measure is Measure::Undefined then the measure is used that is a member of options_t options
+ * If measure is Measure::Undefined then the measure is used that is a member of Options options
  **/
 double compute_score(
     const Seeding::DataCollection &collection,
     const Seeding::Result &result,
-    const Seeding::options_t &options,
+    const Seeding::Options &options,
     Measures::Discrete::Measure measure=Measures::Discrete::Measure::Undefined,
     bool do_correction=false
   );
 double compute_score(
     const Seeding::DataCollection &collection,
     const Seeding::Stats::OccurrenceCounts &counts,
-    const Seeding::options_t &options,
+    const Seeding::Options &options,
     const Seeding::Objective &objective,
     size_t length,
     size_t degeneracy,
@@ -74,14 +74,14 @@ double compute_score(
 double compute_score(
     const Seeding::DataSeries &data_series,
     const Seeding::Stats::OccurrenceCounts &contrast,
-    const Seeding::options_t &options,
+    const Seeding::Options &options,
     Measures::Discrete::Measure measure,
     size_t length,
     size_t degeneracy,
     const std::string &motif_name="",
     bool do_correction=false);
 
-double approximate_score(const std::string &motif, const Seeding::hash_map_t &counts, const Seeding::options_t &options);
+double approximate_score(const std::string &motif, const Seeding::hash_map_t &counts, const Seeding::Options &options);
 
 #endif   /* ----- #ifndef SCORE_HPP  ----- */
 
