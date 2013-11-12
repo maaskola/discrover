@@ -235,11 +235,19 @@ namespace Plasma {
 
 
     // add one undetermined nucleotide on each side
+    // TODO: make the number of 5' and 3' nucleotides configurable
     for(auto &candidate: candidates) {
       candidate.second = "n" + candidate.second + "n";
     }
 
     score_map_t examined_words;
+
+    // wait for the index building to finish
+    while(not index_ready) {
+      if(options.verbosity >= Verbosity::verbose)
+        cerr << "Index still not ready." << endl;
+      sleep(1);
+    }
 
     for(auto &candidate: candidates) {
       const string original_word = candidate.second;
