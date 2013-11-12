@@ -317,6 +317,8 @@ namespace Plasma {
               std::cout << "FIRE tries modifications to position " << position << " of motif " << original_word << endl;
 
             for(auto &modified_word: modifications(original_word, word, position)) {
+
+              // TODO: FIRE enforces a sufficient improvement of the score
               if(not admissible(modified_word, examined_words))
                 continue;
 
