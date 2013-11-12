@@ -23,7 +23,7 @@
 
 using namespace std;
 
-namespace Plasma {
+namespace Seeding {
   double information_content(const string &motif) {
     double ic = 0;
     for(auto &c: motif)

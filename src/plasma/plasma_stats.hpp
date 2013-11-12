@@ -37,7 +37,7 @@
 #include "motif.hpp"
 #include "stats.hpp"
 
-namespace Plasma {
+namespace Seeding {
   typedef std::unordered_map<std::string, Stats::OccurrenceCounts> hash_map_t;
   typedef std::unordered_map<std::string, double> score_map_t;
   typedef std::multimap<double, std::string> rev_map_t;

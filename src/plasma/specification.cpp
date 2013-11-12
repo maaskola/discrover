@@ -89,7 +89,7 @@ namespace Specification {
   {
   }
 
-  Motif::Motif(const string &s) : kind(Motif::Kind::seed), specification(s), name(""), insertions(), lengths()
+  Motif::Motif(const string &s) : kind(Motif::Kind::Seed), specification(s), name(""), insertions(), lengths()
   {
     // cout << "Constructing Specification::Motif from '" << s << "'." << endl;
     size_t pos;
@@ -104,12 +104,12 @@ namespace Specification {
       insertions = vector<size_t>();
     }
     if(boost::filesystem::exists(specification) and boost::filesystem::is_regular_file(specification))
-      kind = Kind::file;
+      kind = Kind::File;
     else {
       if(specification.find_first_not_of("acgtubdhvkmwsrynACGTUBDHVKMWSRYN") == string::npos)
-        kind = Kind::seed;
+        kind = Kind::Seed;
       else {
-        kind = Kind::plasma;
+        kind = Kind::Plasma;
         lengths = parse_list(specification);
       }
     }

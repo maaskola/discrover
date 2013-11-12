@@ -32,7 +32,7 @@
 
 #include "options.hpp"
 
-namespace Plasma {
+namespace Seeding {
   void remove_seqs_with_motif(const std::string &motif, DataSet &data_set, const options_t &options);
   bool mask_motif_occurrences(const std::string &motif, std::string &seq, const options_t &options, char mask_symbol='n');
   void mask_motif_occurrences(const std::string &motif, DataSet &data_set, const options_t &options);

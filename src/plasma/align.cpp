@@ -183,7 +183,7 @@ string read_fasta_with_boundaries(const vector<string> &paths, vector<size_t> &p
   return(s);
 }
 
-string collapse_data_series(const Plasma::DataSeries &data_series, vector<size_t> &pos2seq, vector<size_t> &seq2set) {
+string collapse_data_series(const Seeding::DataSeries &data_series, vector<size_t> &pos2seq, vector<size_t> &seq2set) {
   string s;
   size_t set_idx = 0;
   size_t seq_idx = 0;
@@ -200,7 +200,7 @@ string collapse_data_series(const Plasma::DataSeries &data_series, vector<size_t
   return(s);
 }
 
-string collapse_data_collection(const Plasma::DataCollection &collection, vector<size_t> &pos2seq, vector<size_t> &seq2set, vector<size_t> &set2series) {
+string collapse_data_collection(const Seeding::DataCollection &collection, vector<size_t> &pos2seq, vector<size_t> &seq2set, vector<size_t> &set2series) {
   string s;
   size_t seq_idx = 0;
   size_t set_idx = 0;

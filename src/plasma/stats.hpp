@@ -49,7 +49,7 @@ typedef boost::numeric::ublas::scalar_matrix<size_t> scalar_count_matrix_t;
 typedef boost::numeric::ublas::scalar_vector<fp_t> scalar_vector_t;
 typedef boost::numeric::ublas::scalar_vector<size_t> scalar_count_vector_t;
 
-namespace Plasma {
+namespace Seeding {
   namespace Stats {
     // typedef std::vector<size_t> Stats;
     // typedef std::vector<size_t> OccurrenceCounts;

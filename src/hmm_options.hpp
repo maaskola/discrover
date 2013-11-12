@@ -53,8 +53,8 @@ std::istream& operator>>(std::istream& in, Compression &type);
 namespace Training {
 
   enum class Simultaneity {
-    sequential,
-    simultaneous
+    Sequential,
+    Simultaneous
   };
 
   std::string simultaneity2string(Simultaneity simultaneity);
@@ -82,9 +82,9 @@ struct termination_options {
   bool absolute_improvement;
 };
 
-enum class SeedChoice {
-  seed_score,
-  hmm_score
+enum class ModelChoice {
+  SeedScore,
+  HMMScore
 };
 
 struct LineSearchOptions {
@@ -107,7 +107,7 @@ struct hmm_options {
   std::vector<std::string> load_paths;
   std::string label;
   std::vector<std::string> seeds;
-  Plasma::options_t plasma_options;
+  Seeding::options_t seeding;
   evaluation_options evaluate;
   size_t n_threads;
   size_t bg_order, n_seq;
@@ -117,7 +117,7 @@ struct hmm_options {
   bool long_names;
   bool class_model;
   bool revcomp;
-  SeedChoice seed_choice;
+  ModelChoice model_choice;
   Compression output_compression;
   size_t left_padding, right_padding;
   bool print_posterior;
@@ -153,7 +153,7 @@ struct hmm_options {
   ExecutionInformation exec_info;
 };
 
-std::ostream &operator<<(std::ostream &os, const SeedChoice &choice);
+std::ostream &operator<<(std::ostream &os, const ModelChoice &choice);
 std::ostream &operator<<(std::ostream &os, const Verbosity &verbosity);
 std::ostream &operator<<(std::ostream &os, const LineSearchOptions &options);
 std::ostream &operator<<(std::ostream &os, const termination_options &options);

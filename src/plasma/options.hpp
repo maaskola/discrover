@@ -39,10 +39,10 @@
 #include "../verbosity.hpp"
 
 
-namespace Plasma {
+namespace Seeding {
   enum class OccurrenceFilter {
-    remove_seq,
-    mask_occurrence
+    RemoveSequences,
+    MaskOccurrences
   };
 
   std::istream &operator>>(std::istream &in, OccurrenceFilter &filter);
