@@ -99,13 +99,13 @@ namespace Seeding {
 
   void apply_mask(DataCollection &d, const string &motif, const options_t &options) {
     switch(options.occurrence_filter) {
-      case OccurrenceFilter::remove_seq:
+      case OccurrenceFilter::RemoveSequences:
         if(options.verbosity >= Verbosity::verbose)
           cout << "Removing sequences with " << motif << " occurrences." << endl;
         for(auto &series: d)
           remove_seqs_with_motif(motif, series, options);
         break;
-      case OccurrenceFilter::mask_occurrence:
+      case OccurrenceFilter::MaskOccurrences:
         if(options.verbosity >= Verbosity::verbose)
           cout << "Masking " << motif << " occurrences." << endl;
         for(auto &series: d)

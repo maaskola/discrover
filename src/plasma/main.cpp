@@ -261,7 +261,7 @@ int main(int argc, const char** argv) {
     sort(begin(results), end(results), [](const res_t &a, const res_t &b) { return(a.log_p <= b.log_p); });
     Seeding::DataCollection original_ds = ds;
     Seeding::options_t opts = options;
-    opts.occurrence_filter = Seeding::OccurrenceFilter::remove_seq;
+    opts.occurrence_filter = Seeding::OccurrenceFilter::RemoveSequences;
     for(auto &r: results) {
       report(cout, r, original_ds, options);
       res_t r2 = r;

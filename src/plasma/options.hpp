@@ -41,8 +41,8 @@
 
 namespace Seeding {
   enum class OccurrenceFilter {
-    remove_seq,
-    mask_occurrence
+    RemoveSequences,
+    MaskOccurrences
   };
   std::istream &operator>>(std::istream &in, OccurrenceFilter &filter);
   std::ostream &operator<<(std::ostream &os, const OccurrenceFilter &filter);

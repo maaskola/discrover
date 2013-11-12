@@ -449,7 +449,7 @@ namespace Seeding {
       if(objective.motif_name == motif_spec.name) {
 
         Results results;
-        if(motif_spec.kind == Specification::Motif::Kind::seed) {
+        if(motif_spec.kind == Specification::Motif::Kind::Seed) {
           Result result(objective);
           result.motif = motif_spec.specification;
           result.counts = count_motif(collection, motif_spec.specification, options);

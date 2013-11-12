@@ -268,13 +268,13 @@ int main(int argc, const char** argv)
 
 
   advanced_options.add_options()
-    ("bg_learn", po::value<Training::Method>(&options.bg_learning)->default_value(Training::Method::reestimation, "em"), "How to learn the background. Available are 'fixed', 'em', 'gradient', where the 'em' uses reestimation to maximize the likelihood contribution of the background parameters, while 'gradient' uses the discriminative objective functon.")
+    ("bg_learn", po::value<Training::Method>(&options.bg_learning)->default_value(Training::Method::Reestimation, "em"), "How to learn the background. Available are 'fixed', 'em', 'gradient', where the 'em' uses reestimation to maximize the likelihood contribution of the background parameters, while 'gradient' uses the discriminative objective functon.")
     ("ls_mu", po::value<double>(&options.line_search.mu)->default_value(0.1, "0.1"), "The parameter µ for the Moré-Thuente line search algorithm.")
     ("ls_eta", po::value<double>(&options.line_search.eta)->default_value(0.5, "0.5"), "The parameter η for the Moré-Thuente line search algorithm.")
     ("ls_delta", po::value<double>(&options.line_search.delta)->default_value(0.66, "0.66"), "The parameter delta for the Moré-Thuente line search algorithm.")
     ("ls_num", po::value<size_t>(&options.line_search.max_steps)->default_value(10, "10"), "How many gradient and function evaluation to perform maximally per line search.")
     ("mic", po::value<size_t>(&options.mic)->default_value(0), "How many additional rank groups to introduce in the data. Allows to optimize the maximal information content (MIC).")
-    ("multi", po::value<Training::Simultaneity>(&options.simultaneity)->default_value(Training::Simultaneity::simultaneous,"sim"), "Wether to add and train automatically determined motifs sequentially or simultaneously. Available are 'seq', 'sim'.")
+    ("multi", po::value<Training::Simultaneity>(&options.simultaneity)->default_value(Training::Simultaneity::Simultaneous,"sim"), "Wether to add and train automatically determined motifs sequentially or simultaneously. Available are 'seq', 'sim'.")
     ("threads,T", po::value<size_t>(&options.n_threads)->default_value(omp_get_num_procs()), "The number of threads to use. If this in not specified, the value of the environment variable OMP_NUM_THREADS is used if that is defined, otherwise it will use as many as there are CPU cores on this machine.")
     ("runtime", po::bool_switch(&options.timing_information), "Output information about how long certain parts take to execute.")
     ("simulate", po::value<size_t>(&options.n_simulations)->default_value(0), "Simulate the model.")
@@ -543,14 +543,14 @@ int main(int argc, const char** argv)
   }
 
   if(options.seeding.keep_all)
-    options.seed_choice = SeedChoice::hmm_score;
+    options.model_choice = ModelChoice::HMMScore;
   else
-    options.seed_choice = SeedChoice::seed_score;
+    options.model_choice = ModelChoice::SeedScore;
   if(options.termination.past == 0) {
     std::cout << "Error: the value of --past must be a number greater than 0." << std::endl;
   }
 
-  if(options.simultaneity == Training::Simultaneity::simultaneous and options.wiggle != 0 and options.seed_choice != SeedChoice::hmm_score) {
+  if(options.simultaneity == Training::Simultaneity::Simultaneous and options.wiggle != 0 and options.model_choice != ModelChoice::HMMScore) {
     std::cout << "Warning: option --wiggle deactivated due to simultaneous motif seeding based on seed scores." << std::endl;
     std::cout << "If you want to use wiggle variants please use --hmmscore." << std::endl;
     options.wiggle = 0;

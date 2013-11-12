@@ -6,11 +6,11 @@ namespace Training {
     std::string token;
     in >> token;
     if(token == "none" or token == "fixed" or token == "fix")
-      method = Method::none;
+      method = Method::None;
     else if(token == "reestimation" or token == "reestimate" or token == "em" or token == "generative")
-      method = Method::reestimation;
+      method = Method::Reestimation;
     else if(token == "gradient" or token == "discriminative" or token == "disc")
-      method = Method::gradient;
+      method = Method::Gradient;
     else {
       std::cout << "Training method '" << token << "' not implemented. See -h or --help for help." << std::endl;
       exit(-1);
@@ -21,11 +21,11 @@ namespace Training {
   Method measure2method(Measure measure)
   {
     if(Measures::is_generative(measure))
-      return(Method::reestimation);
+      return(Method::Reestimation);
     else if(Measures::is_discriminative(measure))
-      return(Method::gradient);
+      return(Method::Gradient);
     else
-      return(Method::none);
+      return(Method::None);
   }
 
 
@@ -33,13 +33,13 @@ namespace Training {
   {
     std::string s;
     switch(method) {
-      case Method::none:
+      case Method::None:
         s = "none";
         break;
-      case Method::reestimation:
+      case Method::Reestimation:
         s = "reestimation";
         break;
-      case Method::gradient:
+      case Method::Gradient:
         s = "gradient";
         break;
     }

@@ -40,9 +40,9 @@ typedef Measures::Continuous::Measure Measure;
 
 namespace Training {
   enum class Method {
-    none,
-    reestimation,
-    gradient
+    None,
+    Reestimation,
+    Gradient
   };
   std::string method2string(Method method);
   std::istream& operator>>(std::istream& in, Method& method);

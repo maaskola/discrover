@@ -205,21 +205,21 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
   for(auto &spec: options.motif_specifications)
     switch(spec.kind) {
-      case Specification::Motif::Kind::file:
+      case Specification::Motif::Kind::File:
         // load emission matrix and add it.
         hmm.add_motif(read_emission(spec.specification), expected_seq_size, options.lambda, spec.name, spec.insertions);
         break;
-      case Specification::Motif::Kind::seed:
+      case Specification::Motif::Kind::Seed:
         // use IUPAC regular expression
         hmm.add_motif(spec.specification, options.alpha, expected_seq_size, options.lambda, spec.name, spec.insertions);
         break;
-      case Specification::Motif::Kind::plasma:
+      case Specification::Motif::Kind::Plasma:
         options.seeding.motif_specifications.push_back(spec);
         break;
     }
 
   if(std::find_if(begin(options.motif_specifications), end(options.motif_specifications), [](const Specification::Motif &motif) {
-        return(motif.kind == Specification::Motif::Kind::plasma);
+        return(motif.kind == Specification::Motif::Kind::Plasma);
         }) == end(options.motif_specifications)) {
     if(options.verbosity >= Verbosity::info)
       cout << "No automatic seeds are used." << endl;
@@ -275,7 +275,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         if(options.verbosity >= Verbosity::debug)
           cout << motif_spec.name << " result.size() = " << plasma_results.size() << endl;
 
-        if(options.seed_choice == SeedChoice::hmm_score) {
+        if(options.model_choice == ModelChoice::HMMScore) {
           for(size_t seed_idx = 0; seed_idx < plasma_results.size(); seed_idx++) {
             string motif = pad(plasma_results[seed_idx].motif, options.left_padding, options.right_padding);
             string name = motif_spec.name;
@@ -333,10 +333,10 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
         plasma.options.motif_specifications.erase(plasma.options.motif_specifications.begin() + best_idx);
       }
-      if(options.simultaneity == Training::Simultaneity::sequential)
+      if(options.simultaneity == Training::Simultaneity::Sequential)
         train_evaluate_simulate(hmm, all_data, training_data, test_data, options);
     }
-    if(options.simultaneity == Training::Simultaneity::simultaneous and (options.seed_choice != SeedChoice::hmm_score or not plasma.options.motif_specifications.empty() or options.mic > 0))
+    if(options.simultaneity == Training::Simultaneity::Simultaneous and (options.model_choice != ModelChoice::HMMScore or not plasma.options.motif_specifications.empty() or options.mic > 0))
       train_evaluate_simulate(hmm, all_data, training_data, test_data, options);
   }
   return(hmm);

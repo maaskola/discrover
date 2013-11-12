@@ -68,7 +68,7 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
   desc.add_options()
     (form_switch(prefix, "nmotif", allow_short).c_str(), po::value<size_t>(&options.n_motifs)->default_value(1), "How many motifs to determine.")
     (form_switch(prefix, "any", allow_short).c_str(), po::bool_switch(&options.no_enrichment_filter), "Whether to allow motifs enriched in the opposite direction.")
-    (form_switch(prefix, "filter", false).c_str(), po::value<Seeding::OccurrenceFilter>(&options.occurrence_filter)->default_value(Seeding::OccurrenceFilter::mask_occurrence, "mask"), "How to filter motif occurrences upon identifying a motif. Available are 'remove' and 'mask'.")
+    (form_switch(prefix, "filter", false).c_str(), po::value<Seeding::OccurrenceFilter>(&options.occurrence_filter)->default_value(Seeding::OccurrenceFilter::MaskOccurrences, "mask"), "How to filter motif occurrences upon identifying a motif. Available are 'remove' and 'mask'.")
     (form_switch(prefix, "cand", allow_short).c_str(), po::value<size_t>(&options.max_candidates)->default_value(100), "How many candidates to maintain.")
     (form_switch(prefix, "deg", allow_short).c_str(), po::value<vector<size_t>>(&options.degeneracies), "Which degrees of degeneracy to consider. May be given multiple times. A sequence of length N has a maximal degeneracy of 3*N. Unlimited if unspecified.")
     (form_switch(prefix, "rdeg", false).c_str(), po::value<double>(&options.rel_degeneracy)->default_value(1), "Limit relative degeneracy. 1 corresponds to full degeneracy, and 0 to no degeneracy. For a sequence of length N the degeneracy is maximally 3*N. Thus for a motif of length 8 a maximal relative degeneracy of 0.2 allows (rounded down) 4 degrees of degeneracy.")
