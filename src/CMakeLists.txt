@@ -2,8 +2,8 @@
 # CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/src/config.h)
 
 # add definitions, compiler switches, etc.
-ADD_DEFINITIONS(-Wall -funroll-loops -mtune=native -Wno-unused-local-typedefs)
-# ADD_DEFINITIONS(-Wall -funroll-loops -mtune=native -flto -Wno-unused-local-typedefs)
+ADD_DEFINITIONS(-Wall -funroll-loops -march=native -Wno-unused-local-typedefs)
+# ADD_DEFINITIONS(-Wall -funroll-loops -march=native -flto -Wno-unused-local-typedefs)
 
 ADD_CUSTOM_TARGET(ctags ALL
     COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . plasma
