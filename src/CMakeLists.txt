@@ -5,11 +5,6 @@
 ADD_DEFINITIONS(-Wall -funroll-loops -march=native -Wno-unused-local-typedefs)
 # ADD_DEFINITIONS(-Wall -funroll-loops -march=native -flto -Wno-unused-local-typedefs)
 
-ADD_CUSTOM_TARGET(ctags ALL
-    COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . plasma
-    COMMENT "Creating Ctags."
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src )
-
 ADD_SUBDIRECTORY(plasma)
 
 # build a shared library
