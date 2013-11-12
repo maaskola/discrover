@@ -17,6 +17,7 @@
  */
 
 #include <iostream>
+#include <boost/algorithm/string.hpp>
 #include "options.hpp"
 
 using namespace std;
@@ -28,6 +29,7 @@ namespace Plasma {
     paths(),
     motif_specifications({}),
     objectives(),
+    algorithm(Algorithm::Plasma),
     n_threads(1),
     revcomp(false),
     strict(false),
@@ -70,6 +72,57 @@ namespace Plasma {
         os << "mask";
         break;
     }
+    return(os);
+  }
+
+  Algorithm parse_algorithm(const string &token_) {
+    string token(token_);
+    boost::algorithm::to_lower(token);
+    if(token == "plasma")
+      return(Algorithm::Plasma);
+    else if(token == "fire")
+      return(Algorithm::FIRE);
+    else if(token == "all")
+      return(Algorithm::Plasma | Algorithm::FIRE);
+    else {
+      cout << "Seeding algorithm '" << token_ << "' unknown." << endl
+        << "Please use one of 'plasma', 'fire', or 'all'." << endl
+        << "It is also possible to use multiple algorithms by separating them by comma." << endl;
+      exit(-1);
+    }
+  }
+
+  istream &operator>>(istream &in, Algorithm &algorithm) {
+    string algorithms;
+    in >> algorithms;
+    bool first = true;
+    size_t pos;
+    do {
+      pos = algorithms.find(",");
+      Algorithm algo = parse_algorithm(algorithms.substr(0, pos));
+      if(first) {
+        first = false;
+        algorithm = algo;
+      } else
+        algorithm = algorithm | algo;
+      algorithms = algorithms.substr(pos+1);
+    } while(pos != string::npos);
+    Algorithm algo = parse_algorithm(algorithms);
+    if(first)
+      algorithm = algo;
+    else
+      algorithm = algorithm | algo;
+    cout << "Parsed algorithm: " << algorithm << endl;
+    return(in);
+  }
+  ostream &operator<<(ostream &os, const Algorithm &algorithm) {
+    bool first = true;
+    if((algorithm & Algorithm::Plasma) == Algorithm::Plasma) {
+      os << "plasma";
+      first = false;
+    }
+    if((algorithm & Algorithm::FIRE) == Algorithm::FIRE)
+      os << (first ? "" : ",") << "fire";
     return(os);
   }
 

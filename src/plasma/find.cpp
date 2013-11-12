@@ -159,6 +159,32 @@ namespace Plasma {
     return(l);
   }
 
+  Results Plasma::find_seeds(size_t length, const Objective &objective, Algorithm algorithm) {
+    Results plasma_results;
+    if((algorithm & Algorithm::Plasma) == Algorithm::Plasma)
+      plasma_results = find_breadth(length, objective);
+
+    Results fire_results;
+    if((algorithm & Algorithm::FIRE) == Algorithm::FIRE)
+      fire_results = find_fire(length, objective);
+
+    Results results;
+    set<string> motifs;
+    for(auto &m: plasma_results)
+      if(motifs.find(m.motif) == end(motifs)) {
+        motifs.insert(m.motif);
+        results.push_back(m);
+      }
+    for(auto &m: fire_results)
+      if(motifs.find(m.motif) == end(motifs)) {
+        motifs.insert(m.motif);
+        results.push_back(m);
+      }
+
+    return(results);
+  }
+
+
   /** This exectues the FIRE algorithm to find discriminative IUPAC motifs.
    */
   Results Plasma::find_fire(size_t length, const Objective &objective) {
@@ -600,23 +626,7 @@ namespace Plasma {
       Plasma plasma(*this);
       for(size_t i = 0; i < n_motifs; i++) {
         Results new_results;
-        for(auto &result: plasma.find_fire(length, objective)) {
-          if(options.verbosity >= Verbosity::verbose)
-            cout << "Got results: " << result.motif << " " << result.score << endl;
-          bool allowed = not options.strict;
-          if(not allowed) {
-            if(objective.measure == Measures::Discrete::Measure::CorrectedLogpGtest and result.score > 0) // note that logp are stored as their negative in order to be maximized like the other scores
-              allowed = true;
-            else {
-              double log_p = -compute_score(collection, result, options, Measures::Discrete::Measure::CorrectedLogpGtest);
-              if(log_p < 0)
-                allowed = true;
-            }
-          }
-          if(allowed)
-            new_results.push_back(result);
-        }
-        for(auto &result: plasma.find_breadth(length, objective)) {
+        for(auto &result: plasma.find_seeds(length, objective, options.algorithm)) {
           if(options.verbosity >= Verbosity::verbose)
             cout << "Got results: " << result.motif << " " << result.score << endl;
           bool allowed = not options.strict;
@@ -661,23 +671,7 @@ namespace Plasma {
     for(size_t i = 0; i < n_motifs; i++) {
       Results new_results;
       for(auto length: motif.lengths) {
-        for(auto &result: plasma.find_fire(length, objective)) {
-          if(options.verbosity >= Verbosity::verbose)
-            cout << "Got results: " << result.motif << " " << result.score << endl;
-          bool allowed = not options.strict;
-          if(not allowed) {
-            if(objective.measure == Measures::Discrete::Measure::CorrectedLogpGtest and result.score > 0) // note that logp are stored as their negative in order to be maximized like the other scores
-              allowed = true;
-            else {
-              double log_p = -compute_score(collection, result, options, Measures::Discrete::Measure::CorrectedLogpGtest);
-              if(log_p < 0)
-                allowed = true;
-            }
-          }
-          if(allowed)
-            new_results.push_back(result);
-        }
-        for(auto &result: plasma.find_breadth(length, objective)) {
+        for(auto &result: plasma.find_seeds(length, objective, options.algorithm)) {
           if(options.verbosity >= Verbosity::verbose)
             cout << "Got results: " << result.motif << " " << result.score << endl;
           bool allowed = not options.strict;

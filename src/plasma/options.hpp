@@ -44,8 +44,22 @@ namespace Plasma {
     remove_seq,
     mask_occurrence
   };
+
   std::istream &operator>>(std::istream &in, OccurrenceFilter &filter);
   std::ostream &operator<<(std::ostream &os, const OccurrenceFilter &filter);
+
+  enum class Algorithm {
+    Plasma = (1u << 1),
+    FIRE = (1u << 2)
+  };
+
+  inline Algorithm operator|(Algorithm a, Algorithm b)
+  {return static_cast<Algorithm>(static_cast<int>(a) | static_cast<int>(b));}
+  inline Algorithm operator&(Algorithm a, Algorithm b)
+  {return static_cast<Algorithm>(static_cast<int>(a) & static_cast<int>(b));}
+
+  std::istream &operator>>(std::istream &in, Algorithm &algorithm);
+  std::ostream &operator<<(std::ostream &os, const Algorithm &algorithm);
 
   typedef Specification::Objective<Measures::Discrete::Measure> Objective;
   typedef std::vector<Objective> Objectives;
@@ -58,6 +72,9 @@ namespace Plasma {
     Specification::DataSets paths;
     Specification::Motifs motif_specifications;
     Objectives objectives;
+
+    Algorithm algorithm;
+
     size_t n_threads;
     bool revcomp;
     bool strict;

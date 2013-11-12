@@ -43,6 +43,7 @@ namespace Plasma {
     NucleotideIndex<size_t,size_t> index;
     Plasma(const options_t &options_t);
     Plasma(const DataCollection &collection_, const options_t &opt);
+    Results find_seeds(size_t length, const Objective &objective, Algorithm algorithm);
     Results find_breadth(size_t length, const Objective &objective);
     Results find_fire(size_t length, const Objective &objective);
     Results find_all(const Specification::Motif &motif, const Objective &objective, size_t n_motifs) const;

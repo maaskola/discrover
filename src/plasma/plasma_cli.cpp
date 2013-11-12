@@ -66,8 +66,9 @@ boost::program_options::options_description gen_iupac_options_description(Plasma
       ;
 
   desc.add_options()
+    (form_switch(prefix, "algorithm", allow_short).c_str(), po::value<Plasma::Algorithm>(&options.algorithm)->default_value(Plasma::Algorithm::Plasma, "plasma"), "Which algorithm to use for seeding. Available are 'plasma', 'fire', and 'all'. Multiple algorithms can be used by separating them by comma.")
     (form_switch(prefix, "nmotif", allow_short).c_str(), po::value<size_t>(&options.n_motifs)->default_value(1), "How many motifs to determine.")
-    (form_switch(prefix, "any", allow_short).c_str(), po::bool_switch(&options.no_enrichment_filter), "Whether to allow motifs enriched in the opposite direction.")
+    (form_switch(prefix, "any", false).c_str(), po::bool_switch(&options.no_enrichment_filter), "Whether to allow motifs enriched in the opposite direction.")
     (form_switch(prefix, "filter", false).c_str(), po::value<Plasma::OccurrenceFilter>(&options.occurrence_filter)->default_value(Plasma::OccurrenceFilter::mask_occurrence, "mask"), "How to filter motif occurrences upon identifying a motif. Available are 'remove' and 'mask'.")
     (form_switch(prefix, "cand", allow_short).c_str(), po::value<size_t>(&options.max_candidates)->default_value(100), "How many candidates to maintain.")
     (form_switch(prefix, "deg", allow_short).c_str(), po::value<vector<size_t>>(&options.degeneracies), "Which degrees of degeneracy to consider. May be given multiple times. A sequence of length N has a maximal degeneracy of 3*N. Unlimited if unspecified.")
