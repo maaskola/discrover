@@ -185,7 +185,7 @@ namespace Plasma {
   }
 
 
-  /** This exectues the FIRE algorithm to find discriminative IUPAC motifs.
+  /** This executes the FIRE algorithm to find discriminative IUPAC motifs.
    */
   Results Plasma::find_fire(size_t length, const Objective &objective) {
     Results results;
@@ -217,7 +217,6 @@ namespace Plasma {
 
     string best_motif;
     double max_score = -numeric_limits<double>::infinity();
-    bool best_motif_changed = true;
 
     if(options.verbosity >= Verbosity::verbose)
       cerr << "Starting to get word counts." << endl;
