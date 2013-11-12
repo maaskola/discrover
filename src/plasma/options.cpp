@@ -112,7 +112,6 @@ namespace Plasma {
       algorithm = algo;
     else
       algorithm = algorithm | algo;
-    cout << "Parsed algorithm: " << algorithm << endl;
     return(in);
   }
   ostream &operator<<(ostream &os, const Algorithm &algorithm) {
