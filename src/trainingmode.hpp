@@ -62,8 +62,8 @@ namespace Training {
   typedef Specification::Objective<Measure> Objective;
   typedef std::vector<Objective> Objectives;
 
-  Plasma::Objective corresponding_objective(const Objective &x, bool use_mi_to_seed);
-  Plasma::Objectives corresponding_objectives(const Objectives &x, bool use_mi_to_seed);
+  Seeding::Objective corresponding_objective(const Objective &x, bool use_mi_to_seed);
+  Seeding::Objectives corresponding_objectives(const Objectives &x, bool use_mi_to_seed);
 
   struct Task : public Objective {
     Targets targets;

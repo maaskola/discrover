@@ -39,7 +39,7 @@
 #include "../verbosity.hpp"
 
 
-namespace Plasma {
+namespace Seeding {
   enum class OccurrenceFilter {
     remove_seq,
     mask_occurrence

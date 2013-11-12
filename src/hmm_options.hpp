@@ -107,7 +107,7 @@ struct hmm_options {
   std::vector<std::string> load_paths;
   std::string label;
   std::vector<std::string> seeds;
-  Plasma::options_t plasma_options;
+  Seeding::options_t seeding;
   evaluation_options evaluate;
   size_t n_threads;
   size_t bg_order, n_seq;

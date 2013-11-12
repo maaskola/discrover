@@ -34,7 +34,7 @@
 #include <algorithm>
 #include "options.hpp"
 
-namespace Plasma {
+namespace Seeding {
 
   /** Count occurrences of non-degenerate words; i.e. of words of the given length, consisting only of ACGT */
   void add_counts(const std::string &seq, size_t length, hash_map_t &counts, size_t idx, const Stats::OccurrenceCounts &default_stats, const options_t &options);

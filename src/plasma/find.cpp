@@ -30,7 +30,7 @@
 
 using namespace std;
 
-namespace Plasma {
+namespace Seeding {
   Plasma::Plasma(const options_t &opt) : options(opt), collection(options.paths, options.revcomp, options.n_seq), index_ready(false), needs_rebuilding(false) {
     if(options.verbosity >= Verbosity::verbose)
       cerr << "Data loaded - constructor 1." << endl;
@@ -496,7 +496,7 @@ namespace Plasma {
   }
 
   void Plasma::apply_mask(const string &motif) {
-    ::Plasma::apply_mask(collection, motif, options);
+    ::Seeding::apply_mask(collection, motif, options);
     needs_rebuilding = true;
   }
 

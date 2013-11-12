@@ -113,20 +113,20 @@ Measures::Discrete::Measure measure2iupac_objective(const Measure measure) {
   }
 }
 
-void fixup_plasma_options(hmm_options &options) {
+void fixup_seeding_options(hmm_options &options) {
 // TODO REACTIVATE if(set_objective)
-// TODO REACTIVATE    options.plasma_options.objective = {measure2iupac_objective(options.measure);
-  // options.plasma_options.objective = Plasma::Objective::corrected_logp_gtest;
-  if(options.plasma_options.objectives.size() == 1 and begin(options.plasma_options.objectives)->measure == Measures::Discrete::Measure::SignalFrequency)
-    options.plasma_options.rel_degeneracy = 0.2;
-  options.plasma_options.paths = options.paths;
-  options.plasma_options.n_threads = options.n_threads;
-  options.plasma_options.n_seq = options.n_seq;
-  // options.plasma_options.verbosity = Verbosity::info;
-  options.plasma_options.verbosity = options.verbosity;
-  options.plasma_options.revcomp = options.revcomp;
-  options.plasma_options.pseudo_count = options.contingency_pseudo_count;
-  options.plasma_options.measure_runtime = options.timing_information;
+// TODO REACTIVATE    options.seeding.objective = {measure2iupac_objective(options.measure);
+  // options.seeding.objective = Seeding::Objective::corrected_logp_gtest;
+  if(options.seeding.objectives.size() == 1 and begin(options.seeding.objectives)->measure == Measures::Discrete::Measure::SignalFrequency)
+    options.seeding.rel_degeneracy = 0.2;
+  options.seeding.paths = options.paths;
+  options.seeding.n_threads = options.n_threads;
+  options.seeding.n_seq = options.n_seq;
+  // options.seeding.verbosity = Verbosity::info;
+  options.seeding.verbosity = options.verbosity;
+  options.seeding.revcomp = options.revcomp;
+  options.seeding.pseudo_count = options.contingency_pseudo_count;
+  options.seeding.measure_runtime = options.timing_information;
 }
 
 string generate_random_label(const string &prefix="dlhmm", size_t n_rnd_char=5, Verbosity verbosity=Verbosity::info) {
@@ -204,7 +204,7 @@ int main(int argc, const char** argv)
   po::options_description termination_options("Termination options", cols);
   po::options_description hidden_options("Hidden options", cols);
 
-  po::options_description plasma_options = gen_iupac_options_description(options.plasma_options, "", "Seeding options for libPlasma IUPAC regular expression finding", cols, false, false);
+  po::options_description seeding_options = gen_iupac_options_description(options.seeding, "", "Seeding options for IUPAC regular expression finding", cols, false, false);
 
   generic_options.add_options()
     ("config", po::value<string>(&config_path), "Read options from a configuration file. ")
@@ -324,7 +324,7 @@ int main(int argc, const char** argv)
   advanced_options.add(sampling_options);
 
   po::options_description simple_options;
-  simple_options.add(basic_options).add(objective_options).add(init_options).add(plasma_options).add(eval_options);
+  simple_options.add(basic_options).add(objective_options).add(init_options).add(seeding_options).add(eval_options);
 
   po::options_description common_options;
   common_options.add(simple_options).add(advanced_options);
@@ -534,15 +534,15 @@ int main(int argc, const char** argv)
     options.sampling.max_size = -1;
 
   // Initialize the plasma options
-  fixup_plasma_options(options);
+  fixup_seeding_options(options);
 
   // deprecation warning for option --hmmscore
   if(hmm_score_seeding) {
-    options.plasma_options.keep_all = true;
+    options.seeding.keep_all = true;
     std::cout << "Warning: option --hmmscore is deprecated. It has been superseded by the --keepall option." << std::endl;
   }
 
-  if(options.plasma_options.keep_all)
+  if(options.seeding.keep_all)
     options.seed_choice = SeedChoice::hmm_score;
   else
     options.seed_choice = SeedChoice::seed_score;
@@ -582,7 +582,7 @@ int main(int argc, const char** argv)
   }
 
   if(not options.long_names)
-    if(options.plasma_options.keep_all or options.wiggle > 0) {
+    if(options.seeding.keep_all or options.wiggle > 0) {
       std::cout << "Warning: you specified HMM score seed selection and / or wiggle variants, but did not specify --longnames." << std::endl
         << "Adding option --longnames." << std::endl;
       options.long_names = true;

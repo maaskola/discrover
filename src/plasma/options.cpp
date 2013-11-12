@@ -22,7 +22,7 @@
 using namespace std;
 
 
-namespace Plasma {
+namespace Seeding {
 
   options_t::options_t() :
     paths(),

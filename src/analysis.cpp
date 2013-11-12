@@ -214,7 +214,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         hmm.add_motif(spec.specification, options.alpha, expected_seq_size, options.lambda, spec.name, spec.insertions);
         break;
       case Specification::Motif::Kind::plasma:
-        options.plasma_options.motif_specifications.push_back(spec);
+        options.seeding.motif_specifications.push_back(spec);
         break;
     }
 
@@ -228,7 +228,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
     if(options.verbosity >= Verbosity::info)
       cout << "Determining seeds automatically." << endl;
 
-    Plasma::DataCollection collection(training_data);
+    Seeding::DataCollection collection(training_data);
 
     if(options.verbosity >= Verbosity::debug) {
       for(auto &ser: training_data)
@@ -242,22 +242,22 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
     if(options.verbosity >= Verbosity::debug) {
       for(auto &ser: collection)
         for(auto &set: ser) {
-          cerr << "Plasma::Series " << ser.name << " set -> motifs:";
+          cerr << "Seeding::Series " << ser.name << " set -> motifs:";
           for(auto &m: set.motifs)
             cerr << " " << m;
           cerr << endl;
         }
     }
 
-    Plasma::Plasma plasma(collection, options.plasma_options);
-    auto lesser_score = [](const Plasma::Result &a, const Plasma::Result &b) { return(a.score < b.score); };
+    Seeding::Plasma plasma(collection, options.seeding);
+    auto lesser_score = [](const Seeding::Result &a, const Seeding::Result &b) { return(a.score < b.score); };
 
     while(not plasma.options.motif_specifications.empty()) {
       if(options.verbosity >= Verbosity::debug)
         cout << "motif_specs.size() = " << plasma.options.motif_specifications.size() << endl;
       if(hmm.get_nmotifs() > 0)
         plasma.collection.mask(hmm.compute_mask(training_data));
-      Plasma::Results all_plasma_results;
+      Seeding::Results all_plasma_results;
       size_t plasma_motif_idx = 0;
       while(plasma_motif_idx < plasma.options.motif_specifications.size()) {
         auto motif_spec = options.motif_specifications[plasma_motif_idx];
@@ -269,7 +269,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             cout << " " << obj;
           cout << "." << endl;
         }
-        Plasma::Results plasma_results = plasma.find(motif_spec, objectives);
+        Seeding::Results plasma_results = plasma.find(motif_spec, objectives);
         if(plasma_results.empty())
           break;
         if(options.verbosity >= Verbosity::debug)
@@ -313,7 +313,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         cout << "found all" << endl;
       if(all_plasma_results.empty()) {
         if(options.verbosity >= Verbosity::info)
-          cout << "LibPlasma was unable to find any seeds." << endl;
+          cout << "Unable to find any seeds." << endl;
         plasma.options.motif_specifications.clear();
       } else {
         auto best_iter = max_element(all_plasma_results.begin(), all_plasma_results.end(), lesser_score);

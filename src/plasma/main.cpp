@@ -63,7 +63,7 @@ int main(int argc, const char** argv) {
   double cpu_time_used;
   start_time = clock();
 
-  Plasma::options_t options;
+  Seeding::options_t options;
 
   namespace po = boost::program_options;
 
@@ -242,9 +242,9 @@ int main(int argc, const char** argv) {
   }
 
 
-  Plasma::Plasma plasma(options);
-  Plasma::DataCollection ds = plasma.collection;
-  typedef Plasma::Result res_t;
+  Seeding::Plasma plasma(options);
+  Seeding::DataCollection ds = plasma.collection;
+  typedef Seeding::Result res_t;
   vector<res_t> results;
 
   size_t n = options.motif_specifications.size();
@@ -259,16 +259,16 @@ int main(int argc, const char** argv) {
     report(cout, results[0], ds, options);
   else {
     sort(begin(results), end(results), [](const res_t &a, const res_t &b) { return(a.log_p <= b.log_p); });
-    Plasma::DataCollection original_ds = ds;
-    Plasma::options_t opts = options;
-    opts.occurrence_filter = Plasma::OccurrenceFilter::remove_seq;
+    Seeding::DataCollection original_ds = ds;
+    Seeding::options_t opts = options;
+    opts.occurrence_filter = Seeding::OccurrenceFilter::remove_seq;
     for(auto &r: results) {
       report(cout, r, original_ds, options);
       res_t r2 = r;
       r2.counts = count_motif(ds, r.motif, options);
       report(cerr, r2, ds, options);
       cout << endl;
-      Plasma::apply_mask(ds, r.motif, opts);
+      Seeding::apply_mask(ds, r.motif, opts);
     }
   }
 

@@ -29,7 +29,7 @@
 
 using namespace std;
 
-namespace Plasma {
+namespace Seeding {
   void remove_seqs_with_motif(const string &motif, DataSet &data_set, const options_t &options) {
     vector<size_t> to_be_deleted;
 
