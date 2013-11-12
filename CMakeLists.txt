@@ -111,6 +111,11 @@ INCLUDE(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 git_describe(GIT_DESCRIPTION)
 
+ADD_CUSTOM_TARGET(ctags ALL
+    COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q src/
+    COMMENT "Creating Ctags."
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} )
+
 ADD_SUBDIRECTORY(src build)
 ADD_SUBDIRECTORY(scripts)
 
