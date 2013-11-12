@@ -261,9 +261,9 @@ namespace Seeding {
 
     // add undetermined nucleotides on each side
     for(auto &candidate: candidates) {
-      for(size_t i = 0; i < options.fire.add5nt; i++)
+      for(size_t i = 0; i < options.fire.nucleotides_5prime; i++)
         candidate.second = "n" + candidate.second;
-      for(size_t i = 0; i < options.fire.add3nt; i++)
+      for(size_t i = 0; i < options.fire.nucleotides_3prime; i++)
         candidate.second = candidate.second + "n";
     }
 

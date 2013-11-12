@@ -55,8 +55,8 @@ namespace Seeding {
   { };
 
   Options::FIRE::FIRE() :
-    add5nt(1),
-    add3nt(1),
+    nucleotides_5prime(1),
+    nucleotides_3prime(1),
     nr_rand_tests(10),
     redundancy_threshold(5.0)
   { };

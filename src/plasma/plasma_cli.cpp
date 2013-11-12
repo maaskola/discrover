@@ -95,8 +95,8 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
   po::options_description fire_desc("FIRE seeding algorithm options", cols);
   string fire_prefix = "fire_";
   fire_desc.add_options()
-    (form_switch(fire_prefix, "nucl5", false).c_str(), po::value<size_t>(&options.fire.add5nt)->default_value(1), "Extend seeds by this many nucleotides on the 5' side.")
-    (form_switch(fire_prefix, "nucl3", false).c_str(), po::value<size_t>(&options.fire.add3nt)->default_value(1), "Extend seeds by this many nucleotides on the 3' side.")
+    (form_switch(fire_prefix, "nucl5", false).c_str(), po::value<size_t>(&options.fire.nucleotides_5prime)->default_value(1), "Extend seeds by this many nucleotides on the 5' side.")
+    (form_switch(fire_prefix, "nucl3", false).c_str(), po::value<size_t>(&options.fire.nucleotides_3prime)->default_value(1), "Extend seeds by this many nucleotides on the 3' side.")
     (form_switch(fire_prefix, "signif", false).c_str(), po::value<size_t>(&options.fire.nr_rand_tests)->default_value(10), "Accept seeds until this many randomization tests fail.")
     (form_switch(fire_prefix, "redund", false).c_str(), po::value<double>(&options.fire.redundancy_threshold)->default_value(5.0), "The threshold that controls redundancy in seed optimization.")
     ;

@@ -69,8 +69,8 @@ namespace Seeding {
   struct Options {
     struct FIRE {
       FIRE();
-      size_t add5nt;
-      size_t add3nt;
+      size_t nucleotides_5prime;
+      size_t nucleotides_3prime;
       size_t nr_rand_tests;
       double redundancy_threshold;
     };
