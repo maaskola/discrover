@@ -40,6 +40,7 @@ namespace MCMC {
     class Generator<Motif> {
       private:
         Seeding::Options options;
+        size_t max_degeneracy;
 //        size_t min_size, max_size;
         void replace_similar(char &c) const {
           if(options.verbosity >= Verbosity::debug)
@@ -93,8 +94,8 @@ namespace MCMC {
           }
         }
       public:
-        Generator(const Seeding::Options &opt, size_t w) : // , size_t min_size_=-1, size_t max_size_=-1) :
-          options(opt) // , min_size(min_size_), max_size(max_size_)
+        Generator(const Seeding::Options &opt, size_t w, size_t max_degen) : // , size_t min_size_=-1, size_t max_size_=-1) :
+          options(opt), max_degeneracy(max_degen) // , min_size(min_size_), max_size(max_size_)
       {
         /*
         if(min_size == -1)
@@ -108,37 +109,39 @@ namespace MCMC {
           Motif motif(motif_);
           if(options.verbosity >= Verbosity::verbose)
             std::cout << "Generating new motif based off of " << motif << std::endl;
-          size_t r = rand() % R;
-          size_t p;
-          switch(r) {
-            case 0: // replace nucleotide by a similar one
-              if(options.verbosity >= Verbosity::verbose)
-                std::cout << "Replace nucleotide by a similar one" << std::endl;
-              p = rand() % motif.size();
-              replace_similar(motif[p]);
-              break;
-            case 1: // replace nucleotide by a random one
-              if(options.verbosity >= Verbosity::verbose)
-                std::cout << "Replace nucleotide by an arbitrary one" << std::endl;
-              p = rand() % motif.size();
-              replace_arbitrary(motif[p]);
-              break;
-            case 2: // roll one position
-              if(options.verbosity >= Verbosity::verbose)
-                std::cout << "Roll one position" << std::endl;
-              {
-                char nucl = "acgtmrwsykbdhvn"[rand() % 15];
-                std::string w = " ";
-                w[0] = nucl;
-                bool r = rand() % 2;
-                size_t n = motif.size() - 1;
-                if(r == 0)
-                  motif = w + motif.substr(0, n);
-                else
-                  motif = motif.substr(1, n) + w;
-              }
-              break;
-          }
+          do {
+            size_t r = rand() % R;
+            size_t p;
+            switch(r) {
+              case 0: // replace nucleotide by a similar one
+                if(options.verbosity >= Verbosity::verbose)
+                  std::cout << "Replace nucleotide by a similar one" << std::endl;
+                p = rand() % motif.size();
+                replace_similar(motif[p]);
+                break;
+              case 1: // replace nucleotide by a random one
+                if(options.verbosity >= Verbosity::verbose)
+                  std::cout << "Replace nucleotide by an arbitrary one" << std::endl;
+                p = rand() % motif.size();
+                replace_arbitrary(motif[p]);
+                break;
+              case 2: // roll one position
+                if(options.verbosity >= Verbosity::verbose)
+                  std::cout << "Roll one position" << std::endl;
+                {
+                  char nucl = "acgtmrwsykbdhvn"[rand() % 15];
+                  std::string w = " ";
+                  w[0] = nucl;
+                  bool r = rand() % 2;
+                  size_t n = motif.size() - 1;
+                  if(r == 0)
+                    motif = w + motif.substr(0, n);
+                  else
+                    motif = motif.substr(1, n) + w;
+                }
+                break;
+            }
+          } while(Seeding::motif_degeneracy(motif) > max_degeneracy);
           if(options.verbosity >= Verbosity::verbose)
             std::cout << motif_ << " -> " << motif << std::endl;
           return(motif);
