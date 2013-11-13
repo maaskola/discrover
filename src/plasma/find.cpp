@@ -390,112 +390,112 @@ namespace Seeding {
 
     score_map_t examined_words;
 
-    // wait for the index building to finish
-    while(not index_ready) {
-      if(options.verbosity >= Verbosity::verbose)
-        cerr << "Index still not ready." << endl;
-      sleep(1);
-    }
+    if(max_degeneracy > 0) {
+      // wait for the index building to finish
+      while(not index_ready) {
+        if(options.verbosity >= Verbosity::verbose)
+          cerr << "Index still not ready." << endl;
+        sleep(1);
+      }
 
-    for(auto &candidate: candidates) {
-      const string original_word = candidate.second;
-      const size_t word_len = original_word.size();
+      for(auto &candidate: candidates) {
+        const string original_word = candidate.second;
+        const size_t word_len = original_word.size();
 
-      const size_t n_repetitions = 10;
-
-      if(options.verbosity >= Verbosity::debug)
-        std::cout << "FIRE considers motif " << original_word << " " << candidate.first << endl;
-
-      for(size_t idx_repetition = 0; idx_repetition < n_repetitions; idx_repetition++) {
-        string word = original_word;
-        double previous_score = candidate.first;
-
-        bool tried_all_positions = false;
+        const size_t n_repetitions = 10;
 
         if(options.verbosity >= Verbosity::debug)
-          std::cout << "FIRE starts repetition " << idx_repetition << " for motif " << original_word << endl;
+          std::cout << "FIRE considers motif " << original_word << " " << candidate.first << endl;
 
-        while(not tried_all_positions) {
-          vector<size_t> remaining_positions;
-          for(size_t i = 0; i < word.size(); i++)
-            remaining_positions.push_back(i);
+        for(size_t idx_repetition = 0; idx_repetition < n_repetitions; idx_repetition++) {
+          string word = original_word;
+          double previous_score = candidate.first;
 
-          score_map_t tried;
+          bool tried_all_positions = false;
 
-          while(not remaining_positions.empty()) {
-            if(options.verbosity >= Verbosity::everything) {
-              std::cout << "FIRE remaining positions:";
-              for(auto &x: remaining_positions)
-                std::cout << " " << x;
-              std::cout << std::endl;
-            }
+          if(options.verbosity >= Verbosity::debug)
+            std::cout << "FIRE starts repetition " << idx_repetition << " for motif " << original_word << endl;
 
-            const size_t position_idx = rand() % remaining_positions.size();
-            const size_t position = remaining_positions[position_idx];
-            remaining_positions.erase(begin(remaining_positions) + position_idx);
+          while(not tried_all_positions) {
+            vector<size_t> remaining_positions;
+            for(size_t i = 0; i < word.size(); i++)
+              remaining_positions.push_back(i);
 
-            if(options.verbosity >= Verbosity::debug)
-              std::cout << "FIRE tries modifications to position " << position << " of motif " << original_word << endl;
+            score_map_t tried;
 
-            for(auto &modified_word: modifications(original_word, word, position)) {
-
-              // TODO: FIRE enforces a sufficient improvement of the score
-              if(not admissible(modified_word, examined_words, max_degeneracy))
-                continue;
-
-              // find occurrences
-              vector<size_t> counts_vec;
-              if(options.word_stats)
-                counts_vec = index.word_hits_by_file(modified_word);
-              else
-                counts_vec = index.seq_hits_by_file(modified_word, options.revcomp);
-              Stats::OccurrenceCounts counts(counts_vec.size());
-              for(size_t i = 0; i < counts_vec.size(); i++)
-                counts[i] = counts_vec[i];
-              if(options.word_stats and options.revcomp) {
-                counts_vec = index.word_hits_by_file(reverse_complement(modified_word));
-                for(size_t i = 0; i < counts_vec.size(); i++)
-                  counts[i] += counts_vec[i];
+            while(not remaining_positions.empty()) {
+              if(options.verbosity >= Verbosity::everything) {
+                std::cout << "FIRE remaining positions:";
+                for(auto &x: remaining_positions)
+                  std::cout << " " << x;
+                std::cout << std::endl;
               }
 
-              double score = compute_score(collection, counts, options, objective, word_len, motif_degeneracy(modified_word));
-
-              tried[modified_word] = score;
-              examined_words[modified_word] = score;
+              const size_t position_idx = rand() % remaining_positions.size();
+              const size_t position = remaining_positions[position_idx];
+              remaining_positions.erase(begin(remaining_positions) + position_idx);
 
               if(options.verbosity >= Verbosity::debug)
-                std::cout << "FIRE: modified word " << modified_word << " -> " << score << endl;
-            }
+                std::cout << "FIRE tries modifications to position " << position << " of motif " << original_word << endl;
 
-            double achieved_score = previous_score;
-            string best = word;
-            for(auto &x: tried)
-              if(x.second > achieved_score) {
-                achieved_score = x.second;
-                best = x.first;
+              for(auto &modified_word: modifications(original_word, word, position)) {
+
+                // TODO: FIRE enforces a sufficient improvement of the score
+                if(not admissible(modified_word, examined_words, max_degeneracy))
+                  continue;
+
+                // find occurrences
+                vector<size_t> counts_vec;
+                if(options.word_stats)
+                  counts_vec = index.word_hits_by_file(modified_word);
+                else
+                  counts_vec = index.seq_hits_by_file(modified_word, options.revcomp);
+                Stats::OccurrenceCounts counts(counts_vec.size());
+                for(size_t i = 0; i < counts_vec.size(); i++)
+                  counts[i] = counts_vec[i];
+                if(options.word_stats and options.revcomp) {
+                  counts_vec = index.word_hits_by_file(reverse_complement(modified_word));
+                  for(size_t i = 0; i < counts_vec.size(); i++)
+                    counts[i] += counts_vec[i];
+                }
+
+                double score = compute_score(collection, counts, options, objective, word_len, motif_degeneracy(modified_word));
+
+                tried[modified_word] = score;
+                examined_words[modified_word] = score;
+
+                if(options.verbosity >= Verbosity::debug)
+                  std::cout << "FIRE: modified word " << modified_word << " -> " << score << endl;
               }
 
-            if(best != word) {
-              word = best;
-              previous_score = achieved_score;
-              if(options.verbosity >= Verbosity::verbose)
-                std::cout << "FIRE: increased score: " << word << " " << achieved_score << endl;
-              break;
-            }
-          }
+              double achieved_score = previous_score;
+              string best = word;
+              for(auto &x: tried)
+                if(x.second > achieved_score) {
+                  achieved_score = x.second;
+                  best = x.first;
+                }
 
-          tried_all_positions = remaining_positions.empty();
+              if(best != word) {
+                word = best;
+                previous_score = achieved_score;
+                if(options.verbosity >= Verbosity::verbose)
+                  std::cout << "FIRE: increased score: " << word << " " << achieved_score << endl;
+                break;
+              }
+            }
+
+            tried_all_positions = remaining_positions.empty();
+          }
         }
       }
+
+      for(auto &x: examined_words)
+        if(x.second > max_score) {
+          max_score = x.second;
+          best_motif = x.first;
+        }
     }
-
-    max_score = -numeric_limits<double>::infinity();
-
-    for(auto &x: examined_words)
-      if(x.second > max_score) {
-        max_score = x.second;
-        best_motif = x.first;
-      }
 
     Stats::OccurrenceCounts best_contrast = count_motif(collection, best_motif, options);
     double log_p = -compute_score(collection, best_contrast, options, objective, length, motif_degeneracy(best_motif), Measures::Discrete::Measure::CorrectedLogpGtest);
