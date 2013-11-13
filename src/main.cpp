@@ -127,6 +127,10 @@ void fixup_seeding_options(hmm_options &options) {
   options.seeding.revcomp = options.revcomp;
   options.seeding.pseudo_count = options.contingency_pseudo_count;
   options.seeding.measure_runtime = options.timing_information;
+
+  options.seeding.mcmc.max_iter = options.termination.max_iter;
+  options.seeding.mcmc.temperature = options.sampling.temperature;
+  options.seeding.mcmc.n_parallel= options.sampling.n_parallel;
 }
 
 string generate_random_label(const string &prefix="dlhmm", size_t n_rnd_char=5, Verbosity verbosity=Verbosity::info) {

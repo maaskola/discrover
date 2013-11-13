@@ -62,6 +62,13 @@ namespace Seeding {
     redundancy_threshold(5.0)
   { };
 
+  Options::MCMC::MCMC() :
+    max_iter(1000),
+    temperature(1e-3),
+    n_parallel(6)
+  { };
+
+
   std::istream &operator>>(std::istream &in, CandidateSelection &cand_sel) {
     string token;
     in >> token;

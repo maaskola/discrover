@@ -198,15 +198,13 @@ namespace Seeding {
    */
   Results Plasma::find_mcmc(size_t length, const Objective &objective) {
     srand(time(0));
-    double temperature = 1e-3;
     MCMC::Evaluator<MCMC::Motif> eval(collection, options, objective);
     MCMC::Generator<MCMC::Motif> gen(options, length);
     MCMC::MonteCarlo<MCMC::Motif> mcmc(gen, eval, options.verbosity);
     std::vector<double> temperatures;
     std::vector<MCMC::Motif> init;
-    const size_t n_parallel = 6;
-    const size_t max_iter = 1000;
-    for(size_t i = 0; i < n_parallel; i++) {
+    double temperature = options.mcmc.temperature;
+    for(size_t i = 0; i < options.mcmc.n_parallel; i++) {
       string word;
       for(size_t j = 0; j < length; j++)
         word += "acgt"[rand() % 4];
@@ -214,7 +212,7 @@ namespace Seeding {
       temperatures.push_back(temperature);
       temperature /= 2;
     }
-    auto res = mcmc.parallel_tempering(temperatures, init, max_iter);
+    auto res = mcmc.parallel_tempering(temperatures, init, options.mcmc.max_iter);
 
     std::string best_motif = "";
     double best_score = -numeric_limits<double>::infinity();

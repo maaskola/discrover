@@ -90,6 +90,13 @@ namespace Seeding {
       double rel_degeneracy;
       bool per_degeneracy;
     };
+    struct MCMC {
+      MCMC();
+      size_t max_iter;
+      double temperature;
+      size_t n_parallel;
+    };
+
 
     Options();
 
@@ -101,6 +108,7 @@ namespace Seeding {
 
     Plasma plasma;
     FIRE fire;
+    MCMC mcmc;
 
     size_t n_threads;
     bool revcomp;
