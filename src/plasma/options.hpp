@@ -48,6 +48,14 @@ namespace Seeding {
   std::istream &operator>>(std::istream &in, OccurrenceFilter &filter);
   std::ostream &operator<<(std::ostream &os, const OccurrenceFilter &filter);
 
+  enum class CandidateSelection {
+    TopN,
+    RandomizationTest
+  };
+
+  std::istream &operator>>(std::istream &in, CandidateSelection &cand_sel);
+  std::ostream &operator<<(std::ostream &os, const CandidateSelection &cand_sel);
+
   enum class Algorithm {
     Plasma = (1u << 1),
     FIRE = (1u << 2)
@@ -106,6 +114,8 @@ namespace Seeding {
     Verbosity verbosity;
     bool dump_viterbi;
     bool no_enrichment_filter;
+
+    CandidateSelection candidate_selection;
   };
 }
 
