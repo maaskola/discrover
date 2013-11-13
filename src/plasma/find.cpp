@@ -190,7 +190,7 @@ namespace Seeding {
       candidates.insert({score, iter.first});
       n_candidates++;
       if(n_candidates > options.max_candidates) {
-        candidates.erase(end(candidates));
+        candidates.erase(--end(candidates));
         n_candidates--;
       }
     }
@@ -305,7 +305,7 @@ namespace Seeding {
             candidates.insert({generalization_score, generalization});
             n_candidates++;
             if(n_candidates > options.max_candidates) {
-              candidates.erase(end(candidates));
+              candidates.erase(--end(candidates));
               n_candidates--;
             }
             if(generalization_score > max_score) {
