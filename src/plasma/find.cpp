@@ -205,6 +205,7 @@ namespace Seeding {
     const size_t degeneracy = 0;
     rev_map_t candidates;
 
+    best_motif = "";
     max_score = -numeric_limits<double>::infinity();
 
     for(auto &d: options.plasma.degeneracies)
@@ -495,7 +496,7 @@ namespace Seeding {
     double max_score;
     rev_map_t candidates = determine_initial_candidates(length, objective, best_motif, n_candidates, max_score, results, max_degeneracy, degeneracies);
 
-    bool best_motif_changed = false;
+    bool best_motif_changed = true;
 
     if(max_degeneracy > 0) {
       while(not index_ready) {
