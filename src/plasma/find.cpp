@@ -26,6 +26,7 @@
 #include "mask.hpp"
 #include "aux.hpp"
 #include "align.hpp"
+#include "../mcmc/mcmciupac.hpp"
 #include "../timer.hpp"
 
 using namespace std;
@@ -196,10 +197,50 @@ namespace Seeding {
   /** This executes MCMC to find discriminative IUPAC motifs.
    */
   Results Plasma::find_mcmc(size_t length, const Objective &objective) {
+    srand(time(0));
+    double temperature = 1e-3;
+    MCMC::Evaluator<MCMC::Motif> eval(collection, options, objective);
+    MCMC::Generator<MCMC::Motif> gen(options, length);
+    MCMC::MonteCarlo<MCMC::Motif> mcmc(gen, eval, options.verbosity);
+    std::vector<double> temperatures;
+    std::vector<MCMC::Motif> init;
+    const size_t n_parallel = 6;
+    const size_t max_iter = 1000;
+    for(size_t i = 0; i < n_parallel; i++) {
+      string word;
+      for(size_t j = 0; j < length; j++)
+        word += "acgt"[rand() % 4];
+      init.push_back(word);
+      temperatures.push_back(temperature);
+      temperature /= 2;
+    }
+    auto res = mcmc.parallel_tempering(temperatures, init, max_iter);
+
+    std::string best_motif = "";
+    double best_score = -numeric_limits<double>::infinity();
+    for(auto &x: res)
+      for(auto &y: x)
+        if(y.second > best_score) {
+          best_motif = y.first;
+          best_score = y.second;
+        }
+
     Results results;
+
+    Stats::OccurrenceCounts best_contrast = count_motif(collection, best_motif, options);
+    double log_p = -compute_score(collection, best_contrast, options, objective, length, motif_degeneracy(best_motif), Measures::Discrete::Measure::CorrectedLogpGtest);
+    Result result(objective);
+    result.motif = best_motif;
+    result.score = best_score;
+    result.log_p = log_p;
+    result.counts = best_contrast;
+    results.push_back(result);
+
+    if(options.verbosity >= Verbosity::verbose)
+      std::cout << "MCMC found: " << best_motif << " " << best_score << " " << log_p << endl;
+
     return(results);
   }
-
 
   rev_map_t Plasma::determine_initial_candidates(size_t length, const Objective &objective, string &best_motif, size_t &n_candidates, double &max_score, Results &results, size_t &max_degeneracy, set<size_t> &degeneracies) {
     const size_t degeneracy = 0;
