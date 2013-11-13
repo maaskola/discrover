@@ -123,8 +123,8 @@ namespace Seeding {
       viterbi_dump(res.motif, collection, cerr, options);
   }
 
-  bool admissible(const std::string &word, const score_map_t &previous) {
-    return previous.find(word) == end(previous);
+  bool admissible(const std::string &word, const score_map_t &previous, size_t max_degeneracy) {
+    return (previous.find(word) == end(previous)) and (motif_degeneracy(word) <= max_degeneracy);
   }
 
   std::list<std::string> modifications(const std::string &original_word, const std::string &word, size_t position) {
@@ -440,7 +440,7 @@ namespace Seeding {
             for(auto &modified_word: modifications(original_word, word, position)) {
 
               // TODO: FIRE enforces a sufficient improvement of the score
-              if(not admissible(modified_word, examined_words))
+              if(not admissible(modified_word, examined_words, max_degeneracy))
                 continue;
 
               // find occurrences
