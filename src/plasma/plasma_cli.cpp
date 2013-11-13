@@ -95,6 +95,7 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
   po::options_description fire_desc("FIRE seeding algorithm options", cols);
   string fire_prefix = "fire_";
   fire_desc.add_options()
+    (form_switch(fire_prefix, "select", false).c_str(), po::value<Seeding::CandidateSelection>(&options.candidate_selection)->default_value(Seeding::CandidateSelection::TopN, "topn"), "How to select candidate seeds. Available are 'topn' and 'randtest' which respectively select the top n candidates according to score, or perform randomization test until --signif ones are consecutively failing.")
     (form_switch(fire_prefix, "nucl5", false).c_str(), po::value<size_t>(&options.fire.nucleotides_5prime)->default_value(1), "Extend seeds by this many nucleotides on the 5' side.")
     (form_switch(fire_prefix, "nucl3", false).c_str(), po::value<size_t>(&options.fire.nucleotides_3prime)->default_value(1), "Extend seeds by this many nucleotides on the 3' side.")
     (form_switch(fire_prefix, "signif", false).c_str(), po::value<size_t>(&options.fire.nr_rand_tests)->default_value(10), "Accept seeds until this many randomization tests fail.")

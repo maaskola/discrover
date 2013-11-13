@@ -44,7 +44,8 @@ namespace Seeding {
     keep_all(false),
     verbosity(Verbosity::info),
     dump_viterbi(false),
-    no_enrichment_filter(false)
+    no_enrichment_filter(false),
+    candidate_selection(CandidateSelection::TopN)
     { };
 
   Options::Plasma::Plasma() :
@@ -61,6 +62,31 @@ namespace Seeding {
     redundancy_threshold(5.0)
   { };
 
+  std::istream &operator>>(std::istream &in, CandidateSelection &cand_sel) {
+    string token;
+    in >> token;
+    boost::algorithm::to_lower(token);
+    if(token == "topn")
+      cand_sel = CandidateSelection::TopN;
+    else if(token == "rand" or token == "randtest" or token == "randomizationtest")
+      cand_sel = CandidateSelection::RandomizationTest;
+    else {
+      cout << "Couldn't parse candidate selection type '" << token << "'." << endl;
+      exit(-1);
+    }
+    return(in);
+  }
+  std::ostream &operator<<(std::ostream &os, const CandidateSelection &cand_sel) {
+    switch(cand_sel) {
+      case CandidateSelection::TopN:
+        os << "TopN";
+        break;
+      case CandidateSelection::RandomizationTest:
+        os << "RandomizationTest";
+        break;
+    }
+    return(os);
+  }
 
   istream &operator>>(istream &in, OccurrenceFilter &filter) {
     string token;

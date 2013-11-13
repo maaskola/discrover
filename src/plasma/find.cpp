@@ -19,6 +19,7 @@
 #include "score.hpp"
 #include "count.hpp"
 #include "code.hpp"
+#include "randomization_test.hpp"
 #include <iostream>
 #include <set>
 #include <thread>
@@ -247,10 +248,46 @@ namespace Seeding {
       }
       candidates.insert({score, iter.first});
       n_candidates++;
-      if(n_candidates > options.plasma.max_candidates) {
-        candidates.erase(end(candidates));
-        n_candidates--;
+      if(options.candidate_selection == CandidateSelection::TopN)
+        if(n_candidates > options.plasma.max_candidates) {
+          candidates.erase(--end(candidates));
+          n_candidates--;
+        }
+    }
+
+    if(options.candidate_selection == CandidateSelection::RandomizationTest) {
+      size_t consecutive_failures = 0;
+
+      rev_map_t candidates_ = candidates;
+      rev_map_t candidates = rev_map_t();
+      n_candidates = 0;
+
+      for(auto &candidate: candidates_) {
+        double score = candidate.first;
+
+        if(options.verbosity >= Verbosity::debug)
+          cout << "Candidate " << candidate.second << endl;
+        if(options.verbosity >= Verbosity::debug)
+          cout << "score = " << score << endl;
+
+        size_t nr_of_tests_to_do = 1 << (2 * length);
+        if(options.revcomp)
+          nr_of_tests_to_do /= 2;
+        bool test_res = randomization_test(collection, word_counts[candidate.second], nr_of_tests_to_do, score, options, objective, length, degeneracy);
+        if(test_res)
+          consecutive_failures = 0;
+        else {
+          consecutive_failures++;
+          if(consecutive_failures >= options.fire.nr_rand_tests)
+            break;
+        }
+
+        candidates.insert(candidate);
+        n_candidates++;
       }
+      // TODO delete the worst options.fire.nr_rand_tests candidates
+      if(options.verbosity >= Verbosity::verbose)
+        cout << "FIRE got " << n_candidates << " candidates. " << endl;
     }
 
     if(options.measure_runtime) {
@@ -459,7 +496,7 @@ namespace Seeding {
       candidates.insert({score, iter.first});
       n_candidates++;
       if(n_candidates > options.plasma.max_candidates) {
-        candidates.erase(end(candidates));
+        candidates.erase(--end(candidates));
         n_candidates--;
       }
     }
@@ -574,7 +611,7 @@ namespace Seeding {
             candidates.insert({generalization_score, generalization});
             n_candidates++;
             if(n_candidates > options.plasma.max_candidates) {
-              candidates.erase(end(candidates));
+              candidates.erase(--end(candidates));
               n_candidates--;
             }
             if(generalization_score > max_score) {
