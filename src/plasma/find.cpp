@@ -3,7 +3,7 @@
  *
  *       Filename:  find.cpp
  *
- *    Description:  
+ *    Description:  Routines to discover IUPAC based motifs
  *
  *        Version:  1.0
  *        Created:  31.05.2012 06:47:48
@@ -11,7 +11,6 @@
  *       Compiler:  gcc
  *
  *         Author:  Jonas Maaskola <jonas@maaskola.de>
- *   Organization:  
  *
  * =====================================================================================
  */
@@ -187,11 +186,13 @@ namespace Seeding {
       if(options.verbosity >= Verbosity::debug)
         cout << "motif = " << best_motif << " score = " << score << " " << iter.second << endl;
       }
-      candidates.insert({score, iter.first});
-      n_candidates++;
-      if(n_candidates > options.max_candidates) {
-        candidates.erase(--end(candidates));
-        n_candidates--;
+      if(candidates.empty() or score > candidates.rbegin()->first or n_candidates < options.max_candidates) {
+        candidates.insert({score, iter.first});
+        n_candidates++;
+        if(n_candidates > options.max_candidates) {
+          candidates.erase(--end(candidates));
+          n_candidates--;
+        }
       }
     }
 
@@ -302,18 +303,20 @@ namespace Seeding {
             string generalization = work[i]->first;
             if(this->options.verbosity >= Verbosity::debug)
               cout << "ax " << generalization << " " << generalization_score << endl;
-            candidates.insert({generalization_score, generalization});
-            n_candidates++;
-            if(n_candidates > options.max_candidates) {
-              candidates.erase(--end(candidates));
-              n_candidates--;
-            }
-            if(generalization_score > max_score) {
-              if(this->options.verbosity >= Verbosity::debug)
-                cout << "New maximum!" << endl;
-              max_score = generalization_score;
-              best_motif = work[i]->first;
-              best_motif_changed = true;
+            if(candidates.empty() or generalization_score > candidates.rbegin()->first or n_candidates < options.max_candidates) {
+              candidates.insert({generalization_score, generalization});
+              n_candidates++;
+              if(n_candidates > options.max_candidates) {
+                candidates.erase(--end(candidates));
+                n_candidates--;
+              }
+              if(generalization_score > max_score) {
+                if(this->options.verbosity >= Verbosity::debug)
+                  cout << "New maximum!" << endl;
+                max_score = generalization_score;
+                best_motif = work[i]->first;
+                best_motif_changed = true;
+              }
             }
           }
         }
