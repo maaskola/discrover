@@ -185,18 +185,14 @@ namespace Seeding {
   }
 
 
-  /** This executes the FIRE algorithm to find discriminative IUPAC motifs.
-   */
-  Results Plasma::find_fire(size_t length, const Objective &objective) {
-    Results results;
-    if(options.verbosity >= Verbosity::verbose)
-      cout << "Finding motif of length " << length << " using the FIRE approach with top " << options.plasma.max_candidates << " candidates by " << measure2string(objective.measure) << "." << endl;
+  rev_map_t Plasma::determine_initial_candidates(size_t length, const Objective &objective, string &best_motif, size_t &n_candidates, double &max_score, Results &results, size_t &max_degeneracy, set<size_t> &degeneracies) {
+    const size_t degeneracy = 0;
+    rev_map_t candidates;
 
-    Timer my_timer;
-    set<size_t> degeneracies;
+    max_score = -numeric_limits<double>::infinity();
+
     for(auto &d: options.plasma.degeneracies)
       degeneracies.insert(d);
-    size_t max_degeneracy;
     if(degeneracies.empty())
       max_degeneracy = 3 * length;
     else
@@ -210,14 +206,7 @@ namespace Seeding {
     if(needs_rebuilding and max_degeneracy > 0)
       rebuild_index();
 
-    size_t degeneracy = 0;
-
-    rev_map_t candidates;
-    size_t n_candidates = 0;
-
-    string best_motif;
-    double max_score = -numeric_limits<double>::infinity();
-
+    Timer my_timer;
     if(options.verbosity >= Verbosity::verbose)
       cerr << "Starting to get word counts." << endl;
     hash_map_t word_counts = get_word_counts(collection, length, options);
@@ -291,11 +280,48 @@ namespace Seeding {
         cout << "FIRE got " << n_candidates << " candidates. " << endl;
     }
 
+    if(degeneracies.find(degeneracy) != end(degeneracies)) {
+      Stats::OccurrenceCounts best_contrast = count_motif(collection, best_motif, options);
+      double log_p = -compute_score(collection, best_contrast, options, objective, length, degeneracy, Measures::Discrete::Measure::CorrectedLogpGtest);
+      Result result(objective);
+      result.motif = best_motif;
+      result.score = max_score;
+      result.log_p = log_p;
+      result.counts = best_contrast;
+      //      Result result = {best_motif, max_score, log_p, best_contrast};
+      // cout << "special0: " << best_motif << " " << max_score << " " << best_contrast << endl;
+      // report(result, collection, options);
+      results.push_back(result);
+    }
+    /* for(auto &cand: candidates)
+       cout << "Candidate " << Motif(cand.second) << " score = " << cand.first << endl;
+       */
+
     if(options.measure_runtime) {
       cerr << "Initial scoring for length " << length << " took " << my_timer.tock() << " \u00b5s." << endl;
       my_timer.tick();
     }
 
+    return(candidates);
+  }
+
+
+
+
+  /** This executes the FIRE algorithm to find discriminative IUPAC motifs.
+   */
+  Results Plasma::find_fire(size_t length, const Objective &objective) {
+    Results results;
+    if(options.verbosity >= Verbosity::verbose)
+      cout << "Finding motif of length " << length << " using the FIRE approach with top " << options.plasma.max_candidates << " candidates by " << measure2string(objective.measure) << "." << endl;
+
+    set<size_t> degeneracies;
+    size_t max_degeneracy;
+
+    string best_motif;
+    size_t n_candidates = 0;
+    double max_score;
+    rev_map_t candidates = determine_initial_candidates(length, objective, best_motif, n_candidates, max_score, results, max_degeneracy, degeneracies);
 
     // add undetermined nucleotides on each side
     for(auto &candidate: candidates) {
@@ -429,7 +455,7 @@ namespace Seeding {
     return(results);
   }
 
-  /** This exectues a progressive algorithm to find discriminative IUPAC motifs.
+  /** This executes a progressive algorithm to find discriminative IUPAC motifs.
    * It starts with degeneracy 0 and incrementally allows more degeneracy.
    * For each level of degeneracy the top N generalizations of the motifs of the
    * previous level of degeneracy are determined.
@@ -442,91 +468,18 @@ namespace Seeding {
 //    if(options.verbosity >= Verbosity::debug)
 //      os << "set signal / control = " << options.set_sizes.signal.size() << " " << options.set_sizes.control.size() << endl;
 
-    Timer my_timer;
     set<size_t> degeneracies;
-    for(auto &d: options.plasma.degeneracies)
-      degeneracies.insert(d);
     size_t max_degeneracy;
-    if(degeneracies.empty())
-      max_degeneracy = 3 * length;
-    else
-      max_degeneracy = *degeneracies.rbegin();
-    max_degeneracy = min<size_t>(max_degeneracy, 3 * length * options.plasma.rel_degeneracy);
-    if(options.plasma.per_degeneracy) {
-      for(size_t i = 0; i <= max_degeneracy; i++)
-        degeneracies.insert(i);
-    }
 
-    if(needs_rebuilding and max_degeneracy > 0)
-      rebuild_index();
 
     size_t degeneracy = 0;
 
-    rev_map_t candidates;
-    size_t n_candidates = 0;
-
     string best_motif;
-    double max_score = -numeric_limits<double>::infinity();
-    bool best_motif_changed = true;
+    size_t n_candidates = 0;
+    double max_score;
+    rev_map_t candidates = determine_initial_candidates(length, objective, best_motif, n_candidates, max_score, results, max_degeneracy, degeneracies);
 
-    if(options.verbosity >= Verbosity::verbose)
-      cerr << "Starting to get word counts." << endl;
-    hash_map_t word_counts = get_word_counts(collection, length, options);
-    if(options.measure_runtime) {
-      cerr << "Got words for length " << length << " in " << my_timer.tock() << " \u00b5s." << endl;
-      my_timer.tick();
-    }
-
-//    if(options.verbosity >= Verbosity::debug)
-//      print_counts(word_counts);
-
-
-    for(auto &iter: word_counts) {
-      if(options.verbosity >= Verbosity::debug)
-        cout << "Candidate " << iter.first << endl;
-      double score = compute_score(collection, iter.second, options, objective, length, degeneracy);
-
-      if(options.verbosity >= Verbosity::debug)
-        cout << "score = " << score << endl;
-      if(score > max_score) {
-        max_score = score;
-        best_motif = iter.first;
-      if(options.verbosity >= Verbosity::debug)
-        cout << "motif = " << best_motif << " score = " << score << " " << iter.second << endl;
-      }
-      if(candidates.empty() or score > candidates.rbegin()->first or n_candidates < options.plasma.max_candidates) {
-        candidates.insert({score, iter.first});
-        n_candidates++;
-        if(n_candidates > options.plasma.max_candidates) {
-          candidates.erase(--end(candidates));
-          n_candidates--;
-        }
-      }
-    }
-
-    if(best_motif_changed and degeneracies.find(degeneracy) != end(degeneracies)) {
-      Stats::OccurrenceCounts best_contrast = count_motif(collection, best_motif, options);
-      double log_p = -compute_score(collection, best_contrast, options, objective, length, degeneracy, Measures::Discrete::Measure::CorrectedLogpGtest);
-      Result result(objective);
-      result.motif = best_motif;
-      result.score = max_score;
-      result.log_p = log_p;
-      result.counts = best_contrast;
-//      Result result = {best_motif, max_score, log_p, best_contrast};
-      // cout << "special0: " << best_motif << " " << max_score << " " << best_contrast << endl;
-      // report(result, collection, options);
-      results.push_back(result);
-      best_motif_changed = false;
-    }
-    /* for(auto &cand: candidates)
-       cout << "Candidate " << Motif(cand.second) << " score = " << cand.first << endl;
-       */
-
-
-    if(options.measure_runtime) {
-      cerr << "Initial scoring for length " << length << " took " << my_timer.tock() << " \u00b5s." << endl;
-      my_timer.tick();
-    }
+    bool best_motif_changed = false;
 
     if(max_degeneracy > 0) {
       while(not index_ready) {
@@ -534,6 +487,7 @@ namespace Seeding {
           cerr << "Index still not ready." << endl;
         sleep(1);
       }
+      Timer my_timer;
       while((not candidates.empty()) and degeneracy < max_degeneracy) {
         degeneracy++;
         if(options.verbosity >= Verbosity::verbose)
