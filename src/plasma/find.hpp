@@ -46,6 +46,7 @@ namespace Seeding {
     Results find_seeds(size_t length, const Objective &objective, Algorithm algorithm);
     Results find_breadth(size_t length, const Objective &objective);
     Results find_fire(size_t length, const Objective &objective);
+    Results find_mcmc(size_t length, const Objective &objective);
     rev_map_t determine_initial_candidates(size_t length, const Objective &objective, std::string &best_motif, size_t &n_candidates, double &max_score, Results &results, size_t &max_degeneracy, std::set<size_t> &degeneracies);
     Results find_all(const Specification::Motif &motif, const Objective &objective, size_t n_motifs) const;
     Results find_multiple(const Specification::Motif &motif, const Objective &objective, size_t n_motifs) const;

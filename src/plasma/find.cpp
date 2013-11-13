@@ -168,6 +168,10 @@ namespace Seeding {
     if((algorithm & Algorithm::FIRE) == Algorithm::FIRE)
       fire_results = find_fire(length, objective);
 
+    Results mcmc_results;
+    if((algorithm & Algorithm::MCMC) == Algorithm::MCMC)
+      mcmc_results = find_mcmc(length, objective);
+
     Results results;
     set<string> motifs;
     for(auto &m: plasma_results)
@@ -180,7 +184,19 @@ namespace Seeding {
         motifs.insert(m.motif);
         results.push_back(m);
       }
+    for(auto &m: mcmc_results)
+      if(motifs.find(m.motif) == end(motifs)) {
+        motifs.insert(m.motif);
+        results.push_back(m);
+      }
 
+    return(results);
+  }
+
+  /** This executes MCMC to find discriminative IUPAC motifs.
+   */
+  Results Plasma::find_mcmc(size_t length, const Objective &objective) {
+    Results results;
     return(results);
   }
 
