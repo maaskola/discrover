@@ -121,11 +121,13 @@ namespace Seeding {
       return(Algorithm::Plasma);
     else if(token == "fire")
       return(Algorithm::FIRE);
+    else if(token == "mcmc")
+      return(Algorithm::MCMC);
     else if(token == "all")
-      return(Algorithm::Plasma | Algorithm::FIRE);
+      return(Algorithm::Plasma | Algorithm::FIRE | Algorithm::MCMC);
     else {
       cout << "Seeding algorithm '" << token_ << "' unknown." << endl
-        << "Please use one of 'plasma', 'fire', or 'all'." << endl
+        << "Please use one of 'plasma', 'fire', 'mcmc', or 'all'." << endl
         << "It is also possible to use multiple algorithms by separating them by comma." << endl;
       exit(-1);
     }
@@ -159,8 +161,12 @@ namespace Seeding {
       os << "plasma";
       first = false;
     }
-    if((algorithm & Algorithm::FIRE) == Algorithm::FIRE)
+    if((algorithm & Algorithm::FIRE) == Algorithm::FIRE) {
       os << (first ? "" : ",") << "fire";
+      first = false;
+    }
+    if((algorithm & Algorithm::MCMC) == Algorithm::MCMC)
+      os << (first ? "" : ",") << "mcmc";
     return(os);
   }
 

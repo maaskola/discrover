@@ -58,7 +58,8 @@ namespace Seeding {
 
   enum class Algorithm {
     Plasma = (1u << 1),
-    FIRE = (1u << 2)
+    FIRE = (1u << 2),
+    MCMC = (1u << 3)
   };
 
   inline Algorithm operator|(Algorithm a, Algorithm b)

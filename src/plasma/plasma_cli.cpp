@@ -66,7 +66,7 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
       ;
 
   desc.add_options()
-    (form_switch(prefix, "algo", allow_short).c_str(), po::value<Seeding::Algorithm>(&options.algorithm)->default_value(Seeding::Algorithm::Plasma, "plasma"), "Which algorithm to use for seeding. Available are 'plasma', 'fire', and 'all'. Multiple algorithms can be used by separating them by comma.")
+    (form_switch(prefix, "algo", allow_short).c_str(), po::value<Seeding::Algorithm>(&options.algorithm)->default_value(Seeding::Algorithm::Plasma, "plasma"), "Which algorithm to use for seeding. Available are 'plasma', 'fire', 'mcmc', and 'all'. Multiple algorithms can be used by separating them by comma.")
     (form_switch(prefix, "nmotif", allow_short).c_str(), po::value<size_t>(&options.n_motifs)->default_value(1), "How many motifs to determine.")
     (form_switch(prefix, "any", false).c_str(), po::bool_switch(&options.no_enrichment_filter), "Whether to allow motifs enriched in the opposite direction.")
     (form_switch(prefix, "filter", false).c_str(), po::value<Seeding::OccurrenceFilter>(&options.occurrence_filter)->default_value(Seeding::OccurrenceFilter::MaskOccurrences, "mask"), "How to filter motif occurrences upon identifying a motif. Available are 'remove' and 'mask'.")
