@@ -25,6 +25,18 @@ distribution probabilities by means of the incomplete Gamma function.
 
 
 
+
+Documentation
+=============
+
+The sub-directory doc contains a manual for this package, written in LaTeX.
+A PDF version of the manual will be generated during the build process of this
+package, and can subsequently be found doc/documentation.pdf.
+
+
+
+
+
 Dependencies
 ============
 
@@ -64,6 +76,7 @@ is built and used.
 
 
 
+
 Building
 ========
 
@@ -75,6 +88,9 @@ Please refer to the file INSTALL in the main directory of this package.
 
 How to run
 ==========
+
+Below is a minimal description on how use this package. Please refer to the
+manual in doc/documentation.pdf for more information.
 
 The package contains two binaries, plasma and dlhmm.
 
