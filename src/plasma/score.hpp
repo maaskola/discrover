@@ -37,12 +37,6 @@
 #include "motif.hpp"
 #include "options.hpp"
 #include "results.hpp"
-// #include "../GitSHA1.hpp"
-
-typedef double fp_t;
-typedef boost::numeric::ublas::matrix<fp_t> matrix_t;
-typedef boost::numeric::ublas::vector<fp_t> vector_t;
-
 
 double compute_mutual_information_variance(const Seeding::Stats::OccurrenceTable &m_, double pseudo_count, bool normalize);
 double compute_mutual_information(const Seeding::Stats::OccurrenceTable &counts, double pseudo_count=0, bool normalize=false, bool do_correction=false);
