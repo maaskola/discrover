@@ -32,9 +32,9 @@
 
 #include <iostream>
 #include <vector>
-#include "plasma/specification.hpp"
-#include "plasma/measure.hpp"
-#include "plasma/options.hpp"
+#include "../plasma/specification.hpp"
+#include "../plasma/measure.hpp"
+#include "../plasma/options.hpp"
 
 typedef Measures::Continuous::Measure Measure;
 

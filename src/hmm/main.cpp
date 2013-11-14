@@ -35,12 +35,11 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include "plasma/plasma_cli.hpp"
-// #include "plasma/GitSHA1.hpp"
-#include "GitSHA1.hpp"
+#include "../plasma/plasma_cli.hpp"
+#include "../GitSHA1.hpp"
 #include "analysis.hpp"
-#include "aux.hpp"
-#include "terminal.hpp"
+#include "../aux.hpp"
+#include "../terminal.hpp"
 
 using namespace std;
 
@@ -118,7 +117,7 @@ void fixup_seeding_options(hmm_options &options) {
 // TODO REACTIVATE    options.seeding.objective = {measure2iupac_objective(options.measure);
   // options.seeding.objective = Seeding::Objective::corrected_logp_gtest;
   if(options.seeding.objectives.size() == 1 and begin(options.seeding.objectives)->measure == Measures::Discrete::Measure::SignalFrequency)
-    options.seeding.rel_degeneracy = 0.2;
+    options.seeding.plasma.rel_degeneracy = 0.2;
   options.seeding.paths = options.paths;
   options.seeding.n_threads = options.n_threads;
   options.seeding.n_seq = options.n_seq;
@@ -127,6 +126,10 @@ void fixup_seeding_options(hmm_options &options) {
   options.seeding.revcomp = options.revcomp;
   options.seeding.pseudo_count = options.contingency_pseudo_count;
   options.seeding.measure_runtime = options.timing_information;
+
+  options.seeding.mcmc.max_iter = options.termination.max_iter;
+  options.seeding.mcmc.temperature = options.sampling.temperature;
+  options.seeding.mcmc.n_parallel= options.sampling.n_parallel;
 }
 
 string generate_random_label(const string &prefix="dlhmm", size_t n_rnd_char=5, Verbosity verbosity=Verbosity::info) {

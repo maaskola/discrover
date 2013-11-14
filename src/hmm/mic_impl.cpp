@@ -23,7 +23,6 @@
 #include <set>
 #include <vector>
 #include "association.hpp"
-#include "verbosity.hpp"
 #include "mic_impl.hpp"
 
 namespace MIC {

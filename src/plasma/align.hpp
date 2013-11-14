@@ -31,18 +31,8 @@
 #define ALIGN_HPP
 
 #include <iostream>
-#include <fstream>
-#include <map>
-#include <set>
-#include <boost/filesystem.hpp>
-#include <boost/functional/hash.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filter/bzip2.hpp>
-#include <boost/algorithm/string.hpp>
+// #include <boost/functional/hash.hpp>
 #include "suffix.hpp"
-
-#include "aux.hpp"
 #include "data.hpp"
 
 bool iupac_included(char q, char r);
@@ -82,11 +72,11 @@ class Index {
       sa(gen_suffix_array<idx_t>(begin(data), end(data), verbosity)),
       lcp(gen_lcp<lcp_t>(begin(data), end(data), sa, verbosity)),
       jmp(gen_jmp<idx_t>(lcp, verbosity)) {
-        if(verbosity >= Verbosity::verbose) {
-          std::cout << "SA hash = " << boost::hash_range(begin(sa), end(sa)) << std::endl;
-          std::cout << "LCP hash = " << boost::hash_range(begin(lcp), end(lcp)) << std::endl;
-          std::cout << "JMP hash = " << boost::hash_range(begin(jmp), end(jmp)) << std::endl;
-        }
+//        if(verbosity >= Verbosity::verbose) {
+//          std::cout << "SA hash = " << boost::hash_range(begin(sa), end(sa)) << std::endl;
+//          std::cout << "LCP hash = " << boost::hash_range(begin(lcp), end(lcp)) << std::endl;
+//          std::cout << "JMP hash = " << boost::hash_range(begin(jmp), end(jmp)) << std::endl;
+//        }
       };
     template<class Cmp=std::equal_to<typename data_t::value_type>> std::list<idx_t> find_matches(const data_t &query, Cmp cmp=Cmp()) const {
       return(match(begin(query), end(query), begin(data), end(data), sa, lcp, jmp, cmp));
@@ -98,19 +88,8 @@ class Index {
     std::vector<idx_t> jmp;    // JMP table
 };
 
-template <class data_t, class idx_t=size_t, class lcp_t=size_t>
-class BidirectionalIndex{
-  public:
-    BidirectionalIndex(const data_t &x) :
-      forward_index(x),
-      backward_index(data_t(x.rbegin(), x.rend())) {
-      };
-    template<class Cmp=std::equal_to<typename data_t::value_type>> std::list<idx_t> find_matches(const data_t &query, Cmp cmp=Cmp()) const {
-      return(forward_index.find_matches(query, cmp));
-    };
-  private:
-    Index<data_t, idx_t, lcp_t> forward_index, backward_index;
-};
+// std::string collapse_data_series(const Seeding::DataSeries &data_series, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set);
+std::string collapse_data_collection(const Seeding::DataCollection &collection, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set, std::vector<size_t> &set2series);
 
 template <class idx_t=size_t, class lcp_t=size_t, class index_t=Index<std::string, idx_t, lcp_t>>
 class NucleotideIndex {
@@ -142,14 +121,6 @@ class NucleotideIndex {
           for(auto &set: series)
             paths.push_back(set.path);
       };
-//    NucleotideIndex(const Seeding::DataSeries &data_series, Verbosity verbosity) :
-//      paths(),
-//      pos2seq(),
-//      seq2set(),
-//      index(collapse_data_series(data_series, pos2seq, seq2set), verbosity) {
-//        for(auto &data_set: data_series)
-//          paths.push_back(data_set.path);
-//      };
     NucleotideIndex(const std::vector<std::string> &paths_, size_t nseq=0) :
       paths(paths_),
       pos2seq(),
@@ -189,9 +160,6 @@ class NucleotideIndex {
     std::vector<set_index_t> seq2set, set2series;
     index_t index;
 };
-
-template <class idx_t=size_t, class lcp_t=size_t>
-using BidirectionalNucleotideIndex = NucleotideIndex<idx_t, lcp_t, BidirectionalIndex<std::string, idx_t, lcp_t>>;
 
 #endif
 

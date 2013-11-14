@@ -7,13 +7,13 @@
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
-#include "aux.hpp"
+#include "../aux.hpp"
 #include "hmm.hpp"
 #include "report.hpp"
-#include "timer.hpp"
+#include "../timer.hpp"
 #include "mic.hpp"
-#include "plasma/find.hpp"
-#include "stats_config.hpp"
+#include "../plasma/find.hpp"
+#include "../stats_config.hpp"
 
 using namespace std;
 

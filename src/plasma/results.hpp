@@ -31,7 +31,7 @@
 #define RESULTS_HPP
 
 #include <string>
-#include "stats.hpp"
+#include "../matrix.hpp"
 #include "options.hpp"
 
 namespace Seeding {
@@ -39,7 +39,7 @@ namespace Seeding {
     std::string motif;
     double score;
     double log_p;
-    Stats::OccurrenceCounts counts;
+    count_vector_t counts;
     Result(const Objective &objective);
   };
   typedef std::vector<Result> Results;

@@ -16,56 +16,42 @@
  *
  * =====================================================================================
  *
- *       Filename:  aux.hpp
+ *       Filename:  mic_impl.hpp
  *
- *    Description:  Auxiliary routines
+ *    Description:  Routines to compute the MIC
  *
- *        Created:  Tue Aug 8 22:23:44 2012 +0200
+ *        Created:  05/30/2012 06:42:25 PM
  *
  *         Author:  Jonas Maaskola (JM), jonas@maaskola.de
  *
  * =====================================================================================
  */
 
-#ifndef AUX_HPP
-#define AUX_HPP
+#ifndef MIC_IMPL_HPP
+#define MIC_IMPL_HPP
 
+#include <cstdlib>
+#include <ctime>
+#include <iostream>
+#include <set>
+#include <fstream>
 #include <string>
 #include <vector>
+#include "association.hpp"
+#include "../verbosity.hpp"
 
-template <typename Iter> void range_tolower(Iter beg, Iter end) {
-  for(Iter iter = beg; iter != end; ++iter) {
-    *iter = std::tolower(*iter);
-  }
-}
+namespace MIC {
 
-std::string string_tolower(const std::string & str);
+  typedef double score_t;
+  //typedef size_t data_t;
+  typedef double data_t;
+  typedef std::vector<data_t> sample_t;
+  typedef std::vector<size_t> bounds_t;
+  typedef sample_t stats_t;
 
-template <class T> T hibit_orig(T n) {
-  n |= (n >>   1);
-  n |= (n >>   2);
-  n |= (n >>   4);
-  n |= (n >>   8);
-  n |= (n >>  16);
-  n |= (n >>  32);
-  return n - (n >> 1);
+  bounds_t sample(const sample_t &d, const std::set<size_t> &fixed_bounds, size_t n, size_t n_iter, Verbosity verbosity);
+
 };
 
-template <class T> T hibit(T n) {
-  if(n == 0)
-    return(0);
-  size_t bits = 1;
-  while((n = (n >> 4)) > 0)
-    bits++;
-  return bits;
-};
-
-/** Parse a comma separated list of ranges.
- * Example: "1,2,5-7,2,5,30"  will yield {1, 2, 5, 6, 7, 2, 5, 30}. */
-std::vector<std::string> tokenize(const std::string &s, const std::string &delim);
-std::vector<size_t> parse_list(const std::string &s);
-
-std::string sha1hash(const std::string &s);
-
-#endif   /* ----- #ifndef AUX_HPP  ----- */
+#endif
 

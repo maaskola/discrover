@@ -1,7 +1,7 @@
 #include <cstring>
 #include <boost/algorithm/string.hpp>
 #include "aux.hpp"
-#include "sha1.h"
+#include "sha1.hpp"
 
 using namespace std;
 
@@ -254,6 +254,13 @@ string limit_line_length(const string &x, size_t line_length)
       pos = string::npos;
   }
   return(y);
+}
+
+vector<string> tokenize(const string &s, const string &delim)
+{
+  vector<string> strs;
+  boost::split(strs, s, boost::is_any_of(delim));
+  return(strs);
 }
 
 string sha1hash(const string &s)

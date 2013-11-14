@@ -1,5 +1,5 @@
 /* =====================================================================================
- * Copyright (c) 2012, Jonas Maaskola
+ * Copyright (c) 2011, Jonas Maaskola
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,42 +16,44 @@
  *
  * =====================================================================================
  *
- *       Filename:  mic_impl.hpp
+ *       Filename:  basedefs.hpp
  *
- *    Description:  Routines to compute the MIC
+ *    Description:  Basic classes and type definitions for sets of sequence sets
  *
- *        Created:  05/30/2012 06:42:25 PM
+ *        Created:  Thu Aug 4 22:12:31 2011 +0200
  *
  *         Author:  Jonas Maaskola (JM), jonas@maaskola.de
  *
  * =====================================================================================
  */
 
-#ifndef MIC_IMPL_HPP
-#define MIC_IMPL_HPP
+#ifndef BASEDEFS_HPP
+#define BASEDEFS_HPP
 
-#include <cstdlib>
-#include <ctime>
-#include <iostream>
-#include <set>
-#include <fstream>
 #include <string>
-#include <vector>
-#include "association.hpp"
-#include "verbosity.hpp"
+#include "../plasma/data.hpp"
+#include "trainingmode.hpp"
+#include "sequence.hpp"
 
-namespace MIC {
+namespace Data {
+  typedef Fasta::IEntry Seq;
+  typedef Basic::Set<Seq> Set;
+  typedef Basic::Series<Set> Series;
+  typedef Basic::Collection<Series> Collection;
 
-  typedef double score_t;
-  //typedef size_t data_t;
-  typedef double data_t;
-  typedef std::vector<data_t> sample_t;
-  typedef std::vector<size_t> bounds_t;
-  typedef sample_t stats_t;
+  typedef std::vector<Seq> Seqs;
+}
 
-  bounds_t sample(const sample_t &d, const std::set<size_t> &fixed_bounds, size_t n, size_t n_iter, Verbosity verbosity);
+namespace Training {
+  struct State {
+    int center;
+    std::vector<std::vector<double>> scores;
+    State(size_t n);
+  };
+}
 
-};
+void prepare_cross_validation(const Data::Collection &data_sets, Data::Collection &training_data, Data::Collection &test_data, double cross_validation_freq, Verbosity verbosity);
+void prepare_cross_validation(const Data::Series &data, Data::Series &training_data, Data::Series &test_data, double cross_validation_freq, Verbosity verbosity);
 
 #endif
 

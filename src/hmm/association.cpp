@@ -3,7 +3,7 @@
 #include <cassert>
 #include <boost/math/distributions/chi_squared.hpp>
 #include "association.hpp"
-#include "verbosity.hpp"
+#include "../verbosity.hpp"
 
 const Verbosity association_verbosity = Verbosity::info;
 

@@ -16,7 +16,12 @@
  * =====================================================================================
  */
 
-#include <limits>
+#include <fstream>
+#include <boost/filesystem.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filter/bzip2.hpp>
+#include <boost/algorithm/string.hpp>
 #include "align.hpp"
 #include "fasta.hpp"
 
