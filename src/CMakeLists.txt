@@ -47,7 +47,6 @@ ENDIF()
 TARGET_LINK_LIBRARIES(dlhmm-bin
   dlhmm
   plasma
-  #  ${LIBPLASMA_LIBRARIES}
   -L${Boost_LIBRARY_DIRS}
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
   ${Boost_DATE_TIME_LIBRARY})

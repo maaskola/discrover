@@ -34,7 +34,7 @@
 #include "results.hpp"
 #include "align.hpp"
 
-namespace Plasma {
+namespace Seeding {
   struct Plasma {
     options_t options;
     DataCollection collection;

@@ -205,21 +205,21 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
   for(auto &spec: options.motif_specifications)
     switch(spec.kind) {
-      case Specification::Motif::Kind::file:
+      case Specification::Motif::Kind::File:
         // load emission matrix and add it.
         hmm.add_motif(read_emission(spec.specification), expected_seq_size, options.lambda, spec.name, spec.insertions);
         break;
-      case Specification::Motif::Kind::seed:
+      case Specification::Motif::Kind::Seed:
         // use IUPAC regular expression
         hmm.add_motif(spec.specification, options.alpha, expected_seq_size, options.lambda, spec.name, spec.insertions);
         break;
-      case Specification::Motif::Kind::plasma:
-        options.plasma_options.motif_specifications.push_back(spec);
+      case Specification::Motif::Kind::Plasma:
+        options.seeding.motif_specifications.push_back(spec);
         break;
     }
 
   if(std::find_if(begin(options.motif_specifications), end(options.motif_specifications), [](const Specification::Motif &motif) {
-        return(motif.kind == Specification::Motif::Kind::plasma);
+        return(motif.kind == Specification::Motif::Kind::Plasma);
         }) == end(options.motif_specifications)) {
     if(options.verbosity >= Verbosity::info)
       cout << "No automatic seeds are used." << endl;
@@ -228,7 +228,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
     if(options.verbosity >= Verbosity::info)
       cout << "Determining seeds automatically." << endl;
 
-    Plasma::DataCollection collection(training_data);
+    Seeding::DataCollection collection(training_data);
 
     if(options.verbosity >= Verbosity::debug) {
       for(auto &ser: training_data)
@@ -242,22 +242,22 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
     if(options.verbosity >= Verbosity::debug) {
       for(auto &ser: collection)
         for(auto &set: ser) {
-          cerr << "Plasma::Series " << ser.name << " set -> motifs:";
+          cerr << "Seeding::Series " << ser.name << " set -> motifs:";
           for(auto &m: set.motifs)
             cerr << " " << m;
           cerr << endl;
         }
     }
 
-    Plasma::Plasma plasma(collection, options.plasma_options);
-    auto lesser_score = [](const Plasma::Result &a, const Plasma::Result &b) { return(a.score < b.score); };
+    Seeding::Plasma plasma(collection, options.seeding);
+    auto lesser_score = [](const Seeding::Result &a, const Seeding::Result &b) { return(a.score < b.score); };
 
     while(not plasma.options.motif_specifications.empty()) {
       if(options.verbosity >= Verbosity::debug)
         cout << "motif_specs.size() = " << plasma.options.motif_specifications.size() << endl;
       if(hmm.get_nmotifs() > 0)
         plasma.collection.mask(hmm.compute_mask(training_data));
-      Plasma::Results all_plasma_results;
+      Seeding::Results all_plasma_results;
       size_t plasma_motif_idx = 0;
       while(plasma_motif_idx < plasma.options.motif_specifications.size()) {
         auto motif_spec = options.motif_specifications[plasma_motif_idx];
@@ -269,13 +269,13 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             cout << " " << obj;
           cout << "." << endl;
         }
-        Plasma::Results plasma_results = plasma.find(motif_spec, objectives);
+        Seeding::Results plasma_results = plasma.find(motif_spec, objectives);
         if(plasma_results.empty())
           break;
         if(options.verbosity >= Verbosity::debug)
           cout << motif_spec.name << " result.size() = " << plasma_results.size() << endl;
 
-        if(options.seed_choice == SeedChoice::hmm_score) {
+        if(options.model_choice == ModelChoice::HMMScore) {
           for(size_t seed_idx = 0; seed_idx < plasma_results.size(); seed_idx++) {
             string motif = pad(plasma_results[seed_idx].motif, options.left_padding, options.right_padding);
             string name = motif_spec.name;
@@ -313,7 +313,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         cout << "found all" << endl;
       if(all_plasma_results.empty()) {
         if(options.verbosity >= Verbosity::info)
-          cout << "LibPlasma was unable to find any seeds." << endl;
+          cout << "Unable to find any seeds." << endl;
         plasma.options.motif_specifications.clear();
       } else {
         auto best_iter = max_element(all_plasma_results.begin(), all_plasma_results.end(), lesser_score);
@@ -333,10 +333,10 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
         plasma.options.motif_specifications.erase(plasma.options.motif_specifications.begin() + best_idx);
       }
-      if(options.simultaneity == Training::Simultaneity::sequential)
+      if(options.simultaneity == Training::Simultaneity::Sequential)
         train_evaluate_simulate(hmm, all_data, training_data, test_data, options);
     }
-    if(options.simultaneity == Training::Simultaneity::simultaneous and (options.seed_choice != SeedChoice::hmm_score or not plasma.options.motif_specifications.empty() or options.mic > 0))
+    if(options.simultaneity == Training::Simultaneity::Simultaneous and (options.model_choice != ModelChoice::HMMScore or not plasma.options.motif_specifications.empty() or options.mic > 0))
       train_evaluate_simulate(hmm, all_data, training_data, test_data, options);
   }
   return(hmm);

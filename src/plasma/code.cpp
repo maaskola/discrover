@@ -20,7 +20,7 @@
 
 using namespace std;
 
-namespace Plasma {
+namespace Seeding {
 
   char* construct_code() {
     char* table = new char[128];

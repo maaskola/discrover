@@ -7,9 +7,9 @@ namespace Training {
   string simultaneity2string(Simultaneity simultaneity)
   {
     switch(simultaneity) {
-      case Simultaneity::sequential:
+      case Simultaneity::Sequential:
         return("sequential");
-      case Simultaneity::simultaneous:
+      case Simultaneity::Simultaneous:
         return("simultaneous");
       default:
         return("Inexpressible");
@@ -19,9 +19,9 @@ namespace Training {
   string simultaneity2acronym(Simultaneity simultaneity)
   {
     switch(simultaneity) {
-      case Simultaneity::sequential:
+      case Simultaneity::Sequential:
         return("seq");
-      case Simultaneity::simultaneous:
+      case Simultaneity::Simultaneous:
         return("sim");
       default:
         return("Inexpressible");
@@ -33,12 +33,12 @@ namespace Training {
     string token;
     in >> token;
     if(token == "sim")
-      simultaneity = Simultaneity::simultaneous;
+      simultaneity = Simultaneity::Simultaneous;
     else if(token == "seq")
-      simultaneity = Simultaneity::sequential;
+      simultaneity = Simultaneity::Sequential;
     else {
       cout << "Could not parse simultaneity '" << token << "'." << endl;
-      throw("Couldn not parse Simultaneity");
+      throw("Could not parse Simultaneity");
     }
     cout << "Parse simultaneity: " << simultaneity2string(simultaneity) << endl;
     return(in);
@@ -121,13 +121,13 @@ ostream &operator<<(ostream &os, const LineSearchOptions &options)
   return(os);
 }
 
-ostream &operator<<(ostream &os, const SeedChoice &choice)
+ostream &operator<<(ostream &os, const ModelChoice &choice)
 {
   switch(choice) {
-    case SeedChoice::seed_score:
+    case ModelChoice::SeedScore:
       os << "Seed score" << endl;
       break;
-    case SeedChoice::hmm_score:
+    case ModelChoice::HMMScore:
       os << "HMM score" << endl;
       break;
   }
@@ -221,7 +221,7 @@ ostream &operator<<(ostream &os, const hmm_options &options)
     << "long_names = " << options.long_names << endl
     << "class_model = " << options.class_model << endl
     << "revcomp = " << options.revcomp << endl
-    << "seed_choice = " << options.seed_choice << endl
+    << "model_choice = " << options.model_choice << endl
     << "output_compression = " << options.output_compression << endl
     << "left_padding = " << options.left_padding << endl
     << "right_padding = " << options.right_padding << endl

@@ -32,7 +32,7 @@
 
 #include <string>
 
-namespace Plasma {
+namespace Seeding {
   const char* const Symbol = "-acmgrsvtwyhkdbn";
 
   char* construct_code();

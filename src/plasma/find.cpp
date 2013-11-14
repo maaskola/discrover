@@ -3,7 +3,7 @@
  *
  *       Filename:  find.cpp
  *
- *    Description:  
+ *    Description:  Routines to discover IUPAC based motifs
  *
  *        Version:  1.0
  *        Created:  31.05.2012 06:47:48
@@ -11,7 +11,6 @@
  *       Compiler:  gcc
  *
  *         Author:  Jonas Maaskola <jonas@maaskola.de>
- *   Organization:  
  *
  * =====================================================================================
  */
@@ -30,7 +29,7 @@
 
 using namespace std;
 
-namespace Plasma {
+namespace Seeding {
   Plasma::Plasma(const options_t &opt) : options(opt), collection(options.paths, options.revcomp, options.n_seq), index_ready(false), needs_rebuilding(false) {
     if(options.verbosity >= Verbosity::verbose)
       cerr << "Data loaded - constructor 1." << endl;
@@ -187,11 +186,13 @@ namespace Plasma {
       if(options.verbosity >= Verbosity::debug)
         cout << "motif = " << best_motif << " score = " << score << " " << iter.second << endl;
       }
-      candidates.insert({score, iter.first});
-      n_candidates++;
-      if(n_candidates > options.max_candidates) {
-        candidates.erase(begin(candidates));
-        n_candidates--;
+      if(candidates.empty() or score > candidates.rbegin()->first or n_candidates < options.max_candidates) {
+        candidates.insert({score, iter.first});
+        n_candidates++;
+        if(n_candidates > options.max_candidates) {
+          candidates.erase(--end(candidates));
+          n_candidates--;
+        }
       }
     }
 
@@ -302,18 +303,20 @@ namespace Plasma {
             string generalization = work[i]->first;
             if(this->options.verbosity >= Verbosity::debug)
               cout << "ax " << generalization << " " << generalization_score << endl;
-            candidates.insert({generalization_score, generalization});
-            n_candidates++;
-            if(n_candidates > options.max_candidates) {
-              candidates.erase(begin(candidates));
-              n_candidates--;
-            }
-            if(generalization_score > max_score) {
-              if(this->options.verbosity >= Verbosity::debug)
-                cout << "New maximum!" << endl;
-              max_score = generalization_score;
-              best_motif = work[i]->first;
-              best_motif_changed = true;
+            if(candidates.empty() or generalization_score > candidates.rbegin()->first or n_candidates < options.max_candidates) {
+              candidates.insert({generalization_score, generalization});
+              n_candidates++;
+              if(n_candidates > options.max_candidates) {
+                candidates.erase(--end(candidates));
+                n_candidates--;
+              }
+              if(generalization_score > max_score) {
+                if(this->options.verbosity >= Verbosity::debug)
+                  cout << "New maximum!" << endl;
+                max_score = generalization_score;
+                best_motif = work[i]->first;
+                best_motif_changed = true;
+              }
             }
           }
         }
@@ -449,7 +452,7 @@ namespace Plasma {
       if(objective.motif_name == motif_spec.name) {
 
         Results results;
-        if(motif_spec.kind == Specification::Motif::Kind::seed) {
+        if(motif_spec.kind == Specification::Motif::Kind::Seed) {
           Result result(objective);
           result.motif = motif_spec.specification;
           result.counts = count_motif(collection, motif_spec.specification, options);
@@ -496,7 +499,7 @@ namespace Plasma {
   }
 
   void Plasma::apply_mask(const string &motif) {
-    ::Plasma::apply_mask(collection, motif, options);
+    ::Seeding::apply_mask(collection, motif, options);
     needs_rebuilding = true;
   }
 

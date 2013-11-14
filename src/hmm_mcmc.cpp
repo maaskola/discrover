@@ -88,7 +88,7 @@ HMM HMM::random_variant(const hmm_options &options) const
   int n_ins = std::max<int>(0,std::min<int>(options.sampling.n_indels, options.sampling.max_size - n_cols));
   int n_del = std::max<int>(0,std::min<int>(options.sampling.n_indels, int(n_cols) - std::max<int>(0,options.sampling.min_size)));
   size_t operation = rand() % 6;
-  while((operation >= 5 and options.bg_learning == Training::Method::none) or
+  while((operation >= 5 and options.bg_learning == Training::Method::None) or
       (operation < 5 and options.objectives.empty()) or
       (operation == 2 and n_ins <= 0) or (operation == 3 and n_del <= 0) or (operation == 4 and options.sampling.n_shift == 0))
     operation = rand() % 6;

@@ -55,7 +55,7 @@ INCLUDE(CPack)
 SET(DLHMM_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 
 
-# Check for C++11 features
+# Check for C++11 features of the compiler
 #
 INCLUDE(CheckCXX11Features)
 
@@ -91,10 +91,6 @@ ENDIF()
 
 FIND_PACKAGE(LibGooglePerfTools)
 FIND_PACKAGE(OpenMP)
-# FIND_PACKAGE(Plasma REQUIRED)
-# IF(LIBPLASMA_FOUND)
-#   INCLUDE_DIRECTORIES(${LIBPLASMA_INCLUDE_DIRS})
-# ENDIF()
 
 FIND_PACKAGE(LibR)
 IF(LIBR_FOUND)
@@ -116,6 +112,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -std=c++11")
 INCLUDE(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 git_describe(GIT_DESCRIPTION)
+git_branch(GIT_BRANCH)
 
 ADD_CUSTOM_TARGET(ctags ALL
     COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q src/

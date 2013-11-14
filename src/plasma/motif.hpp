@@ -37,7 +37,7 @@
 #include "stats.hpp"
 #include "../verbosity.hpp"
 
-namespace Plasma {
+namespace Seeding {
   /** A class for IUPAC regular expression type motifs of up to length 16.
    * Uses a binary representation of size 64 bit with 4 bits per position. */
 /*  struct Motif {

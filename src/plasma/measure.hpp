@@ -92,12 +92,5 @@ namespace Measures {
   Discrete::Measure corresponding_measure(Continuous::Measure);
 }
 
-/*namespace Plasma {
-  // typedef Measures::Discrete::Measure Measure;
-  namespace HMM {
-    typedef Measures::Continuous::Measure Measure;
-  }
-}*/
-
 #endif   /* ----- #ifndef MEASURE_HPP  ----- */
 
