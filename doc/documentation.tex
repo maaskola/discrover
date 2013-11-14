@@ -74,6 +74,12 @@ The following algorithms are provided:
 An overview of the available command line options is available with the switch \verb|-h| or its long variant \verb|--help|.
 See \cref{appendix:dlhmm-cli-help} for a listing of the output of this command with \dlhmm{} in version \version{}.
 
+Note that by default not all options are shown.
+To display some infrequently used options please specify \verb|-hv| or \verb|--help --verbose|.
+
+In addition, some advanced options are only shown when the option \verb|-V| or \verb|--noisy| is used.
+Thus, to display all options please specify \verb|-hV| or their long variants \verb|--help --noisy|.
+
 \subsubsection{Determining the version}
 The command line switch \verb|--version| displays the version of \dlhmm{}.
 If additionally the switch \verb|-v| or its long variant \verb|--verbose| is given, then additionally the full SHA1-string of the version is displayed.
