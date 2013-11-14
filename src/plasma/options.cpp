@@ -17,6 +17,7 @@
  */
 
 #include <iostream>
+#include <boost/algorithm/string.hpp>
 #include "options.hpp"
 
 using namespace std;
@@ -24,10 +25,13 @@ using namespace std;
 
 namespace Seeding {
 
-  options_t::options_t() :
+  Options::Options() :
     paths(),
     motif_specifications({}),
     objectives(),
+    algorithm(Algorithm::Plasma),
+    plasma(Plasma()),
+    fire(FIRE()),
     n_threads(1),
     revcomp(false),
     strict(false),
@@ -37,15 +41,59 @@ namespace Seeding {
     measure_runtime(false),
     n_motifs(1),
     occurrence_filter(OccurrenceFilter::RemoveSequences),
-    max_candidates(100),
-    degeneracies(),
-    rel_degeneracy(1),
-    per_degeneracy(false),
     keep_all(false),
     verbosity(Verbosity::info),
     dump_viterbi(false),
-    no_enrichment_filter(false)
+    no_enrichment_filter(false),
+    candidate_selection(CandidateSelection::TopN)
     { };
+
+  Options::Plasma::Plasma() :
+    max_candidates(100),
+    degeneracies(),
+    rel_degeneracy(1),
+    per_degeneracy(false)
+  { };
+
+  Options::FIRE::FIRE() :
+    nucleotides_5prime(1),
+    nucleotides_3prime(1),
+    nr_rand_tests(10),
+    redundancy_threshold(5.0)
+  { };
+
+  Options::MCMC::MCMC() :
+    max_iter(1000),
+    temperature(1e-3),
+    n_parallel(6)
+  { };
+
+
+  std::istream &operator>>(std::istream &in, CandidateSelection &cand_sel) {
+    string token;
+    in >> token;
+    boost::algorithm::to_lower(token);
+    if(token == "topn")
+      cand_sel = CandidateSelection::TopN;
+    else if(token == "rand" or token == "randtest" or token == "randomizationtest")
+      cand_sel = CandidateSelection::RandomizationTest;
+    else {
+      cout << "Couldn't parse candidate selection type '" << token << "'." << endl;
+      exit(-1);
+    }
+    return(in);
+  }
+  std::ostream &operator<<(std::ostream &os, const CandidateSelection &cand_sel) {
+    switch(cand_sel) {
+      case CandidateSelection::TopN:
+        os << "TopN";
+        break;
+      case CandidateSelection::RandomizationTest:
+        os << "RandomizationTest";
+        break;
+    }
+    return(os);
+  }
 
   istream &operator>>(istream &in, OccurrenceFilter &filter) {
     string token;
@@ -70,6 +118,62 @@ namespace Seeding {
         os << "mask";
         break;
     }
+    return(os);
+  }
+
+  Algorithm parse_algorithm(const string &token_) {
+    string token(token_);
+    boost::algorithm::to_lower(token);
+    if(token == "plasma")
+      return(Algorithm::Plasma);
+    else if(token == "fire")
+      return(Algorithm::FIRE);
+    else if(token == "mcmc")
+      return(Algorithm::MCMC);
+    else if(token == "all")
+      return(Algorithm::Plasma | Algorithm::FIRE | Algorithm::MCMC);
+    else {
+      cout << "Seeding algorithm '" << token_ << "' unknown." << endl
+        << "Please use one of 'plasma', 'fire', 'mcmc', or 'all'." << endl
+        << "It is also possible to use multiple algorithms by separating them by comma." << endl;
+      exit(-1);
+    }
+  }
+
+  istream &operator>>(istream &in, Algorithm &algorithm) {
+    string algorithms;
+    in >> algorithms;
+    bool first = true;
+    size_t pos;
+    do {
+      pos = algorithms.find(",");
+      Algorithm algo = parse_algorithm(algorithms.substr(0, pos));
+      if(first) {
+        first = false;
+        algorithm = algo;
+      } else
+        algorithm = algorithm | algo;
+      algorithms = algorithms.substr(pos+1);
+    } while(pos != string::npos);
+    Algorithm algo = parse_algorithm(algorithms);
+    if(first)
+      algorithm = algo;
+    else
+      algorithm = algorithm | algo;
+    return(in);
+  }
+  ostream &operator<<(ostream &os, const Algorithm &algorithm) {
+    bool first = true;
+    if((algorithm & Algorithm::Plasma) == Algorithm::Plasma) {
+      os << "plasma";
+      first = false;
+    }
+    if((algorithm & Algorithm::FIRE) == Algorithm::FIRE) {
+      os << (first ? "" : ",") << "fire";
+      first = false;
+    }
+    if((algorithm & Algorithm::MCMC) == Algorithm::MCMC)
+      os << (first ? "" : ",") << "mcmc";
     return(os);
   }
 

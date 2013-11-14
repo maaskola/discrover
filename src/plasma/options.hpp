@@ -44,20 +44,72 @@ namespace Seeding {
     RemoveSequences,
     MaskOccurrences
   };
+
   std::istream &operator>>(std::istream &in, OccurrenceFilter &filter);
   std::ostream &operator<<(std::ostream &os, const OccurrenceFilter &filter);
+
+  enum class CandidateSelection {
+    TopN,
+    RandomizationTest
+  };
+
+  std::istream &operator>>(std::istream &in, CandidateSelection &cand_sel);
+  std::ostream &operator<<(std::ostream &os, const CandidateSelection &cand_sel);
+
+  enum class Algorithm {
+    Plasma = (1u << 1),
+    FIRE = (1u << 2),
+    MCMC = (1u << 3)
+  };
+
+  inline Algorithm operator|(Algorithm a, Algorithm b)
+  {return static_cast<Algorithm>(static_cast<int>(a) | static_cast<int>(b));}
+  inline Algorithm operator&(Algorithm a, Algorithm b)
+  {return static_cast<Algorithm>(static_cast<int>(a) & static_cast<int>(b));}
+
+  std::istream &operator>>(std::istream &in, Algorithm &algorithm);
+  std::ostream &operator<<(std::ostream &os, const Algorithm &algorithm);
 
   typedef Specification::Objective<Measures::Discrete::Measure> Objective;
   typedef std::vector<Objective> Objectives;
 
   std::ostream &operator<<(std::ostream &out, const Objectives &objectives);
 
-  struct options_t {
-    options_t();
+  struct Options {
+    struct FIRE {
+      FIRE();
+      size_t nucleotides_5prime;
+      size_t nucleotides_3prime;
+      size_t nr_rand_tests;
+      double redundancy_threshold;
+    };
+    struct Plasma {
+      Plasma();
+      size_t max_candidates;
+      std::vector<size_t> degeneracies;
+      double rel_degeneracy;
+      bool per_degeneracy;
+    };
+    struct MCMC {
+      MCMC();
+      size_t max_iter;
+      double temperature;
+      size_t n_parallel;
+    };
+
+
+    Options();
 
     Specification::DataSets paths;
     Specification::Motifs motif_specifications;
     Objectives objectives;
+
+    Algorithm algorithm;
+
+    Plasma plasma;
+    FIRE fire;
+    MCMC mcmc;
+
     size_t n_threads;
     bool revcomp;
     bool strict;
@@ -67,14 +119,12 @@ namespace Seeding {
     bool measure_runtime;
     size_t n_motifs;
     OccurrenceFilter occurrence_filter;
-    size_t max_candidates;
-    std::vector<size_t> degeneracies;
-    double rel_degeneracy;
-    bool per_degeneracy;
     bool keep_all;
     Verbosity verbosity;
     bool dump_viterbi;
     bool no_enrichment_filter;
+
+    CandidateSelection candidate_selection;
   };
 }
 
