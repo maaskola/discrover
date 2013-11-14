@@ -38,8 +38,8 @@
 #include "../plasma/plasma_cli.hpp"
 #include "../GitSHA1.hpp"
 #include "analysis.hpp"
-#include "aux.hpp"
-#include "terminal.hpp"
+#include "../aux.hpp"
+#include "../terminal.hpp"
 
 using namespace std;
 

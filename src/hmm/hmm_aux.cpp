@@ -29,7 +29,7 @@
 
 #include <iomanip>
 #include <set>
-#include "aux.hpp"
+#include "../aux.hpp"
 #include "hmm.hpp"
 
 using namespace std;

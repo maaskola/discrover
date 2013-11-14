@@ -31,7 +31,7 @@
 #ifndef POLYFIT_HPP
 #define POLYFIT_HPP
 
-#include "matrix.hpp"
+#include "../matrix.hpp"
 #include "../verbosity.hpp"
 
 /** Returns a vector of coefficients of a polynomial of degree n that is fit to

@@ -28,7 +28,7 @@
  */
 
 #include "../timer.hpp"
-#include "aux.hpp"
+#include "../aux.hpp"
 #include "hmm.hpp"
 
 #define DO_PARALLEL 1

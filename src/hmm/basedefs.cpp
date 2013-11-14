@@ -6,7 +6,7 @@
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
 #include "../plasma/fasta.hpp"
-#include "aux.hpp"
+#include "../aux.hpp"
 #include "basedefs.hpp"
 
 using namespace std;

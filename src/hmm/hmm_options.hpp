@@ -34,7 +34,7 @@
 #include <vector>
 #include "../plasma/options.hpp"
 #include "basedefs.hpp"
-#include "executioninformation.hpp"
+#include "../executioninformation.hpp"
 #include "../plasma/specification.hpp"
 
 enum class Compression {

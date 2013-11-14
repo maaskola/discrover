@@ -9,7 +9,7 @@
 #include <boost/iostreams/filter/bzip2.hpp>
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/distributions/students_t.hpp>
-#include "aux.hpp"
+#include "../aux.hpp"
 #include "report.hpp"
 #include "../timer.hpp"
 #include "../plasma/find.hpp"
