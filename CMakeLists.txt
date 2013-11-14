@@ -106,6 +106,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -std=c++11")
 INCLUDE(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 git_describe(GIT_DESCRIPTION)
+git_branch(GIT_BRANCH)
 
 ADD_CUSTOM_TARGET(ctags ALL
     COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q src/
