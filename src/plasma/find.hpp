@@ -31,6 +31,7 @@
 #define FIND_HPP
 
 #include "options.hpp"
+#include "plasma_stats.hpp"
 #include "results.hpp"
 #include "align.hpp"
 

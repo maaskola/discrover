@@ -33,7 +33,6 @@
 #include <cstdint>
 #include <list>
 #include <string>
-#include "data.hpp"
 #include "../verbosity.hpp"
 
 namespace Seeding {

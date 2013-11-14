@@ -19,6 +19,7 @@
 #include <iostream>
 #include "../stats_config.hpp"
 #include "correction.hpp"
+#include "motif.hpp"
 #include "score.hpp"
 
 const bool excessive_debug = false;

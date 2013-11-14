@@ -31,7 +31,7 @@
 #define MCMCHMM_HPP
 
 #include "../plasma/score.hpp"
-// #include "../plasma/motif.hpp"
+#include "../plasma/motif.hpp"
 #include "montecarlo.hpp"
 
 namespace MCMC {
@@ -41,7 +41,6 @@ namespace MCMC {
       private:
         Seeding::Options options;
         size_t max_degeneracy;
-//        size_t min_size, max_size;
         void replace_similar(char &c) const {
           if(options.verbosity >= Verbosity::debug)
             std::cout << "Replacing nucleotide " << static_cast<char>(c) << std::endl;
@@ -94,16 +93,7 @@ namespace MCMC {
           }
         }
       public:
-        Generator(const Seeding::Options &opt, size_t w, size_t max_degen) : // , size_t min_size_=-1, size_t max_size_=-1) :
-          options(opt), max_degeneracy(max_degen) // , min_size(min_size_), max_size(max_size_)
-      {
-        /*
-        if(min_size == -1)
-          min_size = w;
-        if(max_size == -1)
-          max_size = w;
-  */
-      };
+        Generator(const Seeding::Options &opt, size_t w, size_t max_degen) : options(opt), max_degeneracy(max_degen) { };
         Motif generate(const Motif &motif_) const {
           const size_t R = 3;
           Motif motif(motif_);

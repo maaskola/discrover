@@ -30,13 +30,10 @@
 #ifndef SCORE_HPP
 #define SCORE_HPP
 
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/vector.hpp>
 #include "plasma_stats.hpp"
-#include "motif.hpp"
 #include "options.hpp"
 #include "results.hpp"
+#include "data.hpp"
 
 double compute_mutual_information_variance(const matrix_t &m_, double pseudo_count, bool normalize);
 double compute_mutual_information(const matrix_t &counts, double pseudo_count=0, bool normalize=false, bool do_correction=false);

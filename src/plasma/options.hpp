@@ -30,14 +30,11 @@
 #ifndef OPTIONS_HPP
 #define OPTIONS_HPP
 
-
 #include <vector>
 #include <string>
 #include "measure.hpp"
-#include "plasma_stats.hpp"
 #include "specification.hpp"
 #include "../verbosity.hpp"
-
 
 namespace Seeding {
   enum class OccurrenceFilter {
