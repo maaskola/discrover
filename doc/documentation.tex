@@ -1,0 +1,44 @@
+%        File: documentation.tex
+%     Created: Mo Nov 11 02:00  2013 C
+% Last Change: Mo Nov 11 02:00  2013 C
+%
+\documentclass[a4paper]{article}
+
+\usepackage{hyperref}
+
+\newcommand{\dlhmm}[0]{\texttt{dlhmm}}
+\title{Documentation for \dlhmm{} v@GIT_DESCRIPTION@}
+\author{Jonas Maaskola}
+\date{\today}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  This is the documentation for \dlhmm{} version @GIT_DESCRIPTION@.
+  Please refer to the publication \cite{Maaskola2013} for a full description of the method.
+
+  This document briefly describes the purpose of this motif finding package, explains important concepts, and details usage of the programs that are part of this package.
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction}
+
+\section{Concepts}
+\subsection{Objective functions}
+\subsection{Seeding}
+\subsection{Binding site HMM optimization}
+
+\section{Usage}
+
+\nocite{*}
+\addcontentsline{toc}{section}{References}
+\bibliographystyle{plain}
+\bibliography{documentation}
+* corresponding author
+
+
+
+\end{document}
+
+
