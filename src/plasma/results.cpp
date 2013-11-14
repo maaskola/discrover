@@ -18,7 +18,7 @@
 
 #include "results.hpp"
 
-namespace Plasma {
+namespace Seeding {
   Result::Result(const Objective &objective) : Objective(objective), motif(), score(), log_p(), counts() { };
 }
 

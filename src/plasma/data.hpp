@@ -221,7 +221,7 @@ namespace Data {
 #include <unordered_set>
 #include <unordered_map>
 
-namespace Plasma {
+namespace Seeding {
   typedef std::unordered_map<std::string, std::vector<size_t>> mask_sub_t;
   typedef std::unordered_map<std::string, mask_sub_t> mask_t;
 

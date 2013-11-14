@@ -30,7 +30,7 @@
 #ifndef  PLASMA_HPP
 #define  PLASMA_HPP
 
-namespace Plasma {
+namespace Seeding {
 };
 
 #endif   /* ----- #ifndef PLASMA_HPP ----- */

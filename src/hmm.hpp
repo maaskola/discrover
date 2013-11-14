@@ -127,9 +127,9 @@ ResultsCounts evaluate_hmm_single_data_set(HMM &hmm, const Data::Set &data, std:
 
 struct Group {
   enum class Kind {
-    special,
-    background,
-    motif
+    Special,
+    Background,
+    Motif
   };
   Kind kind;
   std::string name;

@@ -22,7 +22,7 @@
 using namespace std;
 
 
-namespace Plasma {
+namespace Seeding {
 
   options_t::options_t() :
     paths(),
@@ -36,7 +36,7 @@ namespace Plasma {
     word_stats(false),
     measure_runtime(false),
     n_motifs(1),
-    occurrence_filter(OccurrenceFilter::remove_seq),
+    occurrence_filter(OccurrenceFilter::RemoveSequences),
     max_candidates(100),
     degeneracies(),
     rel_degeneracy(1),
@@ -51,9 +51,9 @@ namespace Plasma {
     string token;
     in >> token;
     if(token == "remove")
-      filter = OccurrenceFilter::remove_seq;
+      filter = OccurrenceFilter::RemoveSequences;
     else if(token == "mask")
-      filter = OccurrenceFilter::mask_occurrence;
+      filter = OccurrenceFilter::MaskOccurrences;
     else {
       cout << "Couldn't parse occurrence filter type '" << token << "'." << endl;
       exit(-1);
@@ -63,10 +63,10 @@ namespace Plasma {
 
   ostream &operator<<(ostream &os, const OccurrenceFilter &filter) {
     switch(filter) {
-      case OccurrenceFilter::remove_seq:
+      case OccurrenceFilter::RemoveSequences:
         os << "remove";
         break;
-      case OccurrenceFilter::mask_occurrence:
+      case OccurrenceFilter::MaskOccurrences:
         os << "mask";
         break;
     }

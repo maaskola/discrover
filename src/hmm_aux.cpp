@@ -237,11 +237,11 @@ void HMM::deserialize(istream &is)
         else
           line = line.substr(start+1);
       }
-      Group::Kind kind = Group::Kind::motif;
+      Group::Kind kind = Group::Kind::Motif;
       if(name == "Special")
-        kind = Group::Kind::special;
+        kind = Group::Kind::Special;
       else if(name == "Background")
-        kind = Group::Kind::background;
+        kind = Group::Kind::Background;
       Group m = {kind, name, states};
       groups.push_back(m);
       safeGetline(is, line);
@@ -652,7 +652,7 @@ Training::Tasks HMM::define_training_tasks(const hmm_options &options) const
   Training::Tasks tasks;
 
   // First the (mostly) discriminative tasks
-  bool do_transition = options.bg_learning == Training::Method::gradient and options.objectives.size() == 1;
+  bool do_transition = options.bg_learning == Training::Method::Gradient and options.objectives.size() == 1;
   for(auto &objective: options.objectives) {
     if(not Measures::is_discriminative(objective.measure))
       continue;
@@ -707,7 +707,7 @@ Training::Tasks HMM::define_training_tasks(const hmm_options &options) const
       series_names.insert(expr.series);
 
   // And then the generative part
-  if(options.bg_learning != Training::Method::none) {
+  if(options.bg_learning != Training::Method::None) {
     Training::Task task;
     task.motif_name = "Generative parameters";
     task.measure = Measure::Likelihood;
@@ -775,7 +775,7 @@ size_t HMM::count_motif(const HMM::StatePath &path, size_t motif) const
 
 bool HMM::is_motif_group(size_t group_idx) const
 {
-  return(groups[group_idx].kind == Group::Kind::motif);
+  return(groups[group_idx].kind == Group::Kind::Motif);
 }
 
 bool HMM::is_motif_state(size_t state_idx) const

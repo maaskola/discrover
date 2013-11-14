@@ -136,11 +136,11 @@ HMM::HMM(size_t bg_order, Verbosity verbosity_, double pseudo_count_) :
   if(verbosity >= Verbosity::debug)
     std::cout << "Called HMM constructor 3." << std::endl
       << "bg_order = " << bg_order << std::endl;
-  Group special({Group::Kind::special, "Special", {start_state}});
+  Group special({Group::Kind::Special, "Special", {start_state}});
   groups.push_back(special);
   group_ids.push_back(0);
 
-  Group background({Group::Kind::background, "Background", {bg_state}});
+  Group background({Group::Kind::Background, "Background", {bg_state}});
   groups.push_back(background);
   group_ids.push_back(1);
   order[bg_state] = bg_order; // for the start and end state
@@ -171,7 +171,7 @@ size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda, cons
 
   size_t first = n_states;
   size_t last = first + n - 1;
-  Group motif = {Group::Kind::motif, name, {}};
+  Group motif = {Group::Kind::Motif, name, {}};
   for(size_t i = first ; i <= last; i++) {
     motif.states.push_back(i);
     group_ids.push_back(motif_idx);
@@ -351,7 +351,7 @@ size_t HMM::add_motif(const std::string &seq, double alpha, double exp_seq_len, 
 
 void HMM::add_motifs(const HMM &hmm) {
   for(auto &group: hmm.groups)
-    if(group.kind == Group::Kind::motif) {
+    if(group.kind == Group::Kind::Motif) {
       size_t n_motif_states = group.states.size();
       matrix_t new_transition = zero_matrix(n_states + n_motif_states, n_states + n_motif_states);
       matrix_t new_emission = zero_matrix(n_states + n_motif_states, n_emissions);

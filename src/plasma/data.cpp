@@ -24,7 +24,7 @@
 
 using namespace std;
 
-namespace Plasma {
+namespace Seeding {
   DataSet::DataSet() :
   Data::Basic::Set<Fasta::Entry>() {
   }
@@ -32,7 +32,7 @@ namespace Plasma {
   DataSet::DataSet(const Specification::DataSet &s, bool revcomp, size_t n_seq) :
     Data::Basic::Set<Fasta::Entry>(s, revcomp, n_seq) { };
 
-  RemovalReport DataSet::mask(const Plasma::mask_sub_t &mask, char mask_symbol) {
+  RemovalReport DataSet::mask(const Seeding::mask_sub_t &mask, char mask_symbol) {
     RemovalReport report;
     Verbosity verbosity = Verbosity::info;
     for(auto &seq: sequences) {
