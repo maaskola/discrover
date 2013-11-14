@@ -23,7 +23,7 @@
 
 using namespace std;
 
-namespace Plasma {
+namespace Seeding {
 
   hash_map_t get_word_counts(const DataCollection &collection, size_t length, const options_t &options) {
     Timer t;

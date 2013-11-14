@@ -53,7 +53,7 @@ typedef uint32_t seq_index_t;
 typedef uint8_t set_index_t;
 
 std::string read_fasta_with_boundaries(const std::vector<std::string> &paths, std::vector<seq_index_t> &pos2seq, std::vector<set_index_t> &seq2set, size_t n_seq=0);
-std::string collapse_data_collection(const Plasma::DataCollection &collection, std::vector<seq_index_t> &pos2seq, std::vector<set_index_t> &seq2set, std::vector<set_index_t> &set2series);
+std::string collapse_data_collection(const Seeding::DataCollection &collection, std::vector<seq_index_t> &pos2seq, std::vector<set_index_t> &seq2set, std::vector<set_index_t> &set2series);
 
 template <class data_t, class idx_t=size_t, class lcp_t=size_t>
 void list_occurrences(const data_t &x, const data_t &q) {
@@ -132,7 +132,7 @@ class NucleotideIndex {
       seq2set(),
       set2series(),
       index("", verbosity) { };
-    NucleotideIndex(const Plasma::DataCollection &collection, Verbosity verbosity) :
+    NucleotideIndex(const Seeding::DataCollection &collection, Verbosity verbosity) :
       paths(),
       pos2seq(),
       seq2set(),
@@ -142,7 +142,7 @@ class NucleotideIndex {
           for(auto &set: series)
             paths.push_back(set.path);
       };
-//    NucleotideIndex(const Plasma::DataSeries &data_series, Verbosity verbosity) :
+//    NucleotideIndex(const Seeding::DataSeries &data_series, Verbosity verbosity) :
 //      paths(),
 //      pos2seq(),
 //      seq2set(),

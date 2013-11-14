@@ -568,10 +568,10 @@ bool HMM::perform_training_iteration(const Data::Collection &data,
       if(options.termination.past <= ts.scores[task_idx].size())
         score = *(ts.scores[task_idx].rbegin() + options.termination.past - 1);
 
-      if(Training::measure2method(task.measure) == Training::Method::gradient)
+      if(Training::measure2method(task.measure) == Training::Method::Gradient)
         done = perform_training_iteration_gradient(data, task, options, ts.center, score) and done;
 
-      if(Training::measure2method(task.measure) == Training::Method::reestimation)
+      if(Training::measure2method(task.measure) == Training::Method::Reestimation)
         done = perform_training_iteration_reestimation(data, task, options, score) and done;
 
       if((task.measure == Measure::ClassificationPosterior or task.measure == Measure::ClassificationLikelihood)
@@ -604,7 +604,7 @@ bool HMM::reestimate_class_parameters(const Data::Collection &collection,
 
   double l = 0;
   for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
-    if(groups[group_idx].kind == Group::Kind::motif) {
+    if(groups[group_idx].kind == Group::Kind::Motif) {
       const double marginal_motif_prior = compute_marginal_motif_prior(group_idx);
       for(auto &series: collection)
         for(auto &data: series) {

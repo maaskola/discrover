@@ -33,7 +33,7 @@ string form_switch(const string &prefix, const string& s, bool add_short=true) {
     return(prefix + s);
 }
 
-boost::program_options::options_description gen_iupac_options_description(Plasma::options_t &options,
+boost::program_options::options_description gen_iupac_options_description(Seeding::options_t &options,
     const string &prefix,
     const string &name,
     size_t cols,
@@ -48,7 +48,7 @@ boost::program_options::options_description gen_iupac_options_description(Plasma
        "1. \tUsing the IUPAC code for nucleic acids.\n"
        "2. \tA length specification. Motifs of the indicated lengths are sought. A length specification is a comma separated list of length ranges, where a length range is either a single length, or an expression of the form 'x-y' to indicate lengths x up to y.\n"
        "Regardless of the way the motif is specified, it may be given a name. The syntax is [NAME:]MOTIFSPEC.")
-      ("score,s", po::value<Plasma::Objectives>(&options.objectives)->default_value(Plasma::Objectives(1,Plasma::Objective("mi")), "mi"), "Which objective function to evaluate. TODO: documentation needs updating to reflect more advanced options for this argument. Available are 'signal_freq', 'control_freq', 'mi', 'mcc', 'delta_freq', 'gtest', 'gtest_logp', 'gtest_logp_raw'.")
+      ("score,s", po::value<Seeding::Objectives>(&options.objectives)->default_value(Seeding::Objectives(1,Seeding::Objective("mi")), "mi"), "Which objective function to evaluate. TODO: documentation needs updating to reflect more advanced options for this argument. Available are 'signal_freq', 'control_freq', 'mi', 'mcc', 'delta_freq', 'gtest', 'gtest_logp', 'gtest_logp_raw'.")
       ("revcomp,r", po::bool_switch(&options.revcomp), "Also consider the reverse complements of the sequences.")
       ("nseq", po::value<size_t>(&options.n_seq)->default_value(0), "Use only the first N sequences of each file. Use 0 to indicate all sequences.")
       ;
@@ -62,13 +62,13 @@ boost::program_options::options_description gen_iupac_options_description(Plasma
 
   if(not include_all)
     desc.add_options()
-      (form_switch(prefix, "seedscore", allow_short).c_str(), po::value<Plasma::Objectives>(&options.objectives)->default_value(Plasma::Objectives(1,Plasma::Objective("mi")), "mi"), "Which objective function to evaluate. TODO: documentation needs updating to reflect more advanced options for this argument. Available are 'signal_freq', 'control_freq', 'mi', 'mcc', 'delta_freq', 'gtest', 'gtest_logp', 'gtest_logp_raw'.")
+      (form_switch(prefix, "seedscore", allow_short).c_str(), po::value<Seeding::Objectives>(&options.objectives)->default_value(Seeding::Objectives(1,Seeding::Objective("mi")), "mi"), "Which objective function to evaluate. TODO: documentation needs updating to reflect more advanced options for this argument. Available are 'signal_freq', 'control_freq', 'mi', 'mcc', 'delta_freq', 'gtest', 'gtest_logp', 'gtest_logp_raw'.")
       ;
 
   desc.add_options()
     (form_switch(prefix, "nmotif", allow_short).c_str(), po::value<size_t>(&options.n_motifs)->default_value(1), "How many motifs to determine.")
     (form_switch(prefix, "any", allow_short).c_str(), po::bool_switch(&options.no_enrichment_filter), "Whether to allow motifs enriched in the opposite direction.")
-    (form_switch(prefix, "filter", false).c_str(), po::value<Plasma::OccurrenceFilter>(&options.occurrence_filter)->default_value(Plasma::OccurrenceFilter::mask_occurrence, "mask"), "How to filter motif occurrences upon identifying a motif. Available are 'remove' and 'mask'.")
+    (form_switch(prefix, "filter", false).c_str(), po::value<Seeding::OccurrenceFilter>(&options.occurrence_filter)->default_value(Seeding::OccurrenceFilter::MaskOccurrences, "mask"), "How to filter motif occurrences upon identifying a motif. Available are 'remove' and 'mask'.")
     (form_switch(prefix, "cand", allow_short).c_str(), po::value<size_t>(&options.max_candidates)->default_value(100), "How many candidates to maintain.")
     (form_switch(prefix, "deg", allow_short).c_str(), po::value<vector<size_t>>(&options.degeneracies), "Which degrees of degeneracy to consider. May be given multiple times. A sequence of length N has a maximal degeneracy of 3*N. Unlimited if unspecified.")
     (form_switch(prefix, "rdeg", false).c_str(), po::value<double>(&options.rel_degeneracy)->default_value(1), "Limit relative degeneracy. 1 corresponds to full degeneracy, and 0 to no degeneracy. For a sequence of length N the degeneracy is maximally 3*N. Thus for a motif of length 8 a maximal relative degeneracy of 0.2 allows (rounded down) 4 degrees of degeneracy.")
