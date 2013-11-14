@@ -26,6 +26,7 @@
 \tableofcontents
 
 \section{Introduction}
+This package provides programs for discriminative motif discovery of protein binding sites in nucleic acid sequences.
 
 \section{Concepts}
 \subsection{Objective functions}
@@ -39,18 +40,26 @@ The command line options that drive both programs are intentionally similar.
 
 Below, in \cref{subsection:running-plasma}, we will first describe how to run \plasma{} independently, before \cref{subsection:running-dlhmm} describes how to use \dlhmm{}.
 
-\subsection{Seed discovery}
+\subsection{Seed discovery with \plasma{}}
 \label{subsection:running-plasma}
-\subsubsection{Command line help}
-An overview of the available command line options is available with the switch \lstinline|-h| or its long variant \lstinline|--help|.
+\subsubsection{Getting help on command line options}
+An overview of the available command line options is available with the switch \verb|-h| or its long variant \verb|--help|.
 See \cref{appendix:plasma-cli-help} for a listing of the output of this command with \plasma{} in version \version{}.
+\subsubsection{Determining the version}
+The command line switch \verb|--version| displays the version of \plasma{}.
+If additionally the switch \verb|-v| or its long variant \verb|--verbose| is given, then additionally the full SHA1-string of the version is displayed.
 
 
-\subsection{Binding site HMM optimization}
+\subsection{Binding site HMM optimization with \dlhmm{}}
 \label{subsection:running-dlhmm}
-\subsubsection{Command line help}
-An overview of the available command line options is available with the switch \lstinline|-h| or its long variant \lstinline|--help|.
+\subsubsection{Getting help on command line options}
+An overview of the available command line options is available with the switch \verb|-h| or its long variant \verb|--help|.
 See \cref{appendix:dlhmm-cli-help} for a listing of the output of this command with \dlhmm{} in version \version{}.
+
+\subsubsection{Determining the version}
+The command line switch \verb|--version| displays the version of \dlhmm{}.
+If additionally the switch \verb|-v| or its long variant \verb|--verbose| is given, then additionally the full SHA1-string of the version is displayed.
+
 
 \section{Appendix}
 \subsection{Command line help of \plasma{}}
