@@ -151,7 +151,7 @@ int main(int argc, const char** argv) {
 
   if(vm.count("version") and not vm.count("help"))
   {
-    cout << program_name << " " << GIT_DESCRIPTION << endl;
+    cout << program_name << " " << GIT_DESCRIPTION << " [" << GIT_BRANCH << " branch]" << endl;
     if(options.verbosity >= Verbosity::verbose)
       cout << GIT_SHA1 << endl;
     return(EXIT_SUCCESS);
