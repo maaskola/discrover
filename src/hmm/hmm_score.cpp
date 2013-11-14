@@ -27,7 +27,7 @@
  * =====================================================================================
  */
 
-#include "aux.hpp"
+#include "../aux.hpp"
 #include "hmm.hpp"
 #include "subhmm.hpp"
 

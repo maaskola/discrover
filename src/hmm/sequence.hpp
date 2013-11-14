@@ -1,5 +1,5 @@
 /* =====================================================================================
- * Copyright (c) 2012, Jonas Maaskola
+ * Copyright (c) 2011, Jonas Maaskola
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,22 +16,35 @@
  *
  * =====================================================================================
  *
- *       Filename:  plasma.hpp
+ *       Filename:  sequence.hpp
  *
- *    Description:  
+ *    Description:  Typedefs and routines for nucleic acid sequences
  *
- *        Created:  Thu May 31 06:47:48 2012 +0200
+ *        Created:  Thu Aug 4 22:12:31 2011 +0200
  *
  *         Author:  Jonas Maaskola (JM), jonas@maaskola.de
  *
  * =====================================================================================
  */
 
-#ifndef  PLASMA_HPP
-#define  PLASMA_HPP
+#ifndef SEQUENCE_HPP
+#define SEQUENCE_HPP
 
-namespace Seeding {
-};
+#include <string>
+#include <vector>
+#include <boost/numeric/ublas/vector.hpp>
+#include "../verbosity.hpp"
 
-#endif   /* ----- #ifndef PLASMA_HPP ----- */
+typedef unsigned char alphabet_idx_t;
+typedef boost::numeric::ublas::vector<alphabet_idx_t> seq_t;
+
+const size_t empty_symbol = 5;
+seq_t string2seq(const std::string &s, int n_enc=-1);
+std::string seq2string(const seq_t &s);
+seq_t random_seq(size_t n, size_t alphabet_size);
+
+std::vector<std::string> extract_seq_ids(const std::string &path, size_t nseq, Verbosity verbosity);
+
+
+#endif
 

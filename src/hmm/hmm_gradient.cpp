@@ -29,7 +29,7 @@
 
 #include <omp.h>
 #include <cmath>
-#include "aux.hpp"
+#include "../aux.hpp"
 #include "hmm.hpp"
 #include "logistic.hpp"
 #include "subhmm.hpp"

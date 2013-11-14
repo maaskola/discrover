@@ -18,7 +18,7 @@
 
 #include <iostream>
 #include <map>
-#include "aux.hpp"
+#include "../aux.hpp"
 #include "data.hpp"
 #include "../verbosity.hpp"
 

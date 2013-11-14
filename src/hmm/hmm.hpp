@@ -87,7 +87,7 @@
 #include <unordered_map>
 #include "association.hpp"
 #include "hmm_options.hpp"
-#include "verbosity.hpp"
+#include "../verbosity.hpp"
 
 
 struct Gradient {

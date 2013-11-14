@@ -32,7 +32,7 @@
 
 #include <iostream>
 #include "hmm.hpp"
-#include "timer.hpp"
+#include "../timer.hpp"
 
 using namespace std;
 

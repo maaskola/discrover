@@ -28,7 +28,7 @@
  */
 
 #include "hmm.hpp"
-#include "mcmc/mcmchmm.hpp"
+#include "../mcmc/mcmchmm.hpp"
 #include "statistics.hpp"
 
 void HMM::modify_column()

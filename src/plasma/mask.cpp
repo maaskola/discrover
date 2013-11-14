@@ -19,7 +19,7 @@
 #include <iostream>
 #include <fstream>
 #include <boost/program_options.hpp>
-#include "aux.hpp"
+#include "../aux.hpp"
 #include "code.hpp"
 #include "score.hpp"
 #include "count.hpp"
@@ -30,7 +30,7 @@
 using namespace std;
 
 namespace Seeding {
-  void remove_seqs_with_motif(const string &motif, DataSet &data_set, const options_t &options) {
+  void remove_seqs_with_motif(const string &motif, DataSet &data_set, const Options &options) {
     vector<size_t> to_be_deleted;
 
     auto iter = begin(data_set.sequences);
@@ -51,7 +51,7 @@ namespace Seeding {
     }
   }
 
-  bool mask_motif_occurrences(const string &motif, string &seq, const options_t &options, char mask_symbol) {
+  bool mask_motif_occurrences(const string &motif, string &seq, const Options &options, char mask_symbol) {
     if(options.verbosity >= Verbosity::debug)
       cout << "Check for masking of sequence " << seq << endl;
     set<size_t> occurrences;
@@ -77,27 +77,27 @@ namespace Seeding {
     return(false);
   }
 
-  bool mask_motif_occurrences(const string &motif, Fasta::Entry &seq, const options_t &options, char mask_symbol) {
+  bool mask_motif_occurrences(const string &motif, Fasta::Entry &seq, const Options &options, char mask_symbol) {
     return(mask_motif_occurrences(motif, seq.sequence, options, mask_symbol));
   };
 
-  void mask_motif_occurrences(const string &motif, DataSet &data_set, const options_t &options) {
+  void mask_motif_occurrences(const string &motif, DataSet &data_set, const Options &options) {
     for(auto &seq: data_set) {
       mask_motif_occurrences(motif, seq, options, 'n');
     }
   }
 
-  void mask_motif_occurrences(const string &motif, DataSeries &data_series, const options_t &options) {
+  void mask_motif_occurrences(const string &motif, DataSeries &data_series, const Options &options) {
     for(auto &data_set: data_series)
       mask_motif_occurrences(motif, data_set, options);
   }
 
-  void remove_seqs_with_motif(const string &motif, DataSeries &data_series, const options_t &options) {
+  void remove_seqs_with_motif(const string &motif, DataSeries &data_series, const Options &options) {
     for(auto &data_set: data_series)
       remove_seqs_with_motif(motif, data_set, options);
   }
 
-  void apply_mask(DataCollection &d, const string &motif, const options_t &options) {
+  void apply_mask(DataCollection &d, const string &motif, const Options &options) {
     switch(options.occurrence_filter) {
       case OccurrenceFilter::RemoveSequences:
         if(options.verbosity >= Verbosity::verbose)

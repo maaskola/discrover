@@ -4,18 +4,21 @@
 %
 \documentclass[a4paper]{article}
 
-\usepackage{hyperref}
+\usepackage{hyperref,cleveref}
 
+\newcommand{\plasma}[0]{\texttt{plasma}}
 \newcommand{\dlhmm}[0]{\texttt{dlhmm}}
-\title{Documentation for \dlhmm{} v@GIT_DESCRIPTION@}
+\newcommand{\version}[0]{@GIT_DESCRIPTION@}
+
+\title{Documentation for \dlhmm{} v\version{}}
 \author{Jonas Maaskola}
 \date{\today}
 \begin{document}
 \maketitle
 
 \begin{abstract}
-  This is the documentation for \dlhmm{} version @GIT_DESCRIPTION@.
-  Please refer to the publication \cite{Maaskola2013} for a full description of the method.
+  This is the documentation for \dlhmm{} version \version{}.
+  Please refer to the publication~\cite{Maaskola2013} for a full description of the method.
 
   This document briefly describes the purpose of this motif finding package, explains important concepts, and details usage of the programs that are part of this package.
 \end{abstract}
@@ -23,6 +26,7 @@
 \tableofcontents
 
 \section{Introduction}
+This package provides programs for discriminative motif discovery of protein binding sites in nucleic acid sequences.
 
 \section{Concepts}
 \subsection{Objective functions}
@@ -30,12 +34,76 @@
 \subsection{Binding site HMM optimization}
 
 \section{Usage}
+There are two main programs that are part of this package, a seed discovery program, \plasma{}, and one for optimizing binding site HMMs, \dlhmm{}.
+The seed discovery program \plasma{} can be used independently, but it is also used by \dlhmm{} for automatic seed discovery.
+The command line options that drive both programs are intentionally similar.
+
+Below, in \cref{subsection:running-plasma}, we will first describe how to run \plasma{} independently, before \cref{subsection:running-dlhmm} describes how to use \dlhmm{}.
+
+\subsection{Seed discovery with \plasma{}}
+\label{subsection:running-plasma}
+\subsubsection{Getting help on command line options}
+An overview of the available command line options is available with the switch \verb|-h| or its long variant \verb|--help|.
+See \cref{appendix:plasma-cli-help} for a listing of the output of this command with \plasma{} in version \version{}.
+\subsubsection{Determining the version}
+The command line switch \verb|--version| displays the version of \plasma{}.
+If additionally the switch \verb|-v| or its long variant \verb|--verbose| is given, then additionally the full SHA1-string of the version is displayed.
+
+\subsection{Seed discovery algorithms}
+There are multiple algorithms implemented in \plasma{} that allow to find IUPAC regular expression type seeds.
+You can select between them with the switch \verb|--algo|.
+It takes one argument, which specifies which algorithm to use.
+The following algorithms are provided:
+\begin{description}
+  \item[Plasma]
+    The default and fast algorithm.
+    It can be used by specifying \verb|--algo plasma|.
+    It uses progressive algorithm that maintains a pool of candidates.
+  \item[FIRE]
+    A seed discovery algorithm similar to the discriminative motif discovery program FIRE~\cite{Elemento2007}.
+    It can be used by specifying \verb|--algo fire|.
+  \item[Monte-Carlo Markov Chain optimization]
+    By specifying \verb|--algo mcmc| Monte-Carlo Markov Chain (MCMC) is used to find seeds.
+    It uses parallel tempering, also known as replica-exchange, to increase the efficiency of the sampling~\cite{Earl2005}.
+    By default, 6 parallel chains are used.
+\end{description}
+
+\subsection{Binding site HMM optimization with \dlhmm{}}
+\label{subsection:running-dlhmm}
+\subsubsection{Getting help on command line options}
+An overview of the available command line options is available with the switch \verb|-h| or its long variant \verb|--help|.
+See \cref{appendix:dlhmm-cli-help} for a listing of the output of this command with \dlhmm{} in version \version{}.
+
+Note that by default not all options are shown.
+To display some infrequently used options please specify \verb|-hv| or \verb|--help --verbose|.
+
+In addition, some advanced options are only shown when the option \verb|-V| or \verb|--noisy| is used.
+Thus, to display all options please specify \verb|-hV| or their long variants \verb|--help --noisy|.
+
+\subsubsection{Determining the version}
+The command line switch \verb|--version| displays the version of \dlhmm{}.
+If additionally the switch \verb|-v| or its long variant \verb|--verbose| is given, then additionally the full SHA1-string of the version is displayed.
+
+
+\section{Appendix}
+\subsection{Command line help of \plasma{}}
+\label{appendix:plasma-cli-help}
+\begin{verbatim}
+@PLASMA_CLI_HELP_OUTPUT@
+\end{verbatim}
+
+\subsection{Command line help of \dlhmm{}}
+\label{appendix:dlhmm-cli-help}
+\begin{verbatim}
+@DLHMM_CLI_HELP_OUTPUT@
+\end{verbatim}
+
+
 
 \nocite{*}
 \addcontentsline{toc}{section}{References}
-\bibliographystyle{plain}
+\bibliographystyle{apalike}
 \bibliography{documentation}
-* corresponding author
 
 
 

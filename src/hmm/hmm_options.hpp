@@ -32,10 +32,10 @@
 
 #include <string>
 #include <vector>
-#include "plasma/options.hpp"
+#include "../plasma/options.hpp"
 #include "basedefs.hpp"
-#include "executioninformation.hpp"
-#include "plasma/specification.hpp"
+#include "../executioninformation.hpp"
+#include "../plasma/specification.hpp"
 
 enum class Compression {
   none,
@@ -107,7 +107,7 @@ struct hmm_options {
   std::vector<std::string> load_paths;
   std::string label;
   std::vector<std::string> seeds;
-  Seeding::options_t seeding;
+  Seeding::Options seeding;
   evaluation_options evaluate;
   size_t n_threads;
   size_t bg_order, n_seq;

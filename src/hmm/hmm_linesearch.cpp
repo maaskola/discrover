@@ -28,10 +28,10 @@
  */
 
 #include <iomanip>
-#include "timer.hpp"
-#include "aux.hpp"
+#include "../timer.hpp"
+#include "../aux.hpp"
 #include "logistic.hpp"
-#include "matrix_inverse.hpp"
+#include "../matrix_inverse.hpp"
 #include "polyfit.hpp"
 #include "hmm.hpp"
 

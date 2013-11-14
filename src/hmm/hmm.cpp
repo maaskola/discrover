@@ -29,7 +29,7 @@
 
 #include <fstream>
 #include <boost/filesystem.hpp>
-#include "aux.hpp"
+#include "../aux.hpp"
 #include "hmm.hpp"
 
 const size_t HMM::start_state;

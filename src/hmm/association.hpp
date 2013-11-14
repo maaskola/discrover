@@ -31,7 +31,7 @@
 #define ASSOCIATION_HPP
 
 #include <vector>
-#include "matrix.hpp"
+#include "../matrix.hpp"
 
 /** Computes mutual information of a contingency table
  * a,b,c,d are assumed to be non-negative

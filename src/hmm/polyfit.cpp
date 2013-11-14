@@ -21,7 +21,7 @@
 #include <cstdlib>
 #include <cstddef>
 #include "polyfit.hpp"
-#include "matrix_inverse.hpp"
+#include "../matrix_inverse.hpp"
 
 double quadratic_extremum(const vector_t &coeff, Verbosity verbosity) {
   if(verbosity >= Verbosity::debug)

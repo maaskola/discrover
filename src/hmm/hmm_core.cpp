@@ -28,7 +28,7 @@
  */
 
 #include <boost/range/adaptors.hpp>
-#include "aux.hpp"
+#include "../aux.hpp"
 #include "hmm.hpp"
 
 double HMM::viterbi(const Data::Seq &s, StatePath &path) const
