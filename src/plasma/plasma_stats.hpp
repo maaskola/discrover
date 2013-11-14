@@ -33,7 +33,6 @@
 #include <unordered_map>
 #include <map>
 #include <string>
-#include "plasma.hpp"
 #include "motif.hpp"
 #include "../matrix.hpp"
 

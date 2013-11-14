@@ -34,32 +34,9 @@
 #include <list>
 #include <string>
 #include "data.hpp"
-// #include "../matrix.hpp"
 #include "../verbosity.hpp"
 
 namespace Seeding {
-  /** A class for IUPAC regular expression type motifs of up to length 16.
-   * Uses a binary representation of size 64 bit with 4 bits per position. */
-/*  struct Motif {
-    // TODO write long motif class
-    // TODO use SSE2
-    typedef std::string storage_t;
-//    static const storage_t block = 0;
-    storage_t data;
-    size_t length;
-    Motif();
-    Motif(storage_t d);
-    Motif(const std::string &s);
-
-    Motif reverse_complement() const;
-    std::string to_string(storage_t x) const;
-    std::string to_string() const;
-
-    bool match(const Sequence &seq, size_t &pos, Verbosity verbosity) const;
-
-    size_t degeneracy() const;
-  };
-  */
   double information_content(const std::string &motif);
   size_t motif_degeneracy(const std::string &motif);
   template <typename Func> void each_generalization(const std::string &motif, Func func) {
@@ -145,8 +122,6 @@ namespace Seeding {
 
   std::list<std::string> all_generalizations(const std::string &motif);
 };
-
-// std::ostream &operator<<(std::ostream &os, const Plasma::Motif &motif);
 
 #endif   /* ----- #ifndef MOTIF_HPP ----- */
 
