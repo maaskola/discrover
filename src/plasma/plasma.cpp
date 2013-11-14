@@ -20,7 +20,7 @@
 #include "code.hpp"
 
 
-namespace Plasma {
+namespace Seeding {
   char* Code = construct_code();
 }
 

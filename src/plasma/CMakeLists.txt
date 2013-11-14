@@ -1,15 +1,6 @@
 
 # CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/src/config.h)
 
-# add definitions, compiler switches, etc.
-ADD_DEFINITIONS(-Wall -Wno-char-subscripts -funroll-loops -mtune=native -Wno-unused-local-typedefs)
-# ADD_DEFINITIONS(-Wall -Wno-char-subscripts -funroll-loops -mtune=native -flto -Wno-unused-local-typedefs)
-
-# ADD_CUSTOM_TARGET(ctags ALL
-#     COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . 
-#     COMMENT "Creating Ctags."
-#     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src )
-
 # build a shared library
 ADD_LIBRARY(plasma SHARED options.cpp measure.cpp align.cpp fasta.cpp specification.cpp find.cpp
   mask.cpp count.cpp results.cpp plasma_cli.cpp score.cpp code.cpp data.cpp motif.cpp

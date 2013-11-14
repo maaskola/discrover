@@ -123,8 +123,8 @@ class BidirectionalIndex{
     Index<data_t, idx_t, lcp_t> forward_index, backward_index;
 };
 
-// std::string collapse_data_series(const Plasma::DataSeries &data_series, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set);
-std::string collapse_data_collection(const Plasma::DataCollection &collection, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set, std::vector<size_t> &set2series);
+// std::string collapse_data_series(const Seeding::DataSeries &data_series, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set);
+std::string collapse_data_collection(const Seeding::DataCollection &collection, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set, std::vector<size_t> &set2series);
 
 template <class idx_t=size_t, class lcp_t=size_t, class index_t=Index<std::string, idx_t, lcp_t>>
 class NucleotideIndex {
@@ -146,7 +146,7 @@ class NucleotideIndex {
       seq2set(),
       set2series(),
       index("", verbosity) { };
-    NucleotideIndex(const Plasma::DataCollection &collection, Verbosity verbosity) :
+    NucleotideIndex(const Seeding::DataCollection &collection, Verbosity verbosity) :
       paths(),
       pos2seq(),
       seq2set(),
@@ -156,7 +156,7 @@ class NucleotideIndex {
           for(auto &set: series)
             paths.push_back(set.path);
       };
-//    NucleotideIndex(const Plasma::DataSeries &data_series, Verbosity verbosity) :
+//    NucleotideIndex(const Seeding::DataSeries &data_series, Verbosity verbosity) :
 //      paths(),
 //      pos2seq(),
 //      seq2set(),

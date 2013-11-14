@@ -72,9 +72,9 @@ namespace Specification {
    */
   struct Motif {
     enum class Kind {
-      file,
-      seed,
-      plasma
+      File,
+      Seed,
+      Plasma
     };
     Kind kind;
     std::string specification;

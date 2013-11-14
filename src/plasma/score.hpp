@@ -44,8 +44,8 @@ typedef boost::numeric::ublas::matrix<fp_t> matrix_t;
 typedef boost::numeric::ublas::vector<fp_t> vector_t;
 
 
-double compute_mutual_information_variance(const Plasma::Stats::OccurrenceTable &m_, double pseudo_count, bool normalize);
-double compute_mutual_information(const Plasma::Stats::OccurrenceTable &counts, double pseudo_count=0, bool normalize=false, bool do_correction=false);
+double compute_mutual_information_variance(const Seeding::Stats::OccurrenceTable &m_, double pseudo_count, bool normalize);
+double compute_mutual_information(const Seeding::Stats::OccurrenceTable &counts, double pseudo_count=0, bool normalize=false, bool do_correction=false);
 double compute_mutual_information(double a, double b, double c, double d);
 
 double compute_mcc(double a, double b, double c, double d);
@@ -56,32 +56,32 @@ double compute_delta_frequency(double a, double b, double c, double d);
  * If measure is Measure::Undefined then the measure is used that is a member of options_t options
  **/
 double compute_score(
-    const Plasma::DataCollection &collection,
-    const Plasma::Result &result,
-    const Plasma::options_t &options,
+    const Seeding::DataCollection &collection,
+    const Seeding::Result &result,
+    const Seeding::options_t &options,
     Measures::Discrete::Measure measure=Measures::Discrete::Measure::Undefined,
     bool do_correction=false
   );
 double compute_score(
-    const Plasma::DataCollection &collection,
-    const Plasma::Stats::OccurrenceCounts &counts,
-    const Plasma::options_t &options,
-    const Plasma::Objective &objective,
+    const Seeding::DataCollection &collection,
+    const Seeding::Stats::OccurrenceCounts &counts,
+    const Seeding::options_t &options,
+    const Seeding::Objective &objective,
     size_t length,
     size_t degeneracy,
     Measures::Discrete::Measure measure=Measures::Discrete::Measure::Undefined,
     bool do_correction=false);
 double compute_score(
-    const Plasma::DataSeries &data_series,
-    const Plasma::Stats::OccurrenceCounts &contrast,
-    const Plasma::options_t &options,
+    const Seeding::DataSeries &data_series,
+    const Seeding::Stats::OccurrenceCounts &contrast,
+    const Seeding::options_t &options,
     Measures::Discrete::Measure measure,
     size_t length,
     size_t degeneracy,
     const std::string &motif_name="",
     bool do_correction=false);
 
-double approximate_score(const std::string &motif, const Plasma::hash_map_t &counts, const Plasma::options_t &options);
+double approximate_score(const std::string &motif, const Seeding::hash_map_t &counts, const Seeding::options_t &options);
 
 #endif   /* ----- #ifndef SCORE_HPP  ----- */
 
