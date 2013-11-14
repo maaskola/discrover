@@ -8,4 +8,3 @@
 * Search one strand against the other
 * Find localized motifs
 * Parallelize FIRE and parallel tempering
-* Put branch into --version
