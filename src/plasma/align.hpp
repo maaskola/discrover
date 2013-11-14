@@ -42,7 +42,7 @@
 #include <boost/algorithm/string.hpp>
 #include "suffix.hpp"
 
-#include "aux.hpp"
+#include "../aux.hpp"
 #include "data.hpp"
 
 bool iupac_included(char q, char r);

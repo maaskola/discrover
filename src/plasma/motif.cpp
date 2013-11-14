@@ -17,7 +17,7 @@
  */
 
 #include <iostream>
-#include "aux.hpp"
+#include "../aux.hpp"
 #include "code.hpp"
 #include "options.hpp"
 

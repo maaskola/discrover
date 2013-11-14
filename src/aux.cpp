@@ -256,6 +256,13 @@ string limit_line_length(const string &x, size_t line_length)
   return(y);
 }
 
+vector<string> tokenize(const string &s, const string &delim)
+{
+  vector<string> strs;
+  boost::split(strs, s, boost::is_any_of(delim));
+  return(strs);
+}
+
 string sha1hash(const string &s)
 {
   const char *t = s.c_str();

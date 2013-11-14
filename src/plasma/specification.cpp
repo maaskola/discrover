@@ -19,7 +19,7 @@
 #include <fstream>
 #include <iostream>
 #include <boost/filesystem.hpp>
-#include "aux.hpp"
+#include "../aux.hpp"
 #include "specification.hpp"
 
 using namespace std;

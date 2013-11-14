@@ -24,7 +24,7 @@
 #include <thread>
 #include "find.hpp"
 #include "mask.hpp"
-#include "aux.hpp"
+#include "../aux.hpp"
 #include "align.hpp"
 #include "../mcmc/mcmciupac.hpp"
 #include "../timer.hpp"
