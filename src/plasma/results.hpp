@@ -34,7 +34,7 @@
 #include "stats.hpp"
 #include "options.hpp"
 
-namespace Plasma {
+namespace Seeding {
   struct Result : public Objective {
     std::string motif;
     double score;

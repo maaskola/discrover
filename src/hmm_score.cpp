@@ -275,7 +275,7 @@ double HMM::compute_score(const Data::Collection &data, const Training::Task &ta
 {
   std::vector<size_t> all_motifs;
   for(size_t i = 0; i < groups.size(); i++)
-    if(groups[i].kind == Group::Kind::motif)
+    if(groups[i].kind == Group::Kind::Motif)
       all_motifs.push_back(i);
   double score = 0;
   switch(task.measure) {

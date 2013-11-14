@@ -23,7 +23,7 @@
 
 using namespace std;
 
-namespace Plasma {
+namespace Seeding {
   double information_content(const string &motif) {
     double ic = 0;
     for(auto &c: motif)
@@ -133,37 +133,44 @@ namespace Plasma {
           generalizations.push_back(generalization);
           generalization[i] = 'h';
           generalizations.push_back(generalization);
+          break;
         case 's':
           generalization[i] = 'b';
           generalizations.push_back(generalization);
           generalization[i] = 'v';
           generalizations.push_back(generalization);
+          break;
         case 'm':
           generalization[i] = 'h';
           generalizations.push_back(generalization);
           generalization[i] = 'v';
           generalizations.push_back(generalization);
+          break;
         case 'k':
           generalization[i] = 'b';
           generalizations.push_back(generalization);
           generalization[i] = 'd';
           generalizations.push_back(generalization);
+          break;
         case 'r':
           generalization[i] = 'd';
           generalizations.push_back(generalization);
           generalization[i] = 'v';
           generalizations.push_back(generalization);
+          break;
         case 'y':
           generalization[i] = 'b';
           generalizations.push_back(generalization);
           generalization[i] = 'h';
           generalizations.push_back(generalization);
+          break;
         case 'b':
         case 'd':
         case 'h':
         case 'v':
           generalization[i] = 'n';
           generalizations.push_back(generalization);
+          break;
         default:
           break;
       }

@@ -45,8 +45,8 @@ vector_t col_sums(const matrix_t &m) {
   return(v);
 }
 
-double compute_mutual_information_variance(const Plasma::Stats::OccurrenceTable &m_, double pseudo_count, bool normalize) {
-  Plasma::Stats::OccurrenceTable m = m_;
+double compute_mutual_information_variance(const Seeding::Stats::OccurrenceTable &m_, double pseudo_count, bool normalize) {
+  Seeding::Stats::OccurrenceTable m = m_;
   double z = 1;
   if(pseudo_count != 0)
     normalize = true;
@@ -86,8 +86,8 @@ double compute_mutual_information_variance(const Plasma::Stats::OccurrenceTable 
   return(var);
 }
 
-double compute_mutual_information(const Plasma::Stats::OccurrenceTable &m_, double pseudo_count, bool normalize, bool do_correction) {
-  Plasma::Stats::OccurrenceTable m = m_;
+double compute_mutual_information(const Seeding::Stats::OccurrenceTable &m_, double pseudo_count, bool normalize, bool do_correction) {
+  Seeding::Stats::OccurrenceTable m = m_;
   double z = 1;
   if(pseudo_count != 0)
     normalize = true;
@@ -126,7 +126,7 @@ double compute_mutual_information(const Plasma::Stats::OccurrenceTable &m_, doub
   return(mi);
 }
 
-double compute_gtest(const Plasma::Stats::OccurrenceTable &m, double pseudo_count, bool normalize) {
+double compute_gtest(const Seeding::Stats::OccurrenceTable &m, double pseudo_count, bool normalize) {
   double n = 0;
   for(size_t i = 0; i < m.size1(); i++)
     for(size_t j = 0; j < m.size2(); j++)
@@ -135,11 +135,11 @@ double compute_gtest(const Plasma::Stats::OccurrenceTable &m, double pseudo_coun
   return(compute_mutual_information(m, pseudo_count, normalize) * log(2.0) * 2 * n);
 }
 
-double compute_logp_gtest(const Plasma::Stats::OccurrenceTable &m, double pseudo_count, bool normalize) {
+double compute_logp_gtest(const Seeding::Stats::OccurrenceTable &m, double pseudo_count, bool normalize) {
   return(-pchisq(compute_gtest(m, pseudo_count, normalize), (m.size1() - 1) * (m.size2() - 1), false, true));
 }
 
-double compute_bonferroni_corrected_logp_gtest(const Plasma::Stats::OccurrenceTable &m, double pseudo_count, bool normalize, size_t length, size_t degeneracy) {
+double compute_bonferroni_corrected_logp_gtest(const Seeding::Stats::OccurrenceTable &m, double pseudo_count, bool normalize, size_t length, size_t degeneracy) {
   double log_correction = compute_correction(length, degeneracy);
   return(compute_logp_gtest(m, pseudo_count, normalize) - log_correction);
 }
@@ -152,8 +152,8 @@ double compute_delta_frequency(double a, double b, double c, double d) {
   return a / (a + b) - c / (c + d);
 }
 
-Plasma::Stats::OccurrenceCounts reduce_count(const Plasma::Stats::OccurrenceCounts &full, const Plasma::DataCollection &collection, const string &series_name) {
-  Plasma::Stats::OccurrenceCounts counts(full.size());
+Seeding::Stats::OccurrenceCounts reduce_count(const Seeding::Stats::OccurrenceCounts &full, const Seeding::DataCollection &collection, const string &series_name) {
+  Seeding::Stats::OccurrenceCounts counts(full.size());
   auto iter = begin(counts);
   auto full_iter = begin(full);
   for(auto &series: collection) {
@@ -169,21 +169,21 @@ Plasma::Stats::OccurrenceCounts reduce_count(const Plasma::Stats::OccurrenceCoun
   return(counts);
 }
 
-double compute_score(const Plasma::DataCollection &collection, const Plasma::Result &result, const Plasma::options_t &options, Measures::Discrete::Measure measure, bool do_correction) {
-  return(compute_score(collection, result.counts, options, result, result.motif.length(), Plasma::motif_degeneracy(result.motif), measure, do_correction));
+double compute_score(const Seeding::DataCollection &collection, const Seeding::Result &result, const Seeding::options_t &options, Measures::Discrete::Measure measure, bool do_correction) {
+  return(compute_score(collection, result.counts, options, result, result.motif.length(), Seeding::motif_degeneracy(result.motif), measure, do_correction));
 }
 
-double compute_score(const Plasma::DataCollection &collection,
-    const Plasma::Stats::OccurrenceCounts &counts,
-    const Plasma::options_t &options,
-    const Plasma::Objective &objective,
+double compute_score(const Seeding::DataCollection &collection,
+    const Seeding::Stats::OccurrenceCounts &counts,
+    const Seeding::options_t &options,
+    const Seeding::Objective &objective,
     size_t length,
     size_t degeneracy,
     Measures::Discrete::Measure measure,
     bool do_correction) {
-// double compute_score(const Plasma::DataCollection &collection, const Plasma::Stats::OccurrenceCounts &counts, const Plasma::options_t &options, Measures::Discrete::Measure measure, size_t length, size_t degeneracy, bool do_correction) {
+// double compute_score(const Seeding::DataCollection &collection, const Seeding::Stats::OccurrenceCounts &counts, const Seeding::options_t &options, Measures::Discrete::Measure measure, size_t length, size_t degeneracy, bool do_correction) {
   if(options.verbosity >= Verbosity::debug) {
-    cout << "compute_score(Plasma::DataCollection)" << endl;
+    cout << "compute_score(Seeding::DataCollection)" << endl;
     cout << "counts = " << counts << endl;
   }
   if(measure == Measures::Discrete::Measure::Undefined)
@@ -206,11 +206,11 @@ double compute_score(const Plasma::DataCollection &collection,
     }
   }
   if(options.verbosity >= Verbosity::debug)
-    cout << "end: compute_score(Plasma::DataCollection) -> " << score << endl;
+    cout << "end: compute_score(Seeding::DataCollection) -> " << score << endl;
   return(score);
 }
 
-double compute_score(const Plasma::DataSeries &data_series, const Plasma::Stats::OccurrenceCounts &counts, const Plasma::options_t &options, Measures::Discrete::Measure measure, size_t length, size_t degeneracy, const string &motif_name, bool do_correction) {
+double compute_score(const Seeding::DataSeries &data_series, const Seeding::Stats::OccurrenceCounts &counts, const Seeding::options_t &options, Measures::Discrete::Measure measure, size_t length, size_t degeneracy, const string &motif_name, bool do_correction) {
   if(measure == Measures::Discrete::Measure::Undefined) {
     cout << "Error in compute_score: Measures::Discrete::Measure::undefined." << endl;
     exit(-1);
