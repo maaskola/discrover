@@ -409,7 +409,7 @@ int main(int argc, const char** argv)
     options.verbosity = Verbosity::debug;
 
   if(vm.count("version") and not vm.count("help")) {
-    cout << options.exec_info.program_name << " " << options.exec_info.hmm_version << endl;
+    cout << options.exec_info.program_name << " " << options.exec_info.hmm_version << " [" << GIT_BRANCH << " branch]" << endl;
     if(options.verbosity >= Verbosity::verbose)
       cout << GIT_SHA1 << endl;
     return(EXIT_SUCCESS);
