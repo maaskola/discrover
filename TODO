@@ -8,3 +8,5 @@
 * Search one strand against the other
 * Find localized motifs
 * Parallelize FIRE and parallel tempering
+* Add RNG seed specification for all parts requiring randomization
+  - MCMC
