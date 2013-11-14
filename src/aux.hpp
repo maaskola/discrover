@@ -99,6 +99,9 @@ inline double exp_diff(double x, double y)
   return(log(exp(x - m) - exp(y - m)) + m);
 }
 
+/** Parse a comma separated list of ranges.
+ * Example: "1,2,5-7,2,5,30"  will yield {1, 2, 5, 6, 7, 2, 5, 30}. */
+std::vector<std::string> tokenize(const std::string &s, const std::string &delim);
 std::string sha1hash(const std::string &s);
 
 #endif

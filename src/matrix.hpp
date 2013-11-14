@@ -31,8 +31,8 @@
 #define MATRIX_HPP
 
 #include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/io.hpp>
 
 typedef double fp_t;
 typedef int index_t;

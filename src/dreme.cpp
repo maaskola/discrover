@@ -1,6 +1,7 @@
-#include "basedefs.hpp"
+#include "hmm/basedefs.hpp"
 #include "dreme_config.hpp"
 #include <sstream>
+#include <list>
 #include <fstream>
 #include <exception>
 

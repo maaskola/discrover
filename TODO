@@ -6,4 +6,8 @@
 * Use other regular expression based motif finding tools for seeding
 * Shuffle sequences for discriminative learning when only one set of sequences is given
 * Search one strand against the other
-* find localized motifs
+* Find localized motifs
+* Parallelize FIRE and parallel tempering
+* Add RNG seed specification for all parts requiring randomization
+  - MCMC
+* MCMC seeding can sample across motif lengths

@@ -31,19 +31,24 @@
 #define FIND_HPP
 
 #include "options.hpp"
+#include "plasma_stats.hpp"
 #include "results.hpp"
 #include "align.hpp"
 
 namespace Seeding {
   struct Plasma {
-    options_t options;
+    Options options;
     DataCollection collection;
     bool index_ready;
     bool needs_rebuilding;
     NucleotideIndex<size_t,size_t> index;
-    Plasma(const options_t &options_t);
-    Plasma(const DataCollection &collection_, const options_t &opt);
-    Results find_breadth(size_t length, const Objective &objective);
+    Plasma(const Options &options);
+    Plasma(const DataCollection &collection_, const Options &opt);
+    Results find_seeds(size_t length, const Objective &objective, Algorithm algorithm);
+    Results find_breadth(size_t length, const Objective &objective, size_t max_degeneracy, const std::set<size_t> &degeneracies) const;
+    Results find_fire(size_t length, const Objective &objective, size_t max_degeneracy, const std::set<size_t> &degeneracies) const;
+    Results find_mcmc(size_t length, const Objective &objective, size_t max_degeneracy) const;
+    rev_map_t determine_initial_candidates(size_t length, const Objective &objective, std::string &best_motif, size_t &n_candidates, double &max_score, Results &results, const std::set<size_t> &degeneracies) const;
     Results find_all(const Specification::Motif &motif, const Objective &objective, size_t n_motifs) const;
     Results find_multiple(const Specification::Motif &motif, const Objective &objective, size_t n_motifs) const;
     void apply_mask(const std::string &motif);
@@ -53,9 +58,9 @@ namespace Seeding {
     Results find(const Specification::Motif &motif, const Objectives &objectives, bool doreport=true) const;
   };
 
-  void report(std::ostream &os, const Objective &objective, const std::string &motif, const DataCollection &collection, const options_t &options);
-  void report(std::ostream &os, const Result &result, const DataCollection &collection, const options_t &options);
-  void viterbi_dump(const std::string &motif, const DataCollection &collection, std::ostream &out, const options_t &options);
+  void report(std::ostream &os, const Objective &objective, const std::string &motif, const DataCollection &collection, const Options &options);
+  void report(std::ostream &os, const Result &result, const DataCollection &collection, const Options &options);
+  void viterbi_dump(const std::string &motif, const DataCollection &collection, std::ostream &out, const Options &options);
 }
 
 #endif   /* ----- #ifndef FIND_HPP  ----- */
