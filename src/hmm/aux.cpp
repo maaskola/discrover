@@ -1,7 +1,7 @@
 #include <cstring>
 #include <boost/algorithm/string.hpp>
 #include "aux.hpp"
-#include "sha1.h"
+#include "../sha1.h"
 
 using namespace std;
 

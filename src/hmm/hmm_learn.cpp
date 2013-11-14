@@ -27,7 +27,7 @@
  * =====================================================================================
  */
 
-#include "timer.hpp"
+#include "../timer.hpp"
 #include "aux.hpp"
 #include "hmm.hpp"
 

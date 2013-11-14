@@ -35,9 +35,8 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include "plasma/plasma_cli.hpp"
-// #include "plasma/GitSHA1.hpp"
-#include "GitSHA1.hpp"
+#include "../plasma/plasma_cli.hpp"
+#include "../GitSHA1.hpp"
 #include "analysis.hpp"
 #include "aux.hpp"
 #include "terminal.hpp"

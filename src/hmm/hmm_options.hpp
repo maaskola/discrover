@@ -32,10 +32,10 @@
 
 #include <string>
 #include <vector>
-#include "plasma/options.hpp"
+#include "../plasma/options.hpp"
 #include "basedefs.hpp"
 #include "executioninformation.hpp"
-#include "plasma/specification.hpp"
+#include "../plasma/specification.hpp"
 
 enum class Compression {
   none,

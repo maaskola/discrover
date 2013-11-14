@@ -28,7 +28,7 @@
  */
 
 #include <iomanip>
-#include "timer.hpp"
+#include "../timer.hpp"
 #include "aux.hpp"
 #include "logistic.hpp"
 #include "matrix_inverse.hpp"

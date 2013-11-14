@@ -30,7 +30,7 @@
 #ifndef MCMCHMM_HPP
 #define MCMCHMM_HPP
 
-#include "../hmm.hpp"
+#include "../hmm/hmm.hpp"
 #include "montecarlo.hpp"
 
 namespace MCMC {

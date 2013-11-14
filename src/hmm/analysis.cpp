@@ -10,10 +10,10 @@
 #include "aux.hpp"
 #include "hmm.hpp"
 #include "report.hpp"
-#include "timer.hpp"
+#include "../timer.hpp"
 #include "mic.hpp"
-#include "plasma/find.hpp"
-#include "stats_config.hpp"
+#include "../plasma/find.hpp"
+#include "../stats_config.hpp"
 
 using namespace std;
 

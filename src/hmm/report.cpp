@@ -11,9 +11,9 @@
 #include <boost/math/distributions/students_t.hpp>
 #include "aux.hpp"
 #include "report.hpp"
-#include "timer.hpp"
-#include "plasma/find.hpp"
-#include "stats_config.hpp"
+#include "../timer.hpp"
+#include "../plasma/find.hpp"
+#include "../stats_config.hpp"
 
 using namespace std;
 

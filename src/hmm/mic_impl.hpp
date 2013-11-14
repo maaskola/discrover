@@ -1,5 +1,5 @@
 /* =====================================================================================
- * Copyright (c) 2011, Jonas Maaskola
+ * Copyright (c) 2012, Jonas Maaskola
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,35 +16,42 @@
  *
  * =====================================================================================
  *
- *       Filename:  sequence.hpp
+ *       Filename:  mic_impl.hpp
  *
- *    Description:  Typedefs and routines for nucleic acid sequences
+ *    Description:  Routines to compute the MIC
  *
- *        Created:  Thu Aug 4 22:12:31 2011 +0200
+ *        Created:  05/30/2012 06:42:25 PM
  *
  *         Author:  Jonas Maaskola (JM), jonas@maaskola.de
  *
  * =====================================================================================
  */
 
-#ifndef SEQUENCE_HPP
-#define SEQUENCE_HPP
+#ifndef MIC_IMPL_HPP
+#define MIC_IMPL_HPP
 
+#include <cstdlib>
+#include <ctime>
+#include <iostream>
+#include <set>
+#include <fstream>
 #include <string>
 #include <vector>
-#include <boost/numeric/ublas/vector.hpp>
-#include "verbosity.hpp"
+#include "association.hpp"
+#include "../verbosity.hpp"
 
-typedef unsigned char alphabet_idx_t;
-typedef boost::numeric::ublas::vector<alphabet_idx_t> seq_t;
+namespace MIC {
 
-const size_t empty_symbol = 5;
-seq_t string2seq(const std::string &s, int n_enc=-1);
-std::string seq2string(const seq_t &s);
-seq_t random_seq(size_t n, size_t alphabet_size);
+  typedef double score_t;
+  //typedef size_t data_t;
+  typedef double data_t;
+  typedef std::vector<data_t> sample_t;
+  typedef std::vector<size_t> bounds_t;
+  typedef sample_t stats_t;
 
-std::vector<std::string> extract_seq_ids(const std::string &path, size_t nseq, Verbosity verbosity);
+  bounds_t sample(const sample_t &d, const std::set<size_t> &fixed_bounds, size_t n, size_t n_iter, Verbosity verbosity);
 
+};
 
 #endif
 

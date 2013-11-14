@@ -31,7 +31,7 @@
 #define BASEDEFS_HPP
 
 #include <string>
-#include "plasma/data.hpp"
+#include "../plasma/data.hpp"
 #include "trainingmode.hpp"
 #include "sequence.hpp"
 

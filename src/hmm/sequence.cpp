@@ -1,5 +1,5 @@
 #include <fstream>
-#include "plasma/fasta.hpp"
+#include "../plasma/fasta.hpp"
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
