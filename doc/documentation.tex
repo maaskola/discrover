@@ -10,7 +10,7 @@
 \newcommand{\dlhmm}[0]{\texttt{dlhmm}}
 \newcommand{\version}[0]{@GIT_DESCRIPTION@}
 
-\title{Documentation for \dlhmm{} v\version{}}
+\title{Manual for \dlhmm{} v\version{}}
 \author{Jonas Maaskola}
 \date{\today}
 \begin{document}
@@ -33,6 +33,8 @@ This package provides programs for discriminative motif discovery of protein bin
 \subsection{Seeding}
 \subsection{Binding site HMM optimization}
 
+\section{Tutorial}
+
 \section{Usage}
 There are two main programs that are part of this package, a seed discovery program, \plasma{}, and one for optimizing binding site HMMs, \dlhmm{}.
 The seed discovery program \plasma{} can be used independently, but it is also used by \dlhmm{} for automatic seed discovery.
@@ -49,7 +51,7 @@ See \cref{appendix:plasma-cli-help} for a listing of the output of this command 
 The command line switch \verb|--version| displays the version of \plasma{}.
 If additionally the switch \verb|-v| or its long variant \verb|--verbose| is given, then additionally the full SHA1-string of the version is displayed.
 
-\subsection{Seed discovery algorithms}
+\subsubsection{Seed discovery algorithms}
 There are multiple algorithms implemented in \plasma{} that allow to find IUPAC regular expression type seeds.
 You can select between them with the switch \verb|--algo|.
 It takes one argument, which specifies which algorithm to use.
