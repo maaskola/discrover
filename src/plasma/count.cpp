@@ -36,7 +36,7 @@ namespace Seeding {
       cout << "Getting word counts for " << n_samples << " samples." << endl;
 
     hash_map_t counts;
-    Stats::OccurrenceCounts default_stats(n_samples);
+    count_vector_t default_stats(n_samples);
     for(auto &x: default_stats)
       x = 0;
 
@@ -80,8 +80,8 @@ namespace Seeding {
   }
 
   /*
-  Stats::OccurrenceCounts count_motif(const DataSeries &data_series, const string &motif, const Options &options) {
-    Stats::OccurrenceCounts stats(data_series.sets.size());
+  count_vector_t count_motif(const DataSeries &data_series, const string &motif, const Options &options) {
+    count_vector_t stats(data_series.sets.size());
     for(auto &x: stats)
       x = 0;
 
@@ -95,11 +95,11 @@ namespace Seeding {
   }
   */
 
-  Stats::OccurrenceCounts count_motif(const DataCollection &collection, const string &motif, const Options &options) {
+  count_vector_t count_motif(const DataCollection &collection, const string &motif, const Options &options) {
     size_t n_samples = 0;
     for(auto &series: collection)
       n_samples += series.sets.size();
-    Stats::OccurrenceCounts stats(n_samples);
+    count_vector_t stats(n_samples);
     for(auto &x: stats)
       x = 0;
 
@@ -123,7 +123,7 @@ namespace Seeding {
     }
   }
 
-  void add_counts(const string &seq_, size_t length, hash_map_t &counts, size_t idx, const Stats::OccurrenceCounts &default_stats, const Options &options) {
+  void add_counts(const string &seq_, size_t length, hash_map_t &counts, size_t idx, const count_vector_t &default_stats, const Options &options) {
     if(options.verbosity >= Verbosity::debug)
       cout << "Adding counts for sequence " << seq_ << endl;
     if(seq_.size() < length)
@@ -164,7 +164,7 @@ namespace Seeding {
     }
   }
 
-  void add_counts(const DataSet &data, size_t len, hash_map_t &counts, size_t idx, const Stats::OccurrenceCounts &default_stats, const Options &options) {
+  void add_counts(const DataSet &data, size_t len, hash_map_t &counts, size_t idx, const count_vector_t &default_stats, const Options &options) {
     for(auto &seq: data)
       add_counts(seq.sequence, len, counts, idx, default_stats, options);
   }

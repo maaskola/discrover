@@ -35,10 +35,10 @@
 #include <string>
 #include "plasma.hpp"
 #include "motif.hpp"
-#include "stats.hpp"
+#include "../matrix.hpp"
 
 namespace Seeding {
-  typedef std::unordered_map<std::string, Stats::OccurrenceCounts> hash_map_t;
+  typedef std::unordered_map<std::string, count_vector_t> hash_map_t;
   typedef std::unordered_map<std::string, double> score_map_t;
   typedef std::multimap<double, std::string, std::greater<double>> rev_map_t;
 }

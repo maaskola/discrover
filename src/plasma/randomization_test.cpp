@@ -3,10 +3,9 @@
 #include "score.hpp"
 
 using namespace std;
-typedef Seeding::Stats::OccurrenceCounts counts_t;
 
-counts_t generate_sample(const Seeding::DataCollection &collection, const counts_t &counts, Verbosity verbosity) {
-  counts_t sample(counts.size(), 0);
+count_vector_t generate_sample(const Seeding::DataCollection &collection, const count_vector_t &counts, Verbosity verbosity) {
+  count_vector_t sample(counts.size(), 0);
 
   if(verbosity >= Verbosity::debug)
     cout << "Sample generation"
@@ -52,12 +51,12 @@ counts_t generate_sample(const Seeding::DataCollection &collection, const counts
   return(sample);
 }
 
-bool randomization_test(const Seeding::DataCollection &collection, const counts_t &counts, size_t nr_tests, double score, const Seeding::Options &options, const Seeding::Objective &objective, size_t length, size_t degeneracy) {
+bool randomization_test(const Seeding::DataCollection &collection, const count_vector_t &counts, size_t nr_tests, double score, const Seeding::Options &options, const Seeding::Objective &objective, size_t length, size_t degeneracy) {
   if(options.verbosity >= Verbosity::verbose)
     cout << "Randomization test" << endl;
   for(size_t i = 0; i < nr_tests; i++) {
 
-    counts_t sample = generate_sample(collection, counts, options.verbosity);
+    count_vector_t sample = generate_sample(collection, counts, options.verbosity);
 
     double sample_score = compute_score(collection, sample, options, objective, length, degeneracy);
 

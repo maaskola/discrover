@@ -243,7 +243,7 @@ namespace Seeding {
 
     Results results;
 
-    Stats::OccurrenceCounts best_contrast = count_motif(collection, best_motif, options);
+    count_vector_t best_contrast = count_motif(collection, best_motif, options);
     double log_p = -compute_score(collection, best_contrast, options, objective, length, motif_degeneracy(best_motif), Measures::Discrete::Measure::CorrectedLogpGtest);
     Result result(objective);
     result.motif = best_motif;
@@ -340,7 +340,7 @@ namespace Seeding {
     }
 
     if(degeneracies.find(degeneracy) != end(degeneracies)) {
-      Stats::OccurrenceCounts best_contrast = count_motif(collection, best_motif, options);
+      count_vector_t best_contrast = count_motif(collection, best_motif, options);
       double log_p = -compute_score(collection, best_contrast, options, objective, length, degeneracy, Measures::Discrete::Measure::CorrectedLogpGtest);
       Result result(objective);
       result.motif = best_motif;
@@ -450,7 +450,7 @@ namespace Seeding {
                   counts_vec = index.word_hits_by_file(modified_word);
                 else
                   counts_vec = index.seq_hits_by_file(modified_word, options.revcomp);
-                Stats::OccurrenceCounts counts(counts_vec.size());
+                count_vector_t counts(counts_vec.size());
                 for(size_t i = 0; i < counts_vec.size(); i++)
                   counts[i] = counts_vec[i];
                 if(options.word_stats and options.revcomp) {
@@ -497,7 +497,7 @@ namespace Seeding {
         }
     }
 
-    Stats::OccurrenceCounts best_contrast = count_motif(collection, best_motif, options);
+    count_vector_t best_contrast = count_motif(collection, best_motif, options);
     double log_p = -compute_score(collection, best_contrast, options, objective, length, motif_degeneracy(best_motif), Measures::Discrete::Measure::CorrectedLogpGtest);
     Result result(objective);
     result.motif = best_motif;
@@ -597,7 +597,7 @@ namespace Seeding {
           else
             counts_vec = index.seq_hits_by_file(generalization, options.revcomp);
           // t1 = timer.tock();
-          Stats::OccurrenceCounts counts(counts_vec.size());
+          count_vector_t counts(counts_vec.size());
           for(size_t i = 0; i < counts_vec.size(); i++)
             counts[i] = counts_vec[i];
           if(options.word_stats and options.revcomp) {
@@ -605,7 +605,7 @@ namespace Seeding {
             for(size_t i = 0; i < counts_vec.size(); i++)
               counts[i] += counts_vec[i];
           }
-          // Stats::OccurrenceCounts counts_old = count_motif(collection, generalization, options);
+          // count_vector_t counts_old = count_motif(collection, generalization, options);
           scores[i] = compute_score(collection, counts, options, objective, length, degeneracy);
         }
 
@@ -638,7 +638,7 @@ namespace Seeding {
         }
 
         if(best_motif_changed and degeneracies.find(degeneracy) != end(degeneracies)) {
-          Stats::OccurrenceCounts best_contrast = count_motif(collection, best_motif, options);
+          count_vector_t best_contrast = count_motif(collection, best_motif, options);
           double log_p = -compute_score(collection, best_contrast, options, objective, length, degeneracy, Measures::Discrete::Measure::CorrectedLogpGtest);
           Result result(objective);
           result.motif = best_motif;
@@ -655,7 +655,7 @@ namespace Seeding {
       }
 
       if(best_motif_changed and degeneracies.find(degeneracy) == end(degeneracies)) {
-        Stats::OccurrenceCounts best_contrast = count_motif(collection, best_motif, options);
+        count_vector_t best_contrast = count_motif(collection, best_motif, options);
         double log_p = -compute_score(collection, best_contrast, options, objective, length, degeneracy, Measures::Discrete::Measure::CorrectedLogpGtest);
         Result result(objective);
         result.motif = best_motif;

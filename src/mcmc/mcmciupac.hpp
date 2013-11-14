@@ -158,7 +158,7 @@ namespace MCMC {
           data(data_), options(opt), objective(obj) { };
 
         double evaluate(const Motif &motif) const {
-          Seeding::Stats::OccurrenceCounts counts = count_motif(data, motif, options);
+          count_vector_t counts = count_motif(data, motif, options);
           double score = compute_score(data, counts, options, objective, motif.size(), Seeding::motif_degeneracy(motif));
           return(score);
         };

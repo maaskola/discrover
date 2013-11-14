@@ -38,8 +38,8 @@
 #include "options.hpp"
 #include "results.hpp"
 
-double compute_mutual_information_variance(const Seeding::Stats::OccurrenceTable &m_, double pseudo_count, bool normalize);
-double compute_mutual_information(const Seeding::Stats::OccurrenceTable &counts, double pseudo_count=0, bool normalize=false, bool do_correction=false);
+double compute_mutual_information_variance(const matrix_t &m_, double pseudo_count, bool normalize);
+double compute_mutual_information(const matrix_t &counts, double pseudo_count=0, bool normalize=false, bool do_correction=false);
 double compute_mutual_information(double a, double b, double c, double d);
 
 double compute_mcc(double a, double b, double c, double d);
@@ -58,7 +58,7 @@ double compute_score(
   );
 double compute_score(
     const Seeding::DataCollection &collection,
-    const Seeding::Stats::OccurrenceCounts &counts,
+    const count_vector_t &counts,
     const Seeding::Options &options,
     const Seeding::Objective &objective,
     size_t length,
@@ -67,7 +67,7 @@ double compute_score(
     bool do_correction=false);
 double compute_score(
     const Seeding::DataSeries &data_series,
-    const Seeding::Stats::OccurrenceCounts &contrast,
+    const count_vector_t &contrast,
     const Seeding::Options &options,
     Measures::Discrete::Measure measure,
     size_t length,
