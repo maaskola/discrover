@@ -35,9 +35,17 @@ This package provides programs for discriminative motif discovery of protein bin
 
 \section{Tutorial}
 Assume that you have one FASTA file with signal sequences, \verb|signal.fa|, and one with control sequences, and that you want to find motifs of length 8~nt that are discriminative between the two.
-Then the following command already suffices:\\
+\subsection{Analyzing RNA-binding proteins}
+To analyze RNA-binding proteins the following command already suffices:\\
 \begin{verbbox}
 dlhmm signal.fa control.fa -m 8
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+\subsection{Analyzing DNA-binding proteins}
+In case you want to analyze DNA-binding proteins, please add the \verb|-r| option or its long variant \verb|--revcomp| to also consider motif occurrences on the reverse complementary strand.\\
+\begin{verbbox}
+dlhmm signal.fa control.fa -m 8 -r
 \end{verbbox}
 \fbox{\theverbbox[t]}
 
