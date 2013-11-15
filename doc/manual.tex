@@ -4,7 +4,7 @@
 %
 \documentclass[a4paper]{article}
 
-\usepackage{hyperref,cleveref,verbatimbox}
+\usepackage{hyperref,cleveref,verbatimbox,natbib}
 
 \newcommand{\plasma}[0]{\texttt{plasma}}
 \newcommand{\dlhmm}[0]{\texttt{dlhmm}}
@@ -20,13 +20,48 @@
   This is the documentation for \dlhmm{} version \version{}.
   Please refer to the publication~\cite{Maaskola2013} for a full description of the method.
 
+  The package provides programs for discriminative motif discovery of protein binding sites in nucleic acid sequences.
+
   This document briefly describes the purpose of this motif finding package, explains important concepts, and details usage of the programs that are part of this package.
 \end{abstract}
 
 \tableofcontents
 
 \section{Introduction}
-This package provides programs for discriminative motif discovery of protein binding sites in nucleic acid sequences.
+
+Transcriptional and post-transcriptional regulation rely to a large extent on effective mechanisms that allow nucleic acid binding proteins to recognize specific sets of nucleic acids.
+Aside from structural cues, binding of regulators is guided by sequence information (motifs) present in cognate nucleic acids.
+
+Motif discovery is the problem of unraveling motifs recognized by a given nucleic acid binding protein from sequences known to harbor occurrences of the motif.
+Classically, motif finding was marked by scarcity of data when only few sequences were available.
+The introduction of microarray based technologies like ChIP-chip \cite{Ren2000,Iyer2001} and RIP-Chip \cite{Tenenbaum2000,Keene2006} allowed to assay \textit{in vivo} sequence binding specificity on a genome-wide scale.
+More recently sequencing based technologies, such as ChIP-Seq \cite{Robertson2007, Johnson2007} and CLIP-Seq \cite{Licatalosi2008,Sanford2009,Hafner2010} further increased the amounts of data yielded by single experiments and simultaneously improved the spatial resolution, reducing uncertainty about the exact location of \textit{in vivo} binding sites.
+SELEX \cite{Ellington1990,Tuerk1990} and related sequencing based technologies \cite{Jolma2010}, and protein-binding microarrays (PBMs) \cite{Bulyk2001,Berger2006a} are targeted assays for the \textit{in vitro} sequence binding specificity of nucleic acid binding proteins.
+
+Due to the central importance of the motif discovery problem in computational biology many algorithms addressing it have been developed over the last two decades \cite{Das2007}.
+These algorithms employ  a variety of models for the sequence binding specificity of nucleic acid binding proteins, including discrete word-based models, as well as probabilistic models such as position weight matrices (PWM) \cite{Stormo1998}, and hidden Markov models (HMM) \cite{Rabiner1989}.
+Word based approaches tend to be computationally efficient and allow fast global optimization, but may fail for motifs that include weak positions \cite{Das2007}.
+PWMs can be motivated from biophysical principles \cite{Berg1987,Stormo2000,Foat2006}.
+General inference methods for HMMs offer a unified framework for biological sequence modeling \cite{Durbin1998}.
+HMMs flexibly model both binding sites and their surrounding sequence context, may account for dependence of neighboring positions via higher order emissions, and length variability of motifs is idiomatically realized via non-constitutive states in the HMM topology.
+
+Because of historically smaller data sizes, many of the presently available motif finding methods were not designed for data sets as large as those produced by current experiments.
+Consequently, many of these abort or run unacceptably slow when applied to large data sets.
+Thus, even after more than two decades of computational analysis of biological sequences, there is continued interest in the development of new analysis methods that leverage the full potential of large data sets.
+
+\subsection{Overview}
+Here we describe a discriminative learning method based on HMMs, realized and available as free software, to automatically discover binding site sequence motifs of nucleic acid binding proteins from arbitrary contrasts,
+such as positive and negative example sequences.
+Not all of the positive examples need contain binding site occurrences and not all negative examples need be devoid of them.
+The framework is applicable to a broad variety of contrasts, comprising the comparison of strongly bound versus weakly bound targets, or of signal sequences with shuffled sequences.
+It is also possible to discover context-dependent motifs, or to analyze data sets of different factors for mutually discriminative features.
+When available, information from repeat experiments is leveraged by the method.
+
+Putative motifs are identified by a measure of association that quantifies how strongly motif presence varies across conditions of a contrast.
+For the chosen objective function, a discrete optimization phase determines IUPAC regular expressions as seeds from which HMMs are initialized.
+Subsequently HMM parameters are improved with gradient optimization, which is demonstrated to robustly and effectively function with realistic data sizes.
+
+Objective functions evaluated on multiple contrast may be combined into meta-objectives that allow for a joint analysis of repeat experiments, or to discover motifs that are differential in one contrast but not, or less so, in another.
 
 \section{Concepts}
 \subsection{Objective functions}
@@ -117,10 +152,10 @@ If additionally the switch \verb|-v| or its long variant \verb|--verbose| is giv
 
 
 \nocite{*}
+\phantomsection
 \addcontentsline{toc}{section}{References}
 \bibliographystyle{apalike}
 \bibliography{documentation}
-
 
 
 \end{document}
