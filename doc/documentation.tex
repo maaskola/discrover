@@ -4,7 +4,7 @@
 %
 \documentclass[a4paper]{article}
 
-\usepackage{hyperref,cleveref}
+\usepackage{hyperref,cleveref,verbatimbox}
 
 \newcommand{\plasma}[0]{\texttt{plasma}}
 \newcommand{\dlhmm}[0]{\texttt{dlhmm}}
@@ -34,6 +34,12 @@ This package provides programs for discriminative motif discovery of protein bin
 \subsection{Binding site HMM optimization}
 
 \section{Tutorial}
+Assume that you have one FASTA file with signal sequences, \verb|signal.fa|, and one with control sequences, and that you want to find motifs of length 8~nt that are discriminative between the two.
+Then the following command already suffices:\\
+\begin{verbbox}
+dlhmm signal.fa control.fa -m 8
+\end{verbbox}
+\fbox{\theverbbox[t]}
 
 \section{Usage}
 There are two main programs that are part of this package, a seed discovery program, \plasma{}, and one for optimizing binding site HMMs, \dlhmm{}.
