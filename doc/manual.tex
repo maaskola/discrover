@@ -69,18 +69,40 @@ Objective functions evaluated on multiple contrast may be combined into meta-obj
 \subsection{Binding site HMM optimization}
 
 \section{Tutorial}
-Assume that you have one FASTA file with signal sequences, \verb|signal.fa|, and one with control sequences, and that you want to find motifs of length 8~nt that are discriminative between the two.
-\subsection{Analyzing RNA-binding proteins}
+This tutorial will demonstrate the basic usage of the motif discovery tools in this package.
+Let us assume that you have one FASTA file with signal sequences, \verb|signal.fa|, and one with control sequences, and that you want to find motifs of length 8~nt that are discriminative between the two.
+\subsection{Basic usage}
+To perform a full analysis of discriminative motifs, \dlhmm{} automatically discovers the most discriminative IUPAC regular expression as seed, initializes an HMM on it, and subsequently optimizes the HMM parameters.
+\subsubsection{Analysis of RNA-binding proteins}
 To analyze RNA-binding proteins the following command already suffices:\\
 \begin{verbbox}
 dlhmm signal.fa control.fa -m 8
 \end{verbbox}
 \fbox{\theverbbox[t]}
 
-\subsection{Analyzing DNA-binding proteins}
+\subsubsection{Analysis of DNA-binding proteins}
 In case you want to analyze DNA-binding proteins, please add the \verb|-r| option or its long variant \verb|--revcomp| to also consider motif occurrences on the reverse complementary strand.\\
 \begin{verbbox}
 dlhmm signal.fa control.fa -m 8 -r
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+\subsection{Manual seed discovery}
+\label{tutorial:plasma}
+Apart from the fully integrated analysis describes above, it is also possible to manually run the seed discovery:\\
+\begin{verbbox}
+plasma signal.fa control.fa -m 8 -r
+\end{verbbox}
+\fbox{\theverbbox[t]}
+Here, we are looking again for a DNA-binding protein's motif (due to the usage of the option \verb|-r|).
+The command line interface of the two programs is intentionally similar, so that the most important command line options apply to both programs.
+
+\subsection{Manual seed specification for \dlhmm{}}
+Say that you have found a seed of interest for your protein, for example by manually using \plasma{} as described in \cref{tutorial:plasma}.
+Let us assume it is the IUPAC regular expression \verb|tgtanatw|, where the \verb|n| stands for any nucleotide and the \verb|w| for either \verb|a| or \verb|t|.
+You can now use this IUPAC regular expression as seed for an HMM and optimize the HMM parameters as follows:\\
+\begin{verbbox}
+dlhmm signal.fa control.fa -m tgtanata
 \end{verbbox}
 \fbox{\theverbbox[t]}
 
