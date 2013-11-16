@@ -9,6 +9,7 @@
 \newcommand{\plasma}[0]{\texttt{plasma}}
 \newcommand{\dlhmm}[0]{\texttt{dlhmm}}
 \newcommand{\version}[0]{@GIT_DESCRIPTION@}
+\newcommand{\TikZ}{Ti\emph{k}Z}
 
 \title{Manual for \dlhmm{} v\version{}}
 \author{Jonas Maaskola}
@@ -105,6 +106,15 @@ You can now use this IUPAC regular expression as seed for an HMM and optimize th
 dlhmm signal.fa control.fa -m tgtanata
 \end{verbbox}
 \fbox{\theverbbox[t]}
+
+
+\subsection{Generating sequence logos for motifs}
+You can generate sequence logos of discovered motifs by using the script \verb|tikzlogo|:\\
+\begin{verbbox}
+tikzlogo motif.hmm
+\end{verbbox}
+\fbox{\theverbbox[t]}
+This generates a \LaTeX document which uses \TikZ{} code to draw a sequence motif, and subsequently compiles the generated \LaTeX file into a PDF document.
 
 \section{Usage}
 There are two main programs that are part of this package, a seed discovery program, \plasma{}, and one for optimizing binding site HMMs, \dlhmm{}.
