@@ -11,3 +11,4 @@
 * Add RNG seed specification for all parts requiring randomization
   - MCMC
 * MCMC seeding can sample across motif lengths
+* Collect rejection statistics for MCMC chains
