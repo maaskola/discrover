@@ -215,7 +215,6 @@ namespace Seeding {
   /** This executes MCMC to find discriminative IUPAC motifs.
    */
   Results Plasma::find_mcmc(size_t length, const Objective &objective, size_t max_degeneracy) const {
-    srand(time(0));
     MCMC::Evaluator<MCMC::Motif> eval(collection, options, objective);
     MCMC::Generator<MCMC::Motif> gen(options, length, max_degeneracy);
     MCMC::MonteCarlo<MCMC::Motif> mcmc(gen, eval, options.verbosity);
@@ -223,10 +222,7 @@ namespace Seeding {
     std::vector<MCMC::Motif> init;
     double temperature = options.mcmc.temperature;
     for(size_t i = 0; i < options.mcmc.n_parallel; i++) {
-      string word;
-      for(size_t j = 0; j < length; j++)
-        word += "acgt"[rand() % 4];
-      init.push_back(word);
+      init.push_back(gen.generate());
       temperatures.push_back(temperature);
       temperature /= 2;
     }
