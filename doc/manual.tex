@@ -4,11 +4,12 @@
 %
 \documentclass[a4paper]{article}
 
-\usepackage{hyperref,cleveref,verbatimbox,natbib}
+\usepackage{hyperref,cleveref,verbatimbox,natbib,url}
 
 \newcommand{\plasma}[0]{\texttt{plasma}}
 \newcommand{\dlhmm}[0]{\texttt{dlhmm}}
 \newcommand{\version}[0]{@GIT_DESCRIPTION@}
+\newcommand{\theurl}[0]{\url{https://github.com/maaskola/dlhmm}}
 \newcommand{\TikZ}{Ti\emph{k}Z}
 
 \hypersetup{%
@@ -29,6 +30,7 @@
   Please refer to the publication~\cite{Maaskola2013} for a full description of the method.
 
   The package provides programs for discriminative motif discovery of protein binding sites in nucleic acid sequences.
+  It is available as free software under the GNU General Public License v3 from \theurl{}.
 
   This document briefly describes the purpose of this motif finding package, explains important concepts, and details usage of the programs that are part of this package.
 \end{abstract}
