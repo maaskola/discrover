@@ -110,7 +110,7 @@ namespace Seeding {
     os << "Variance mutual information [bit] " << compute_score(collection, res, options, Measures::Discrete::Measure::VarianceMutualInformation, true) << endl;
     os << "Sd mutual information [bit]       " << sqrt(compute_score(collection, res, options, Measures::Discrete::Measure::VarianceMutualInformation, true)) << endl;
     os << "Z mutual information [bit]        " << compute_score(collection, res, options, Measures::Discrete::Measure::MutualInformation, true) / sqrt(compute_score(collection, res, options, Measures::Discrete::Measure::VarianceMutualInformation, true)) << endl;
-    os << "Fisher exact test                 " << compute_score(collection, res, options, Measures::Discrete::Measure::FisherExactTest) << endl;
+    os << "Fisher exact test                 " << -compute_score(collection, res, options, Measures::Discrete::Measure::FisherExactTest) << endl;
     os << "G-test                            " << compute_score(collection, res, options, Measures::Discrete::Measure::Gtest) << endl;
     os << "Uncorrected log-P(G-test)         " << -compute_score(collection, res, options, Measures::Discrete::Measure::LogpGtest) << endl;
     os << "Corrected log-P(G-test)           " << x << (x > 0 ? "      WARNING: greater zero!" : "") << endl;
@@ -522,6 +522,12 @@ namespace Seeding {
     Results results;
     if(options.verbosity >= Verbosity::verbose)
       cout << "Finding motif of length " << length << " using top " << options.plasma.max_candidates << " breadth search by " << measure2string(objective.measure) << "." << endl;
+
+    if(objective.measure == Measures::Discrete::Measure::FisherExactTest)
+      cerr << "Warning: Fisher exact test does not work very well with the seeding algorithm" << endl
+        << "Plasma. The reason is that for extreme distributions in the contingency table," << endl
+        << "this test tends to underflow, and thus it does not discriminate further between" << endl
+        << "extreme tables." << endl;
 
 //    if(options.verbosity >= Verbosity::debug)
 //      os << "set signal / control = " << options.set_sizes.signal.size() << " " << options.set_sizes.control.size() << endl;
