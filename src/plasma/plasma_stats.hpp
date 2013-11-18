@@ -34,12 +34,32 @@
 #include <map>
 #include <string>
 #include "../matrix.hpp"
+#include "../verbosity.hpp"
 
 namespace Seeding {
   typedef std::unordered_map<std::string, count_vector_t> hash_map_t;
   typedef std::unordered_map<std::string, double> score_map_t;
   typedef std::multimap<double, std::string, std::greater<double>> rev_map_t;
 }
+
+struct FisherExactTestResults {
+  double p_value;
+  double log_p_value;
+};
+
+
+enum class Alternative {
+  TwoSided,
+  Less,
+  Greater
+};
+
+FisherExactTestResults fisher_exact_test(const matrix_t &X_,
+    double hypothesizedOddsRatio = 1,
+    Alternative alternative = Alternative::TwoSided,
+    bool confInt = true,
+    double confLevel = 0.95,
+    Verbosity verbosity=Verbosity::verbose);
 
 #endif   /* ----- #ifndef PLASMA_STATS_HPP ----- */
 
