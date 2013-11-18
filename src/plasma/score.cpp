@@ -148,9 +148,7 @@ double compute_bonferroni_corrected_logp_gtest(const matrix_t &m, double pseudo_
 double compute_fisher_exact_test(const matrix_t &m, double pseudo_count, bool normalize, size_t length, size_t degeneracy) {
   auto test_results = fisher_exact_test(m);
   double log_correction = compute_correction(length, degeneracy);
-  log_correction=0;
   double val = -test_results.log_p_value - log_correction;
-  cout << "fisher: " << m << " -> " << test_results.log_p_value << endl;
   return val;
 }
 
