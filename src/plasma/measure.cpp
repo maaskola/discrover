@@ -159,6 +159,23 @@ namespace Measures {
       return false;
   }
 
+  template <> bool is_inverted<Discrete::Measure>(Discrete::Measure measure)
+  {
+    switch(measure) {
+      case Discrete::Measure::FisherExactTest:
+      case Discrete::Measure::LogpGtest:
+      case Discrete::Measure::CorrectedLogpGtest:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  template <> bool is_inverted<Continuous::Measure>(Continuous::Measure measure)
+  {
+    // currently no continuous measures are inverted
+    return false;
+  }
 
   namespace Continuous {
     void parse_measure(const string &token, Measure &measure) {

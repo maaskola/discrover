@@ -77,6 +77,7 @@ namespace Measures {
 
     std::istream& operator>>(std::istream& in, Measure &measure);
     std::ostream &operator<<(std::ostream &out, const Measure &measure);
+
   }
 
   template <typename X> bool is_discriminative(X measure);
@@ -89,6 +90,10 @@ namespace Measures {
   template <> bool is_two_by_two<Discrete::Measure>(Discrete::Measure measure);
   template <> bool is_two_by_two<Continuous::Measure>(Continuous::Measure measure);
 //  template <typename X> bool is_generative(X measure) { return(not is_discriminative<X>(measure)); }
+
+  template <typename X> bool is_inverted(X measure);
+  template <> bool is_inverted<Discrete::Measure>(Discrete::Measure measure);
+  template <> bool is_inverted<Continuous::Measure>(Continuous::Measure measure);
 
   Discrete::Measure corresponding_measure(Continuous::Measure);
 }
