@@ -99,8 +99,10 @@ namespace Seeding {
     Options no_ps = options;
     no_ps.pseudo_count = 0;
     double x = -compute_score(collection, res, options, Measures::Discrete::Measure::CorrectedLogpGtest);
-    for(auto &objective: options.objectives)
-      os << "Objective: " << Specification::to_string(objective) << "                            " << compute_score(collection, res.counts, options, objective, res.motif.size(), motif_degeneracy(res.motif)) << endl;
+    for(auto &objective: options.objectives) {
+      double sign = (Measures::is_inverted(objective.measure) ? -1 : 1);
+      os << "Objective: " << Specification::to_string(objective) << "                            " << sign * compute_score(collection, res.counts, options, objective, res.motif.size(), motif_degeneracy(res.motif)) << endl;
+    }
     os << "Score                             " << compute_score(collection, res, options) << endl;
     os << "Delta frequency                   " << compute_score(collection, res, options, Measures::Discrete::Measure::DeltaFrequency) << endl;
     os << "Matthew's correlation coefficient " << compute_score(collection, res, options, Measures::Discrete::Measure::MatthewsCorrelationCoefficient) << endl;
