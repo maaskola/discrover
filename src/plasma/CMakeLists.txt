@@ -27,10 +27,12 @@ IF(GOOGLEPERFTOOLS_FOUND)
   TARGET_LINK_LIBRARIES(plasma-bin ${PROFILER_LIBRARY} ${TCMALLOC_LIBRARY})
 ENDIF()
 
-IF(LIBR_FOUND AND LIBR_MATHLIB_LIBRARY)
-  ADD_EXECUTABLE(test_fisher test_fisher.cpp plasma_stats.cpp)
-  TARGET_LINK_LIBRARIES(test_fisher m ${LIBR_LIBRARIES})
-ENDIF()
+# The following is code to validate the implementation of the Fisher exact
+# test. Uncomment to build.
+# IF(LIBR_FOUND AND LIBR_MATHLIB_LIBRARY)
+#   ADD_EXECUTABLE(test_fisher test_fisher.cpp plasma_stats.cpp)
+#   TARGET_LINK_LIBRARIES(test_fisher m ${LIBR_LIBRARIES})
+# ENDIF()
 
 INSTALL(TARGETS plasma-bin plasma
   RUNTIME DESTINATION bin
