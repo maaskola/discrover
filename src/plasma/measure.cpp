@@ -43,8 +43,12 @@ namespace Measures {
         measure = Measure::CorrectedLogpGtest;
       else if(token == "fisher")
         measure = Measure::FisherExactTest;
-      else
+      else if(token == "undefined")
         measure = Measure::Undefined;
+      else {
+        cout << "Could not parse measure: " << token << std::endl;
+        exit(-1);
+      }
     }
 
     string measure2string(Measure measure) {
@@ -152,11 +156,14 @@ namespace Measures {
 
   template <> bool is_two_by_two<Discrete::Measure>(Discrete::Measure measure)
   {
-    if(measure == Discrete::Measure::MatthewsCorrelationCoefficient
-        or measure == Discrete::Measure::DeltaFrequency)
-      return true;
-    else
-      return false;
+    switch(measure) {
+      case Discrete::Measure::MatthewsCorrelationCoefficient:
+      case Discrete::Measure::DeltaFrequency:
+      case Discrete::Measure::FisherExactTest:
+        return true;
+      default:
+        return false;
+    }
   }
 
   template <> bool is_inverted<Discrete::Measure>(Discrete::Measure measure)
