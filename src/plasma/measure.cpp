@@ -41,6 +41,8 @@ namespace Measures {
         measure = Measure::LogpGtest;
       else if(token == "gtest_logp")
         measure = Measure::CorrectedLogpGtest;
+      else if(token == "fisher")
+        measure = Measure::FisherExactTest;
       else
         measure = Measure::Undefined;
     }
@@ -65,6 +67,8 @@ namespace Measures {
           return("Bonferroni-corrected log P(G-test)");
         case Measure::VarianceMutualInformation:
           return("variance of mutual information");
+        case Measure::FisherExactTest:
+          return("Fisher's exact test");
         case Measure::Undefined:
           return("undefined");
       }
@@ -92,6 +96,8 @@ namespace Measures {
           return("gtest_logp");
         case Measure::VarianceMutualInformation:
           return("var_mi");
+        case Measure::FisherExactTest:
+          return("fisher");
         case Measure::Undefined:
           return("undefined");
       }

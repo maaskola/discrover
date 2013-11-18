@@ -145,6 +145,15 @@ double compute_bonferroni_corrected_logp_gtest(const matrix_t &m, double pseudo_
   return(compute_logp_gtest(m, pseudo_count, normalize) - log_correction);
 }
 
+double compute_fisher_exact_test(const matrix_t &m, double pseudo_count, bool normalize, size_t length, size_t degeneracy) {
+  auto test_results = fisher_exact_test(m);
+  double log_correction = compute_correction(length, degeneracy);
+  log_correction=0;
+  double val = -test_results.log_p_value - log_correction;
+  cout << "fisher: " << m << " -> " << test_results.log_p_value << endl;
+  return val;
+}
+
 double compute_mcc(double a, double b, double c, double d) {
   return (a*d - b*c) / sqrt((a+b)*(a+c)*(b+d)*(c+d));
 }
@@ -279,6 +288,9 @@ double compute_score(const Seeding::DataSeries &data_series, const count_vector_
     case Measures::Discrete::Measure::CorrectedLogpGtest:
       score = compute_bonferroni_corrected_logp_gtest(occurrence_table, options.pseudo_count, true, length, degeneracy);
       break;
+    case Measures::Discrete::Measure::FisherExactTest:
+      score = compute_fisher_exact_test(occurrence_table, options.pseudo_count, true, length, degeneracy);
+      break;
     case Measures::Discrete::Measure::MatthewsCorrelationCoefficient:
       return(compute_mcc(signal_freq, signal_size - signal_freq, control_freq, control_size - control_freq));
     case Measures::Discrete::Measure::DeltaFrequency:
@@ -288,7 +300,8 @@ double compute_score(const Seeding::DataSeries &data_series, const count_vector_
     case Measures::Discrete::Measure::ControlFrequency:
       return(control_rel_freq);
     default:
-      assert(false);
+      cout << "Calculation of score '" << measure << "' not implemented." << endl;
+      exit(-1);
   }
 
   return(score);

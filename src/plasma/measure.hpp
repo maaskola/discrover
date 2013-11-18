@@ -46,6 +46,7 @@ namespace Measures {
       CorrectedLogpGtest,
       MatthewsCorrelationCoefficient,
       DeltaFrequency,
+      FisherExactTest
     };
 
     void parse_measure(const std::string &token, Measure &measure);
