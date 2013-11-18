@@ -110,6 +110,7 @@ namespace Seeding {
     os << "Variance mutual information [bit] " << compute_score(collection, res, options, Measures::Discrete::Measure::VarianceMutualInformation, true) << endl;
     os << "Sd mutual information [bit]       " << sqrt(compute_score(collection, res, options, Measures::Discrete::Measure::VarianceMutualInformation, true)) << endl;
     os << "Z mutual information [bit]        " << compute_score(collection, res, options, Measures::Discrete::Measure::MutualInformation, true) / sqrt(compute_score(collection, res, options, Measures::Discrete::Measure::VarianceMutualInformation, true)) << endl;
+    os << "Fisher exact test                 " << compute_score(collection, res, options, Measures::Discrete::Measure::FisherExactTest) << endl;
     os << "G-test                            " << compute_score(collection, res, options, Measures::Discrete::Measure::Gtest) << endl;
     os << "Uncorrected log-P(G-test)         " << -compute_score(collection, res, options, Measures::Discrete::Measure::LogpGtest) << endl;
     os << "Corrected log-P(G-test)           " << x << (x > 0 ? "      WARNING: greater zero!" : "") << endl;
