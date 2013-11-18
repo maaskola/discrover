@@ -42,6 +42,8 @@
 #include "../terminal.hpp"
 #include "../random_seed.hpp"
 
+size_t HMM::mcmc_simulations_run = 0;
+
 using namespace std;
 
 string gen_usage_string(const string &program_name)
