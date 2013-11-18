@@ -40,6 +40,9 @@
 #include "analysis.hpp"
 #include "../aux.hpp"
 #include "../terminal.hpp"
+#include "../random_seed.hpp"
+
+size_t HMM::mcmc_simulations_run = 0;
 
 using namespace std;
 
@@ -129,7 +132,8 @@ void fixup_seeding_options(hmm_options &options) {
 
   options.seeding.mcmc.max_iter = options.termination.max_iter;
   options.seeding.mcmc.temperature = options.sampling.temperature;
-  options.seeding.mcmc.n_parallel= options.sampling.n_parallel;
+  options.seeding.mcmc.n_parallel = options.sampling.n_parallel;
+  options.seeding.mcmc.random_salt = options.random_salt;
 }
 
 string generate_random_label(const string &prefix="dlhmm", size_t n_rnd_char=5, Verbosity verbosity=Verbosity::info) {
@@ -154,20 +158,6 @@ string generate_random_label(const string &prefix="dlhmm", size_t n_rnd_char=5, 
   return(label);
 }
 
-template <typename X> X entropy_from_os(const std::string &source="/dev/urandom") {
-  std::ifstream f(source.c_str());
-  X myRandom;
-  f.read(reinterpret_cast<char*>(&myRandom), sizeof(myRandom));
-  return(myRandom);
-}
-
-template <typename X> void mix_with_os_entropy(X &x, const std::string &source="/dev/urandom") {
-  if(boost::filesystem::exists(source)) {
-    X y = entropy_from_os<X>(source);
-    x = x ^ y;
-  }
-}
-
 int main(int argc, const char** argv)
 {
   const string default_error_msg = "Please inspect the command line help with -h or --help.";
@@ -180,8 +170,7 @@ int main(int argc, const char** argv)
   hmm_options options;
   options.exec_info = generate_exec_info(argv[0], GIT_DESCRIPTION, cmdline(argc, argv));
   options.class_model = false;
-  options.random_salt = time(0) ^ getpid(); // XOR Unix time & process ID
-  mix_with_os_entropy(options.random_salt); // XOR with entropy from /dev/urandom if available
+  options.random_salt = generate_rng_seed();
 
   string config_path;
   bool hmm_score_seeding;
