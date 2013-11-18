@@ -182,7 +182,7 @@ namespace Seeding {
 
     Results plasma_results;
     if((algorithm & Algorithm::Plasma) == Algorithm::Plasma)
-      plasma_results = find_breadth(length, objective, max_degeneracy, degeneracies);
+      plasma_results = find_plasma(length, objective, max_degeneracy, degeneracies);
 
     Results fire_results;
     if((algorithm & Algorithm::FIRE) == Algorithm::FIRE)
@@ -517,7 +517,7 @@ namespace Seeding {
    * For each level of degeneracy the top N generalizations of the motifs of the
    * previous level of degeneracy are determined.
    */
-  Results Plasma::find_breadth(size_t length, const Objective &objective, size_t max_degeneracy, const set<size_t> &degeneracies) const {
+  Results Plasma::find_plasma(size_t length, const Objective &objective, size_t max_degeneracy, const set<size_t> &degeneracies) const {
     Results results;
     if(options.verbosity >= Verbosity::verbose)
       cout << "Finding motif of length " << length << " using top " << options.plasma.max_candidates << " breadth search by " << measure2string(objective.measure) << "." << endl;
