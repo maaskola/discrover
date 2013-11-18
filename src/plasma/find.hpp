@@ -51,7 +51,7 @@ namespace Seeding {
       void apply_mask(const Results &results);
     private:
       Results find_seeds(size_t length, const Objective &objective, Algorithm algorithm);
-      Results find_breadth(size_t length, const Objective &objective, size_t max_degeneracy, const std::set<size_t> &degeneracies) const;
+      Results find_plasma(size_t length, const Objective &objective, size_t max_degeneracy, const std::set<size_t> &degeneracies) const;
       Results find_fire(size_t length, const Objective &objective, size_t max_degeneracy, const std::set<size_t> &degeneracies) const;
       Results find_mcmc(size_t length, const Objective &objective, size_t max_degeneracy) const;
       rev_map_t determine_initial_candidates(size_t length, const Objective &objective, std::string &best_motif, size_t &n_candidates, double &max_score, Results &results, const std::set<size_t> &degeneracies) const;
