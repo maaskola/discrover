@@ -30,7 +30,7 @@ ENDIF()
 # The following is code to validate the implementation of the Fisher exact
 # test. Uncomment to build.
 # IF(LIBR_FOUND AND LIBR_MATHLIB_LIBRARY)
-#   ADD_EXECUTABLE(test_fisher test_fisher.cpp plasma_stats.cpp)
+#   ADD_EXECUTABLE(test_fisher test_fisher.cpp plasma_stats.cpp dreme_hyper.cpp)
 #   TARGET_LINK_LIBRARIES(test_fisher m ${LIBR_LIBRARIES})
 # ENDIF()
 
