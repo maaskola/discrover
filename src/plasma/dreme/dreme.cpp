@@ -3,6 +3,7 @@
 #include "../../dreme_config.hpp"
 #include <sstream>
 #include <fstream>
+#include <boost/filesystem.hpp>
 
 using namespace std;
 
@@ -44,7 +45,7 @@ namespace Dreme {
       size_t max_size,
       bool revcomp,
       size_t n_motifs,
-      const string &out_path) {
+      bool remove_temp_dir) {
     if(path2 == "")
       cout << "Running DREME for one FASTA file: " << path1 << endl;
     else
@@ -72,11 +73,8 @@ namespace Dreme {
     if(n_motifs > 0)
       str << " -m " << n_motifs;
 
-    string dreme_output_dir;
-    if(out_path == "")
-      dreme_output_dir = "/tmp/dlhmm_dreme_out/";
-    else
-      dreme_output_dir = "/tmp/" + out_path;
+    auto out_path = boost::filesystem::temp_directory_path() / "dreme-out-%%%%-%%%%";;
+    string dreme_output_dir = boost::filesystem::unique_path(out_path.string()).string();
 
     str << " -oc " << dreme_output_dir;
 
@@ -87,6 +85,12 @@ namespace Dreme {
     int res = system(command.c_str());
 
     auto regexes = parse_dreme_output(dreme_output_dir);
+
+    if(remove_temp_dir) {
+      cout << "Removing temporary directory for DREME output " << dreme_output_dir << endl;
+      boost::filesystem::remove_all(dreme_output_dir);
+    }
+
     return(regexes);
   }
 }

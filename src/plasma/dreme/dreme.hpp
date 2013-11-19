@@ -27,7 +27,7 @@ namespace Dreme {
       size_t max_size=0,
       bool revcomp=false,
       size_t n_motifs=0,
-      const std::string &out_path="");
+      bool remove_temp_dir=true);
 };
 
 #endif
