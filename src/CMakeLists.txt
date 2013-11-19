@@ -17,5 +17,3 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/stats_config.hpp.in"
 
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/dreme_config.hpp.in"
   "${CMAKE_CURRENT_SOURCE_DIR}/dreme_config.hpp" @ONLY)
-
-ADD_EXECUTABLE(rundreme dreme.cpp "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp")
