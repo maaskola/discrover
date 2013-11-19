@@ -21,6 +21,8 @@ int main(int argc, const char** argv) {
 
   try {
     auto regexes = Dreme::run(path1, path2, 8, 8, false, 1);
+    for(auto &x: regexes)
+      cout << "Dreme found motif " << x.first << " with E-value " << x.second << endl;
   } catch (exception& e) {
     cout << "Exception: " << e.what() << endl;
   }

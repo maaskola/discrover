@@ -19,9 +19,9 @@ namespace Dreme {
       virtual const char* what() const throw();
   };
 
-  std::list<std::string> parse_dreme_output(const std::string &dir);
+  std::list<std::pair<std::string,double>> parse_dreme_output(const std::string &dir);
 
-  std::list<std::string> run(const std::string &path1,
+  std::list<std::pair<std::string,double>> run(const std::string &path1,
       const std::string &path2="",
       size_t min_size=0,
       size_t max_size=0,

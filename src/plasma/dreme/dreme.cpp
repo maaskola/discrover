@@ -21,8 +21,8 @@ namespace Dreme {
     return(("min_size (" + boost::lexical_cast<string>(min_size) + ") is not smaller than max_size (" + boost::lexical_cast<string>(max_size) + ").").c_str());
   };
 
-  list<string> parse_dreme_output(const string &dir) {
-    list<string> motifs;
+  list<pair<string,double>> parse_dreme_output(const string &dir) {
+    list<pair<string,double>> motifs;
 
     string path = dir + "/dreme.txt";
 
@@ -30,12 +30,15 @@ namespace Dreme {
 
     string line;
     while(getline(ifs, line))
-      if(line.substr(0, 6) == "MOTIF ")
-        motifs.push_back(line.substr(6));
+      if(line.substr(0, 6) == "MOTIF ") {
+        string motif = line.substr(6);
+        double score = 0; // FIXME
+        motifs.push_back(make_pair(motif, score));
+      }
     return(motifs);
   }
 
-  list<string> run(const string &path1,
+  list<pair<string,double>> run(const string &path1,
       const string &path2,
       size_t min_size,
       size_t max_size,
@@ -83,9 +86,7 @@ namespace Dreme {
 
     int res = system(command.c_str());
 
-    list<string> regexes = parse_dreme_output(dreme_output_dir);
-    for(auto &x: regexes)
-      cout << "Dreme found motif: " << x << endl;
+    auto regexes = parse_dreme_output(dreme_output_dir);
     return(regexes);
   }
 }

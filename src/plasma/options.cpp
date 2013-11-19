@@ -128,15 +128,17 @@ namespace Seeding {
     boost::algorithm::to_lower(token);
     if(token == "plasma")
       return(Algorithm::Plasma);
+    else if(token == "dreme")
+      return(Algorithm::ExternalDREME);
     else if(token == "fire")
       return(Algorithm::FIRE);
     else if(token == "mcmc")
       return(Algorithm::MCMC);
     else if(token == "all")
-      return(Algorithm::Plasma | Algorithm::FIRE | Algorithm::MCMC);
+      return(Algorithm::Plasma | Algorithm::ExternalDREME | Algorithm::FIRE | Algorithm::MCMC);
     else {
       cout << "Seeding algorithm '" << token_ << "' unknown." << endl
-        << "Please use one of 'plasma', 'fire', 'mcmc', or 'all'." << endl
+        << "Please use one of 'plasma', 'dreme', 'fire', 'mcmc', or 'all'." << endl
         << "It is also possible to use multiple algorithms by separating them by comma." << endl;
       exit(-1);
     }
@@ -168,6 +170,10 @@ namespace Seeding {
     bool first = true;
     if((algorithm & Algorithm::Plasma) == Algorithm::Plasma) {
       os << "plasma";
+      first = false;
+    }
+    if((algorithm & Algorithm::ExternalDREME) == Algorithm::ExternalDREME) {
+      os << (first ? "" : ",") << "dreme";
       first = false;
     }
     if((algorithm & Algorithm::FIRE) == Algorithm::FIRE) {

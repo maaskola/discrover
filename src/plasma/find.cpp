@@ -29,6 +29,7 @@
 #include "align.hpp"
 #include "../mcmc/mcmciupac.hpp"
 #include "../timer.hpp"
+#include "dreme/dreme.hpp"
 
 using namespace std;
 
@@ -184,6 +185,10 @@ namespace Seeding {
     if((algorithm & Algorithm::Plasma) == Algorithm::Plasma)
       plasma_results = find_plasma(length, objective, max_degeneracy, degeneracies);
 
+    Results external_dreme_results;
+    if((algorithm & Algorithm::ExternalDREME) == Algorithm::ExternalDREME)
+      external_dreme_results = find_external_dreme(length, objective, max_degeneracy, degeneracies);
+
     Results fire_results;
     if((algorithm & Algorithm::FIRE) == Algorithm::FIRE)
       fire_results = find_fire(length, objective, max_degeneracy, degeneracies);
@@ -195,6 +200,11 @@ namespace Seeding {
     Results results;
     set<string> motifs;
     for(auto &m: plasma_results)
+      if(motifs.find(m.motif) == end(motifs)) {
+        motifs.insert(m.motif);
+        results.push_back(m);
+      }
+    for(auto &m: external_dreme_results)
       if(motifs.find(m.motif) == end(motifs)) {
         motifs.insert(m.motif);
         results.push_back(m);
@@ -362,6 +372,45 @@ namespace Seeding {
   }
 
 
+
+  /** This uses the external program DREME to find discriminative IUPAC motifs.
+   */
+  Results Plasma::find_external_dreme(size_t length, const Objective &objective, size_t max_degeneracy, const set<size_t> &degeneracies) const {
+    Results results;
+    vector<string> paths;
+    for(auto &series: collection)
+      for(auto &set: series)
+        paths.push_back(set.path);
+    if(paths.size() > 2) {
+      cerr << "Error: when using the external DREME program to find seeds no more than two FASTA files may be used." << endl;
+      exit(-1);
+    }
+
+    string path1 = paths[0];
+    string path2 = "";
+    if(paths.size() == 2)
+      path2 = paths[1];
+
+    auto regexes = Dreme::run(path1, path2, length, length, options.revcomp, 1);
+
+    for(auto &res: regexes) {
+      string best_motif = res.first;
+      double max_score = res.second;
+      count_vector_t best_contrast = count_motif(collection, best_motif, options);
+      double log_p = -compute_score(collection, best_contrast, options, objective, length, motif_degeneracy(best_motif), Measures::Discrete::Measure::CorrectedLogpGtest);
+      Result result(objective);
+      result.motif = best_motif;
+      result.score = max_score;
+      result.log_p = log_p;
+      result.counts = best_contrast;
+      results.push_back(result);
+
+      if(options.verbosity >= Verbosity::verbose)
+        std::cout << "DREME found: " << best_motif << " " << max_score << " " << log_p << endl;
+
+    }
+    return(results);
+  }
 
 
   /** This executes the FIRE algorithm to find discriminative IUPAC motifs.
