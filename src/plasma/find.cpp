@@ -187,6 +187,10 @@ namespace Seeding {
     if((algorithm & Algorithm::Plasma) == Algorithm::Plasma)
       plasma_results = find_plasma(length, objective, max_degeneracy, degeneracies);
 
+    Results dreme_results;
+    if((algorithm & Algorithm::DREME) == Algorithm::DREME)
+      dreme_results = find_dreme(length, objective, max_degeneracy, degeneracies);
+
     Results fire_results;
     if((algorithm & Algorithm::FIRE) == Algorithm::FIRE)
       fire_results = find_fire(length, objective, max_degeneracy, degeneracies);
@@ -198,6 +202,11 @@ namespace Seeding {
     Results results;
     set<string> motifs;
     for(auto &m: plasma_results)
+      if(motifs.find(m.motif) == end(motifs)) {
+        motifs.insert(m.motif);
+        results.push_back(m);
+      }
+    for(auto &m: dreme_results)
       if(motifs.find(m.motif) == end(motifs)) {
         motifs.insert(m.motif);
         results.push_back(m);
@@ -365,8 +374,6 @@ namespace Seeding {
   }
 
 
-
-
   /** This executes the FIRE algorithm to find discriminative IUPAC motifs.
    */
   Results Plasma::find_fire(size_t length, const Objective &objective, size_t max_degeneracy, const set<size_t> &degeneracies) const {
@@ -514,6 +521,162 @@ namespace Seeding {
 
     return(results);
   }
+
+
+  /** This executes the DREME algorithm to find discriminative IUPAC motifs.
+   */
+  Results Plasma::find_dreme(size_t length, const Objective &objective, size_t max_degeneracy, const set<size_t> &degeneracies) const {
+    Results results;
+    if(options.verbosity >= Verbosity::verbose)
+      cout << "Finding motif of length " << length << " using the DREME approach with top " << options.plasma.max_candidates << " candidates by " << measure2string(objective.measure) << "." << endl;
+
+    size_t degeneracy = 0;
+
+    string best_motif;
+    size_t n_candidates = 0;
+    double max_score;
+
+    // TODO: DREME considers all 3 to 8 nucleotide words
+    rev_map_t candidates = determine_initial_candidates(length, objective, best_motif, n_candidates, max_score, results, degeneracies);
+
+    bool best_motif_changed = true;
+
+    if(max_degeneracy > 0) {
+      while(not index_ready) {
+        if(options.verbosity >= Verbosity::verbose)
+          cerr << "Index still not ready." << endl;
+        sleep(1);
+      }
+      Timer my_timer;
+      while((not candidates.empty()) and degeneracy < max_degeneracy) {
+        degeneracy++;
+        if(options.verbosity >= Verbosity::verbose)
+          cout << "Next round. We have " << candidates.size() << " candidates." << endl;
+
+        score_map_t propositions; // scores have been computed for these motifs
+        // alt_score_map_t propositions; // scores have been computed for these motifs
+        // set<string> ignored; // motifs whose score is inferior than one of their specifications
+
+        for(auto &candidate: candidates) {
+          double candidate_score = candidate.first;
+          string candidate_motif(candidate.second);
+
+          if(options.verbosity >= Verbosity::debug)
+            cout << "Considering candidate " << candidate_motif << endl;
+
+          for(auto &code: all_generalizations(candidate_motif)) {
+            if(options.verbosity >= Verbosity::debug)
+              cout << "Considering generalization " << code << endl;
+            //            string generalization(code);
+            if(options.revcomp) {
+              string rc = reverse_complement(code);
+              if(lexicographical_compare(begin(code), end(code), begin(rc), end(rc)))
+                code = rc;
+            }
+            // bool previously_considered = true;
+            // double generalization_score;
+
+            // retrieve or calculate score
+            auto iter = propositions.find(code);
+            if(iter != end(propositions))
+              // it has been considered before, retrieve score
+              iter->second = max<double>(iter->second, candidate_score);
+            else
+              propositions.insert({code, candidate_score});
+          }
+        }
+        vector<score_map_t::const_iterator> work;
+        // for(score_map_t::const_iterator &x: propositions)
+        for(score_map_t::const_iterator x = propositions.begin(); x != end(propositions); x++)
+          work.push_back(x);
+        size_t n = work.size();
+        vector<double> scores(work.size());
+#pragma omp parallel for
+        for(size_t i = 0; i < n; i++) {
+          string generalization = work[i]->first;
+          // double t1;
+          // Timer timer;
+          // it hasn't been considered before, calculate score
+          vector<size_t> counts_vec;
+          if(options.word_stats)
+            counts_vec = index.word_hits_by_file(generalization);
+          else
+            counts_vec = index.seq_hits_by_file(generalization, options.revcomp);
+          // t1 = timer.tock();
+          count_vector_t counts(counts_vec.size());
+          for(size_t i = 0; i < counts_vec.size(); i++)
+            counts[i] = counts_vec[i];
+          if(options.word_stats and options.revcomp) {
+            counts_vec = index.word_hits_by_file(reverse_complement(generalization));
+            for(size_t i = 0; i < counts_vec.size(); i++)
+              counts[i] += counts_vec[i];
+          }
+          // count_vector_t counts_old = count_motif(collection, generalization, options);
+          scores[i] = compute_score(collection, counts, options, objective, length, degeneracy);
+        }
+
+        candidates = rev_map_t();
+        n_candidates = 0;
+        for(size_t i = 0; i < n; i++) {
+          double candidate_score = work[i]->second;
+          double generalization_score = scores[i];
+          // heuristic: may be exact for short enough sequences, with length of sequence it becomes more of a heuristic
+          if(generalization_score >= candidate_score) {
+            string generalization = work[i]->first;
+            if(this->options.verbosity >= Verbosity::debug)
+              cout << "ax " << generalization << " " << generalization_score << endl;
+            if(candidates.empty() or generalization_score > candidates.rbegin()->first or n_candidates < options.plasma.max_candidates) {
+              candidates.insert({generalization_score, generalization});
+              n_candidates++;
+              if(n_candidates > options.plasma.max_candidates) {
+                candidates.erase(--end(candidates));
+                n_candidates--;
+              }
+              if(generalization_score > max_score) {
+                if(this->options.verbosity >= Verbosity::debug)
+                  cout << "New maximum!" << endl;
+                max_score = generalization_score;
+                best_motif = work[i]->first;
+                best_motif_changed = true;
+              }
+            }
+          }
+        }
+
+        if(best_motif_changed and degeneracies.find(degeneracy) != end(degeneracies)) {
+          count_vector_t best_contrast = count_motif(collection, best_motif, options);
+          double log_p = -compute_score(collection, best_contrast, options, objective, length, degeneracy, Measures::Discrete::Measure::CorrectedLogpGtest);
+          Result result(objective);
+          result.motif = best_motif;
+          result.score = max_score;
+          result.log_p = log_p;
+          result.counts = best_contrast;
+          results.push_back(result);
+          best_motif_changed = false;
+        }
+        if(options.measure_runtime) {
+          cerr << "Degeneracy " << degeneracy << " took " << my_timer.tock() << " \u00b5s." << endl;
+          my_timer.tick();
+        }
+      }
+
+      if(best_motif_changed and degeneracies.find(degeneracy) == end(degeneracies)) {
+        count_vector_t best_contrast = count_motif(collection, best_motif, options);
+        double log_p = -compute_score(collection, best_contrast, options, objective, length, degeneracy, Measures::Discrete::Measure::CorrectedLogpGtest);
+        Result result(objective);
+        result.motif = best_motif;
+        result.score = max_score;
+        result.log_p = log_p;
+        result.counts = best_contrast;
+        results.push_back(result);
+        best_motif_changed = false;
+      }
+    }
+
+
+    return(results);
+  }
+
 
   /** This executes a progressive algorithm to find discriminative IUPAC motifs.
    * It starts with degeneracy 0 and incrementally allows more degeneracy.
