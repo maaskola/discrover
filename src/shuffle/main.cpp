@@ -11,7 +11,6 @@
  *       Compiler:  gcc
  *
  *         Author:  Jonas Maaskola (jonas@maaskola.de), 
- *   Organization:  
  *
  * =====================================================================================
  */
@@ -32,7 +31,8 @@ const std::string program_name = "dinucleotide_shuffle";
 
 std::string gen_usage_string()
 {
-  const std::string usage = "Generates dinucleotide frequency preserving shuffles of FASTA files.\n";
+  const std::string usage = "Generates dinucleotide frequency preserving shuffles of FASTA files.\n"
+    "The code is based on altschulEriksonDinuclShuffle.py by P. Clote, from Oct 2003.\n";
   return usage;
 }
 
@@ -146,7 +146,7 @@ int main(int argc, const char **argv)
   }
 
   if (vm.count("help")) {
-    cout << program_name << " " << GIT_DESCRIPTION << endl << "Copyright (C) 2011 Jonas Maaskola\n"
+    cout << program_name << " " << GIT_DESCRIPTION << endl << "Copyright (C) 2013 Jonas Maaskola\n"
       "Provided under GNU General Public License Version 3 or later.\n"
       "See the file COPYING provided with this software for details of the license.\n" << endl;
     cout << gen_usage_string() << endl;
@@ -218,7 +218,7 @@ int main(int argc, const char **argv)
         shuffle(ifs, n);
       }
       else {
-        cerr << "Error: " << path << " does not exist.";
+        cerr << "Error: " << path << " does not exist." << endl;
         exit(-1);
       }
     }
