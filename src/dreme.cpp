@@ -43,7 +43,8 @@ namespace Dreme {
       const string &path2="",
       size_t min_size=0,
       size_t max_size=0,
-      const string &path="") {
+      const string &path="",
+      bool revcomp=false) {
     if(path2 == "")
       cout << "Running DREME for one FASTA file: " << path1 << endl;
     else
@@ -64,6 +65,9 @@ namespace Dreme {
         throw InvalidLengthsException(min_size, max_size);
       str << " -mink " << min_size << " -maxk " << max_size;
     }
+
+    if(not revcomp)
+      str << " -norc";
 
     string dreme_output_dir;
     if(path == "")
