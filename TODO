@@ -12,3 +12,11 @@
   - MCMC
 * MCMC seeding can sample across motif lengths
 * Collect rejection statistics for MCMC chains
+* Consider not using multiple objectives for plasma
+* Clean up plasma scoring
+  - Dispose with redundant copying into / out of vectors or matrices
+  - Chuck out signal_freq and control_freq measures?
+* Implement phyper / dhyper or provide failing stubs
+* Write test cases
+* Use cpack for test cases?
+* Consider renaming
