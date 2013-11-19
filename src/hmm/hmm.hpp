@@ -409,6 +409,10 @@ class HMM {
     /** Perform parallel tempering */
     std::vector<std::list<std::pair<HMM, double>>> mcmc(const Data::Collection &data, const Training::Task &task, const hmm_options &options);
 
+    // Static variable that keeps track of the number of times MCMC has been used for HMM parameter inference
+    // The reason to use this is in order to make MCMC reproducible while insuring that not every run within one
+    // program execution is identical to the other
+    static size_t mcmc_simulations_run;
 
 // -------------------------------------------------------------------------------------------
 // Gradient learning

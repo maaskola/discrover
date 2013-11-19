@@ -30,6 +30,8 @@
 #ifndef MCMCHMM_HPP
 #define MCMCHMM_HPP
 
+#include <random>
+#include <functional>
 #include "../plasma/score.hpp"
 #include "../plasma/motif.hpp"
 #include "montecarlo.hpp"
@@ -40,37 +42,41 @@ namespace MCMC {
     class Generator<Motif> {
       private:
         Seeding::Options options;
+        size_t motif_length;
         size_t max_degeneracy;
+        std::mt19937 engine; // RNG Mersenne twister MT19937
+        std::uniform_int_distribution<size_t> dist2, dist3, dist4, dist6, dist7, dist8, dist14, dist15, distPos;
+        std::function<size_t()>               rand2, rand3, rand4, rand6, rand7, rand8, rand14, rand15, randPos;
         void replace_similar(char &c) const {
           if(options.verbosity >= Verbosity::debug)
             std::cout << "Replacing nucleotide " << static_cast<char>(c) << std::endl;
           switch(tolower(c)) {
             // individual nucleotides
-            case 'a': c = "cgtmwr"[rand() % 6]; break;
-            case 'c': c = "agtmsy"[rand() % 6]; break;
-            case 'g': c = "actksr"[rand() % 6]; break;
+            case 'a': c = "cgtmwr"[rand6()]; break;
+            case 'c': c = "agtmsy"[rand6()]; break;
+            case 'g': c = "actksr"[rand6()]; break;
             case 't':
-            case 'u': c = "acgkwy"[rand() % 6]; break;
+            case 'u': c = "acgkwy"[rand6()]; break;
               // two nucleotide wildcards
-            case 'm': c = "acrwsyvh"[rand() % 8]; break;
-            case 'r': c = "agmwskvd"[rand() % 8]; break;
-            case 'w': c = "atmrykhd"[rand() % 8]; break;
-            case 's': c = "cgmyrkvb"[rand() % 8]; break;
-            case 'y': c = "ctmswkhb"[rand() % 8]; break;
-            case 'k': c = "gtmswydb"[rand() % 8]; break;
+            case 'm': c = "acrwsyvh"[rand8()]; break;
+            case 'r': c = "agmwskvd"[rand8()]; break;
+            case 'w': c = "atmrykhd"[rand8()]; break;
+            case 's': c = "cgmyrkvb"[rand8()]; break;
+            case 'y': c = "ctmswkhb"[rand8()]; break;
+            case 'k': c = "gtmswydb"[rand8()]; break;
               // three nucleotide wildcards
-            case 'b': c = "sykdhvn"[rand() % 7]; break;
-            case 'd': c = "rwkbhvn"[rand() % 7]; break;
-            case 'h': c = "mwykbvn"[rand() % 7]; break;
-            case 'v': c = "mrsbdhn"[rand() % 7]; break;
+            case 'b': c = "sykdhvn"[rand7()]; break;
+            case 'd': c = "rwkbhvn"[rand7()]; break;
+            case 'h': c = "mwykbvn"[rand7()]; break;
+            case 'v': c = "mrsbdhn"[rand7()]; break;
               // four nucleotide wildcard
-            case 'n': c = "bdhv"[rand() % 4]; break;
+            case 'n': c = "bdhv"[rand4()]; break;
             default:
               throw("Error: character not recognized.");
           }
         }
         void replace_arbitrary(char &c) const {
-          size_t r = rand() % 14;
+          const size_t r = rand14();
           switch(tolower(c)) {
             // individual nucleotides
             case 'a': c = "cgtmrwsykbdhvn"[r]; break;
@@ -93,36 +99,49 @@ namespace MCMC {
           }
         }
       public:
-        Generator(const Seeding::Options &opt, size_t w, size_t max_degen) : options(opt), max_degeneracy(max_degen) { };
+        Generator(const Seeding::Options &opt, size_t len, size_t max_degen) :
+          options(opt),
+          motif_length(len),
+          max_degeneracy(max_degen),
+          engine(options.mcmc.random_salt),
+          dist2(0, 1), dist3(0, 2), dist4(0, 3), dist6(0, 5),
+          dist7(0, 6), dist8(0, 7), dist14(0, 13), dist15(0, 14),
+          distPos(0, len-1) {
+            engine.seed(options.mcmc.random_salt);
+            rand2 = std::bind(dist2, engine); rand3 = std::bind(dist3, engine);
+            rand4 = std::bind(dist4, engine); rand6 = std::bind(dist6, engine);
+            rand7 = std::bind(dist7, engine); rand8 = std::bind(dist8, engine);
+            rand14 = std::bind(dist14, engine); rand15 = std::bind(dist15, engine);
+            randPos = std::bind(distPos, engine);
+          };
         Motif generate(const Motif &motif_) const {
-          const size_t R = 3;
           Motif motif(motif_);
           if(options.verbosity >= Verbosity::verbose)
             std::cout << "Generating new motif based off of " << motif << std::endl;
           do {
-            size_t r = rand() % R;
+            size_t r = rand3();
             size_t p;
             switch(r) {
               case 0: // replace nucleotide by a similar one
                 if(options.verbosity >= Verbosity::verbose)
                   std::cout << "Replace nucleotide by a similar one" << std::endl;
-                p = rand() % motif.size();
+                p = randPos();
                 replace_similar(motif[p]);
                 break;
               case 1: // replace nucleotide by a random one
                 if(options.verbosity >= Verbosity::verbose)
                   std::cout << "Replace nucleotide by an arbitrary one" << std::endl;
-                p = rand() % motif.size();
+                p = randPos();
                 replace_arbitrary(motif[p]);
                 break;
               case 2: // roll one position
                 if(options.verbosity >= Verbosity::verbose)
                   std::cout << "Roll one position" << std::endl;
                 {
-                  char nucl = "acgtmrwsykbdhvn"[rand() % 15];
+                  char nucl = "acgtmrwsykbdhvn"[rand15()];
                   std::string w = " ";
                   w[0] = nucl;
-                  bool r = rand() % 2;
+                  bool r = rand2();
                   size_t n = motif.size() - 1;
                   if(r == 0)
                     motif = w + motif.substr(0, n);
@@ -135,6 +154,12 @@ namespace MCMC {
           if(options.verbosity >= Verbosity::verbose)
             std::cout << motif_ << " -> " << motif << std::endl;
           return(motif);
+        };
+        Motif generate() {
+          std::string word;
+          for(size_t j = 0; j < motif_length; j++)
+            word += "acgt"[rand4()];
+          return(word);
         };
     };
   template <>
@@ -155,5 +180,4 @@ namespace MCMC {
     };
 }
 
- 
 #endif
