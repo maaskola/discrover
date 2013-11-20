@@ -26,3 +26,22 @@ pectation maximization step for the generative parameters. The generative
 updates often modify the parameters so as to decrease the objective function's
 values. The reported relative increase of the discriminative objective function
 is measured relative to before it is applied.
+
+
+Q: Why is it that the (intermediate and final) scores reported during
+optimization of HMM parameters are often smaller than those resulting from
+seeding?
+
+A: The HMM parameters are optimized by maximizing a smooth function based on
+expected numbers of sites (defined by the posterior occurrence probability of
+the HMM motif), while seeding uses integer counts of sequences that either have
+or do not have an occurrence of a given IUPAC regular expression. The posterior
+probabilities over which expected values are summed for the HMM parameter
+optimization do not separate occurrences in such a black and white manner as the
+integer counts of occurrences of IUPAC regular expression do.
+It is thus that the scores based on expected values reported during and after
+training are typically smaller than those reported after seeding.
+
+Note that, importantly, the scores computed for the learned HMM parameters from
+the Viterbi parses of the sequences are in turn typically greater than those
+reported after seeding.
