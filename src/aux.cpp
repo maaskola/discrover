@@ -1,7 +1,6 @@
 #include <cstring>
 #include <boost/algorithm/string.hpp>
 #include "aux.hpp"
-#include "sha1.hpp"
 
 using namespace std;
 
@@ -261,19 +260,5 @@ vector<string> tokenize(const string &s, const string &delim)
   vector<string> strs;
   boost::split(strs, s, boost::is_any_of(delim));
   return(strs);
-}
-
-string sha1hash(const string &s)
-{
-  const char *t = s.c_str();
-  unsigned char hash[20];
-  char hexstring[41]; // 40 chars + a zero
-  int end = (int) strlen(t);
-  sha1::calc(t, end, hash);
-  sha1::toHexString(hash, hexstring);
-  string res;
-  for(size_t i = 0; i < 40; i++)
-    res += hexstring[i];
-  return(res);
 }
 

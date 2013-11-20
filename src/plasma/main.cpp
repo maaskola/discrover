@@ -241,6 +241,7 @@ int main(int argc, const char** argv) {
     cout << "objectives:"; for(auto &x: options.objectives) cout << " " << x; cout << endl;
   }
 
+  srand(options.mcmc.random_salt);
 
   Seeding::Plasma plasma(options);
   Seeding::DataCollection ds = plasma.collection;

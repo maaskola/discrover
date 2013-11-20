@@ -106,6 +106,15 @@ void check_data(const Data::Collection &collection, const hmm_options &options)
       cout << "Data collection has " << series.set_size << " sequences with a total size of " << series.seq_size << " nucleotides." << endl;
       for(auto &set: series) {
         cout << set.path << " has " << set.set_size << " sequences with a total size of " << set.seq_size << " nucleotides." << endl;
+        if(options.verbosity >= Verbosity::verbose) {
+          cout << "The SHA1 of this set is " << set.sha1 << endl;
+          cout << "The first 3 sequences are:" << endl;
+          size_t i = 0;
+          for(auto &seq: set) {
+            cout << ">" << seq.definition << endl << seq.sequence << endl;
+            if(i++ > 3) break;
+          }
+        }
         if(options.verbosity >= Verbosity::debug)
           for(auto &seq: set)
             cout << ">" << seq.definition << endl << seq.sequence << endl;

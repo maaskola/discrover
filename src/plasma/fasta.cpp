@@ -1,5 +1,6 @@
 
 #include "fasta.hpp"
+#include "../shuffle/dinucleotide_shuffle.hpp"
 #include "io.hpp"
 
 using namespace std;
@@ -106,16 +107,24 @@ istream &operator>>(istream &is, vector<Fasta::IEntry> &seqs) {
   return(is);
 }
 
-void read_fasta(const string &path, vector<Fasta::Entry> &sequences, bool revcomp, size_t n_seq) {
+void read_fasta(const string &path, vector<Fasta::Entry> &sequences, bool revcomp, size_t n_seq, bool shuffled) {
   parse_file(path, [&](istream &is) { is >> sequences; });
   if(n_seq > 0) // TODO: improve efficiency by only reading in n_seq sequences
     sequences.resize(n_seq);
+  if(shuffled)
+    for(auto &s: sequences)
+      s.sequence = dinucleotideShuffle(s.sequence);
 };
 
-void read_fasta(const string &path, vector<Fasta::IEntry> &sequences, bool revcomp, size_t n_seq) {
+void read_fasta(const string &path, vector<Fasta::IEntry> &sequences, bool revcomp, size_t n_seq, bool shuffled) {
   parse_file(path, [&](istream &is) { is >> sequences; });
   if(n_seq > 0) // TODO: improve efficiency by only reading in n_seq sequences
     sequences.resize(n_seq);
+  if(shuffled)
+    for(auto &s: sequences) {
+      s.sequence = dinucleotideShuffle(s.sequence);
+      s.isequence = string2seq_(s.sequence);
+    }
   if(revcomp)
     for(auto &s: sequences) {
       s.sequence += "$" + reverse_complement(s.sequence);
