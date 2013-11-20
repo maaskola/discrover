@@ -4,7 +4,6 @@
   - chain of states with all insertion states
   - chain of states with insertion and deletion states / Eddy's plan 7
 * Use other regular expression based motif finding tools for seeding
-* Shuffle sequences for discriminative learning when only one set of sequences is given
 * Search one strand against the other
 * Find localized motifs
 * Parallelize FIRE and parallel tempering
@@ -20,3 +19,4 @@
 * Write test cases
 * Use cpack for test cases?
 * Consider renaming
+* Improve naming of shuffled sequences in HMM

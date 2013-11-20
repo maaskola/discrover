@@ -169,7 +169,7 @@ void HMM::initialize_transitions_to_and_from_chain(size_t w, double l, double la
 void HMM::register_dataset(const Data::Set &data, double class_prior, double motif_p1, double motif_p2)
 {
   if(verbosity >= Verbosity::verbose)
-    std::cout << "register_data_set(data.path=" << data.path << ", sha1=" << data.sha1 << ", class_prior=" << class_prior << ")" << std::endl;
+    std::cout << "register_data_set(data.path=" << data.path << ( data.is_shuffle ? " shuffle" : " ") << ", sha1=" << data.sha1 << ", class_prior=" << class_prior << ")" << std::endl;
   RegisteredDataSet reg_data({data, class_prior, std::map<size_t, double>()});
   for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
     if(is_motif_group(group_idx)) {

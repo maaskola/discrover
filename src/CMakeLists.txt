@@ -2,6 +2,7 @@
 ADD_DEFINITIONS(-Wall -funroll-loops -march=native -Wno-unused-local-typedefs)
 # ADD_DEFINITIONS(-Wall -funroll-loops -march=native -flto -Wno-unused-local-typedefs)
 
+ADD_SUBDIRECTORY(shuffle)
 ADD_SUBDIRECTORY(plasma)
 ADD_SUBDIRECTORY(hmm)
 
