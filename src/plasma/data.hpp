@@ -34,6 +34,8 @@
 #include "specification.hpp"
 #include "fasta.hpp"
 
+std::string sha1hash(const std::string &s);
+
 namespace Data {
   namespace Basic {
     template <typename X>
@@ -60,7 +62,10 @@ namespace Data {
           set_size(0),
           sequences()
         {
-          read_fasta(path, sequences, revcomp, n_seq);
+          read_fasta(path, sequences, revcomp, n_seq, is_shuffle);
+
+          sha1 = compute_sha1();
+
           set_size = sequences.size();
           for(auto &seq: sequences)
             seq_size += seq.sequence.size();
@@ -70,7 +75,8 @@ namespace Data {
             Specification::DataSet(set),
             seq_size(0),
             set_size(set.set_size),
-            sequences()
+            sequences(),
+            sha1(set.sha1)
         {
           for(auto &seq: set) {
             seq_t s(seq);
@@ -79,10 +85,18 @@ namespace Data {
           }
         };
 
+        std::string compute_sha1() const {
+          std::string d;
+          for(auto &s: sequences)
+            d += s.sequence;
+          return(sha1hash(d));
+        }
+
         // member variables
 
         size_t seq_size, set_size;
         std::vector<seq_t> sequences;
+        std::string sha1;
       };
 
     template <typename X>

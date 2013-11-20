@@ -36,20 +36,20 @@ string readfile(const string &path) {
 }
 
 namespace Specification {
-  DataSet::DataSet() : series(""), path(""), sha1(""), motifs() {
+  DataSet::DataSet() : series(""), path(""), is_shuffle(false), motifs() {
     if(false)
       cout << "Specification::DataSet standard constructor" << endl;
   };
-  DataSet::DataSet(const DataSet &spec) : series(spec.series), path(spec.path), sha1(spec.sha1), motifs(spec.motifs) {
+  DataSet::DataSet(const DataSet &spec) : series(spec.series), path(spec.path), is_shuffle(spec.is_shuffle), motifs(spec.motifs) {
     if(false)
       cout << "Specification::DataSet copy constructor: '" << spec.path << "'" << endl;
   };
-  DataSet::DataSet(const string &token) : DataSet() {
-  //}, series(""), path(""), sha1(""), motifs() {
+  DataSet::DataSet(const string &token, bool is_shuffle_) : DataSet() {
     if(false)
       cout << "Specification::DataSet string constructor: '" << token << "'." << endl;
     // the format is [NAMES:[SERIES:]]seq.fa e.g. pum,qki:bg0:seq.fa or :bg0:seq.fa or seq.fa
     // so if a file name contains at least one ":" then one would just have to write ::file_name_with_:_.fa
+    is_shuffle = is_shuffle_;
     size_t pos;
     if((pos = token.find(":")) != string::npos) {
       string motif_token = token.substr(0, pos);
@@ -65,14 +65,12 @@ namespace Specification {
       path = token;
 
     if(boost::filesystem::exists(path)) {
-      if(boost::filesystem::is_regular_file(path)) {
-      sha1 = sha1hash(readfile(path));
-      } else {
-        cout << "Error opening FASTA file: path " << path << " is not a regular file." << endl;
+      if(not boost::filesystem::is_regular_file(path)) {
+        cout << "Error: FASTA file " << path << " is not a regular file." << endl;
         exit(-1);
       }
     } else {
-      cout << "Error opening FASTA file: path " << path << " does not exist." << endl;
+      cout << "Error: FASTA file " << path << " does not exist." << endl;
       exit(-1);
     }
 
@@ -80,7 +78,7 @@ namespace Specification {
       cout << "Constructed DataSet:\npath = " << path << "\n" << "series = " << series << "\n" << "motifs  =";
       for(auto x: motifs) cout << " " << x;
       cout << endl;
-      cout << "The SHA1 hash is " << sha1 << endl;
+      cout << "This is" << (is_shuffle ? "" : " not") << " a shuffle." << endl;
     }
   }
 
@@ -225,6 +223,8 @@ namespace Specification {
       s += m;
     }
     s += ":" + spec.series + ":" + spec.path;
+    if(spec.is_shuffle)
+      s += "_SHUFFLE";
     return(s);
   }
 }

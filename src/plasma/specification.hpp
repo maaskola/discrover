@@ -52,9 +52,9 @@ namespace Specification {
   struct DataSet {
     std::string series;
     std::string path;
-    std::string sha1;
+    bool is_shuffle;
     std::set<std::string> motifs;
-    DataSet(const std::string &s);
+    DataSet(const std::string &s, bool shuffled=false);
     DataSet(const DataSet &spec);
     DataSet();
   };
@@ -198,7 +198,7 @@ namespace Specification {
    *   - give names to unnamed motifs, making sure not to overwrite given ones
    *   - more that needs to be documented
    */
-  template <typename X> void harmonize(Motifs &motifs, DataSets &data, std::vector<Objective<X>> &objectives) {
+  template <typename X> void harmonize(Motifs &motifs, DataSets &data, std::vector<Objective<X>> &objectives, bool add_shuffles=true) {
     const bool debug = false;
 
     // find all series names occurring in data set specifications
@@ -261,9 +261,20 @@ namespace Specification {
             series_size++;
         if(Measures::is_discriminative(objective.measure))
           if(series_size < 2) {
+            if(add_shuffles and series_size == 1) {
+              DataSet shuffle_spec;
+              for(auto &spec: data)
+                if(atom.series == spec.series) {
+                  shuffle_spec = DataSet(spec.path, true);
+                  shuffle_spec.series = spec.series;
+                  break;
+                }
+              data.push_back(shuffle_spec);
+            } else {
               std::cout << "Error: discriminative measure '" << objective.measure << "' requires at least a binary contrast in series '" << atom.series << "'." << std::endl;
               exit(-1);
             }
+          }
         if(Measures::is_two_by_two(objective.measure))
           if(series_size != 2) {
             std::cout << "Error: 2x2 measure '" << objective.measure << "' only works on binary contrasts, and series '" << atom.series << "' is not binary." << std::endl;

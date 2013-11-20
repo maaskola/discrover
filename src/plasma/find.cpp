@@ -15,6 +15,7 @@
  * =====================================================================================
  */
 
+#include <random>
 #include "score.hpp"
 #include "count.hpp"
 #include "code.hpp"
@@ -181,7 +182,7 @@ namespace Seeding {
 
     Results plasma_results;
     if((algorithm & Algorithm::Plasma) == Algorithm::Plasma)
-      plasma_results = find_breadth(length, objective, max_degeneracy, degeneracies);
+      plasma_results = find_plasma(length, objective, max_degeneracy, degeneracies);
 
     Results fire_results;
     if((algorithm & Algorithm::FIRE) == Algorithm::FIRE)
@@ -215,7 +216,6 @@ namespace Seeding {
   /** This executes MCMC to find discriminative IUPAC motifs.
    */
   Results Plasma::find_mcmc(size_t length, const Objective &objective, size_t max_degeneracy) const {
-    srand(time(0));
     MCMC::Evaluator<MCMC::Motif> eval(collection, options, objective);
     MCMC::Generator<MCMC::Motif> gen(options, length, max_degeneracy);
     MCMC::MonteCarlo<MCMC::Motif> mcmc(gen, eval, options.verbosity);
@@ -223,10 +223,7 @@ namespace Seeding {
     std::vector<MCMC::Motif> init;
     double temperature = options.mcmc.temperature;
     for(size_t i = 0; i < options.mcmc.n_parallel; i++) {
-      string word;
-      for(size_t j = 0; j < length; j++)
-        word += "acgt"[rand() % 4];
-      init.push_back(word);
+      init.push_back(gen.generate());
       temperatures.push_back(temperature);
       temperature /= 2;
     }
@@ -370,6 +367,8 @@ namespace Seeding {
   /** This executes the FIRE algorithm to find discriminative IUPAC motifs.
    */
   Results Plasma::find_fire(size_t length, const Objective &objective, size_t max_degeneracy, const set<size_t> &degeneracies) const {
+    std::mt19937 rng_engine; // RNG Mersenne twister MT19937
+    rng_engine.seed(options.mcmc.random_salt);
     Results results;
     if(options.verbosity >= Verbosity::verbose)
       cout << "Finding motif of length " << length << " using the FIRE approach with top " << options.plasma.max_candidates << " candidates by " << measure2string(objective.measure) << "." << endl;
@@ -431,7 +430,8 @@ namespace Seeding {
                 std::cout << std::endl;
               }
 
-              const size_t position_idx = rand() % remaining_positions.size();
+              std::uniform_int_distribution<size_t> posDist(0, remaining_positions.size()-1);
+              const size_t position_idx = posDist(rng_engine);
               const size_t position = remaining_positions[position_idx];
               remaining_positions.erase(begin(remaining_positions) + position_idx);
 
@@ -517,7 +517,7 @@ namespace Seeding {
    * For each level of degeneracy the top N generalizations of the motifs of the
    * previous level of degeneracy are determined.
    */
-  Results Plasma::find_breadth(size_t length, const Objective &objective, size_t max_degeneracy, const set<size_t> &degeneracies) const {
+  Results Plasma::find_plasma(size_t length, const Objective &objective, size_t max_degeneracy, const set<size_t> &degeneracies) const {
     Results results;
     if(options.verbosity >= Verbosity::verbose)
       cout << "Finding motif of length " << length << " using top " << options.plasma.max_candidates << " breadth search by " << measure2string(objective.measure) << "." << endl;

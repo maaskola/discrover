@@ -261,7 +261,7 @@ std::vector<std::list<std::pair<HMM, double>>> HMM::mcmc(const Data::Collection 
     const hmm_options &options)
 {
   double temperature = options.sampling.temperature;
-  srand(time(0));
+  srand(options.random_salt + (HMM::mcmc_simulations_run++));
   MCMC::Evaluator<HMM> eval(data, task);
   MCMC::Generator<HMM> gen(options, n_states-first_state);
   MCMC::MonteCarlo<HMM> mcmc(gen, eval, verbosity);

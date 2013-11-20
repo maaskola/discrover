@@ -19,6 +19,7 @@
 #include <iostream>
 #include <boost/algorithm/string.hpp>
 #include "options.hpp"
+#include "../random_seed.hpp"
 
 using namespace std;
 
@@ -65,7 +66,8 @@ namespace Seeding {
   Options::MCMC::MCMC() :
     max_iter(1000),
     temperature(1e-3),
-    n_parallel(6)
+    n_parallel(6),
+    random_salt(generate_rng_seed())
   { };
 
 
