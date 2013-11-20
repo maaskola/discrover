@@ -1,0 +1,204 @@
+%        File: documentation.tex
+%     Created: Mo Nov 11 02:00  2013 C
+% Last Change: Mo Nov 11 02:00  2013 C
+%
+\documentclass[a4paper]{article}
+
+\usepackage{hyperref,cleveref,verbatimbox,natbib,url}
+
+\newcommand{\plasma}[0]{\texttt{plasma}}
+\newcommand{\dlhmm}[0]{\texttt{dlhmm}}
+\newcommand{\version}[0]{@GIT_DESCRIPTION@}
+\newcommand{\theurl}[0]{\url{https://github.com/maaskola/dlhmm}}
+\newcommand{\TikZ}{Ti\emph{k}Z}
+
+\hypersetup{%
+  pdfauthor=Jonas Maaskola,
+  pdftitle=Manual for dlhmm v\version{},
+  pdfkeywords={Motif searching} {Discriminative learning} {Motif discovery} {Nucleic acids} {RNA} {DNA} {HMM} {Hidden Markov model},
+  colorlinks=true     % false: boxed links; true: colored links
+}
+
+\title{Manual for \dlhmm{} v\version{}}
+\author{Jonas Maaskola}
+\date{\today}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  This is the documentation for \dlhmm{} version \version{}.
+  Please refer to the publication~\cite{Maaskola2013} for a full description of the method.
+
+  The package provides programs for discriminative motif discovery of protein binding sites in nucleic acid sequences.
+  It is available as free software under the GNU General Public License v3 from \theurl{}.
+
+  This document briefly describes the purpose of this motif finding package, explains important concepts, and details usage of the programs that are part of this package.
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction}
+
+Transcriptional and post-transcriptional regulation rely to a large extent on effective mechanisms that allow nucleic acid binding proteins to recognize specific sets of nucleic acids.
+Aside from structural cues, binding of regulators is guided by sequence information (motifs) present in cognate nucleic acids.
+
+Motif discovery is the problem of unraveling motifs recognized by a given nucleic acid binding protein from sequences known to harbor occurrences of the motif.
+Classically, motif finding was marked by scarcity of data when only few sequences were available.
+The introduction of microarray based technologies like ChIP-chip \cite{Ren2000,Iyer2001} and RIP-Chip \cite{Tenenbaum2000,Keene2006} allowed to assay \textit{in vivo} sequence binding specificity on a genome-wide scale.
+More recently sequencing based technologies, such as ChIP-Seq \cite{Robertson2007, Johnson2007} and CLIP-Seq \cite{Licatalosi2008,Sanford2009,Hafner2010} further increased the amounts of data yielded by single experiments and simultaneously improved the spatial resolution, reducing uncertainty about the exact location of \textit{in vivo} binding sites.
+SELEX \cite{Ellington1990,Tuerk1990} and related sequencing based technologies \cite{Jolma2010}, and protein-binding microarrays (PBMs) \cite{Bulyk2001,Berger2006a} are targeted assays for the \textit{in vitro} sequence binding specificity of nucleic acid binding proteins.
+
+Due to the central importance of the motif discovery problem in computational biology many algorithms addressing it have been developed over the last two decades \cite{Das2007}.
+These algorithms employ  a variety of models for the sequence binding specificity of nucleic acid binding proteins, including discrete word-based models, as well as probabilistic models such as position weight matrices (PWM) \cite{Stormo1998}, and hidden Markov models (HMM) \cite{Rabiner1989}.
+Word based approaches tend to be computationally efficient and allow fast global optimization, but may fail for motifs that include weak positions \cite{Das2007}.
+PWMs can be motivated from biophysical principles \cite{Berg1987,Stormo2000,Foat2006}.
+General inference methods for HMMs offer a unified framework for biological sequence modeling \cite{Durbin1998}.
+HMMs flexibly model both binding sites and their surrounding sequence context, may account for dependence of neighboring positions via higher order emissions, and length variability of motifs is idiomatically realized via non-constitutive states in the HMM topology.
+
+Because of historically smaller data sizes, many of the presently available motif finding methods were not designed for data sets as large as those produced by current experiments.
+Consequently, many of these abort or run unacceptably slow when applied to large data sets.
+Thus, even after more than two decades of computational analysis of biological sequences, there is continued interest in the development of new analysis methods that leverage the full potential of large data sets.
+
+\subsection{Overview}
+Here we describe a discriminative learning method based on HMMs, realized and available as free software, to automatically discover binding site sequence motifs of nucleic acid binding proteins from arbitrary contrasts,
+such as positive and negative example sequences.
+Not all of the positive examples need contain binding site occurrences and not all negative examples need be devoid of them.
+The framework is applicable to a broad variety of contrasts, comprising the comparison of strongly bound versus weakly bound targets, or of signal sequences with shuffled sequences.
+It is also possible to discover context-dependent motifs, or to analyze data sets of different factors for mutually discriminative features.
+When available, information from repeat experiments is leveraged by the method.
+
+Putative motifs are identified by a measure of association that quantifies how strongly motif presence varies across conditions of a contrast.
+For the chosen objective function, a discrete optimization phase determines IUPAC regular expressions as seeds from which HMMs are initialized.
+Subsequently HMM parameters are improved with gradient optimization, which is demonstrated to robustly and effectively function with realistic data sizes.
+
+Objective functions evaluated on multiple contrast may be combined into meta-objectives that allow for a joint analysis of repeat experiments, or to discover motifs that are differential in one contrast but not, or less so, in another.
+
+\section{Concepts}
+\subsection{Objective functions}
+\subsection{Seeding}
+\subsection{Binding site HMM optimization}
+
+\section{Tutorial}
+This tutorial will demonstrate the basic usage of the motif discovery tools in this package.
+Let us assume that you have one FASTA file with signal sequences, \verb|signal.fa|, and one with control sequences, and that you want to find motifs of length 8~nt that are discriminative between the two.
+\subsection{Basic usage}
+To perform a full analysis of discriminative motifs, \dlhmm{} automatically discovers the most discriminative IUPAC regular expression as seed, initializes an HMM on it, and subsequently optimizes the HMM parameters.
+\subsubsection{Analysis of RNA-binding proteins}
+To analyze RNA-binding proteins the following command already suffices:\\
+\begin{verbbox}
+dlhmm signal.fa control.fa -m 8
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+\subsubsection{Analysis of DNA-binding proteins}
+In case you want to analyze DNA-binding proteins, please add the \verb|-r| option or its long variant \verb|--revcomp| to also consider motif occurrences on the reverse complementary strand.\\
+\begin{verbbox}
+dlhmm signal.fa control.fa -m 8 -r
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+\subsection{Manual seed discovery}
+\label{tutorial:plasma}
+Apart from the fully integrated analysis describes above, it is also possible to manually run the seed discovery:\\
+\begin{verbbox}
+plasma signal.fa control.fa -m 8 -r
+\end{verbbox}
+\fbox{\theverbbox[t]}
+Here, we are looking again for a DNA-binding protein's motif (due to the usage of the option \verb|-r|).
+The command line interface of the two programs is intentionally similar, so that the most important command line options apply to both programs.
+
+\subsection{Manual seed specification for \dlhmm{}}
+Say that you have found a seed of interest for your protein, for example by manually using \plasma{} as described in \cref{tutorial:plasma}.
+Let us assume it is the IUPAC regular expression \verb|tgtanatw|, where the \verb|n| stands for any nucleotide and the \verb|w| for either \verb|a| or \verb|t|.
+You can now use this IUPAC regular expression as seed for an HMM and optimize the HMM parameters as follows:\\
+\begin{verbbox}
+dlhmm signal.fa control.fa -m tgtanata
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+
+\subsection{Generating sequence logos for motifs}
+You can generate sequence logos of discovered motifs by using the script \verb|tikzlogo|:\\
+\begin{verbbox}
+tikzlogo motif.hmm
+\end{verbbox}
+\fbox{\theverbbox[t]}
+This generates a \LaTeX document which uses \TikZ{} code to draw a sequence motif, and subsequently compiles the generated \LaTeX file into a PDF document.
+
+\section{Usage}
+There are two main programs that are part of this package, a seed discovery program, \plasma{}, and one for optimizing binding site HMMs, \dlhmm{}.
+The seed discovery program \plasma{} can be used independently, but it is also used by \dlhmm{} for automatic seed discovery.
+The command line options that drive both programs are intentionally similar.
+
+Below, in \cref{subsection:running-plasma}, we will first describe how to run \plasma{} independently, before \cref{subsection:running-dlhmm} describes how to use \dlhmm{}.
+
+\subsection{Seed discovery with \plasma{}}
+\label{subsection:running-plasma}
+\subsubsection{Getting help on command line options}
+An overview of the available command line options is available with the switch \verb|-h| or its long variant \verb|--help|.
+See \cref{appendix:plasma-cli-help} for a listing of the output of this command with \plasma{} in version \version{}.
+\subsubsection{Determining the version}
+The command line switch \verb|--version| displays the version of \plasma{}.
+If additionally the switch \verb|-v| or its long variant \verb|--verbose| is given, then additionally the full SHA1-string of the version is displayed.
+
+\subsubsection{Seed discovery algorithms}
+There are multiple algorithms implemented in \plasma{} that allow to find IUPAC regular expression type seeds.
+You can select between them with the switch \verb|--algo|.
+It takes one argument, which specifies which algorithm to use.
+The following algorithms are provided:
+\begin{description}
+  \item[Plasma]
+    The default and fast algorithm.
+    It can be used by specifying \verb|--algo plasma|.
+    It uses progressive algorithm that maintains a pool of candidates.
+  \item[FIRE]
+    A seed discovery algorithm similar to the discriminative motif discovery program FIRE~\cite{Elemento2007}.
+    It can be used by specifying \verb|--algo fire|.
+  \item[Monte-Carlo Markov Chain optimization]
+    By specifying \verb|--algo mcmc| Monte-Carlo Markov Chain (MCMC) is used to find seeds.
+    It uses parallel tempering, also known as replica-exchange, to increase the efficiency of the sampling~\cite{Earl2005}.
+    By default, 6 parallel chains are used.
+\end{description}
+
+\subsection{Binding site HMM optimization with \dlhmm{}}
+\label{subsection:running-dlhmm}
+\subsubsection{Getting help on command line options}
+An overview of the available command line options is available with the switch \verb|-h| or its long variant \verb|--help|.
+See \cref{appendix:dlhmm-cli-help} for a listing of the output of this command with \dlhmm{} in version \version{}.
+
+Note that by default not all options are shown.
+To display some infrequently used options please specify \verb|-hv| or \verb|--help --verbose|.
+
+In addition, some advanced options are only shown when the option \verb|-V| or \verb|--noisy| is used.
+Thus, to display all options please specify \verb|-hV| or their long variants \verb|--help --noisy|.
+
+\subsubsection{Determining the version}
+The command line switch \verb|--version| displays the version of \dlhmm{}.
+If additionally the switch \verb|-v| or its long variant \verb|--verbose| is given, then additionally the full SHA1-string of the version is displayed.
+
+
+\section{Appendix}
+\subsection{Command line help of \plasma{}}
+\label{appendix:plasma-cli-help}
+\begin{verbatim}
+@PLASMA_CLI_HELP_OUTPUT@
+\end{verbatim}
+
+\subsection{Command line help of \dlhmm{}}
+\label{appendix:dlhmm-cli-help}
+\begin{verbatim}
+@DLHMM_CLI_HELP_OUTPUT@
+\end{verbatim}
+
+
+
+\nocite{*}
+\phantomsection
+\addcontentsline{toc}{section}{References}
+\bibliographystyle{apalike}
+\bibliography{documentation}
+
+
+\end{document}
+
+

@@ -50,24 +50,11 @@ namespace MCMC {
         double evaluate(T& i) const;
     };
 
-  template <>
-    class Evaluator<double> {
-      public:
-        double evaluate(double i) const { return i*i; };
-    };
-
   template <class T>
     class Generator {
       public:
         T generate(const T& i) const;
     };
-
-  template <>
-    class Generator<double> {
-      public:
-        double generate(double i) const { return i+2*(rand() * 1.0 / RAND_MAX -0.5); };
-    };
-
 
   template <class T>
     class MonteCarlo {

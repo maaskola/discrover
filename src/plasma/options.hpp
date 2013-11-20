@@ -92,6 +92,7 @@ namespace Seeding {
       size_t max_iter;
       double temperature;
       size_t n_parallel;
+      unsigned int random_salt;
     };
 
 

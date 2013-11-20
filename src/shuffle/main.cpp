@@ -3,82 +3,73 @@
  *
  *       Filename:  main.cpp
  *
- *    Description:
+ *    Description:  A tool to generate shuffles of sequences
  *
  *        Version:  1.0
- *        Created:  31.05.2012 06:47:48
+ *        Created:  19.11.2013 20:54:24
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  Jonas Maaskola <jonas@maaskola.de>
- *   Organization:
+ *         Author:  Jonas Maaskola (jonas@maaskola.de), 
  *
  * =====================================================================================
  */
-
-#include <ctime>          // for clock()
-#include <sys/times.h>    // for times(struct tms *)
-#include <iostream>
-#include <omp.h>
+#include <cstdlib>
 #include <fstream>
+#include <cstdlib>
+#include <cstddef>
 #include <boost/program_options.hpp>
-#include "code.hpp"
-#include "score.hpp"
-#include "align.hpp"
-#include "count.hpp"
-#include "mask.hpp"
-#include "find.hpp"
-#include "../timer.hpp"
-#include "plasma_cli.hpp"
+#include <boost/filesystem.hpp>
+#include <string>
+#include <vector>
 #include "../GitSHA1.hpp"
+#include "../verbosity.hpp"
+#include "../plasma/fasta.hpp"
+#include "dinucleotide_shuffle.hpp"
 
-const std::string header = "# How to interpret this file:\n"
-"# The program proceeds iteratively, at each step determining the single most discriminative word.";
-
-const std::string program_name = "plasma";
+const std::string program_name = "dinucleotide_shuffle";
 
 std::string gen_usage_string()
 {
-  const std::string usage = "This program executes a progressive algorithm, which in each iteration\n"
-    "determines the IUPAC word with the highest residual score that is enriched,\n"
-    "in signal.fa, accepts it, and masks all occurrences or removes all data samples\n"
-    "in which it occurs, before proceeding.\n"
-    "\n"
-    "Some example calls:\n" +
-    program_name + " -f signal.fa -f control.fa -m 8 > analysis.txt\n" +
-    program_name + " -f signal.fa -f control.fa -m 4-12 > analysis.txt\n" +
-    program_name + " -f signal.fa -f control.fa -m 4-12 -d 0 > analysis.txt\n" +
-    program_name + " -f signal.fa -f control.fa -m 4-12 -s freq -d 0 > analysis.txt\n" +
-    program_name + " -f signal.fa -f control.fa -m 4-12 -s freq -d 2 > analysis.txt\n" +
-    program_name + " -f signal.fa -f control.fa -m 4-12 -d 2 > analysis.txt\n" +
-    program_name + " -f signal.fa -f control.fa -m 4-12 --rdeg 0.2 > analysis.txt\n" +
-    program_name + " -f signal:signal.fa -f control.fa -m signal:8 > analysis.txt\n";
+  const std::string usage = "Generates dinucleotide frequency preserving shuffles of FASTA files.\n"
+    "The code is based on altschulEriksonDinuclShuffle.py by P. Clote, from Oct 2003.\n";
   return usage;
 }
 
+
 using namespace std;
 
-int main(int argc, const char** argv) {
-  clock_t start_time, end_time;
-  double cpu_time_used;
-  start_time = clock();
+void shuffle(istream &is, size_t n) {
+  auto parsing = [&n](Fasta::Entry &&entry) {
+    for(size_t i = 0; i < n; i++)
+      cout << ">" << entry.definition << endl
+        << dinucleotideShuffle(entry.sequence) << endl;
+    return(true);
+  };
+  auto parser = Fasta::make_parser(parsing);
+  is >> parser;
+}
 
-  Seeding::Options options;
+int main(int argc, const char **argv)
+{
+  vector<string> paths;
+  size_t n = 1;
+  size_t seed = 1;
+  Verbosity verbosity = Verbosity::info;
 
   namespace po = boost::program_options;
 
   // Declare the supported options.
-  po::options_description desc("Basic options");
+  po::options_description desc("Options");
   desc.add_options()
     ("help,h", "produce help message")
     ("version", "Print out the version. Also show git SHA1 with -v.")
+    ("fasta,f", po::value<vector<string>>(&paths), "FASTA file(s) with nucleic acid sequences. If no files are specified, sequences are read from standard input.")
+    ("number,n", po::value<size_t>(&n)->default_value(1), "How many shuffles to generate per sequence.")
+    ("seed,s", po::value<size_t>(&seed), "Seed to initialize random number generator.")
     ("verbose,v", "Be verbose about the progress")
-    ("noisy,V", "Be very verbose about the progress")
     ;
-  po::options_description ext_options = gen_iupac_options_description(options);
-
-  desc.add(ext_options);
-
+ 
   po::positional_options_description pos;
   pos.add("fasta",-1);
 
@@ -143,29 +134,25 @@ int main(int argc, const char** argv) {
     return(-1);
   }
 
-
   if(vm.count("verbose"))
-    options.verbosity = Verbosity::verbose;
-  if(vm.count("noisy"))
-    options.verbosity = Verbosity::debug;
+    verbosity = Verbosity::verbose;
 
   if(vm.count("version") and not vm.count("help"))
   {
     cout << program_name << " " << GIT_DESCRIPTION << " [" << GIT_BRANCH << " branch]" << endl;
-    if(options.verbosity >= Verbosity::verbose)
+    if(verbosity >= Verbosity::verbose)
       cout << GIT_SHA1 << endl;
     return(EXIT_SUCCESS);
   }
 
   if (vm.count("help")) {
-    cout << program_name << " " << GIT_DESCRIPTION << endl << "Copyright (C) 2011 Jonas Maaskola\n"
+    cout << program_name << " " << GIT_DESCRIPTION << endl << "Copyright (C) 2013 Jonas Maaskola\n"
       "Provided under GNU General Public License Version 3 or later.\n"
       "See the file COPYING provided with this software for details of the license.\n" << endl;
     cout << gen_usage_string() << endl;
     cout << desc << "\n";
     return 1;
   }
-
 
 
   try {
@@ -217,78 +204,25 @@ int main(int argc, const char** argv) {
     return(-1);
   }
 
+  if(vm.count("seed"))
+    srand(seed);
+  else
+    srand(time(0));
 
-  if(options.motif_specifications.size() == 0) {
-    cout << "Error: you must specify motif lengths of interest with the -m switch." << endl;
-    exit(-1);
-  }
-
-  if(vm.count("threads"))
-    omp_set_num_threads(options.n_threads);
-
-
-  if(options.verbosity >= Verbosity::verbose) {
-    cout << "motif_specifications:"; for(auto &x: options.motif_specifications) cout << " " << x; cout << endl;
-    cout << "paths:"; for(auto &x: options.paths) cout << " " << x; cout << endl;
-    cout << "objectives:"; for(auto &x: options.objectives) cout << " " << x; cout << endl;
-  }
-
-  Specification::harmonize(options.motif_specifications, options.paths, options.objectives);
-
-  if(options.verbosity >= Verbosity::verbose) {
-    cout << "motif_specifications:"; for(auto &x: options.motif_specifications) cout << " " << x; cout << endl;
-    cout << "paths:"; for(auto &x: options.paths) cout << " " << x; cout << endl;
-    cout << "objectives:"; for(auto &x: options.objectives) cout << " " << x; cout << endl;
-  }
-
-  srand(options.mcmc.random_salt);
-
-  Seeding::Plasma plasma(options);
-  Seeding::DataCollection ds = plasma.collection;
-  typedef Seeding::Result res_t;
-  vector<res_t> results;
-
-  size_t n = options.motif_specifications.size();
-  for(auto &motif: options.motif_specifications) {
-    for(auto &r:  plasma.find(motif, options.objectives, false))
-      results.push_back(r);
-    if(--n > 0)
-      plasma.apply_mask(results);
-  }
-
-  if(results.size() == 1)
-    report(cout, results[0], ds, options);
-  else {
-    sort(begin(results), end(results), [](const res_t &a, const res_t &b) { return(a.log_p <= b.log_p); });
-    Seeding::DataCollection original_ds = ds;
-    Seeding::Options opts = options;
-    opts.occurrence_filter = Seeding::OccurrenceFilter::RemoveSequences;
-    for(auto &r: results) {
-      report(cout, r, original_ds, options);
-      res_t r2 = r;
-      r2.counts = count_motif(ds, r.motif, options);
-      report(cerr, r2, ds, options);
-      cout << endl;
-      Seeding::apply_mask(ds, r.motif, opts);
+  if(paths.empty()) {
+    shuffle(cin, n);
+  } else
+    for(auto &path: paths) {
+      if(boost::filesystem::exists(path)) {
+        ifstream ifs(path.c_str());
+        shuffle(ifs, n);
+      }
+      else {
+        cerr << "Error: " << path << " does not exist." << endl;
+        exit(-1);
+      }
     }
-  }
 
-  end_time = clock();
-  cpu_time_used = ((double) (end_time - start_time)) / CLOCKS_PER_SEC;
-
-  if(options.verbosity >= Verbosity::info) {
-    cout << "CPU time used = " << cpu_time_used << endl;
-    if(options.verbosity >= Verbosity::verbose) {
-      tms tm;
-      clock_t some_time = times(&tm);
-      cout << "times() return " << ((double) some_time) << endl;
-      cout << "utime = " << tm.tms_utime << endl;
-      cout << "stime = " << tm.tms_stime << endl;
-      cout << "cutime = " << tm.tms_cutime << endl;
-      cout << "cstime = " << tm.tms_cstime << endl;
-    }
-  }
-
-  return(EXIT_SUCCESS);
+  return EXIT_SUCCESS;
 }
 
