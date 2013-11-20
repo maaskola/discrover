@@ -119,7 +119,7 @@ void HMM::serialize(ostream &os, const ExecutionInformation &exec_info, size_t f
       os << "# Run in " << exec_info.directory << endl;
       os << "# Command = " << exec_info.cmdline << endl;
       for(auto &x: registered_datasets) {
-        os << "Dataset " << x.second.spec.path << " " << x.second.spec.sha1 << " class = " << x.second.class_prior << " motif = ";
+        os << "Dataset " << x.second.spec.path << " " << x.first << " class = " << x.second.class_prior << " motif = ";
         for(auto &y: x.second.motif_prior)
           os << " " << y.first << "/" << y.second;
         os << std::endl;

@@ -84,8 +84,8 @@ std::ostream &operator<<(std::ostream &os, const Fasta::Entry &entry);
 std::istream &operator>>(std::istream &is, std::vector<Fasta::Entry> &parser);
 std::istream &operator>>(std::istream &is, std::vector<Fasta::IEntry> &parser);
 
-void read_fasta(const std::string &path, std::vector<Fasta::Entry> &entries, bool revcomp, size_t n_seq=0);
-void read_fasta(const std::string &path, std::vector<Fasta::IEntry> &entries, bool revcomp, size_t n_seq=0);
+void read_fasta(const std::string &path, std::vector<Fasta::Entry> &entries, bool revcomp, size_t n_seq=0, bool shuffled=false);
+void read_fasta(const std::string &path, std::vector<Fasta::IEntry> &entries, bool revcomp, size_t n_seq=0, bool shuffled=false);
 
 #endif
 

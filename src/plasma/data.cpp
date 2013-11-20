@@ -21,8 +21,23 @@
 #include "../aux.hpp"
 #include "data.hpp"
 #include "../verbosity.hpp"
+#include "../sha1.hpp"
 
 using namespace std;
+
+string sha1hash(const string &s)
+{
+  const char *t = s.c_str();
+  unsigned char hash[20];
+  char hexstring[41]; // 40 chars + a zero
+  int end = (int) strlen(t);
+  sha1::calc(t, end, hash);
+  sha1::toHexString(hash, hexstring);
+  string res;
+  for(size_t i = 0; i < 40; i++)
+    res += hexstring[i];
+  return(res);
+}
 
 namespace Seeding {
   DataSet::DataSet() :
