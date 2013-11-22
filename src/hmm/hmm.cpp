@@ -18,7 +18,7 @@
  *
  *       Filename:  hmm.cpp
  *
- *    Description:  Constructors of the HMM class 
+ *    Description:  Constructors of the HMM class
  *
  *        Created:  Wed Aug 3 02:08:55 2011 +0200
  *
@@ -157,50 +157,63 @@ HMM::HMM(size_t bg_order, Verbosity verbosity_, double pseudo_count_) :
     std::cout << "Constructed HMM: " << *this << std::endl;
 };
 
-size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda, const std::string &name, const std::vector<size_t> &insertions)
+size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda, const std::string &name, std::vector<size_t> insertions, size_t pad_left, size_t pad_right)
 {
   if(verbosity >= Verbosity::verbose)
     std::cout << "Adding motif " << name << ": " << e << std::endl;
 
-  size_t n_insertions = insertions.size();
-  size_t n = e.size1() + n_insertions;
+  const size_t n_insertions = insertions.size();
+  const size_t n_core_states = e.size1();
+  const size_t n_padded_states = pad_left + e.size1() + pad_right;
+  const size_t n_total = n_padded_states + n_insertions;
 
   HMM previous(*this);
 
-  size_t motif_idx = groups.size();
+  const size_t motif_idx = groups.size();
 
-  size_t first = n_states;
-  size_t last = first + n - 1;
+  // size_t first = n_states;
+
+  const size_t first_padded = n_states;
+  const size_t last_padded = first_padded + n_padded_states - 1; // the last of the non-insertion states of this motif
+
+  const size_t first_core = first_padded + pad_left;
+  const size_t last_core = first_core + n_core_states - 1;
+
+  const size_t first_total = first_padded;
+  const size_t last_total = first_total + n_total - 1;
+
   Group motif = {Group::Kind::Motif, name, {}};
-  for(size_t i = first ; i <= last; i++) {
+  for(size_t i = first_total; i <= last_total; i++) {
     motif.states.push_back(i);
     group_ids.push_back(motif_idx);
   }
   groups.push_back(motif);
 
-  last_state += n;
-  n_states += n;
+  last_state += n_total;
+  n_states += n_total;
 
   transition = zero_matrix(n_states, n_states);
   emission = zero_matrix(n_states, n_emissions);
 
+  // keep all former emissions
   for(size_t i = 0; i < previous.transition.size1(); i++)
     for(size_t j = 0; j < n_emissions; j++)
       emission(i,j) = previous.emission(i,j);
 
+  // keep all former transitions
   for(size_t i = 0; i < previous.transition.size1(); i++)
     for(size_t j = 0; j < previous.transition.size2(); j++)
       transition(i,j) = previous.transition(i,j);
 
-  for(size_t i = 0; i < n; i++)
+  for(size_t i = 0; i < n_total; i++)
     order.push_back(0); // TODO: make configurable
 
-  set_motif_emissions(e, first, n_insertions);
+  set_motif_emissions(e, first_padded, n_insertions, pad_left, pad_right);
 
-  initialize_transitions_to_and_from_chain(n, exp_seq_len, lambda, first, last);
+  initialize_transitions_to_and_from_chain(n_core_states, exp_seq_len, lambda, first_padded, last_core, pad_left, pad_right);
 
   // initialize transitions between successive chain states
-  for(size_t i = first; i < last; i++)
+  for(size_t i = first_padded; i < last_padded; i++)
     transition(i,i+1) = 1.0;
 
   normalize_transition(transition);
@@ -212,49 +225,45 @@ size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda, cons
       std::cout << " " << x;
     std::cout << std::endl;
   }
+
+  // Note the user is to specify insertions positions using 1-based indexing
+  // Insertions are given by specifying the (1-based) index of the position in the
+  // motif AFTER which the insertion is to be placed
   if(n_insertions > 0) {
+    std::sort(begin(insertions), end(insertions));
     for(auto &i: insertions)
-      if(i == 0 or i > e.size1()) {
+      if(i == 0 or i >= e.size1()) {
         // insertions are currently only allowed between motif states
         // TODO: generalize
-        std::cout << "Error: insertion positions must be within the motif.";
+        std::cout << "Error: insertion positions must be within the motif." << std::endl;
         exit(-1);
       }
 
 
     const double insert_transition_probability = 0.5;
 
-    size_t first_insertion = last - n_insertions;
-    size_t second_to_last_regular = first_insertion - 1;
+    const size_t first_insertion = last_padded + 1;
+    const size_t last_insertion = last_total;
 
     if(verbosity >= Verbosity::debug)
       std::cout << transition << std::endl;
 
     // set to zero the transition probabilities of insertion states
-    for(size_t i = first_insertion; i < last; i++)
+    for(size_t i = first_insertion; i <= last_insertion; i++)
       for(size_t j = 0; j < n_states; j++)
         transition(i,j) = 0;
 
     if(verbosity >= Verbosity::debug)
       std::cout << transition << std::endl;
 
-    // fix transition of second to last chain state
-    for(size_t j = 0; j < n_states; j++)
-      transition(second_to_last_regular, j) = 0;
-    transition(second_to_last_regular, last) = 1;
-
-    if(verbosity >= Verbosity::debug)
-      std::cout << transition << std::endl;
-
     // fix transitions of insertions
-    for(size_t i_ = 0; i_ < n_insertions; i_++) {
-      size_t i = n_insertions - 1 - i_;
-      for(size_t j = 0; j < n_states; j++) {
-        transition(first_insertion+i, j) = transition(insertions[i]+1,j);
-        transition(insertions[i]+1,j) *= (1 - insert_transition_probability);
-      }
-      transition(insertions[i]+1,first_insertion+i) = insert_transition_probability;
+    for(size_t i = 0; i < n_insertions; i++) {
+      for(size_t j = 0; j < n_states; j++)
+        transition(first_core + insertions[i] - 1, j) *= (1 - insert_transition_probability);
+      transition(first_insertion + i, first_core + insertions[i]) = 1;
+      transition(first_core + insertions[i] - 1, first_insertion + i) = insert_transition_probability;
     }
+
     if(verbosity >= Verbosity::debug)
       std::cout << transition << std::endl;
   }
@@ -284,7 +293,7 @@ void set_emissions(size_t i, const std::vector<size_t> &these, matrix_t &m, doub
     m(i,j) /= z;
 }
 
-size_t HMM::add_motif(const std::string &seq, double alpha, double exp_seq_len, double lambda, const std::string &name, const std::vector<size_t> &insertions)
+size_t HMM::add_motif(const std::string &seq, double alpha, double exp_seq_len, double lambda, const std::string &name, const std::vector<size_t> &insertions, size_t pad_left, size_t pad_right)
 {
   if(verbosity >= Verbosity::verbose)
     std::cout << "Adding motif for " << seq << "." << std::endl;
@@ -345,7 +354,7 @@ size_t HMM::add_motif(const std::string &seq, double alpha, double exp_seq_len, 
     }
     set_emissions(i, these, e, alpha);
   }
-  size_t motif_idx = add_motif(e, exp_seq_len, lambda, name, insertions);
+  size_t motif_idx = add_motif(e, exp_seq_len, lambda, name, insertions, pad_left, pad_right);
   return(motif_idx);
 }
 

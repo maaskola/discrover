@@ -156,9 +156,10 @@ string padding(size_t n, char c='n') {
   return(s);
 }
 
+/* FIXME remove
 string pad(const string &s, size_t l, size_t r, char c='n') {
   return(padding(l,c) + s + padding(r,c));
-}
+}  */
 
 vector<string> generate_wiggle_variants(const string &s,  size_t n, Verbosity verbosity) {
   if(verbosity >= Verbosity::debug)
@@ -216,11 +217,11 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
     switch(spec.kind) {
       case Specification::Motif::Kind::File:
         // load emission matrix and add it.
-        hmm.add_motif(read_emission(spec.specification), expected_seq_size, options.lambda, spec.name, spec.insertions);
+        hmm.add_motif(read_emission(spec.specification), expected_seq_size, options.lambda, spec.name, spec.insertions, options.left_padding, options.right_padding);
         break;
       case Specification::Motif::Kind::Seed:
         // use IUPAC regular expression
-        hmm.add_motif(spec.specification, options.alpha, expected_seq_size, options.lambda, spec.name, spec.insertions);
+        hmm.add_motif(spec.specification, options.alpha, expected_seq_size, options.lambda, spec.name, spec.insertions, options.left_padding, options.right_padding);
         break;
       case Specification::Motif::Kind::Plasma:
         options.seeding.motif_specifications.push_back(spec);
@@ -286,7 +287,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
         if(options.model_choice == ModelChoice::HMMScore) {
           for(size_t seed_idx = 0; seed_idx < plasma_results.size(); seed_idx++) {
-            string motif = pad(plasma_results[seed_idx].motif, options.left_padding, options.right_padding);
+            string motif = plasma_results[seed_idx].motif;
             string name = motif_spec.name;
 
             std::cout << "Considering candidate motif " << name << ":" << motif << " and training to determine the HMM score." << std::endl;
@@ -298,7 +299,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
               hmm_options options_(options);
               if(options_.verbosity >= Verbosity::info and options_.wiggle > 0)
                 std::cout << "Considering wiggle variant " << variant << " of candidate motif " << name << ":" << motif << " and training to determine the HMM score." << std::endl;
-              hmm_.add_motif(variant, options_.alpha, expected_seq_size, options_.lambda, name, plasma.options.motif_specifications[plasma_motif_idx].insertions);
+              hmm_.add_motif(variant, options_.alpha, expected_seq_size, options_.lambda, name, plasma.options.motif_specifications[plasma_motif_idx].insertions, options.left_padding, options.right_padding);
 
               if(options_.long_names)
                 options_.label += "." + variant;
@@ -336,7 +337,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         if(options.verbosity >= Verbosity::info)
           cout << "Accepting seed " << name << ":" << motif << endl;
 
-        hmm.add_motif(motif, options.alpha, expected_seq_size, options.lambda, name, plasma.options.motif_specifications[best_idx].insertions);
+        hmm.add_motif(motif, options.alpha, expected_seq_size, options.lambda, name, plasma.options.motif_specifications[best_idx].insertions, options.left_padding, options.right_padding);
         if(options.long_names)
           options.label += "." + motif;
 
