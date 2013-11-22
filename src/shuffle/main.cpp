@@ -44,9 +44,16 @@ void shuffle(istream &is, size_t n, size_t seed) {
   rng.seed(seed);
   uniform_int_distribution<size_t> dist;
   auto parsing = [&n, &seed, &rng, &dist](Fasta::Entry &&entry) {
-    for(size_t i = 0; i < n; i++)
+    for(size_t i = 0; i < n; i++) {
+      string seq = entry.sequence;
+      for(auto &s: seq) {
+        s = tolower(s);
+        if(s == 'u')
+          s = 't';
+      }
       cout << ">" << entry.definition << endl
-        << dinucleotideShuffle(entry.sequence, dist(rng)) << endl;
+        << dinucleotideShuffle(seq, dist(rng)) << endl;
+    }
     return(true);
   };
   auto parser = Fasta::make_parser(parsing);
