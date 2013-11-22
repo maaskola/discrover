@@ -6,7 +6,7 @@
 find_path(DREME_DIR NAMES dreme meme-dreme)
 
 include(FindPackageHandleStandardArgs)
-# handle the QUIETLY and REQUIRED arguments and set LIBGOOGLEPERFTOOLS_FOUND to TRUE
+# handle the QUIETLY and REQUIRED arguments and set DREME_FOUND to TRUE
 # if all listed variables are TRUE
 find_package_handle_standard_args(DREME DEFAULT_MSG DREME_DIR)
 
