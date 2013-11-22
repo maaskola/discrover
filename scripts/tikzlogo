@@ -427,9 +427,11 @@ ARGV.each{|path|
         # fix widths of final states
         final = hmm.final_states(name)
         cumul = node_width
+        puts cumul
         final.each{|state|
           widths[state] = cumul
-          cumul *= hmm.transition[state][state+1]
+          cumul *= hmm.transition[state][state+1] if state != hmm.n_states - 1
+          puts cumul
         }
 
         # e_matrix = hmm.emission[range[0]..range[-1]]
