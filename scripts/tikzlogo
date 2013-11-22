@@ -396,19 +396,42 @@ ARGV.each{|path|
       first = true
       hmm.motifs.each{|name,range|
         next if name == "Constitutive" or name == "Special" or name =~ /Background/
-        # puts name,range
+
         e_matrix = []
         topo_order = hmm.topological_order(name)
         topo_order.each{|x|
           e_matrix << hmm.emission[x]
         }
+
         widths = [node_width] * e_matrix.length
+
+        # fix widths of insert states
         topo_order.each_with_index{|x,idx|
           next if idx == topo_order.length - 1
           if x > topo_order[(idx+1)..-1].min
             widths[idx] = widths[idx] * range.map{|y| hmm.transition[y][x]}.max
           end
         }
+        # fix widths of initial states
+        initial = hmm.initial_states(name)
+        v = []
+        cumul = 0.0
+        initial.each{|i|
+          x = 0
+          hmm.motifs["Background"].each{|b| x += hmm.transition[b][i] }
+          cumul += x
+          v << cumul
+        }
+        v.each_with_index{|x,idx| widths[idx] = node_width * x / cumul }
+
+        # fix widths of final states
+        final = hmm.final_states(name)
+        cumul = node_width
+        final.each{|state|
+          widths[state] = cumul
+          cumul *= hmm.transition[state][state+1]
+        }
+
         # e_matrix = hmm.emission[range[0]..range[-1]]
         f.puts $tikz_newpage unless first
         first = false
