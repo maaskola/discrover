@@ -11,7 +11,6 @@
 #include "hmm.hpp"
 #include "report.hpp"
 #include "../timer.hpp"
-#include "mic.hpp"
 #include "../plasma/find.hpp"
 #include "../stats_config.hpp"
 
@@ -346,7 +345,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
       if(options.simultaneity == Training::Simultaneity::Sequential)
         train_evaluate_simulate(hmm, all_data, training_data, test_data, options);
     }
-    if(options.simultaneity == Training::Simultaneity::Simultaneous and (options.model_choice != ModelChoice::HMMScore or not plasma.options.motif_specifications.empty() or options.mic > 0))
+    if(options.simultaneity == Training::Simultaneity::Simultaneous and (options.model_choice != ModelChoice::HMMScore or not plasma.options.motif_specifications.empty()))
       train_evaluate_simulate(hmm, all_data, training_data, test_data, options);
   }
   return(hmm);
@@ -378,28 +377,6 @@ void perform_analysis(hmm_options &options)
     cout << "Loading sequences." << endl;
 
   Data::Collection collection(options.paths, options.revcomp, options.n_seq);
-  Data::Collection *orig_data = &collection;
-
-  if(options.mic > 0 and collection.series.size() == 1 and collection.series[0].sets.size() == 1) {
-    orig_data = new Data::Collection(collection);
-    auto iter = collection.series.begin()->sets.begin();
-    size_t n = iter->set_size;
-    Data::Set set;
-    set.path = iter->path;
-    set.motifs = iter->motifs;
-    set.series = iter->series;
-    for(size_t i = 0; i < n/2; i++) {
-      size_t j = n - 1 - i;
-      Data::Seq seq = iter->sequences[j];
-      set.sequences.push_back(seq);
-      iter->sequences.erase(iter->sequences.begin()+j);
-      set.set_size++;
-      set.seq_size += seq.sequence.size();
-      iter->set_size--;
-      iter->seq_size -= seq.sequence.size();
-    }
-    collection.series.begin()->sets.push_back(set);
-  }
 
   check_data(collection, options);
 
@@ -408,13 +385,5 @@ void perform_analysis(hmm_options &options)
     options.cross_validation_iterations = 1;
   }
   std::vector<HMM> hmms = cross_validation(collection, options);
-  if(options.mic > 0) {
-    HMM hmm = hmms[0]; // ignore other cross validation results
-    Data::Collection mic_data = optimize_mic(*orig_data, hmm, options.mic);
-    std::vector<HMM> mic_hmms = cross_validation(mic_data, options);
-  }
-
-  if(orig_data != &collection)
-    delete orig_data;
 }
 

@@ -228,7 +228,6 @@ ostream &operator<<(ostream &os, const hmm_options &options)
     << "print_posterior = " << options.print_posterior << endl
     << "timing_information = " << options.timing_information << endl
     << "cross_validation_iterations = " << options.cross_validation_iterations << endl
-    << "mic = " << options.mic << endl
     << "cross_validation_freq = " << options.cross_validation_freq << endl
     << "store_intermediate = " << options.store_intermediate << endl
     << "wiggle = " << options.wiggle << endl
