@@ -482,37 +482,48 @@ ostream &operator<<(ostream& os, const HMM &hmm)
 }
 
 
-void HMM::set_motif_emissions(const matrix_t &e, size_t first, size_t n_insertions)
+/** Set the emissions according to the desired matrix.
+ * Also embed the matrix with pad_left uniform emission positions on the left,
+ * and pad_left uniform emission positions on the right. Finally, a number of
+ * n_insertions positions with uniform emissions are added for insertions states.
+ */
+void HMM::set_motif_emissions(const matrix_t &e, size_t first_padded, size_t n_insertions, size_t pad_left, size_t pad_right)
 {
   if(verbosity >= Verbosity::debug)
     cout << "set motif_emissions; n_insertions = " << n_insertions << endl;
-  size_t n = e.size1();
-  // set to the desired matrix and the following n_positions to be uniform, also split the motif so the uniform positions are in front of the last motif state
+
+  const size_t n = e.size1();
+
+  // first set the emissions of the padding states on the left to uniform
+  for(size_t i = 0; i < pad_left; i++) {
+    for(size_t j = 0; j < e.size2(); j++)
+      emission(first_padded + i , j) = 1.0 / e.size2();
+    for(size_t j = e.size2(); j < n_emissions; j++)
+      emission(first_padded + i , j) = 0;
+  }
+
+  // then set the emissions of the states of the actual motif to the given matrix
   for(size_t i = 0; i < n; i++) {
     for(size_t j = 0; j < e.size2(); j++)
-      emission(first + i , j) = e(i, j);
+      emission(first_padded + pad_left + i , j) = e(i, j);
     for(size_t j = e.size2(); j < n_emissions; j++)
-      emission(first + i , j) = 0;
+      emission(first_padded + pad_left + i , j) = 0;
   }
+
+  // finally set the emissions of the padding states on the right to uniform
+  for(size_t i = 0; i < pad_right; i++) {
+    for(size_t j = 0; j < e.size2(); j++)
+      emission(first_padded + pad_left + n + i , j) = 1.0 / e.size2();
+    for(size_t j = e.size2(); j < n_emissions; j++)
+      emission(first_padded + pad_left + n + i , j) = 0;
+  }
+
+  // set the emissions of the insert states to uniform
   for(size_t i = 0; i < n_insertions; i++) {
     for(size_t j = 0; j < e.size2(); j++)
-      emission(first + n + i, j) = 1;
+      emission(first_padded + pad_left + n + pad_right + i, j) = 1.0 / e.size2();
     for(size_t j = e.size2(); j < n_emissions; j++)
-      emission(first + n + i, j) = 0;
-    double z = 0;
-    for(size_t j = 0; j < n_emissions; j++)
-      z += emission(first + n + i, j);
-    for(size_t j = 0; j < n_emissions; j++)
-      emission(first + n + i, j) /= z;
-  }
-  if(n_insertions > 0) {
-    size_t a = first + n - 1;
-    size_t b = first + n + n_insertions - 1;
-    for(size_t j = 0; j < n_emissions; j++) {
-      double temp = emission(a, j);
-      emission(a, j) = emission(b, j);
-      emission(b, j) = temp;
-    }
+      emission(first_padded + pad_left + n + pad_right + i, j) = 0;
   }
 }
 

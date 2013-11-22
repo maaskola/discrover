@@ -209,9 +209,8 @@ class HMM {
     void initialize_transitions();
     void initialize_bg_transitions();
     void initialize_order_offsets();
-    void initialize_transitions_to_and_from_chain(double init_trans, size_t first, size_t last);
-    void initialize_transitions_to_and_from_chain(size_t w, double l, double lambda, size_t first, size_t last);
-    void set_motif_emissions(const matrix_t &e, size_t first, size_t n_insertions);
+    void initialize_transitions_to_and_from_chain(size_t w, double l, double lambda, size_t first, size_t last, size_t pad_left, size_t pad_right);
+    void set_motif_emissions(const matrix_t &e, size_t first, size_t n_insertions, size_t pad_left, size_t pad_right);
     void normalize_transition(matrix_t &m) const;
     void normalize_emission(matrix_t &m) const;
 
@@ -229,9 +228,9 @@ class HMM {
 
   public:
     /* Add a motif based on a IUPAC string. */
-    size_t add_motif(const std::string &seq, double alpha, double exp_seq_len, double lambda, const std::string &name, const std::vector<size_t> &insertions);
+    size_t add_motif(const std::string &seq, double alpha, double exp_seq_len, double lambda, const std::string &name, const std::vector<size_t> &insertions, size_t pad_left, size_t pad_right);
     /* Add a motif based on a matrix. */
-    size_t add_motif(const matrix_t &e, double exp_seq_len, double lambda, const std::string &name, const std::vector<size_t> &insertions);
+    size_t add_motif(const matrix_t &e, double exp_seq_len, double lambda, const std::string &name, std::vector<size_t> insertions, size_t pad_left, size_t pad_right);
 
     /* Add motifs of another HMM. */
     void add_motifs(const HMM &hmm);
