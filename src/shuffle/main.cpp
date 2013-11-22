@@ -39,11 +39,14 @@ std::string gen_usage_string()
 
 using namespace std;
 
-void shuffle(istream &is, size_t n) {
-  auto parsing = [&n](Fasta::Entry &&entry) {
+void shuffle(istream &is, size_t n, size_t seed) {
+  mt19937 rng;
+  rng.seed(seed);
+  uniform_int_distribution<size_t> dist;
+  auto parsing = [&n, &seed, &rng, &dist](Fasta::Entry &&entry) {
     for(size_t i = 0; i < n; i++)
       cout << ">" << entry.definition << endl
-        << dinucleotideShuffle(entry.sequence) << endl;
+        << dinucleotideShuffle(entry.sequence, dist(rng)) << endl;
     return(true);
   };
   auto parser = Fasta::make_parser(parsing);
@@ -204,18 +207,17 @@ int main(int argc, const char **argv)
     return(-1);
   }
 
-  if(vm.count("seed"))
-    srand(seed);
-  else
-    srand(time(0));
+  if(not vm.count("seed"))
+    seed = random_device()();
+
 
   if(paths.empty()) {
-    shuffle(cin, n);
+    shuffle(cin, n, seed);
   } else
     for(auto &path: paths) {
       if(boost::filesystem::exists(path)) {
         ifstream ifs(path.c_str());
-        shuffle(ifs, n);
+        shuffle(ifs, n, seed++);
       }
       else {
         cerr << "Error: " << path << " does not exist." << endl;

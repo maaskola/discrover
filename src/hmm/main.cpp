@@ -591,6 +591,8 @@ int main(int argc, const char** argv)
     std::cout << "Initializing random number generator with salt " << options.random_salt << "." << std::endl;
   srand(options.random_salt);
 
+  Fasta::SequenceShuffling::seed(options.random_salt);
+
   // main routine
   perform_analysis(options);
 

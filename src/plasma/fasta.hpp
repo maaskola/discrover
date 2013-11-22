@@ -87,5 +87,17 @@ std::istream &operator>>(std::istream &is, std::vector<Fasta::IEntry> &parser);
 void read_fasta(const std::string &path, std::vector<Fasta::Entry> &entries, bool revcomp, size_t n_seq=0, bool shuffled=false);
 void read_fasta(const std::string &path, std::vector<Fasta::IEntry> &entries, bool revcomp, size_t n_seq=0, bool shuffled=false);
 
+namespace Fasta {
+  struct SequenceShuffling {
+    static void seed(size_t new_seed = std::random_device()()) {
+      rng.seed(new_seed);
+    }
+    private:
+    static std::mt19937 rng;
+    friend void ::read_fasta(const std::string &path, std::vector<Fasta::Entry> &entries, bool revcomp, size_t n_seq, bool shuffled);
+    friend void ::read_fasta(const std::string &path, std::vector<Fasta::IEntry> &entries, bool revcomp, size_t n_seq, bool shuffled);
+  };
+};
+
 #endif
 

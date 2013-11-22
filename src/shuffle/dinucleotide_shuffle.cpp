@@ -4,6 +4,7 @@
 #include <map>
 #include <list>
 #include <iostream>
+#include <random>
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 
@@ -38,16 +39,17 @@ void computeCountAndLists(const string &s, NuclCount &nuclCnt, DinuclCount &dinu
   assert(dinuclTotal==s.size()-1);
 }
 
-struct Eulerian {
+template <class T> struct Eulerian {
 
   bool valid;
   EdgeList edges;
   Nucls nucls;
   char lastChar;
+  std::uniform_real_distribution<double> udist;
 
   Eulerian() : valid(false), edges(), nucls(), lastChar('X') { };
 
-  Eulerian(const string &s) : valid(false), edges(), nucls(), lastChar(s.back()) {
+  Eulerian(const string &s, T &rng) : valid(false), edges(), nucls(), lastChar(s.back()), udist(0,1) {
     NuclCount nuclCnt;
     DinuclCount dinuclCnt;
     NuclList nl;
@@ -56,7 +58,7 @@ struct Eulerian {
     // compute nucleotides appearing in s
     for(Nucl x: "ACGTN") if(s.find(x) != string::npos) nucls.push_back(x);
 
-    for(Nucl x: nucls) if(x != lastChar) edges.push_back(make_pair(x, chooseEdge(x,dinuclCnt)));
+    for(Nucl x: nucls) if(x != lastChar) edges.push_back(make_pair(x, chooseEdge(x,dinuclCnt, rng)));
 
     valid = connectedToLast();
   };
@@ -71,8 +73,8 @@ struct Eulerian {
     return true;
   };
 
-  Nucl chooseEdge(Nucl x, DinuclCount dinuclCnt) const {
-    double z = 1.0 * rand() / RAND_MAX;
+  Nucl chooseEdge(Nucl x, DinuclCount dinuclCnt, T &rng) {
+    double z = udist(rng);
     double denom = 0;
     for(auto y: "ACGTN") {
       auto iter = dinuclCnt.find({x,y});
@@ -95,12 +97,14 @@ struct Eulerian {
 };
 
 
-string dinucleotideShuffle(const string &s_) {
+string dinucleotideShuffle(const string &s_, size_t seed) {
+  mt19937 rng;
+  rng.seed(seed);
   string s(s_);
   boost::algorithm::to_upper(s);
-  Eulerian eulerian;
+  Eulerian<mt19937> eulerian;
   while(not eulerian.valid)
-    eulerian = Eulerian(s);
+    eulerian = Eulerian<mt19937>(s, rng);
 
   NuclCount nuclCnt;
   DinuclCount dinuclCnt;
@@ -113,7 +117,7 @@ string dinucleotideShuffle(const string &s_) {
     auto &iter = nl.find(x.first)->second;
     iter.erase(std::find(begin(iter), end(iter), x.second));
   }
-  for(Nucl x: eulerian.nucls) random_shuffle(begin(nl[x]), end(nl[x]));
+  for(Nucl x: eulerian.nucls) shuffle(begin(nl[x]), end(nl[x]), rng);
   for(Edge x: eulerian.edges) nl[x.first].push_back(x.second);
 
   // construct the Eulerian path

@@ -1,9 +1,13 @@
 
+#include <random>
 #include "fasta.hpp"
 #include "../shuffle/dinucleotide_shuffle.hpp"
 #include "io.hpp"
 
 using namespace std;
+
+mt19937 Fasta::SequenceShuffling::rng;
+uniform_int_distribution<size_t> udist;
 
 Fasta::IEntry::seq_t string2seq_(const string &s, int n_enc=-1)
 {
@@ -113,7 +117,7 @@ void read_fasta(const string &path, vector<Fasta::Entry> &sequences, bool revcom
     sequences.resize(n_seq);
   if(shuffled)
     for(auto &s: sequences)
-      s.sequence = dinucleotideShuffle(s.sequence);
+      s.sequence = dinucleotideShuffle(s.sequence, udist(Fasta::SequenceShuffling::rng));
 };
 
 void read_fasta(const string &path, vector<Fasta::IEntry> &sequences, bool revcomp, size_t n_seq, bool shuffled) {
@@ -122,7 +126,7 @@ void read_fasta(const string &path, vector<Fasta::IEntry> &sequences, bool revco
     sequences.resize(n_seq);
   if(shuffled)
     for(auto &s: sequences) {
-      s.sequence = dinucleotideShuffle(s.sequence);
+      s.sequence = dinucleotideShuffle(s.sequence, udist(Fasta::SequenceShuffling::rng));
       s.isequence = string2seq_(s.sequence);
     }
   if(revcomp)

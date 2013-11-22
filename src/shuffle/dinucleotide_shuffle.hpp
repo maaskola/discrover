@@ -3,7 +3,7 @@
 
 #include <string>
 
-std::string dinucleotideShuffle(const std::string &s);
+std::string dinucleotideShuffle(const std::string &s, size_t seed);
 
 #endif
 
