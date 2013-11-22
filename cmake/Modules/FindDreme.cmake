@@ -3,7 +3,7 @@
 #  DREME_FOUND - System has Dreme
 #  DREME_DIR - The directory with the dreme binary
 
-find_path(DREME_DIR NAMES dreme)
+find_path(DREME_DIR NAMES dreme meme-dreme)
 
 include(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set LIBGOOGLEPERFTOOLS_FOUND to TRUE
