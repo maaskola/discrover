@@ -306,7 +306,7 @@ int main(int argc, const char** argv)
 
   hidden_options.add_options()
     ("absthresh", po::bool_switch(&options.termination.absolute_improvement), "Whether improvement should be gauged by absolute value. Default is relative to the current score.")
-    ("salt", po::value<unsigned int>(&options.random_salt), "Seed for the random number generator. If unspecified, will use current time, XORed with the process ID and additionally with entropy from /dev/urandom, if available.")
+    ("salt", po::value<unsigned int>(&options.random_salt), "Seed for the random number generator.")
     ("intermediate", po::bool_switch(&options.store_intermediate), "Write out intermediate parameters during training.")
     ("limitlogp", po::bool_switch(&options.limit_logp), "Do not report corrected log-P values greater 0 but report 0 in this case.")
     ("longnames", po::bool_switch(&options.long_names), "Form longer output file names that contain some information about the parameters.")
