@@ -243,6 +243,8 @@ int main(int argc, const char** argv) {
 
   srand(options.mcmc.random_salt);
 
+  Fasta::SequenceShuffling::seed(options.mcmc.random_salt);
+
   Seeding::Plasma plasma(options);
   Seeding::DataCollection ds = plasma.collection;
   typedef Seeding::Result res_t;

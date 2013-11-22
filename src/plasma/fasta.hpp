@@ -64,28 +64,38 @@ namespace Fasta {
     make_parser(T&& t) {
       return { std::forward<T>(t) };
     }
+
+  std::istream &operator>>(std::istream &is, Entry &entry);
+  std::istream &operator>>(std::istream &is, IEntry &entry);
+
+  template <class X>
+    std::istream &operator>>(std::istream &is, Parser<X> &parser) {
+      bool proceed = true;
+      while(proceed and is.good()) {
+        Entry entry;
+        is >> entry;
+        proceed = parser(std::move(entry));
+      }
+      return(is);
+    };
+
+  std::ostream &operator<<(std::ostream &os, const Entry &entry);
+  std::istream &operator>>(std::istream &is, std::vector<Entry> &parser);
+  std::istream &operator>>(std::istream &is, std::vector<IEntry> &parser);
+
+  void read_fasta(const std::string &path, std::vector<Entry> &entries, bool revcomp, size_t n_seq=0, bool shuffled=false);
+  void read_fasta(const std::string &path, std::vector<IEntry> &entries, bool revcomp, size_t n_seq=0, bool shuffled=false);
+
+  struct SequenceShuffling {
+    static void seed(size_t new_seed = std::random_device()()) {
+      rng.seed(new_seed);
+    }
+    private:
+    static std::mt19937 rng;
+    friend void read_fasta(const std::string &path, std::vector<Entry> &entries, bool revcomp, size_t n_seq, bool shuffled);
+    friend void read_fasta(const std::string &path, std::vector<IEntry> &entries, bool revcomp, size_t n_seq, bool shuffled);
+  };
 };
-
-std::istream &operator>>(std::istream &is, Fasta::Entry &entry);
-std::istream &operator>>(std::istream &is, Fasta::IEntry &entry);
-
-template <class X>
-std::istream &operator>>(std::istream &is, Fasta::Parser<X> &parser) {
-  bool proceed = true;
-  while(proceed and is.good()) {
-    Fasta::Entry entry;
-    is >> entry;
-    proceed = parser(std::move(entry));
-  }
-  return(is);
-};
-
-std::ostream &operator<<(std::ostream &os, const Fasta::Entry &entry);
-std::istream &operator>>(std::istream &is, std::vector<Fasta::Entry> &parser);
-std::istream &operator>>(std::istream &is, std::vector<Fasta::IEntry> &parser);
-
-void read_fasta(const std::string &path, std::vector<Fasta::Entry> &entries, bool revcomp, size_t n_seq=0, bool shuffled=false);
-void read_fasta(const std::string &path, std::vector<Fasta::IEntry> &entries, bool revcomp, size_t n_seq=0, bool shuffled=false);
 
 #endif
 

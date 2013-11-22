@@ -11,7 +11,6 @@
 #include "hmm.hpp"
 #include "report.hpp"
 #include "../timer.hpp"
-#include "mic.hpp"
 #include "../plasma/find.hpp"
 #include "../stats_config.hpp"
 
@@ -167,9 +166,10 @@ string padding(size_t n, char c='n') {
   return(s);
 }
 
+/* FIXME remove
 string pad(const string &s, size_t l, size_t r, char c='n') {
   return(padding(l,c) + s + padding(r,c));
-}
+}  */
 
 vector<string> generate_wiggle_variants(const string &s,  size_t n, Verbosity verbosity) {
   if(verbosity >= Verbosity::debug)
@@ -227,11 +227,11 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
     switch(spec.kind) {
       case Specification::Motif::Kind::File:
         // load emission matrix and add it.
-        hmm.add_motif(read_emission(spec.specification), expected_seq_size, options.lambda, spec.name, spec.insertions);
+        hmm.add_motif(read_emission(spec.specification), expected_seq_size, options.lambda, spec.name, spec.insertions, options.left_padding, options.right_padding);
         break;
       case Specification::Motif::Kind::Seed:
         // use IUPAC regular expression
-        hmm.add_motif(spec.specification, options.alpha, expected_seq_size, options.lambda, spec.name, spec.insertions);
+        hmm.add_motif(spec.specification, options.alpha, expected_seq_size, options.lambda, spec.name, spec.insertions, options.left_padding, options.right_padding);
         break;
       case Specification::Motif::Kind::Plasma:
         options.seeding.motif_specifications.push_back(spec);
@@ -297,7 +297,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
         if(options.model_choice == ModelChoice::HMMScore) {
           for(size_t seed_idx = 0; seed_idx < plasma_results.size(); seed_idx++) {
-            string motif = pad(plasma_results[seed_idx].motif, options.left_padding, options.right_padding);
+            string motif = plasma_results[seed_idx].motif;
             string name = motif_spec.name;
 
             std::cout << "Considering candidate motif " << name << ":" << motif << " and training to determine the HMM score." << std::endl;
@@ -309,7 +309,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
               hmm_options options_(options);
               if(options_.verbosity >= Verbosity::info and options_.wiggle > 0)
                 std::cout << "Considering wiggle variant " << variant << " of candidate motif " << name << ":" << motif << " and training to determine the HMM score." << std::endl;
-              hmm_.add_motif(variant, options_.alpha, expected_seq_size, options_.lambda, name, plasma.options.motif_specifications[plasma_motif_idx].insertions);
+              hmm_.add_motif(variant, options_.alpha, expected_seq_size, options_.lambda, name, plasma.options.motif_specifications[plasma_motif_idx].insertions, options.left_padding, options.right_padding);
 
               if(options_.long_names)
                 options_.label += "." + variant;
@@ -347,7 +347,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         if(options.verbosity >= Verbosity::info)
           cout << "Accepting seed " << name << ":" << motif << endl;
 
-        hmm.add_motif(motif, options.alpha, expected_seq_size, options.lambda, name, plasma.options.motif_specifications[best_idx].insertions);
+        hmm.add_motif(motif, options.alpha, expected_seq_size, options.lambda, name, plasma.options.motif_specifications[best_idx].insertions, options.left_padding, options.right_padding);
         if(options.long_names)
           options.label += "." + motif;
 
@@ -356,7 +356,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
       if(options.simultaneity == Training::Simultaneity::Sequential)
         train_evaluate_simulate(hmm, all_data, training_data, test_data, options);
     }
-    if(options.simultaneity == Training::Simultaneity::Simultaneous and (options.model_choice != ModelChoice::HMMScore or not plasma.options.motif_specifications.empty() or options.mic > 0))
+    if(options.simultaneity == Training::Simultaneity::Simultaneous and (options.model_choice != ModelChoice::HMMScore or not plasma.options.motif_specifications.empty()))
       train_evaluate_simulate(hmm, all_data, training_data, test_data, options);
   }
   return(hmm);
@@ -388,28 +388,6 @@ void perform_analysis(hmm_options &options)
     cout << "Loading sequences." << endl;
 
   Data::Collection collection(options.paths, options.revcomp, options.n_seq);
-  Data::Collection *orig_data = &collection;
-
-  if(options.mic > 0 and collection.series.size() == 1 and collection.series[0].sets.size() == 1) {
-    orig_data = new Data::Collection(collection);
-    auto iter = collection.series.begin()->sets.begin();
-    size_t n = iter->set_size;
-    Data::Set set;
-    set.path = iter->path;
-    set.motifs = iter->motifs;
-    set.series = iter->series;
-    for(size_t i = 0; i < n/2; i++) {
-      size_t j = n - 1 - i;
-      Data::Seq seq = iter->sequences[j];
-      set.sequences.push_back(seq);
-      iter->sequences.erase(iter->sequences.begin()+j);
-      set.set_size++;
-      set.seq_size += seq.sequence.size();
-      iter->set_size--;
-      iter->seq_size -= seq.sequence.size();
-    }
-    collection.series.begin()->sets.push_back(set);
-  }
 
   check_data(collection, options);
 
@@ -418,13 +396,5 @@ void perform_analysis(hmm_options &options)
     options.cross_validation_iterations = 1;
   }
   std::vector<HMM> hmms = cross_validation(collection, options);
-  if(options.mic > 0) {
-    HMM hmm = hmms[0]; // ignore other cross validation results
-    Data::Collection mic_data = optimize_mic(*orig_data, hmm, options.mic);
-    std::vector<HMM> mic_hmms = cross_validation(mic_data, options);
-  }
-
-  if(orig_data != &collection)
-    delete orig_data;
 }
 

@@ -123,7 +123,6 @@ struct hmm_options {
   bool print_posterior;
   bool timing_information;
   size_t cross_validation_iterations;
-  size_t mic; // how many additional groups to split the data into
   double cross_validation_freq;
   bool store_intermediate; // to write out intermediate parameterizations
   size_t wiggle;

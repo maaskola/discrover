@@ -265,7 +265,6 @@ int main(int argc, const char** argv)
     ("ls_eta", po::value<double>(&options.line_search.eta)->default_value(0.5, "0.5"), "The parameter η for the Moré-Thuente line search algorithm.")
     ("ls_delta", po::value<double>(&options.line_search.delta)->default_value(0.66, "0.66"), "The parameter delta for the Moré-Thuente line search algorithm.")
     ("ls_num", po::value<size_t>(&options.line_search.max_steps)->default_value(10, "10"), "How many gradient and function evaluation to perform maximally per line search.")
-    ("mic", po::value<size_t>(&options.mic)->default_value(0), "How many additional rank groups to introduce in the data. Allows to optimize the maximal information content (MIC).")
     ("multi", po::value<Training::Simultaneity>(&options.simultaneity)->default_value(Training::Simultaneity::Simultaneous,"sim"), "Wether to add and train automatically determined motifs sequentially or simultaneously. Available are 'seq', 'sim'.")
     ("threads,T", po::value<size_t>(&options.n_threads)->default_value(omp_get_num_procs()), "The number of threads to use. If this in not specified, the value of the environment variable OMP_NUM_THREADS is used if that is defined, otherwise it will use as many as there are CPU cores on this machine.")
     ("runtime", po::bool_switch(&options.timing_information), "Output information about how long certain parts take to execute.")
@@ -306,7 +305,7 @@ int main(int argc, const char** argv)
 
   hidden_options.add_options()
     ("absthresh", po::bool_switch(&options.termination.absolute_improvement), "Whether improvement should be gauged by absolute value. Default is relative to the current score.")
-    ("salt", po::value<unsigned int>(&options.random_salt), "Seed for the random number generator. If unspecified, will use current time, XORed with the process ID and additionally with entropy from /dev/urandom, if available.")
+    ("salt", po::value<unsigned int>(&options.random_salt), "Seed for the random number generator.")
     ("intermediate", po::bool_switch(&options.store_intermediate), "Write out intermediate parameters during training.")
     ("limitlogp", po::bool_switch(&options.limit_logp), "Do not report corrected log-P values greater 0 but report 0 in this case.")
     ("longnames", po::bool_switch(&options.long_names), "Form longer output file names that contain some information about the parameters.")
@@ -590,6 +589,8 @@ int main(int argc, const char** argv)
   if(options.verbosity >= Verbosity::info)
     std::cout << "Initializing random number generator with salt " << options.random_salt << "." << std::endl;
   srand(options.random_salt);
+
+  Fasta::SequenceShuffling::seed(options.random_salt);
 
   // main routine
   perform_analysis(options);

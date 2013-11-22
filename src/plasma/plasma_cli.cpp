@@ -112,7 +112,7 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
       ("temp", po::value<double>(&options.mcmc.temperature)->default_value(1e-3), "When performing Gibbs sampling use this temperature. The temperatures of parallel chains is decreasing by factors of two.")
       ("maxiter", po::value<size_t>(&options.mcmc.max_iter)->default_value(1000), "Maximal number of iterations to perform during MCMC seeding.")
       ("partemp", po::value<size_t>(&options.mcmc.n_parallel)->default_value(6), "Parallel chains to run for parallel tempering.")
-      ("salt", po::value<unsigned int>(&options.mcmc.random_salt), "Seed for the random number generator. If unspecified, will use current time, XORed with the process ID and additionally with entropy from /dev/urandom, if available.")
+      ("mcmcsalt", po::value<unsigned int>(&options.mcmc.random_salt), "Seed for the MCMC random number generator.")
       ;
     desc.add(mcmc_desc);
   } else {

@@ -211,18 +211,21 @@ module HMM
     end
 
     # Find those states reachable from the set of states given as argument.
-    # NOTE: There's a slight hack in the 'next if i == states[-1] statement.
-    # NOTE: We do not consider states reachable from the last of the given
-    # NOTE: states.
+    # NOTE: There's a slight hack in the 'and j != states[0] statement.
+    # NOTE: We identify the last of the non-insertion states by the fact,
+    # NOTE: that from it we could reach the first of the set of motif states
+    # NOTE: Thus, we do not consider states reachable from that state.
     def reachable_states(states)
+      # puts "calling reachable_states for #{states.join(",")}"
       r = {}
       states.each{|i|
         r[i] = []
         states.each{|j|
-          next if i == states[-1]
-          r[i] << j if @transition[i][j] > 0
+          # next if i == states[-1]
+          r[i] << j if @transition[i][j] > 0 and j != states[0]
         }
       }
+      # puts "in reachable_states -> #{r.map{|x,y| "#{x}:[#{y.join(",")}]"}.join(",")}"
       states.length.times{|n|
         r.each{|i,x|
           y = []
@@ -236,6 +239,7 @@ module HMM
           r[i] = y
         }
       }
+      # puts "called reachable_states -> #{r.map{|x,y| "#{x}:[#{y.join(",")}]"}.join(",")}"
       r
     end
 
@@ -254,6 +258,48 @@ module HMM
           1
         end
       }
+    end
+
+    def reachable_from_state(state)
+      r = []
+      @n_states.times{|i|
+        r << i if @transition[state][i] > 0
+      }
+      r
+    end
+
+    def reachable_from_states(states)
+      r = []
+      states.each{|state|
+        r += reachable_from_state(state)
+      }
+      r.sort.uniq
+    end
+
+    def initial_states(motif)
+      reachable_from_bg = reachable_from_states(@motifs["Background"])
+      initial = []
+      @motifs[motif].each{|state|
+        initial << state if reachable_from_bg.include?(state)
+      }
+      # puts "initial states of #{motif} = #{initial.join(",")}"
+      initial
+    end
+
+    def final_states(motif)
+      final = []
+      @motifs[motif].each{|state|
+        included = false
+        @motifs["Background"].each{|bg_state|
+          if @transition[state][bg_state] > 0
+            included = true
+            break
+          end
+        }
+        final << state if included
+      }
+      # puts "final states of #{motif} = #{final.join(",")}"
+      final
     end
   end
 

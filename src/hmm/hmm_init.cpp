@@ -107,61 +107,41 @@ void HMM::initialize_bg_transitions()
   transition(bg_state, bg_state) = 1.0;
 };
 
-void HMM::initialize_transitions_to_and_from_chain(double init_trans, size_t first, size_t last)
-{
-  if(first < n_states) {
-    // initialize the transitions from the start state
-    transition(start_state,bg_state) = 1 - init_trans;
-    transition(start_state,first) = init_trans;
-    transition(start_state,start_state) = 0;
-
-    // initialize the transitions from the background
-    transition(bg_state,start_state) = init_trans;
-    transition(bg_state,bg_state) *= 1 - 2 * init_trans;
-    transition(bg_state,first) = init_trans;
-
-    // initialize the transitions from the motif chain
-    transition(last,start_state) = init_trans;
-    transition(last,bg_state) *= 1 - 2 * init_trans;
-    transition(last,first) = init_trans;
-  }
-}
-
 
 /** Initialize the transition probabilities to and from the motif chain such
   * that lambda of the sequences have a motif occurrence, where the expected
   * sequence length is l.
   */
-void HMM::initialize_transitions_to_and_from_chain(size_t w, double l, double lambda, size_t first, size_t last)
+void HMM::initialize_transitions_to_and_from_chain(size_t w, double l, double lambda, size_t first, size_t last, size_t pad_left, size_t pad_right)
 {
-  // size_t w = last - first + 1;
-  if(first < n_states) {
+  const double x = lambda / (l - w + 1);
+  const double y = lambda / (l - w + 1) * (l - w) / (l - w * lambda);
+  const double z = (1 - lambda / (l - w + 1)) / (l - w * lambda);
 
-    const double x = lambda / (l - w + 1);
-    const double y = lambda / (l - w + 1) * (l - w) / (l - w * lambda);
-    const double z = (1 - lambda / (l - w + 1)) / (l - w * lambda);
+  if(verbosity >= Verbosity::debug)
+    std::cout << "l = " << l << std::endl
+      << "w = " << w << std::endl
+      << "x = " << x << std::endl
+      << "y = " << y << std::endl
+      << "z = " << z << std::endl;
 
-    if(verbosity >= Verbosity::debug)
-      std::cout << "l = " << l << std::endl
-        << "w = " << w << std::endl
-        << "x = " << x << std::endl
-        << "y = " << y << std::endl
-        << "z = " << z << std::endl;
+  // initialize transitions from the start state
+  transition(start_state,start_state) = 0; // sequences are at least one position long
+  transition(start_state,bg_state) = 1 - x;
+  for(size_t i = first; i <= first + pad_left; i++)
+    transition(start_state,i) = x / (pad_left + 1.0);
 
-    // initialize transitions from the start state
-    transition(start_state,start_state) = 0; // sequences are at least one position long
-    transition(start_state,bg_state) = 1 - x;
-    transition(start_state,first) = x;
+  // initialize transitions from the background state
+  transition(bg_state,start_state) = z;
+  transition(bg_state,bg_state) = 1 - y - z;
+  for(size_t i = first; i <= first + pad_left; i++)
+    transition(bg_state,i) = y / (pad_left + 1.0);
 
-    // initialize transitions from the background state
-    transition(bg_state,start_state) = z;
-    transition(bg_state,bg_state) = 1 - y - z;
-    transition(bg_state,first) = y;
-
-    // intialize transitions from the last of the motif chain states
-    transition(last,start_state) = z;
-    transition(last,bg_state) = 1 - y - z;
-    transition(last,first) = y;
+  // initialize transitions from the last of the motif chain states
+  for(size_t i = last; i <= last + pad_right; i++) {
+    transition(i,start_state) = z;
+    transition(i,bg_state) = 1 - y - z;
+    transition(i,first) = y;
   }
 }
 
