@@ -863,9 +863,9 @@ namespace Seeding {
 //        auto pos_iter = match_iter;
 //        for(size_t j = current; j < pos; j++)
         while(pos_iter++ != match_iter)
-          out << "B";
+          out << "0";
         for(size_t j = 0; j < motif.length(); j++) {
-          out << j;
+          out << static_cast<char>('A' + j);
           match_iter++;
 //          pos++;
         }
@@ -873,7 +873,7 @@ namespace Seeding {
 //        current = pos;
       }
       while(pos_iter++ != end(seq.sequence))
-        out << "B";
+        out << "0";
       out << endl;
     }
   }
