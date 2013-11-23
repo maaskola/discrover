@@ -29,7 +29,12 @@
 
 #include "hmm.hpp"
 #include "../mcmc/mcmchmm.hpp"
-#include "statistics.hpp"
+#include <random>
+
+std::mt19937 rng; // FIXME initialize this
+std::uniform_int_distribution<size_t> rnucl(0, 3); // FIXME: see next line
+// std::uniform_int_distribution<size_t> rnucl(0, HMM::alphabet_size - 1);
+std::uniform_real_distribution<double> runif(0, 1);
 
 void HMM::modify_column()
 {
@@ -184,13 +189,11 @@ void HMM::add_columns(size_t n)
   size_t pos = rand() % 2;
   if(verbosity >= Verbosity::verbose)
     std::cout << "Adding " << n << " columns at the " << (pos == 0 ? "beginning" : "end") << "." << std::endl;
-  boost::mt19937 rng(time(0));
   for(size_t j = 0; j < n; j++) {
     size_t n = n_emissions;
-    std::vector<double> e(n+1, 0);
-    std::vector<double> v = runiform(alphabet_size, rng);
+    std::vector<double> e(n+1, 0); // FIXME: why + 1 ?
     for(size_t i = 0; i < alphabet_size; i++)
-      e[i] = v[i];
+      e[i] = runif(rng);
 
     if(pos == 0)
       add_column(first_state+j, e);
