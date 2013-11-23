@@ -112,7 +112,7 @@ namespace Fasta {
 
   void read_fasta(const string &path, vector<Entry> &sequences, bool revcomp, size_t n_seq, bool shuffled) {
     parse_file(path, [&](istream &is) { is >> sequences; });
-    if(n_seq > 0) // TODO: improve efficiency by only reading in n_seq sequences
+    if(n_seq > 0 and sequences.size() > n_seq) // TODO: improve efficiency by only reading in n_seq sequences
       sequences.resize(n_seq);
     if(shuffled)
       for(auto &s: sequences)
@@ -122,7 +122,7 @@ namespace Fasta {
   void read_fasta(const string &path, vector<IEntry> &sequences, bool revcomp, size_t n_seq, bool shuffled) {
     parse_file(path, [&](istream &is) { is >> sequences; });
     if(n_seq > 0) // TODO: improve efficiency by only reading in n_seq sequences
-      sequences.resize(n_seq);
+      sequences.resize(n_seq and sequences.size() > n_seq);
     if(shuffled)
       for(auto &s: sequences) {
         s.sequence = dinucleotideShuffle(s.sequence, udist(SequenceShuffling::rng));
