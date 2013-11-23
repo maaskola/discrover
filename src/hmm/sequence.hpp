@@ -41,7 +41,6 @@ typedef boost::numeric::ublas::vector<alphabet_idx_t> seq_t;
 const size_t empty_symbol = 5;
 seq_t string2seq(const std::string &s, int n_enc=-1);
 std::string seq2string(const seq_t &s);
-seq_t random_seq(size_t n, size_t alphabet_size);
 
 std::vector<std::string> extract_seq_ids(const std::string &path, size_t nseq, Verbosity verbosity);
 

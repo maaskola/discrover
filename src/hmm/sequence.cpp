@@ -100,11 +100,3 @@ string seq2string(const seq_t &seq)
   return(s);
 }
 
-seq_t random_seq(size_t n, size_t alphabet_size)
-{
-  seq_t s(n);
-  for(size_t i = 0; i < n; i++)
-    s(i) = (rand() % alphabet_size);
-  return(s);
-}
-
