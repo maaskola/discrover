@@ -367,8 +367,8 @@ namespace Seeding {
   /** This executes the FIRE algorithm to find discriminative IUPAC motifs.
    */
   Results Plasma::find_fire(size_t length, const Objective &objective, size_t max_degeneracy, const set<size_t> &degeneracies) const {
-    std::mt19937 rng_engine; // RNG Mersenne twister MT19937
-    rng_engine.seed(options.mcmc.random_salt);
+    std::mt19937 rng; // RNG Mersenne twister MT19937
+    rng.seed(options.mcmc.random_salt);
     Results results;
     if(options.verbosity >= Verbosity::verbose)
       cout << "Finding motif of length " << length << " using the FIRE approach with top " << options.plasma.max_candidates << " candidates by " << measure2string(objective.measure) << "." << endl;
@@ -430,8 +430,8 @@ namespace Seeding {
                 std::cout << std::endl;
               }
 
-              std::uniform_int_distribution<size_t> posDist(0, remaining_positions.size()-1);
-              const size_t position_idx = posDist(rng_engine);
+              std::uniform_int_distribution<size_t> r_pos(0, remaining_positions.size()-1);
+              const size_t position_idx = r_pos(rng);
               const size_t position = remaining_positions[position_idx];
               remaining_positions.erase(begin(remaining_positions) + position_idx);
 

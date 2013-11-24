@@ -42,8 +42,8 @@ using namespace std;
 void shuffle(istream &is, size_t n, size_t seed) {
   mt19937 rng;
   rng.seed(seed);
-  uniform_int_distribution<size_t> dist;
-  auto parsing = [&n, &seed, &rng, &dist](Fasta::Entry &&entry) {
+  uniform_int_distribution<size_t> r_unif;
+  auto parsing = [&n, &seed, &rng, &r_unif](Fasta::Entry &&entry) {
     for(size_t i = 0; i < n; i++) {
       string seq = entry.sequence;
       for(auto &s: seq) {
@@ -52,7 +52,7 @@ void shuffle(istream &is, size_t n, size_t seed) {
           s = 't';
       }
       cout << ">" << entry.definition << endl
-        << dinucleotideShuffle(seq, dist(rng)) << endl;
+        << dinucleotideShuffle(seq, r_unif(rng)) << endl;
     }
     return(true);
   };

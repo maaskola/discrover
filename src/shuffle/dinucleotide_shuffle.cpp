@@ -45,11 +45,11 @@ template <class T> struct Eulerian {
   EdgeList edges;
   Nucls nucls;
   char lastChar;
-  std::uniform_real_distribution<double> udist;
+  std::uniform_real_distribution<double> r_unif;
 
   Eulerian() : valid(false), edges(), nucls(), lastChar('X') { };
 
-  Eulerian(const string &s, T &rng) : valid(false), edges(), nucls(), lastChar(s.back()), udist(0,1) {
+  Eulerian(const string &s, T &rng) : valid(false), edges(), nucls(), lastChar(s.back()), r_unif(0,1) {
     NuclCount nuclCnt;
     DinuclCount dinuclCnt;
     NuclList nl;
@@ -74,7 +74,7 @@ template <class T> struct Eulerian {
   };
 
   Nucl chooseEdge(Nucl x, DinuclCount dinuclCnt, T &rng) {
-    double z = udist(rng);
+    double z = r_unif(rng);
     double denom = 0;
     for(auto y: "ACGTN") {
       auto iter = dinuclCnt.find({x,y});
