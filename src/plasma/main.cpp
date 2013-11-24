@@ -31,6 +31,7 @@
 #include "../timer.hpp"
 #include "plasma_cli.hpp"
 #include "../GitSHA1.hpp"
+#include "../mcmc/montecarlo.hpp"
 
 const std::string header = "# How to interpret this file:\n"
 "# The program proceeds iteratively, at each step determining the single most discriminative word.";
@@ -250,6 +251,7 @@ int main(int argc, const char** argv) {
   uniform_int_distribution<size_t> r_unif;
 
   Fasta::SequenceShuffling::seed(r_unif(rng));
+  MCMC::EntropySource::seed(r_unif(rng));
 
   Seeding::Plasma plasma(options);
   Seeding::DataCollection ds = plasma.collection;

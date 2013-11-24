@@ -44,7 +44,6 @@ namespace MCMC {
         Seeding::Options options;
         size_t motif_length;
         size_t max_degeneracy;
-        std::mt19937 engine; // RNG Mersenne twister MT19937
         std::uniform_int_distribution<size_t> dist2, dist3, dist4, dist6, dist7, dist8, dist14, dist15, distPos;
         std::function<size_t()>               rand2, rand3, rand4, rand6, rand7, rand8, rand14, rand15, randPos;
         void replace_similar(char &c) const {
@@ -103,16 +102,18 @@ namespace MCMC {
           options(opt),
           motif_length(len),
           max_degeneracy(max_degen),
-          engine(options.mcmc.random_salt),
           dist2(0, 1), dist3(0, 2), dist4(0, 3), dist6(0, 5),
           dist7(0, 6), dist8(0, 7), dist14(0, 13), dist15(0, 14),
           distPos(0, len-1) {
-            engine.seed(options.mcmc.random_salt);
-            rand2 = std::bind(dist2, engine); rand3 = std::bind(dist3, engine);
-            rand4 = std::bind(dist4, engine); rand6 = std::bind(dist6, engine);
-            rand7 = std::bind(dist7, engine); rand8 = std::bind(dist8, engine);
-            rand14 = std::bind(dist14, engine); rand15 = std::bind(dist15, engine);
-            randPos = std::bind(distPos, engine);
+            rand2 = std::bind(dist2, MCMC::EntropySource::rng);
+            rand3 = std::bind(dist3, MCMC::EntropySource::rng);
+            rand4 = std::bind(dist4, MCMC::EntropySource::rng);
+            rand6 = std::bind(dist6, MCMC::EntropySource::rng);
+            rand7 = std::bind(dist7, MCMC::EntropySource::rng);
+            rand8 = std::bind(dist8, MCMC::EntropySource::rng);
+            rand14 = std::bind(dist14, MCMC::EntropySource::rng);
+            rand15 = std::bind(dist15, MCMC::EntropySource::rng);
+            randPos = std::bind(distPos, MCMC::EntropySource::rng);
           };
         Motif generate(const Motif &motif_) const {
           Motif motif(motif_);
