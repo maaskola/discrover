@@ -30,45 +30,6 @@ vector<string> extract_seq_ids(const string &path, size_t nseq, Verbosity verbos
   return(s);
 }
 
-seq_t string2seq(const string &s, int n_enc)
-{
-  seq_t seq(s.size());
-  size_t idx = 0;
-  for(auto iter : s)
-  {
-    switch(iter) {
-      case 'a':
-      case 'A':
-        seq[idx] = 0;
-        break;
-      case 'c':
-      case 'C':
-        seq[idx] = 1;
-        break;
-      case 'g':
-      case 'G':
-        seq[idx] = 2;
-        break;
-      case 't':
-      case 'T':
-      case 'u':
-      case 'U':
-        seq[idx] = 3;
-        break;
-      case '$':
-        seq[idx] = empty_symbol;
-      default:
-        if(n_enc < 0)
-          seq[idx] = random() % 4;
-        else
-          seq[idx] = n_enc;
-        // throw("Wrong encoding");
-    }
-    idx++;
-  }
-  return(seq);
-}
-
 string seq2string(const seq_t &seq)
 {
   string s;

@@ -39,7 +39,6 @@ typedef unsigned char alphabet_idx_t;
 typedef boost::numeric::ublas::vector<alphabet_idx_t> seq_t;
 
 const size_t empty_symbol = 5;
-seq_t string2seq(const std::string &s, int n_enc=-1);
 std::string seq2string(const seq_t &s);
 
 std::vector<std::string> extract_seq_ids(const std::string &path, size_t nseq, Verbosity verbosity);
