@@ -7,11 +7,21 @@
 using namespace std;
 
 namespace Fasta {
-  mt19937 Fasta::EntropySource::rng;
+  mt19937 Fasta::EntropySource::shuffling_rng;
+  mt19937 Fasta::EntropySource::random_nucl_rng;
   uniform_int_distribution<size_t> r_unif;
 
-  IEntry::seq_t string2seq_(const string &s, int n_enc=-1)
+  Entry::Entry() : definition(), sequence() { };
+  Entry::Entry(const Entry &entry) : definition(entry.definition), sequence(entry.sequence) { };
+  Entry::Entry(const IEntry &ientry) : definition(ientry.definition), sequence()
   {
+    size_t pos = ientry.sequence.find("$");
+    sequence = ientry.sequence.substr(0,pos);
+  }
+
+  IEntry::seq_t string2seq(const string &s, int n_enc=-1)
+  {
+    std::uniform_int_distribution<size_t> r_nucl(0,3);
     IEntry::seq_t seq(s.size());
     size_t idx = 0;
     for(auto iter : s)
@@ -37,9 +47,10 @@ namespace Fasta {
           break;
         case '$':
           seq[idx] = IEntry::empty_symbol;
+          break;
         default:
           if(n_enc < 0)
-            seq[idx] = random() % 4;
+            seq[idx] = r_nucl(EntropySource::random_nucl_rng);
           else
             seq[idx] = n_enc;
           // throw("Wrong encoding");
@@ -49,7 +60,7 @@ namespace Fasta {
     return(seq);
   }
 
-  IEntry::IEntry(const Entry &entry) : Entry(entry), isequence(string2seq_(entry.sequence)) {
+  IEntry::IEntry(const Entry &entry) : Entry(entry), isequence(string2seq(entry.sequence)) {
   };
 
   ostream &operator<<(ostream &os, const Entry &entry) {
@@ -116,23 +127,19 @@ namespace Fasta {
       sequences.resize(n_seq);
     if(shuffled)
       for(auto &s: sequences)
-        s.sequence = dinucleotideShuffle(s.sequence, r_unif(EntropySource::rng));
+        s.sequence = dinucleotideShuffle(s.sequence, r_unif(EntropySource::shuffling_rng));
   };
 
-  void read_fasta(const string &path, vector<IEntry> &sequences, bool revcomp, size_t n_seq, bool shuffled) {
-    parse_file(path, [&](istream &is) { is >> sequences; });
-    if(n_seq > 0) // TODO: improve efficiency by only reading in n_seq sequences
-      sequences.resize(n_seq and sequences.size() > n_seq);
-    if(shuffled)
-      for(auto &s: sequences) {
-        s.sequence = dinucleotideShuffle(s.sequence, r_unif(EntropySource::rng));
-        s.isequence = string2seq_(s.sequence);
-      }
-    if(revcomp)
-      for(auto &s: sequences) {
-        s.sequence += "$" + reverse_complement(s.sequence);
-        s.isequence = string2seq_(s.sequence);
-      }
+  void read_fasta(const string &path, vector<IEntry> &isequences, bool revcomp, size_t n_seq, bool shuffled) {
+    vector<Entry> sequences;
+    read_fasta(path, sequences, revcomp, n_seq, shuffled);
+    for(auto &s: sequences) {
+      IEntry is(s);
+      if(revcomp)
+        is.sequence += "$" + reverse_complement(is.sequence);
+        is.isequence = string2seq(is.sequence);
+      isequences.push_back(is);
+    }
   };
 }
 
