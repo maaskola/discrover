@@ -7,7 +7,7 @@
 using namespace std;
 
 namespace Fasta {
-  mt19937 Fasta::SequenceShuffling::rng;
+  mt19937 Fasta::EntropySource::rng;
   uniform_int_distribution<size_t> r_unif;
 
   IEntry::seq_t string2seq_(const string &s, int n_enc=-1)
@@ -116,7 +116,7 @@ namespace Fasta {
       sequences.resize(n_seq);
     if(shuffled)
       for(auto &s: sequences)
-        s.sequence = dinucleotideShuffle(s.sequence, r_unif(SequenceShuffling::rng));
+        s.sequence = dinucleotideShuffle(s.sequence, r_unif(EntropySource::rng));
   };
 
   void read_fasta(const string &path, vector<IEntry> &sequences, bool revcomp, size_t n_seq, bool shuffled) {
@@ -125,7 +125,7 @@ namespace Fasta {
       sequences.resize(n_seq and sequences.size() > n_seq);
     if(shuffled)
       for(auto &s: sequences) {
-        s.sequence = dinucleotideShuffle(s.sequence, r_unif(SequenceShuffling::rng));
+        s.sequence = dinucleotideShuffle(s.sequence, r_unif(EntropySource::rng));
         s.isequence = string2seq_(s.sequence);
       }
     if(revcomp)

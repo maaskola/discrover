@@ -86,7 +86,7 @@ namespace Fasta {
   void read_fasta(const std::string &path, std::vector<Entry> &entries, bool revcomp, size_t n_seq=0, bool shuffled=false);
   void read_fasta(const std::string &path, std::vector<IEntry> &entries, bool revcomp, size_t n_seq=0, bool shuffled=false);
 
-  struct SequenceShuffling {
+  struct EntropySource {
     static void seed(size_t new_seed = std::random_device()()) {
       rng.seed(new_seed);
     }

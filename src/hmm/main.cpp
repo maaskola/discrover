@@ -590,7 +590,7 @@ int main(int argc, const char** argv)
 
   std::uniform_int_distribution<size_t> r_unif;
 
-  Fasta::SequenceShuffling::seed(r_unif(rng));
+  Fasta::EntropySource::seed(r_unif(rng));
   MCMC::EntropySource::seed(r_unif(rng));
 
   // main routine
