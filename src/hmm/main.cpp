@@ -50,8 +50,7 @@ string gen_usage_string(const string &program_name)
 {
   string usage = "This program implements hidden Markov models for probabilistic sequence analysis, "
     "in particular for the purpose of discovering unknown binding site patterns in nucleic acid sequences. "
-    "It may be used to train models using sequence data, evaluate models on "
-    "sequence data, or to simulate sequence data from a model. "
+    "It may be used to train models using sequence data, evaluate models on sequence data. "
     "Several learning objectives are implemented. "
     "Please refer to the description for the --score option below.\n"
    "\n"
@@ -268,7 +267,6 @@ int main(int argc, const char** argv)
     ("multi", po::value<Training::Simultaneity>(&options.simultaneity)->default_value(Training::Simultaneity::Simultaneous,"sim"), "Wether to add and train automatically determined motifs sequentially or simultaneously. Available are 'seq', 'sim'.")
     ("threads,T", po::value<size_t>(&options.n_threads)->default_value(omp_get_num_procs()), "The number of threads to use. If this in not specified, the value of the environment variable OMP_NUM_THREADS is used if that is defined, otherwise it will use as many as there are CPU cores on this machine.")
     ("runtime", po::bool_switch(&options.timing_information), "Output information about how long certain parts take to execute.")
-    ("simulate", po::value<size_t>(&options.n_simulations)->default_value(0), "Simulate the model.")
     ("posterior", po::bool_switch(&options.print_posterior), "During evaluation also print out the motif posterior probabilitity.")
     ("no-classp", po::bool_switch(&options.learn_class_prior)->default_value(true), "When performing MMIE, do not learn the class prior.")
     ("no-motifp", po::bool_switch(&options.learn_conditional_motif_prior)->default_value(true), "When performing MMIE, do not learn the conditional motif prior.")

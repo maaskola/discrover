@@ -16,24 +16,6 @@
 
 using namespace std;
 
-
-void do_simulations(const HMM &hmm, size_t n_simulations, const hmm_options &options)
-{
-  Timer simulation_timer;
-  string simulation_out_path = options.label + ".simulation";
-  if(n_simulations > 0) {
-    ofstream sim_out(simulation_out_path.c_str());
-    for(size_t i = 0; i < n_simulations; i++) {
-      pair<HMM::StatePath,seq_t> sim = hmm.simulate();
-      // sim_out << hmm.path2string(sim.first) << endl;
-      sim_out << seq2string(sim.second) << endl;
-    }
-  }
-  double time = simulation_timer.tock();
-  if(options.timing_information)
-    cerr << "Simulations: " << time << " micro-seconds" << endl;
-}
-
 double train_hmm(HMM &hmm,
     const Data::Collection &training_data,
     const Training::Tasks &tasks,
@@ -132,7 +114,7 @@ void check_data(const Data::Collection &collection, const hmm_options &options)
 }
 
 
-void train_evaluate_simulate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options)
+void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options)
 {
   // Define the training tasks
   Training::Tasks tasks = hmm.define_training_tasks(options);
@@ -140,7 +122,6 @@ void train_evaluate_simulate(HMM &hmm, const Data::Collection &all_data, const D
   if(not tasks.empty())
     train_hmm(hmm, training_data, tasks, options);
   evaluate_hmm(hmm, all_data, training_data, test_data, tasks, options);
-  do_simulations(hmm, options.n_simulations, options);
 }
 
 double get_expected_seq_size(const Data::Collection &collection)
@@ -232,7 +213,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         }) == end(options.motif_specifications)) {
     if(options.verbosity >= Verbosity::info)
       cout << "No automatic seeds are used." << endl;
-    train_evaluate_simulate(hmm, all_data, training_data, test_data, options);
+    train_evaluate(hmm, all_data, training_data, test_data, options);
   } else {
     if(options.verbosity >= Verbosity::info)
       cout << "Determining seeds automatically." << endl;
@@ -303,7 +284,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
               if(options_.long_names)
                 options_.label += "." + variant;
               Training::Tasks tasks = hmm_.define_training_tasks(options_);
-              train_evaluate_simulate(hmm_, all_data, training_data, test_data, options_);
+              train_evaluate(hmm_, all_data, training_data, test_data, options_);
               double score = hmm_.compute_score(training_data, *tasks.begin());
               if(score > plasma_results[seed_idx].score) {
                 plasma_results[seed_idx].motif = variant;
@@ -343,10 +324,10 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         plasma.options.motif_specifications.erase(plasma.options.motif_specifications.begin() + best_idx);
       }
       if(options.simultaneity == Training::Simultaneity::Sequential)
-        train_evaluate_simulate(hmm, all_data, training_data, test_data, options);
+        train_evaluate(hmm, all_data, training_data, test_data, options);
     }
     if(options.simultaneity == Training::Simultaneity::Simultaneous and (options.model_choice != ModelChoice::HMMScore or not plasma.options.motif_specifications.empty()))
-      train_evaluate_simulate(hmm, all_data, training_data, test_data, options);
+      train_evaluate(hmm, all_data, training_data, test_data, options);
   }
   return(hmm);
 }

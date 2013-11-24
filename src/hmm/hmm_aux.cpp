@@ -322,45 +322,6 @@ void HMM::deserialize(istream &is)
 };
 
 
-pair<HMM::StatePath,seq_t> HMM::simulate() const
-{
-  vector<size_t> p;
-  vector<size_t> s;
-  size_t state = start_state;
-  p.push_back(state);
-  s.push_back(4);
-  bool initialized = true;
-  while(initialized or state != start_state) {
-    initialized = false;
-    size_t next_state = 0;
-    size_t next_emission = 0;
-
-    double r = 1.0 * rand() / RAND_MAX;
-    double cumul = 0;
-    while(r > (cumul += transition(state,next_state)))
-      next_state++;
-
-    r = 1.0 * rand() / RAND_MAX;
-    cumul = 0;
-    while(r > (cumul += emission(next_state,next_emission)))
-      next_emission++;
-
-
-    state = next_state;
-
-    p.push_back(state);
-    s.push_back(next_emission);
-  }
-  HMM::StatePath P(p.size());
-  for(size_t i = 0; i < p.size(); i++)
-    P[i] = p[i];
-  seq_t S(s.size());
-  for(size_t i = 0; i < s.size(); i++)
-    S[i] = s[i];
-  return(pair<HMM::StatePath,seq_t>(P,S));
-}
-
-
 string HMM::path2string(const HMM::StatePath &path) const
 {
   string p;
