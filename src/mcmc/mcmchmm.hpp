@@ -48,7 +48,7 @@ namespace MCMC {
             options.sampling.max_size = w;
         };
         HMM generate(const HMM &hmm) const {
-          return(hmm.random_variant(options));
+          return(hmm.random_variant(options, EntropySource::rng));
         };
     };
   template <>

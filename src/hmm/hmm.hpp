@@ -287,7 +287,7 @@ class HMM {
     double get_pseudo_count() const;
 
     /** Generate a random candidate variant for MCMC sampling */
-    HMM random_variant(const hmm_options &options) const;
+    HMM random_variant(const hmm_options &options, std::mt19937 &rng) const;
 
     size_t count_motif(const StatePath &path, size_t motif) const;
 
@@ -404,11 +404,6 @@ class HMM {
 //
     /** Perform parallel tempering */
     std::vector<std::list<std::pair<HMM, double>>> mcmc(const Data::Collection &data, const Training::Task &task, const hmm_options &options);
-
-    // Static variable that keeps track of the number of times MCMC has been used for HMM parameter inference
-    // The reason to use this is in order to make MCMC reproducible while insuring that not every run within one
-    // program execution is identical to the other
-    static size_t mcmc_simulations_run;
 
 // -------------------------------------------------------------------------------------------
 // Gradient learning
@@ -529,12 +524,12 @@ class HMM {
 // Methods for candidate generation in MCMC sampling
 // -------------------------------------------------------------------------------------------
   protected:
-    void swap_columns();
-    void modify_column();
-    void modify_transition(double eps=1e-6);
-    void add_columns(size_t n);
+    void swap_columns(std::mt19937 &rng);
+    void modify_column(std::mt19937 &rng);
+    void modify_transition(std::mt19937 &rng, double eps=1e-6);
+    void add_columns(size_t n, std::mt19937 &rng);
     void add_column(size_t n, const std::vector<double> &e);
-    void del_columns(size_t n);
+    void del_columns(size_t n, std::mt19937 &rng);
     void del_column(size_t n);
 
     struct History {

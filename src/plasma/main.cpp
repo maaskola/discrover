@@ -241,9 +241,15 @@ int main(int argc, const char** argv) {
     cout << "objectives:"; for(auto &x: options.objectives) cout << " " << x; cout << endl;
   }
 
-  srand(options.mcmc.random_salt);
+  // initialize RNG
+  if(options.verbosity >= Verbosity::verbose)
+    cout << "Initializing random number generator with salt " << options.mcmc.random_salt << "." << endl;
+  mt19937 rng;
+  rng.seed(options.mcmc.random_salt);
 
-  Fasta::SequenceShuffling::seed(options.mcmc.random_salt);
+  uniform_int_distribution<size_t> r_unif;
+
+  Fasta::SequenceShuffling::seed(r_unif(rng));
 
   Seeding::Plasma plasma(options);
   Seeding::DataCollection ds = plasma.collection;

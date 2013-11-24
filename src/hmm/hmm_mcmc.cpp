@@ -31,50 +31,52 @@
 #include "../mcmc/mcmchmm.hpp"
 #include <random>
 
-std::mt19937 rng; // FIXME initialize this
-std::uniform_int_distribution<size_t> rnucl(0, 3); // FIXME: see next line
-// std::uniform_int_distribution<size_t> rnucl(0, HMM::alphabet_size - 1);
-std::uniform_real_distribution<double> runif(0, 1);
+std::uniform_int_distribution<size_t> r_binary(0,1);
+std::uniform_real_distribution<double> r_unif(0, 1);
 
-void HMM::modify_column()
+void HMM::modify_column(std::mt19937 &rng)
 {
-  size_t n_cols = n_states-first_state;
-  size_t col = rand() % n_cols + first_state;
-  size_t i = rand() % alphabet_size;
-  size_t j = rand() % alphabet_size;
+  std::uniform_int_distribution<size_t> r_state(first_state, last_state);
+  size_t col = r_state(rng);
+
+  std::uniform_int_distribution<size_t> r_nucl(0, alphabet_size - 1);
+  size_t i = r_nucl(rng);
+  size_t j = r_nucl(rng);
   while(i == j)
-    j = rand() % alphabet_size;
+    j = r_nucl(rng);
   if(verbosity >= Verbosity::verbose)
     std::cout << "Modifying emissions " << i << " and " << j << " in column " << col << std::endl;
-  double rel_amount = rand() * 1.0 / RAND_MAX;
+  double rel_amount = r_unif(rng);
   double amount = emission(col,i) * rel_amount;
   emission(col,i) -= amount;
   emission(col,j) += amount;
 }
 
-void HMM::modify_transition(double eps)
+void HMM::modify_transition(std::mt19937 &rng, double eps)
 {
-  size_t col = rand() % n_states;
+  std::uniform_int_distribution<size_t> r_state(0, n_states - 1);
+  size_t col = r_state(rng);
   size_t cnt = 0;
   for(size_t i = 0; i < n_states; i++)
     cnt += (transition(col,i) > 0 ? 1 : 0);
   while(cnt <= 1) {
-    col = rand() % n_states;
+    col = r_state(rng);
     cnt = 0;
     for(size_t i = 0; i < n_states; i++)
       cnt += (transition(col,i) > 0 ? 1 : 0);
   }
+  std::uniform_int_distribution<size_t> r_cnt(0, cnt-1);
   std::vector<size_t> present;
   for(size_t i = 0; i < n_states; i++)
     if(transition(col,i) > 0)
       present.push_back(i);
-  size_t i = rand() % cnt;
-  size_t j = rand() % cnt;
+  size_t i = r_cnt(rng);
+  size_t j = r_cnt(rng);
   while(i == j)
-    j = rand() % cnt;
+    j = r_cnt(rng);
   if(verbosity >= Verbosity::verbose)
     std::cout << "Modifying transitions " << present[i] << " and " << present[j] << " in column " << col << std::endl;
-  double rel_amount = rand() * 1.0 / RAND_MAX;
+  double rel_amount = r_unif(rng);
   double amount = transition(col,present[i]) * rel_amount;
   transition(col,present[i]) -= amount;
   transition(col,present[j]) += amount - eps;
@@ -86,41 +88,47 @@ void HMM::modify_transition(double eps)
     transition(col,i) /= z;
 }
 
-HMM HMM::random_variant(const hmm_options &options) const
+HMM HMM::random_variant(const hmm_options &options, std::mt19937 &rng) const
 {
   HMM candidate(*this);
   unsigned n_cols = n_states - first_state;
   int n_ins = std::max<int>(0,std::min<int>(options.sampling.n_indels, options.sampling.max_size - n_cols));
   int n_del = std::max<int>(0,std::min<int>(options.sampling.n_indels, int(n_cols) - std::max<int>(0,options.sampling.min_size)));
-  size_t operation = rand() % 6;
+
+  std::uniform_int_distribution<size_t> r_operation(0, 5);
+  std::uniform_int_distribution<size_t> r_ins(1, n_ins);
+  std::uniform_int_distribution<size_t> r_del(1, n_del);
+  std::uniform_int_distribution<size_t> r_shift(1, options.sampling.n_shift);
+
+  size_t operation = r_operation(rng);
   while((operation >= 5 and options.bg_learning == Training::Method::None) or
       (operation < 5 and options.objectives.empty()) or
       (operation == 2 and n_ins <= 0) or (operation == 3 and n_del <= 0) or (operation == 4 and options.sampling.n_shift == 0))
-    operation = rand() % 6;
+    operation = r_operation(rng);
   if(verbosity > Verbosity::info)
     std::cout << "operation =  " << operation << std::endl;
   switch(operation) {
     case 0: // modify a column
-      candidate.modify_column();
+      candidate.modify_column(rng);
       break;
     case 1: // swap two columns
-      candidate.swap_columns();
+      candidate.swap_columns(rng);
       break;
     case 2: // add column
-      candidate.add_columns(rand() % n_ins + 1);
+      candidate.add_columns(r_ins(rng), rng);
       break;
     case 3: // del column
-      candidate.del_columns(rand() % n_del + 1);
+      candidate.del_columns(r_del(rng), rng);
       break;
     case 4: // shift matrix
       {
-        size_t n = rand() % options.sampling.n_shift + 1;
-        candidate.del_columns(n);
-        candidate.add_columns(n);
+        size_t n = r_shift(rng);
+        candidate.del_columns(n, rng);
+        candidate.add_columns(n, rng);
       }
       break;
     case 5: // modify transition
-      candidate.modify_transition();
+      candidate.modify_transition(rng);
       break;
     case 6: // modify IC
       break;
@@ -131,13 +139,13 @@ HMM HMM::random_variant(const hmm_options &options) const
 }
  
 
-void HMM::swap_columns()
+void HMM::swap_columns(std::mt19937 &rng)
 {
-  size_t n_cols = n_states-first_state;
-  size_t i = rand() % n_cols + first_state;
-  size_t j = rand() % n_cols + first_state;
+  std::uniform_int_distribution<size_t> r_state(first_state, last_state);
+  size_t i = r_state(rng);
+  size_t j = r_state(rng);
   while(i == j)
-    j = rand() % n_cols + first_state;
+    j = r_state(rng);
   if(verbosity >= Verbosity::verbose)
     std::cout << "Swapping columns " << i << " and " << j << std::endl;
   for(size_t k = 0; k < n_emissions; k++) {
@@ -184,16 +192,16 @@ void HMM::add_column(size_t n, const std::vector<double> &e)
 }
 
 
-void HMM::add_columns(size_t n)
+void HMM::add_columns(size_t n, std::mt19937 &rng)
 {
-  size_t pos = rand() % 2;
+  size_t pos = r_binary(rng);
   if(verbosity >= Verbosity::verbose)
     std::cout << "Adding " << n << " columns at the " << (pos == 0 ? "beginning" : "end") << "." << std::endl;
   for(size_t j = 0; j < n; j++) {
     size_t n = n_emissions;
     std::vector<double> e(n+1, 0); // FIXME: why + 1 ?
     for(size_t i = 0; i < alphabet_size; i++)
-      e[i] = runif(rng);
+      e[i] = r_unif(rng);
 
     if(pos == 0)
       add_column(first_state+j, e);
@@ -246,9 +254,9 @@ void HMM::del_column(size_t n)
   // TODO: purge empty groups?
 }
 
-void HMM::del_columns(size_t n)
+void HMM::del_columns(size_t n, std::mt19937 &rng)
 {
-  size_t i = rand() % 2;
+  size_t i = r_binary(rng);
   if(verbosity >= Verbosity::verbose)
     std::cout << "Deleting " << n << " columns at the " << (i == 0 ? "beginning" : "end") << "." << std::endl;
   for(size_t j = 0; j < n; j++)
@@ -264,7 +272,6 @@ std::vector<std::list<std::pair<HMM, double>>> HMM::mcmc(const Data::Collection 
     const hmm_options &options)
 {
   double temperature = options.sampling.temperature;
-  srand(options.random_salt + (HMM::mcmc_simulations_run++));
   MCMC::Evaluator<HMM> eval(data, task);
   MCMC::Generator<HMM> gen(options, n_states-first_state);
   MCMC::MonteCarlo<HMM> mcmc(gen, eval, verbosity);

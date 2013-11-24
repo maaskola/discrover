@@ -36,11 +36,23 @@
 #include <list>
 #include <vector>
 #include <cmath>
+#include <random>
 #include "../verbosity.hpp"
 
 namespace MCMC {
+  struct EntropySource {
+    static void seed(size_t new_seed = std::random_device()()) {
+      rng.seed(new_seed);
+    }
+    private:
+    static std::mt19937 rng;
+    template <typename> friend struct MonteCarlo;
+    template <typename> friend struct Evaluator;
+    template <typename> friend struct Generator;
+  };
 
-  double boltzdist(double dG, double T){
+  inline double boltzdist(double dG, double T)
+  {
     return exp(- dG / T);
   };
 
@@ -74,12 +86,16 @@ namespace MCMC {
         Generator<T> generator;
         Evaluator<T> evaluator;
 
+        friend Generator<T>;
+        friend Evaluator<T>;
       private:
+
         bool GibbsStep(double temp, T &state, double &G) const {
+          std::uniform_real_distribution<double> runif(0,1);
           T nextstate = generator.generate(state);
           double nextG = evaluator.evaluate(nextstate);
           double dG = nextG - G;
-          double r = 1.0 * rand() / RAND_MAX;
+          double r = runif(EntropySource::rng);
           double p = std::min<double>(1.0, boltzdist(-dG,temp));
           if(verbosity >= Verbosity::verbose)
             std::cerr << "T = " << temp << " next state = " << nextstate << std::endl
@@ -100,7 +116,8 @@ namespace MCMC {
  
 
         bool swap(double temp1, double temp2, T &state1, T &state2, double &G1, double &G2) const {
-          double r = 1.0 * rand() / RAND_MAX;
+          std::uniform_real_distribution<double> runif(0,1);
+          double r = runif(EntropySource::rng);
           double p = std::min<double>(1.0,exp(-(G1 / temp1 + G2 / temp2 - G1 / temp2 - G2 / temp1)));
           if(verbosity >= Verbosity::verbose)
             std::cerr << "T1 = " << temp1 << " T2 " << temp2 << " G1 = " << G1 << " G2 = " << G2 << std::endl
@@ -136,6 +153,7 @@ namespace MCMC {
 
         std::vector<std::list<E>> parallel_tempering(const std::vector<double> &temp, const std::vector<T> &init, size_t steps) const {
           size_t n = temp.size();
+          std::uniform_int_distribution<size_t> runif_int(0, n-2);
           std::vector<T> state = init;
 
           std::vector<double> G;
@@ -161,7 +179,7 @@ namespace MCMC {
             }
 
             if(temp.size() > 1) {
-              size_t r = rand() % (n - 1);
+              size_t r = runif_int(EntropySource::rng);
               if(verbosity >= Verbosity::verbose)
                 std::cerr << "Testing swap of " << r << " and " << r+1 << std::endl;
               if(swap(temp[r], temp[r+1], state[r], state[r+1], G[r], G[r+1])) {

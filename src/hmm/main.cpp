@@ -41,8 +41,7 @@
 #include "../aux.hpp"
 #include "../terminal.hpp"
 #include "../random_seed.hpp"
-
-size_t HMM::mcmc_simulations_run = 0;
+#include "../mcmc/montecarlo.hpp"
 
 using namespace std;
 
@@ -136,6 +135,9 @@ void fixup_seeding_options(hmm_options &options) {
 }
 
 string generate_random_label(const string &prefix="dlhmm", size_t n_rnd_char=5, Verbosity verbosity=Verbosity::info) {
+  // NOTE: this could use boost::filesystem::unique_path
+  std::random_device rng;
+  std::uniform_int_distribution<char> r_char('a', 'z');
   using namespace boost::posix_time;
   ptime t = microsec_clock::universal_time();
   string datetime = to_iso_extended_string(t) + "Z";
@@ -146,11 +148,8 @@ string generate_random_label(const string &prefix="dlhmm", size_t n_rnd_char=5, 
   std::string label = prefix + "_" + datetime;
   if(n_rnd_char > 0) {
     label += "_";
-    const char first = 'a';
-    const char last = 'z';
-    size_t n = last - first + 1;
     for(size_t i = 0; i < n_rnd_char; i++)
-      label += char(rand() % n + first);
+      label += r_char(rng);
   }
   if(verbosity >= Verbosity::debug)
     cout << "Generated random label " << label << endl;
@@ -586,9 +585,13 @@ int main(int argc, const char** argv)
   // initialize RNG
   if(options.verbosity >= Verbosity::info)
     std::cout << "Initializing random number generator with salt " << options.random_salt << "." << std::endl;
-  srand(options.random_salt);
+  std::mt19937 rng;
+  rng.seed(options.random_salt);
 
-  Fasta::SequenceShuffling::seed(options.random_salt);
+  std::uniform_int_distribution<size_t> r_unif;
+
+  Fasta::SequenceShuffling::seed(r_unif(rng));
+  MCMC::EntropySource::seed(r_unif(rng));
 
   // main routine
   perform_analysis(options);
