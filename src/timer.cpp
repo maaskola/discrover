@@ -40,7 +40,7 @@ void Timer::tick()
   gettimeofday(&start,NULL);
 }
 
-/** Return time in seconds since tick(). */
+/** Return time in micro seconds since tick(). */
 double Timer::tock() const
 {
   struct timeval end;

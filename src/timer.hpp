@@ -44,7 +44,7 @@ class Timer {
     /** (Re-)Start the timer. */
     void tick();
 
-    /** Time in seconds since tick(). */
+    /** Time in micro seconds since tick(). */
     double tock() const;
 };
 
