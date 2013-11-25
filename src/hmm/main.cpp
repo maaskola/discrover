@@ -29,6 +29,10 @@
 
 #include <ctime>          // for clock()
 #include <sys/times.h>    // for times(struct tms *)
+
+#include <sys/time.h>
+#include <sys/resource.h>
+
 #include <iostream>
 #include <fstream>
 #include <omp.h>
@@ -42,6 +46,7 @@
 #include "../terminal.hpp"
 #include "../random_seed.hpp"
 #include "../mcmc/montecarlo.hpp"
+#include "../timer.hpp"
 
 using namespace std;
 
@@ -162,6 +167,7 @@ int main(int argc, const char** argv)
   clock_t start, end;
   double cpu_time_used;
   start = clock();
+  Timer timer;
 
   namespace po = boost::program_options;
 
@@ -610,7 +616,24 @@ int main(int argc, const char** argv)
       std::cout << "cutime = " << tm.tms_cutime << std::endl;
       std::cout << "cstime = " << tm.tms_cstime << std::endl;
     }
-  }
+
+    if(options.timing_information) {
+      struct rusage usage;
+      if(getrusage(RUSAGE_SELF, &usage) != 0) {
+        cout << "getrusage failed" << endl ;
+        exit(0);
+      }
+
+      cout << "User time sec = "<< usage.ru_utime.tv_sec << endl;
+      cout << "User time usec = "<< usage.ru_utime.tv_usec << endl;
+      cout << "System time sec = "<< usage.ru_stime.tv_sec << endl;
+      cout << "System time usec = "<< usage.ru_stime.tv_usec << endl;
+    }
+
+      double elapsed_time = timer.tock();
+      cout << "Elapsed time = " << elapsed_time << endl;
+
+    }
 
   return(EXIT_SUCCESS);
 }
