@@ -16,11 +16,10 @@
  * =====================================================================================
  */
 
-#include <ctime>          // for clock()
-#include <sys/times.h>    // for times(struct tms *)
+#include <sys/resource.h> // for getrusage
 #include <iostream>
-#include <omp.h>
 #include <fstream>
+#include <omp.h>
 #include <boost/program_options.hpp>
 #include "code.hpp"
 #include "score.hpp"
@@ -60,9 +59,7 @@ std::string gen_usage_string()
 using namespace std;
 
 int main(int argc, const char** argv) {
-  clock_t start_time, end_time;
-  double cpu_time_used;
-  start_time = clock();
+  Timer timer;
 
   Seeding::Options options;
 
@@ -283,22 +280,25 @@ int main(int argc, const char** argv) {
     }
   }
 
-  end_time = clock();
-  cpu_time_used = ((double) (end_time - start_time)) / CLOCKS_PER_SEC;
-
   if(options.verbosity >= Verbosity::info) {
-    cout << "CPU time used = " << cpu_time_used << endl;
-    if(options.verbosity >= Verbosity::verbose) {
-      tms tm;
-      clock_t some_time = times(&tm);
-      cout << "times() return " << ((double) some_time) << endl;
-      cout << "utime = " << tm.tms_utime << endl;
-      cout << "stime = " << tm.tms_stime << endl;
-      cout << "cutime = " << tm.tms_cutime << endl;
-      cout << "cstime = " << tm.tms_cstime << endl;
+    struct rusage usage;
+    if(getrusage(RUSAGE_SELF, &usage) != 0) {
+      cout << "getrusage failed" << endl ;
+      exit(0);
     }
-  }
 
+    double utime = usage.ru_utime.tv_sec + 1e-6 * usage.ru_utime.tv_usec;
+    double stime = usage.ru_stime.tv_sec + 1e-6 * usage.ru_stime.tv_usec;
+    double total_time = utime + stime;
+    double elapsed_time = timer.tock() * 1e-6;
+
+    cerr
+      << "User time = " << utime << " sec" << endl
+      << "System time = " << stime << " sec" << endl
+      << "CPU time = " << total_time << " sec" << endl
+      << "Elapsed time = " << elapsed_time << " sec" << endl
+      << 100 * total_time / elapsed_time <<"\% CPU" << endl;
+  }
   return(EXIT_SUCCESS);
 }
 

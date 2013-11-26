@@ -27,12 +27,7 @@
  * =====================================================================================
  */
 
-#include <ctime>          // for clock()
-#include <sys/times.h>    // for times(struct tms *)
-
-#include <sys/time.h>
-#include <sys/resource.h>
-
+#include <sys/resource.h> // for getrusage
 #include <iostream>
 #include <fstream>
 #include <omp.h>
@@ -164,9 +159,6 @@ string generate_random_label(const string &prefix="dlhmm", size_t n_rnd_char=5, 
 int main(int argc, const char** argv)
 {
   const string default_error_msg = "Please inspect the command line help with -h or --help.";
-  clock_t start, end;
-  double cpu_time_used;
-  start = clock();
   Timer timer;
 
   namespace po = boost::program_options;
@@ -177,7 +169,9 @@ int main(int argc, const char** argv)
   options.random_salt = generate_rng_seed();
 
   string config_path;
-  bool hmm_score_seeding;
+
+  bool deprecated_timing_information = false;
+  bool deprecated_hmm_score_seeding = false;
 
   string background_initialization;
 
@@ -199,6 +193,7 @@ int main(int argc, const char** argv)
   po::options_description sampling_options("Gibbs sampling options", cols);
   po::options_description termination_options("Termination options", cols);
   po::options_description hidden_options("Hidden options", cols);
+  po::options_description deprecated_options("Deprecated options", cols);
 
   po::options_description seeding_options = gen_iupac_options_description(options.seeding, "", "Seeding options for IUPAC regular expression finding", cols, false, false);
 
@@ -251,7 +246,6 @@ int main(int argc, const char** argv)
     ("wiggle", po::value<size_t>(&options.wiggle)->default_value(0), "For automatically determined seeds, consider variants shifted up and down by up to the specified number of positions.")
     ("padl", po::value<size_t>(&options.left_padding)->default_value(0), "For automatically determined seeds, add Ns upstream of, or to the left of the seed.")
     ("padr", po::value<size_t>(&options.right_padding)->default_value(0), "For automatically determined seeds, add Ns downstream of, or to the right of the seed.")
-    ("hmmscore", po::bool_switch(&hmm_score_seeding), "Train a HMM for each seed and select seeds in order of their HMM scores.")
     ("miseeding", po::bool_switch(&options.use_mi_to_seed), "Disregard automatic seeding choice and use MICO for seeding.")
     ;
 
@@ -271,7 +265,7 @@ int main(int argc, const char** argv)
     ("ls_num", po::value<size_t>(&options.line_search.max_steps)->default_value(10, "10"), "How many gradient and function evaluation to perform maximally per line search.")
     ("multi", po::value<Training::Simultaneity>(&options.simultaneity)->default_value(Training::Simultaneity::Simultaneous,"sim"), "Wether to add and train automatically determined motifs sequentially or simultaneously. Available are 'seq', 'sim'.")
     ("threads,T", po::value<size_t>(&options.n_threads)->default_value(omp_get_num_procs()), "The number of threads to use. If this in not specified, the value of the environment variable OMP_NUM_THREADS is used if that is defined, otherwise it will use as many as there are CPU cores on this machine.")
-    ("runtime", po::bool_switch(&options.timing_information), "Output information about how long certain parts take to execute.")
+    ("time", po::bool_switch(&options.timing_information), "Output information about how long certain parts take to execute.")
     ("posterior", po::bool_switch(&options.print_posterior), "During evaluation also print out the motif posterior probabilitity.")
     ("no-classp", po::bool_switch(&options.learn_class_prior)->default_value(true), "When performing MMIE, do not learn the class prior.")
     ("no-motifp", po::bool_switch(&options.learn_conditional_motif_prior)->default_value(true), "When performing MMIE, do not learn the conditional motif prior.")
@@ -313,6 +307,13 @@ int main(int argc, const char** argv)
     ("limitlogp", po::bool_switch(&options.limit_logp), "Do not report corrected log-P values greater 0 but report 0 in this case.")
     ("longnames", po::bool_switch(&options.long_names), "Form longer output file names that contain some information about the parameters.")
     ;
+
+  deprecated_options.add_options()
+    ("runtime", po::bool_switch(&deprecated_timing_information), "Output information about how long certain parts take to execute. Superseded by the --time option.")
+    ("hmmscore", po::bool_switch(&deprecated_hmm_score_seeding), "Train a HMM for each seed and select seeds in order of their HMM scores. Superseded by the --keepall option.")
+    ;
+
+  hidden_options.add(deprecated_options);
 
   advanced_options.add(termination_options);
   advanced_options.add(sampling_options);
@@ -527,14 +528,18 @@ int main(int argc, const char** argv)
   } else
     options.sampling.max_size = -1;
 
+  // treat deprecated options
+  if(deprecated_timing_information) {
+    cerr << "Warning: option --runtime is deprecated. It has been superseded by the --time option." << endl;
+    options.timing_information = true;
+  }
+  if(deprecated_hmm_score_seeding) {
+    std::cout << "Warning: option --hmmscore is deprecated. It has been superseded by the --keepall option." << std::endl;
+    options.seeding.keep_all = true;
+  }
+
   // Initialize the plasma options
   fixup_seeding_options(options);
-
-  // deprecation warning for option --hmmscore
-  if(hmm_score_seeding) {
-    options.seeding.keep_all = true;
-    std::cout << "Warning: option --hmmscore is deprecated. It has been superseded by the --keepall option." << std::endl;
-  }
 
   if(options.seeding.keep_all)
     options.model_choice = ModelChoice::HMMScore;
@@ -602,38 +607,25 @@ int main(int argc, const char** argv)
   // main routine
   perform_analysis(options);
 
-  end = clock();
-  cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-
   if(options.verbosity >= Verbosity::info) {
-    std::cout << "CPU time used = " << cpu_time_used << std::endl;
-    if(options.verbosity >= Verbosity::verbose) {
-      tms tm;
-      clock_t some_time = times(&tm);
-      std::cout << "times() return " << ((double) some_time) << std::endl;
-      std::cout << "utime = " << tm.tms_utime << std::endl;
-      std::cout << "stime = " << tm.tms_stime << std::endl;
-      std::cout << "cutime = " << tm.tms_cutime << std::endl;
-      std::cout << "cstime = " << tm.tms_cstime << std::endl;
+    struct rusage usage;
+    if(getrusage(RUSAGE_SELF, &usage) != 0) {
+      cout << "getrusage failed" << endl ;
+      exit(0);
     }
 
-    if(options.timing_information) {
-      struct rusage usage;
-      if(getrusage(RUSAGE_SELF, &usage) != 0) {
-        cout << "getrusage failed" << endl ;
-        exit(0);
-      }
+    double utime = usage.ru_utime.tv_sec + 1e-6 * usage.ru_utime.tv_usec;
+    double stime = usage.ru_stime.tv_sec + 1e-6 * usage.ru_stime.tv_usec;
+    double total_time = utime + stime;
+    double elapsed_time = timer.tock() * 1e-6;
 
-      cout << "User time sec = "<< usage.ru_utime.tv_sec << endl;
-      cout << "User time usec = "<< usage.ru_utime.tv_usec << endl;
-      cout << "System time sec = "<< usage.ru_stime.tv_sec << endl;
-      cout << "System time usec = "<< usage.ru_stime.tv_usec << endl;
-    }
-
-      double elapsed_time = timer.tock();
-      cout << "Elapsed time = " << elapsed_time << endl;
-
-    }
+    cerr
+      << "User time = " << utime << " sec" << endl
+      << "System time = " << stime << " sec" << endl
+      << "CPU time = " << total_time << " sec" << endl
+      << "Elapsed time = " << elapsed_time << " sec" << endl
+      << 100 * total_time / elapsed_time <<"\% CPU" << endl;
+  }
 
   return(EXIT_SUCCESS);
 }
