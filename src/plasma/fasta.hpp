@@ -37,7 +37,11 @@
 std::string reverse_complement(const std::string &s);
 
 namespace Fasta {
+  struct IEntry;
   struct Entry {
+    Entry();
+    Entry(const Entry &entry);
+    Entry(const IEntry &ientry);
     std::string definition;
     std::string sequence;
     std::string string(size_t width=60) const { return(">" + definition + "\n" + sequence); };
@@ -86,14 +90,16 @@ namespace Fasta {
   void read_fasta(const std::string &path, std::vector<Entry> &entries, bool revcomp, size_t n_seq=0, bool shuffled=false);
   void read_fasta(const std::string &path, std::vector<IEntry> &entries, bool revcomp, size_t n_seq=0, bool shuffled=false);
 
-  struct SequenceShuffling {
+  struct EntropySource {
     static void seed(size_t new_seed = std::random_device()()) {
-      rng.seed(new_seed);
+      shuffling_rng.seed(new_seed);
+      random_nucl_rng.seed(std::uniform_int_distribution<size_t>()(shuffling_rng));
     }
     private:
-    static std::mt19937 rng;
+    static std::mt19937 shuffling_rng, random_nucl_rng;
     friend void read_fasta(const std::string &path, std::vector<Entry> &entries, bool revcomp, size_t n_seq, bool shuffled);
     friend void read_fasta(const std::string &path, std::vector<IEntry> &entries, bool revcomp, size_t n_seq, bool shuffled);
+    friend IEntry::seq_t string2seq(const std::string &s, int n_enc);
   };
 };
 

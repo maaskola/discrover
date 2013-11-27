@@ -349,6 +349,7 @@ def gen_tex(matrix, f, infologo, background, widths, height, ordering=:alpha, rn
     else
       pos = n - i - 1
     end
+    $stderr.puts [pos,widths[pos]].join("\t")
     f.puts gen_column(cumul_x, 0, widths[pos], height, matrix[pos], infologo, ordering, background, rna, font_colors, colors, revcomp, verbose)
     cumul_x = cumul_x + widths[pos]
   }
@@ -399,11 +400,15 @@ ARGV.each{|path|
 
         e_matrix = []
         topo_order = hmm.topological_order(name)
+        # $stderr.puts topo_order
         topo_order.each{|x|
           e_matrix << hmm.emission[x]
         }
 
         widths = [node_width] * e_matrix.length
+        # widths.each_with_index{|w,idx|
+        #   puts ["w",w,idx].join("\t")
+        # }
 
         # fix widths of insert states
         topo_order.each_with_index{|x,idx|
@@ -414,6 +419,7 @@ ARGV.each{|path|
         }
         # fix widths of initial states
         initial = hmm.initial_states(name)
+        # $stderr.puts "initial = #{initial.join(", ")}"
         v = []
         cumul = 0.0
         initial.each{|i|
@@ -426,13 +432,19 @@ ARGV.each{|path|
 
         # fix widths of final states
         final = hmm.final_states(name)
+        # $stderr.puts "final = #{final.join(", ")}"
         cumul = node_width
-        puts cumul
+        v = []
         final.each{|state|
-          widths[state] = cumul
-          cumul *= hmm.transition[state][state+1] if state != hmm.n_states - 1
-          puts cumul
+          v << cumul
+          # $stderr.puts "#{state} -> #{cumul}"
+          cumul *= hmm.transition[state][state+1] unless state == final[-1]
         }
+        v.each_with_index{|x,i|
+          widths[widths.size - v.size + i] = x
+        }
+
+        # $stderr.puts widths
 
         # e_matrix = hmm.emission[range[0]..range[-1]]
         f.puts $tikz_newpage unless first

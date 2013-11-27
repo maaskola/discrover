@@ -211,18 +211,15 @@ module HMM
     end
 
     # Find those states reachable from the set of states given as argument.
-    # NOTE: There's a slight hack in the 'and j != states[0] statement.
-    # NOTE: We identify the last of the non-insertion states by the fact,
-    # NOTE: that from it we could reach the first of the set of motif states
-    # NOTE: Thus, we do not consider states reachable from that state.
-    def reachable_states(states)
+    # NOTE: There's a slight hack in that transitions from the set of final
+    # states to the set of initial states are not considered.
+    def reachable_states(states, initial, final)
       # puts "calling reachable_states for #{states.join(",")}"
       r = {}
       states.each{|i|
         r[i] = []
         states.each{|j|
-          # next if i == states[-1]
-          r[i] << j if @transition[i][j] > 0 and j != states[0]
+          r[i] << j if @transition[i][j] > 0 and not(final.include?(i) and initial.include?(j))# and j != states[0]
         }
       }
       # puts "in reachable_states -> #{r.map{|x,y| "#{x}:[#{y.join(",")}]"}.join(",")}"
@@ -245,10 +242,13 @@ module HMM
 
     # Determine a topological order of the states of a motif.
     # If no motif is specified, use the first one.
+    # Ignore transitions from set of final states to the set of initial ones.
     def topological_order(motif=nil)
       motif = @motifs.keys[0] if motif.nil?
       states = @motifs[motif]
-      reach = reachable_states(states)
+      initial = initial_states(motif)
+      final = final_states(motif)
+      reach = reachable_states(states, initial, final)
       states.sort{|x,y|
         if x == y
           0

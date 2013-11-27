@@ -141,7 +141,8 @@ void HMM::initialize_transitions_to_and_from_chain(size_t w, double l, double la
   for(size_t i = last; i <= last + pad_right; i++) {
     transition(i,start_state) = z;
     transition(i,bg_state) = 1 - y - z;
-    transition(i,first) = y;
+    for(size_t j = first; j <= first + pad_left; j++)
+      transition(i,j) = y / (pad_left + 1.0);
   }
 }
 
