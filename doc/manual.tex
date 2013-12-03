@@ -101,7 +101,7 @@ dlhmm signal.fa control.fa -m 8 -r
 
 \subsection{Manual seed discovery}
 \label{tutorial:plasma}
-Apart from the fully integrated analysis describes above, it is also possible to manually run the seed discovery:\\
+Apart from the fully integrated analysis described above, it is also possible to manually run the seed discovery:\\
 \begin{verbbox}
 plasma signal.fa control.fa -m 8 -r
 \end{verbbox}
@@ -110,13 +110,21 @@ plasma signal.fa control.fa -m 8 -r
 Here, we are looking again for a DNA-binding protein's motif (due to the usage of the option \verb|-r|).
 The command line interface of the two programs are intentionally designed to be similar, so that the most important command line options apply to both programs.
 
-\subsubsection{Discovering seed across a length range}
+\subsubsection{Discovering seeds across a length range}
 You can use the following motif specification to discover seeds from a given range of lengths.
 Say you want to consider seeds of 5--10~nt length, then you can use this command:\\
 \begin{verbbox}
 plasma signal.fa control.fa -m 5-10 -r
 \end{verbbox}
 \fbox{\theverbbox[t]}
+
+Note that the same syntax can also be used for automatic seed discovery with \dlhmm{}:
+\\
+\begin{verbbox}
+dlhmm signal.fa control.fa -m 5-10 -r
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
 
 
 \subsection{Manual seed specification for \dlhmm{}}
