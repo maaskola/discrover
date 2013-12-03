@@ -8,6 +8,8 @@
 
 \newcommand{\plasma}[0]{\texttt{plasma}}
 \newcommand{\dlhmm}[0]{\texttt{dlhmm}}
+\newcommand{\dinuclshuffle}[0]{\texttt{dinucleotide\_shuffle}}
+
 \newcommand{\version}[0]{@GIT_DESCRIPTION@}
 \newcommand{\theurl}[0]{\url{https://github.com/maaskola/dlhmm}}
 \newcommand{\TikZ}{Ti\emph{k}Z}
@@ -104,8 +106,18 @@ Apart from the fully integrated analysis describes above, it is also possible to
 plasma signal.fa control.fa -m 8 -r
 \end{verbbox}
 \fbox{\theverbbox[t]}
+
 Here, we are looking again for a DNA-binding protein's motif (due to the usage of the option \verb|-r|).
-The command line interface of the two programs is intentionally similar, so that the most important command line options apply to both programs.
+The command line interface of the two programs are intentionally designed to be similar, so that the most important command line options apply to both programs.
+
+\subsubsection{Discovering seed across a length range}
+You can use the following motif specification to discover seeds from a given range of lengths.
+Say you want to consider seeds of 5--10~nt length, then you can use this command:\\
+\begin{verbbox}
+plasma signal.fa control.fa -m 5-10 -r
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
 
 \subsection{Manual seed specification for \dlhmm{}}
 Say that you have found a seed of interest for your protein, for example by manually using \plasma{} as described in \cref{tutorial:plasma}.
@@ -123,7 +135,40 @@ You can generate sequence logos of discovered motifs by using the script \verb|t
 tikzlogo motif.hmm
 \end{verbbox}
 \fbox{\theverbbox[t]}
+
 This generates a \LaTeX document which uses \TikZ{} code to draw a sequence motif, and subsequently compiles the generated \LaTeX file into a PDF document.
+
+\subsection{Using random shuffles as control}
+In case you only have a set of signal sequences and you want to use dinucleotide shuffles as control, you have multiple possibilities.
+\subsubsection{Generating a set of dinucleotide shuffled sequences}
+This software package comes with a C++ implementation of the Altschul-Erkison dinucleotide shuffling algorithm originally implemented in the Python program \verb|altschulEriksonDinuclShuffle.py| by P. Clote, Oct 2003.
+It is available in the program \dinuclshuffle{}.
+To generate for each sequence contained within a set of signal sequence a shuffled sequence of equal length and equal dinucleotide counts, use the following command:\\
+\begin{verbbox}
+dinucleotide_shuffle signal.fa > control.fa
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+Note that for purposes of reproducibility, you can provide a seed for the random shuffle generation.
+
+\subsubsection{Automatic generation of random dinucleotide shuffles}
+You can also use the same routines by providing only a set of signal sequences to either \plasma{} or \dlhmm{}, as the following two commands exemplify.
+For \plasma{}\\
+\begin{verbbox}
+plasma signal.fa -m 8
+\end{verbbox}
+\fbox{\theverbbox[t]}\\
+and for \dlhmm{}\\
+\begin{verbbox}
+dlhmm signal.fa -m 8
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+In both cases, dinucleotide shuffles will be generated using the same routines as in \dinuclshuffle{}, and subsequently motif discovery will be executed for motifs that are discriminative between \verb|signal.fa| and the randomly generated set of dinucleotide shuffles.
+
+Note that also in this case for the purpose of reproducibility, you can provide a seed for the random shuffle generation.
+
+
 
 \section{Usage}
 There are two main programs that are part of this package, a seed discovery program, \plasma{}, and one for optimizing binding site HMMs, \dlhmm{}.
