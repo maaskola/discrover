@@ -21,6 +21,7 @@
 #include "code.hpp"
 #include "randomization_test.hpp"
 #include <iostream>
+#include <fstream>
 #include <set>
 #include <thread>
 #include "find.hpp"
@@ -120,8 +121,11 @@ namespace Seeding {
         double z = options.word_stats ? set.seq_size : set.set_size;
         os << "Occurrence statistics             " << set.path << " " << x << " / " << z << " = " << (x/z) << endl;
       }
-    if(options.dump_viterbi)
-      viterbi_dump(res.motif, collection, cerr, options);
+    if(options.dump_viterbi) {
+      string viterbi_output = options.label + ".viterbi";
+      ofstream ofs(viterbi_output.c_str());
+      viterbi_dump(res.motif, collection, ofs, options);
+    }
   }
 
   bool admissible(const std::string &word, const score_map_t &previous, size_t max_degeneracy) {

@@ -6,7 +6,7 @@ ADD_LIBRARY(plasma SHARED options.cpp measure.cpp align.cpp fasta.cpp specificat
   mask.cpp count.cpp results.cpp plasma_cli.cpp score.cpp code.cpp data.cpp motif.cpp
   ../aux.cpp correction.cpp plasma.cpp plasma_stats.cpp ../random_seed.cpp randomization_test.cpp
   ../sha1.cpp ../timer.cpp ../shuffle/dinucleotide_shuffle.cpp
-  ../mcmc/montecarlo.cpp
+  ../executioninformation.cpp ../mcmc/montecarlo.cpp
   "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA1.cpp")
 
 ADD_EXECUTABLE(plasma-bin main.cpp)

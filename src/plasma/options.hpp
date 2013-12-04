@@ -122,6 +122,8 @@ namespace Seeding {
     bool dump_viterbi;
     bool no_enrichment_filter;
 
+    std::string label;
+
     CandidateSelection candidate_selection;
   };
 }

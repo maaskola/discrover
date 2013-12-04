@@ -134,6 +134,7 @@ void fixup_seeding_options(hmm_options &options) {
   options.seeding.revcomp = options.revcomp;
   options.seeding.pseudo_count = options.contingency_pseudo_count;
   options.seeding.measure_runtime = options.timing_information;
+  options.seeding.label = options.label;
 
   options.seeding.mcmc.max_iter = options.termination.max_iter;
   options.seeding.mcmc.temperature = options.sampling.temperature;
@@ -141,27 +142,6 @@ void fixup_seeding_options(hmm_options &options) {
   options.seeding.mcmc.random_salt = options.random_salt;
 }
 
-string generate_random_label(const string &prefix="dlhmm", size_t n_rnd_char=5, Verbosity verbosity=Verbosity::info) {
-  // NOTE: this could use boost::filesystem::unique_path
-  std::random_device rng;
-  std::uniform_int_distribution<char> r_char('a', 'z');
-  using namespace boost::posix_time;
-  ptime t = microsec_clock::universal_time();
-  string datetime = to_iso_extended_string(t) + "Z";
-
-  // TODO perhaps add the process ID -> getpid()
-  if(verbosity >= Verbosity::debug)
-    cout << "Generating random label with prefix " << prefix << " and " << n_rnd_char << " random characters." << endl;
-  std::string label = prefix + "_" + datetime;
-  if(n_rnd_char > 0) {
-    label += "_";
-    for(size_t i = 0; i < n_rnd_char; i++)
-      label += r_char(rng);
-  }
-  if(verbosity >= Verbosity::debug)
-    cout << "Generated random label " << label << endl;
-  return(label);
-}
 
 int main(int argc, const char** argv)
 {
