@@ -29,6 +29,7 @@
 #include "find.hpp"
 #include "../timer.hpp"
 #include "plasma_cli.hpp"
+#include "../executioninformation.hpp"
 #include "../GitSHA1.hpp"
 #include "../mcmc/montecarlo.hpp"
 
@@ -223,6 +224,12 @@ int main(int argc, const char** argv) {
 
   if(vm.count("threads"))
     omp_set_num_threads(options.n_threads);
+
+  if(not vm.count("output")) {
+    options.label = generate_random_label(program_name, 0, options.verbosity);
+    if(options.verbosity >= Verbosity::info)
+      cout << "Using \"" << options.label << "\" as label to generate output file names." << endl;
+  }
 
 
   if(options.verbosity >= Verbosity::verbose) {
