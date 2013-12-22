@@ -104,7 +104,7 @@ void check_data(const Data::Collection &collection, const hmm_options &options)
           size_t i = 0;
           for(auto &seq: set) {
             cout << ">" << seq.definition << endl << seq.sequence << endl;
-            if(i++ > 3) break;
+            if(++i >= 3) break;
           }
         }
         if(options.verbosity >= Verbosity::debug)
