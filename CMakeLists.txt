@@ -22,14 +22,11 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 SET(CMAKE_BUILD_TYPE Release)
 
 # Set installation destination and prefix path to find libraries installed on
-# this sytem. This is the only required manual configuration step.
+# this sytem. If this is not specified, /usr/local/ will be used.
 #
-# NOTE: Please modify this to suit your system
-# ============================================
-#
-SET(LOCAL_PREFIX "~/local")
-SET(CMAKE_INSTALL_PREFIX ${LOCAL_PREFIX})
-SET(CMAKE_PREFIX_PATH ${LOCAL_PREFIX})
+# SET(LOCAL_PREFIX "~/local")
+# SET(CMAKE_INSTALL_PREFIX ${LOCAL_PREFIX})
+# SET(CMAKE_PREFIX_PATH ${LOCAL_PREFIX})
 
 
 

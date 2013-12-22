@@ -4,19 +4,21 @@ Instructions to build the code
 
 The code contained in this package is built in four steps.
 
-1. Configure the CMake build script
-2. Execute the CMake build script
-3. Compile the source code
-4. Link and install the binary file
+0. Optional: Edit the CMake build script
+1. Execute the CMake build script
+2. Compile the source code
+3. Link and install the binary file
 
 
 
 
-1. Configure the CMake build script
+0. Optional: Edit the CMake build script
 
 
-Open the file CMakeLists.txt in the root directory of the source code tree,
-and change the definition of the variable LOCAL_PREFIX to match your system.
+The file CMakeLists.txt in the root directory of the source code tree contains
+the instructions to configure and build dlhmm.
+Among other things, you can set the target installation directory in it.
+To do this, find the following lines, and modify them to your liking.
 
 SET(LOCAL_PREFIX "~/local")
 SET(CMAKE_INSTALL_PREFIX ${LOCAL_PREFIX})
@@ -46,12 +48,21 @@ the next step.
 
 
 
-2. Execute the CMake build script
+1. Execute the CMake build script
 
 
 Change to the root directory of the package and execute
 
 cmake .
+
+Alternatively, you can execute
+
+cmake -DCMAKE_INSTALL_PREFIX:PATH=/desired/installation/path .
+
+where you would replace /desired/installation/path by the path to which you
+to install the package. Note that you would have to issue this every time you
+configure the package, so it may be preferable to set this permanently as
+described in step 0 above.
 
 
 Explanation:
@@ -68,7 +79,7 @@ please contact the author of this software.
 
 
 
-3. Compile the source code
+2. Compile the source code
 
 
 Execute from the package's root directory
@@ -87,7 +98,7 @@ where N is the number of CPUs that you want to use.
 
 
 
-4. Link and install the binary file
+3. Link and install the binary file
 
 
 While still in the root directory of this package, execute
@@ -96,8 +107,10 @@ make install
 
 
 Explanation:
-This will copy the libraries and binaries into the place that you specified in
-the CMakeLists.txt file in step 1.
+This will copy the libraries and binaries into the default installation path,
+which is /usr/local/bin, /usr/local/lib, and /usr/local/share/doc if you did
+not specify otherwise via CMakeLists.txt in step 0, or via the command line in
+step 1.
 
 If these locations are part of your $PATH and $LD_LIBRARY_PATH environment
 variables you can then simply run the dlhmm program from anywhere.
