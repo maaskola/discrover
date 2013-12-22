@@ -62,6 +62,7 @@ We make use of code in the Boost C++ libraries, so please install it.
 These libraries are available under the Boost License
 http://www.boost.org/users/license.html
 The version of Boost must be recent enough to include the V3 filesystem library.
+Version 1.48 and more recent versions are known to work.
 
 
 OpenMP
