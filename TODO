@@ -12,3 +12,12 @@
 * MCMC seeding can sample across motif lengths
 * Collect rejection statistics for MCMC chains
 * Improve naming of shuffled sequences in HMM
+* Should only the new dynamic padding be used, or should also the old, fixed n-padding be kept?
+  - perhaps for simplicity of the interface it would be good to dispose of the old style
+* Unify the scoring code of plasma and hmm
+* write random salt into .hmm file
+* try the Polak-Rebiere formula for conjugate gradient descent (see Greiner & al 2005)
+  - unfortunately, this does not seem to mesh well with hybrid learning
+* Viterbi decoding occurrence counting is broken when using --padl > 0
+* Provide the discovered motifs as .HMM files with the software distribution
+* Specifying the number of threads with the environment variable OMP_NUM_THREADS doesn't work
