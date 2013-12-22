@@ -659,14 +659,14 @@ Training::Tasks HMM::define_training_tasks(const hmm_options &options) const
     for(auto &e_state: task.targets.emission) {
       auto pair = e_states.insert(e_state);
       if(not pair.second) {
-        cout << "Error: some emission parameters are supposed to be simulaneously subjected to multiple learning tasks." << endl;
+        cout << "Error: some emission parameters are supposed to be simultaneously subjected to multiple learning tasks." << endl;
         exit(-1);
       }
     }
     for(auto &t_state: task.targets.transition) {
       auto pair = t_states.insert(t_state);
       if(not pair.second) {
-        cout << "Error: some transition parameters are supposed to be simulaneously subjected to multiple learning tasks." << endl;
+        cout << "Error: some transition parameters are supposed to be simultaneously subjected to multiple learning tasks." << endl;
         exit(-1);
       }
     }
