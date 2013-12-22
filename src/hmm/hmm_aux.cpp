@@ -624,10 +624,12 @@ Training::Tasks HMM::define_training_tasks(const hmm_options &options) const
   Training::Tasks tasks;
 
   // First the (mostly) discriminative tasks
+  bool atleast_one_discriminative_task = false;
   bool do_transition = options.bg_learning == Training::Method::Gradient and options.objectives.size() == 1;
   for(auto &objective: options.objectives) {
     if(not Measures::is_discriminative(objective.measure))
       continue;
+    atleast_one_discriminative_task = true;
     Training::Task task;
     task.motif_name = objective.motif_name;
     task.measure = objective.measure;
@@ -659,14 +661,14 @@ Training::Tasks HMM::define_training_tasks(const hmm_options &options) const
     for(auto &e_state: task.targets.emission) {
       auto pair = e_states.insert(e_state);
       if(not pair.second) {
-        cout << "Error: some emission parameters are supposed to be simulaneously subjected to multiple learning tasks." << endl;
+        cout << "Error: some emission parameters are supposed to be simultaneously subjected to multiple learning tasks." << endl;
         exit(-1);
       }
     }
     for(auto &t_state: task.targets.transition) {
       auto pair = t_states.insert(t_state);
       if(not pair.second) {
-        cout << "Error: some transition parameters are supposed to be simulaneously subjected to multiple learning tasks." << endl;
+        cout << "Error: some transition parameters are supposed to be simultaneously subjected to multiple learning tasks." << endl;
         exit(-1);
       }
     }
@@ -681,8 +683,14 @@ Training::Tasks HMM::define_training_tasks(const hmm_options &options) const
   // And then the generative part
   if(options.bg_learning != Training::Method::None) {
     Training::Task task;
-    task.motif_name = "Generative parameters";
-    task.measure = Measure::Likelihood;
+    if(atleast_one_discriminative_task) {
+      task.motif_name = "Generative parameters";
+      task.measure = Measure::Likelihood;
+    } else {
+      task.motif_name = options.objectives[0].motif_name;
+      task.measure = options.objectives[0].measure;
+    }
+
     for(auto &series_name: series_names)
       task.series_expression.push_back({+1, series_name});
     for(size_t i = 0; i < n_states; i++) {

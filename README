@@ -50,9 +50,11 @@ This software package is written in C++11, so it is necessary to use an
 up-to-date version of your compiler. The GNU compiler collection supports all
 necessary features to compile this project as of version 4.6.
 
+
 Cmake
 http://www.cmake.org/
 We use CMake to construct Makefiles to build dlhmm.
+
 
 Boost C++ libraries
 http://www.boost.org/
@@ -73,6 +75,13 @@ distribution function.  During configuration it is checked if the R library is
 found. If that is the case then we link to it, otherwise code extracted from it
 is built and used.
 
+
+DREME from the MEME suite
+http://meme.nbcr.net/meme/
+Optionally, the program DREME from the MEME suite of motif analysis tools can be
+integrated for seeding of HMM motifs. During configuration it is checked if any
+programs named 'dreme' or 'meme-dreme' can be found. If that is the case, you
+will be able to use DREME for motif seeding by specifying --algo dreme.
 
 
 

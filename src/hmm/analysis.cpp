@@ -28,36 +28,47 @@ double train_hmm(HMM &hmm,
     if(options.verbosity >= Verbosity::info)
       cout << "Not performing training because no training tasks were specified." << endl;
   } else {
-    if(options.verbosity >= Verbosity::info)
-      cout << "Performing training." << endl;
-    Timer learning_timer;
+    bool any_found = false;
+    for(auto &group: hmm.groups)
+      for(auto &task: tasks)
+        if(task.motif_name == group.name) {
+          any_found = true;
+        }
+    if(not any_found) {
+      if(options.verbosity >= Verbosity::info)
+        cout << "Skipping training because no motifs specified in the tasks have corresponding states in the HMM." << endl;
+    } else {
+      if(options.verbosity >= Verbosity::info)
+        cout << "Performing training." << endl;
+      Timer learning_timer;
 
-    if(options.verbosity >= Verbosity::verbose)
-      cout << "Registering data sets for class based HMMs." << endl;
+      if(options.verbosity >= Verbosity::verbose)
+        cout << "Registering data sets for class based HMMs." << endl;
 
-    for(auto &series: training_data)
-      for(auto &data_set: series)
-        hmm.register_dataset(data_set, (1.0*data_set.set_size)/training_data.set_size, options.conditional_motif_prior1, options.conditional_motif_prior2);
+      for(auto &series: training_data)
+        for(auto &data_set: series)
+          hmm.register_dataset(data_set, (1.0*data_set.set_size)/training_data.set_size, options.conditional_motif_prior1, options.conditional_motif_prior2);
 
-    delta = hmm.train(training_data, tasks, options);
-    if(options.verbosity >= Verbosity::verbose)
-      cout << endl << "The parameters changed by an L1-norm of " << delta << endl;
+      delta = hmm.train(training_data, tasks, options);
+      if(options.verbosity >= Verbosity::verbose)
+        cout << endl << "The parameters changed by an L1-norm of " << delta << endl;
 
-    double time = learning_timer.tock();
-    if(options.timing_information)
-      cerr << "Learning: " << time << " micro-seconds" << endl;
+      double time = learning_timer.tock();
+      if(options.timing_information)
+        cerr << "Learning: " << time << " micro-seconds" << endl;
 
-    if(options.verbosity >= Verbosity::debug)
-      cout << "HMM after training:" << endl
-        << hmm << endl;
+      if(options.verbosity >= Verbosity::debug)
+        cout << "HMM after training:" << endl
+          << hmm << endl;
 
-    string store_to = options.label + ".hmm";
+      string store_to = options.label + ".hmm";
 
-    if(options.verbosity >= Verbosity::info)
-      cout << endl << "Parameters stored in " << store_to << endl;
+      if(options.verbosity >= Verbosity::info)
+        cout << endl << "Parameters stored in " << store_to << endl;
 
-    ofstream os(store_to.c_str());
-    hmm.serialize(os, options.exec_info);
+      ofstream os(store_to.c_str());
+      hmm.serialize(os, options.exec_info);
+    }
   }
   return(delta);
 }
@@ -93,7 +104,7 @@ void check_data(const Data::Collection &collection, const hmm_options &options)
           size_t i = 0;
           for(auto &seq: set) {
             cout << ">" << seq.definition << endl << seq.sequence << endl;
-            if(i++ > 3) break;
+            if(++i >= 3) break;
           }
         }
         if(options.verbosity >= Verbosity::debug)

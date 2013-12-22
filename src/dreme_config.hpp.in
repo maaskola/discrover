@@ -1,0 +1,4 @@
+
+#define _DREME_PATH "@DREME_DIR@/dreme"
+const char * DREME_PATH = _DREME_PATH;
+
