@@ -53,17 +53,9 @@ void count_report(ostream &ofs, const matrix_t counts, size_t motif_len, const D
   double g = calc_g_test(counts, pseudo_count);
   // double correct_class = hmm.correct_classification(data);  // TODO: reactivate
   double log_p_g = pchisq(g, df, false, true);
-  double cor_log_p_g_log15 = log(15) * motif_len + log_p_g;
-  double cor_log_p_g_4 = 4 * motif_len + log_p_g;
-//  double cor_log_p_g4 = log(74) * motif_len + log_p_g;
-  double cor_log_p_g_stringent1 = log(149) * motif_len + log_p_g;
-  double cor_log_p_g_stringent2 = log(374) * motif_len + log_p_g;
-  if(limit_logp) {
-    cor_log_p_g_log15 = min<double>(0, cor_log_p_g_log15);
-    cor_log_p_g_4 = min<double>(0, cor_log_p_g_4);
-    cor_log_p_g_stringent1 = min<double>(0, cor_log_p_g_stringent1);
-    cor_log_p_g_stringent2 = min<double>(0, cor_log_p_g_stringent2);
-  }
+  double cor_log_p_g_stringent = log(149) * motif_len + log_p_g;
+  if(limit_logp)
+    cor_log_p_g_stringent = min<double>(0, cor_log_p_g_stringent);
 
   ofs << prefix << "Discriminatory mutual information = " << mutualinf << " bit per sequence" << endl;
   ofs << prefix << "Expected discriminatory mutual information = " << exp_mutualinf << " bit per sequence" << endl;
@@ -71,12 +63,8 @@ void count_report(ostream &ofs, const matrix_t counts, size_t motif_len, const D
   ofs << prefix << "Std. dev. of discriminatory mutual information = " << sqrt(var_mutualinf) << " bit per sequence" << endl;
   ofs << prefix << "Z-score of discriminatory mutual information = " << exp_mutualinf / sqrt(var_mutualinf) << " bit per sequence" << endl;
   ofs << prefix << "G-test = " << g << endl;
-  //    ofs << "P(Chi-Square(G-Test)) = " << pchisq(g, data.signal.size(), false, false) << endl;
   ofs << prefix << "Log-P(Chi-Square(G-Test)) = " << log_p_g << endl;
-//  ofs << prefix << "Bonferroni-A corrected log-P(Chi-Square(G-Test)) = " << cor_log_p_g_log15 << endl;
-//  ofs << prefix << "Bonferroni-B corrected log-P(Chi-Square(G-Test)) = " << cor_log_p_g_4 << endl;
-  ofs << prefix << "Bonferroni corrected log-P(Chi-Square(G-Test)) = " << cor_log_p_g_stringent1 << endl;
-//  ofs << prefix << "Bonferroni-D corrected log-P(Chi-Square(G-Test)) = " << cor_log_p_g_stringent2 << endl;
+  ofs << prefix << "Bonferroni corrected log-P(Chi-Square(G-Test)) = " << cor_log_p_g_stringent << endl;
 }
 
 void eval_contrast(const HMM &hmm, const Data::Series &data, ostream &ofs, bool limit_logp, const string &tag)
