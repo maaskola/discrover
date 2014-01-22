@@ -6,7 +6,7 @@ IF(COMMAND cmake_policy)
   cmake_policy(SET CMP0003 NEW)
 ENDIF(COMMAND cmake_policy)
 
-PROJECT(dlhmm)
+PROJECT(discrover)
 
 # if you want the full compiler output, uncomment the following line
 # SET(CMAKE_VERBOSE_MAKEFILE ON)
@@ -52,7 +52,7 @@ SET(CPACK_PACKAGE_CONTACT "Jonas Maaskola")
 # SET(CPACK_PACKAGE_EXECUTABLES "MyExecutable" "My Executable")
 INCLUDE(CPack)
 
-SET(DLHMM_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+SET(DISCROVER_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 
 
 # Check for C++11 features of the compiler

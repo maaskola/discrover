@@ -1,5 +1,5 @@
 
-dlhmm - discriminative learning for hidden Markov models
+discrover - discriminative learning for hidden Markov models
 
 Binding site pattern discovery from nucleic acid sequences
 by discriminative learning of hidden Markov models
@@ -53,7 +53,7 @@ necessary features to compile this project as of version 4.6.
 
 Cmake
 http://www.cmake.org/
-We use CMake to construct Makefiles to build dlhmm.
+We use CMake to construct Makefiles to build discrover.
 
 
 Boost C++ libraries
@@ -102,18 +102,18 @@ How to run
 Below is a minimal description on how use this package. Please refer to the
 manual in doc/documentation.pdf for more information.
 
-The package contains two binaries, plasma and dlhmm.
+The package contains two binaries, plasma and discrover.
 
-Plasma is used to find IUPAC regular expression type motifs, and dlhmm learns
+Plasma is used to find IUPAC regular expression type motifs, and discrover learns
 HMMs. Both use discriminative objective functions.
-If no seeds are specified for dlhmm, plasma will be used to find seeds auto-
+If no seeds are specified for discrover, plasma will be used to find seeds auto-
 matically.
 
 Please refer to the command line help, which is available after installing with
 
-dlhmm -h
+discrover -h
   or
-dlhmm --help
+discrover --help
 
 Similarly:
 
@@ -125,9 +125,9 @@ plasma --help
 Note that some infrequently used options are hidden by default, and may be shown
 with the verbose switch:
 
-dlhmm -hv
+discrover -hv
 
 Even more obscure options are available by adding the very verbose switch:
 
-dlhmm -hV
+discrover -hV
 

@@ -16,7 +16,7 @@ The code contained in this package is built in four steps.
 
 
 The file CMakeLists.txt in the root directory of the source code tree contains
-the instructions to configure and build dlhmm.
+the instructions to configure and build discrover.
 Among other things, you can set the target installation directory in it.
 To do this, find the following lines, and modify them to your liking.
 
@@ -113,7 +113,7 @@ not specify otherwise via CMakeLists.txt in step 0, or via the command line in
 step 1.
 
 If these locations are part of your $PATH and $LD_LIBRARY_PATH environment
-variables you can then simply run the dlhmm program from anywhere.
+variables you can then simply run the discrover program from anywhere.
 
 Otherwise, you might still have to add the directories you installed to to $PATH
 and $LD_LIBRARY_PATH. This can be done with a command like
@@ -128,7 +128,7 @@ similar such that they are executed every time you log into your machine.
 
 Finally, try it out! Execute
 
-dlhmm -h
+discrover -h
 
 This should present you the help information of the program.
 
