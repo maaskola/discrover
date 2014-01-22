@@ -6,7 +6,7 @@ EAPI=5
 inherit cmake-utils git-2
 
 DESCRIPTION="A sequence motif discovery tool that uses discriminative learning"
-HOMEPAGE="https://github.com/maaskola/dlhmm"
+HOMEPAGE="https://github.com/maaskola/discrover"
 EGIT_REPO_URI="https://github.com/maaskola/${PN}"
 
 LICENSE="GPL-3+"
