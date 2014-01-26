@@ -16,6 +16,9 @@ options.freqlogo = false
 options.revcomp = false
 options.noaxis = false
 options.noexecute = false
+options.view = false
+options.viewer = "okular"
+options.png_dpi = 300
 options.order = :auto
 options.background = false
 options.dna = false
@@ -57,6 +60,13 @@ OptionParser.new do |opts|
   end
   opts.on("-x", "--noexecute", "Do not immediately execute the commands.") do |v|
     options.noexecute = v
+  end
+  opts.on("-V", "--view [VIEWER]", "Start the PDF viewer on the resulting PDF files. You may optionally specify which viewer to use. Default: #{options.viewer}.") do |v|
+    options.view = true
+    options.viewer = v unless v.nil?
+  end
+  opts.on("-p", "--png DPI", "Convert the resulting PDF to PNG with the given amount of DPI. Specify 0 to disable. Uses the program \"convert\" of the ImageMagick package.") do |v|
+    options.png_dpi = v.to_i
   end
   opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
     options.verbose = v
@@ -349,7 +359,7 @@ def gen_tex(matrix, f, infologo, background, widths, height, ordering=:alpha, rn
     else
       pos = n - i - 1
     end
-    $stderr.puts [pos,widths[pos]].join("\t")
+    # $stderr.puts [pos,widths[pos]].join("\t")
     f.puts gen_column(cumul_x, 0, widths[pos], height, matrix[pos], infologo, ordering, background, rna, font_colors, colors, revcomp, verbose)
     cumul_x = cumul_x + widths[pos]
   }
@@ -460,15 +470,34 @@ ARGV.each{|path|
 pdf_paths = tex_paths.map{|x| x.gsub(/.tex$/,".pdf")}
 aux_paths = tex_paths.map{|x| x.gsub(/.tex$/,".aux")}
 log_paths = tex_paths.map{|x| x.gsub(/.tex$/,".log")}
+png_paths = tex_paths.map{|x| x.gsub(/.tex$/,".png")}
 
 tex_paths.each_with_index{|path, idx|
   dir = File.dirname(path)
-  cmd = "cd #{dir} && pdflatex #{path} && rm #{[tex_paths, aux_paths, log_paths].map{|x| x[idx]}.join(" ")}"
+  show_output = "> /dev/null"
+  if options.verbose
+    show_output = ""
+  end
+  cmd = [
+    ["cd #{dir}"],
+    ["pdflatex", path, show_output],
+    ["rm", [tex_paths, aux_paths, log_paths].map{|x|x[idx]}.join(" ")]
+  ].map{|x| x.join(" ").strip()}.join(" && ")
   puts cmd
   system(cmd) unless options.noexecute
 }
 
-cmd = "okular #{pdf_paths.join(" ")} &"
-puts cmd
-exec(cmd) unless options.noexecute
+if options.png_dpi > 0
+  pdf_paths.each_with_index{|path, idx|
+    cmd = "convert -density #{options.png_dpi} #{path} #{png_paths[idx]}"
+    puts cmd
+    system(cmd) unless options.noexecute
+  }
+end
+
+if options.view
+  cmd = "#{options.viewer} #{pdf_paths.join(" ")} &"
+  puts cmd
+  exec(cmd) unless options.noexecute
+end
 
