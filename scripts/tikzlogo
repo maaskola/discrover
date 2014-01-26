@@ -312,7 +312,6 @@ def gen_column(x_pos, y_pos, width, height, values, infologo, ordering, backgrou
     end
     cumul = next_cumul
   }
-  # $stderr.puts cumul if verbose
   text
 end
 
@@ -337,7 +336,6 @@ def gen_tex(matrix, f, infologo, background, widths, height, ordering=:alpha, rn
       ylabel = "IC [bit]"
     end
     f.puts "\\node[rotate=90, inner sep=0] at (-2em, #{height} / 2) {#{ylabel}};"
-    # f.puts "\\node[rotate=90, above=0.8cm, inner sep=0] at (y axis mid) {#{ylabel}};"
   else
     # draw an invisible line to keep the full vertical height when drawing an axis
     f.puts "\\draw [line width=0, color=black!0] (0,0) -- coordinate (y axis mid) (0, #{height});"
@@ -345,13 +343,9 @@ def gen_tex(matrix, f, infologo, background, widths, height, ordering=:alpha, rn
 
   n = matrix.length
 
-  #  f.puts "\\draw[help lines] (0,0) grid (#{n},2);"
-  # colors = "green yellow orange blue".split(" ")
   colors = "colora colorc colorg colort".split(" ")
   font_colors = colors
   font_colors = ["white"] * 4 if background
-  # font_colors = ["black"] * 4 if background
-  # nucls = "acgt".split("")
   cumul_x = 0
   n.times{|i|
     if not revcomp
@@ -359,7 +353,6 @@ def gen_tex(matrix, f, infologo, background, widths, height, ordering=:alpha, rn
     else
       pos = n - i - 1
     end
-    # $stderr.puts [pos,widths[pos]].join("\t")
     f.puts gen_column(cumul_x, 0, widths[pos], height, matrix[pos], infologo, ordering, background, rna, font_colors, colors, revcomp, verbose)
     cumul_x = cumul_x + widths[pos]
   }
@@ -368,7 +361,6 @@ end
 def read_matrix(path)
   m = []
   File.open(path){|f|
-  #  f.gets
     while line = f.gets
       line.strip!
       cols = line.split("\t")
@@ -410,15 +402,11 @@ ARGV.each{|path|
 
         e_matrix = []
         topo_order = hmm.topological_order(name)
-        # $stderr.puts topo_order
         topo_order.each{|x|
           e_matrix << hmm.emission[x]
         }
 
         widths = [node_width] * e_matrix.length
-        # widths.each_with_index{|w,idx|
-        #   puts ["w",w,idx].join("\t")
-        # }
 
         # fix widths of insert states
         topo_order.each_with_index{|x,idx|
@@ -429,7 +417,6 @@ ARGV.each{|path|
         }
         # fix widths of initial states
         initial = hmm.initial_states(name)
-        # $stderr.puts "initial = #{initial.join(", ")}"
         v = []
         cumul = 0.0
         initial.each{|i|
@@ -442,21 +429,17 @@ ARGV.each{|path|
 
         # fix widths of final states
         final = hmm.final_states(name)
-        # $stderr.puts "final = #{final.join(", ")}"
         cumul = node_width
         v = []
         final.each{|state|
           v << cumul
-          # $stderr.puts "#{state} -> #{cumul}"
           cumul *= hmm.transition[state][state+1] unless state == final[-1]
         }
         v.each_with_index{|x,i|
           widths[widths.size - v.size + i] = x
         }
 
-        # $stderr.puts widths
 
-        # e_matrix = hmm.emission[range[0]..range[-1]]
         f.puts $tikz_newpage unless first
         first = false
         gen_tex(e_matrix, f, !options.freqlogo, options.background, widths, node_height, options.order, ! options.dna, ! options.noaxis, options.revcomp, options.verbose)
