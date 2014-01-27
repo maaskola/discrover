@@ -123,7 +123,7 @@ class HMM;
 
 struct ResultsCounts;
 
-ResultsCounts evaluate_hmm_single_data_set(HMM &hmm, const Data::Set &data, std::ostream &out, std::ostream &v_out, std::ostream &occurrence_out, const hmm_options &options);
+ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm, const Data::Set &data, std::ostream &out, std::ostream &v_out, std::ostream &occurrence_out, const hmm_options &options);
 double train_hmm(HMM &hmm, const Data::Collection &training_data, const Training::Tasks &tasks, const hmm_options &options);
 
 struct Group {
@@ -299,7 +299,7 @@ class HMM {
     size_t non_zero_parameters(const Training::Targets &targets) const;
 
     friend std::ostream &operator<<(std::ostream& os, const HMM &hmm);
-    friend ResultsCounts evaluate_hmm_single_data_set(HMM &hmm, const Data::Set &data, std::ostream &out, std::ostream &v_out, std::ostream &occurrence_out, const hmm_options &options);
+    friend ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm, const Data::Set &data, std::ostream &out, std::ostream &v_out, std::ostream &occurrence_out, const hmm_options &options);
     friend double train_hmm(HMM &hmm, const Data::Collection &training_data, const Training::Tasks &tasks, const hmm_options &options);
 
     double compute_score(const Data::Collection &data, const Training::Task &task) const;

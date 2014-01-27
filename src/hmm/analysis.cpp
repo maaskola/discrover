@@ -132,7 +132,11 @@ void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Coll
 
   if(not tasks.empty())
     train_hmm(hmm, training_data, tasks, options);
-  evaluate_hmm(hmm, all_data, training_data, test_data, tasks, options);
+  if(test_data.set_size != 0) {
+    evaluate_hmm(hmm, training_data, "training", tasks, options);
+    evaluate_hmm(hmm, test_data, "Test", tasks, options);
+  }
+  evaluate_hmm(hmm, all_data, "", tasks, options);
 }
 
 double get_expected_seq_size(const Data::Collection &collection)

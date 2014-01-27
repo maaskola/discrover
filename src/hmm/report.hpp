@@ -55,17 +55,16 @@ struct ResultsCounts {
 /** Evaluate a single data set.
  * @return expected and Viterbi counts of occurrences and sites of all motifs
  */
-ResultsCounts evaluate_hmm_single_data_set(HMM &hmm_,
+ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm_,
     const Data::Set &data,
     ostream &out,
     ostream &v_out,
     ostream &occurrence_out,
     const hmm_options &options);
 
-void evaluate_hmm(HMM &hmm_,
-    const Data::Collection &all_data,
-    const Data::Collection &training_data,
-    const Data::Collection &test_data,
+void evaluate_hmm(const HMM &hmm_,
+    const Data::Collection &data,
+    const std::string &tag,
     const Training::Tasks &tasks,
     const hmm_options &options);
  

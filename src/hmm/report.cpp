@@ -209,7 +209,7 @@ template <class T> void correlation_report(const std::vector<T> &x, std::ostream
   out.precision(prev_prec);
 }
 
-ResultsCounts evaluate_hmm_single_data_set(HMM &hmm,
+ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
     const Data::Set &data,
     ostream &out,
     ostream &v_out,
@@ -311,7 +311,8 @@ ResultsCounts evaluate_hmm_single_data_set(HMM &hmm,
       // print to motif occurrence table
       for(size_t pos = 0; pos < path.size(); pos++)
         for(size_t group_idx = 0; group_idx < n_groups; group_idx++)
-          if(hmm.is_motif_group(group_idx) and path[pos] == hmm.groups[group_idx].states[0]) {
+          if(hmm.is_motif_group(group_idx) and
+              path[pos] == hmm.groups[group_idx].states[0]) {
             size_t end = pos + 1;
             while(end != path.size() and path[end] > path[pos])
               end++;
@@ -353,57 +354,42 @@ ResultsCounts evaluate_hmm_single_data_set(HMM &hmm,
   return(results);
 }
 
-void evaluate_hmm(HMM &hmm_,
-    const Data::Collection &all_data,
-    const Data::Collection &training_data,
-    const Data::Collection &test_data,
+void evaluate_hmm(const HMM &hmm,
+    const Data::Collection &data,
+    const string &tag,
     const Training::Tasks &tasks,
     const hmm_options &options)
 {
-  HMM hmm(hmm_);
-
   /*  TODO: re-enable class-based models
   if(options.adapt_classes) {
     if(options.verbosity >= Verbosity::info)
       cout << "Registering data sets for class based HMMs." << endl;
 
-    for(auto &series: training_data)
+    for(auto &series: data)
       for(auto &data: series)
         hmm.register_class_hmm(data);
-    if(test_data.set_size != 0) {
-      for(auto &series: test_data)
-        for(auto &data: series)
-          hmm.register_class_hmm(data);
-      for(auto &series: all_data)
-        for(auto &data: series)
-          hmm.register_class_hmm(data);
     }
     Training::Targets generative_targets = hmm.gen_secondary_training_targets(options.training_type);
     Training::Task generative_task;
     generative_task.method = Training::Method::reestimation;
     generative_task.measure = Measure::likelihood;
     generative_task.targets = generative_targets;
-    hmm.reestimation(training_data, generative_task, options);
-    if(test_data.set_size != 0) {
-      hmm.reestimation(test_data, generative_task, options);
-      hmm.reestimation(all_data, generative_task, options);
-    }
+    hmm.reestimation(data, generative_task, options);
   } */
 
   ios_base::openmode flags = ios_base::out;
   if(options.output_compression != Compression::none)
     flags |= ios_base::binary;
 
-  string eval_out_path = options.label + ".summary";
-  string occurrence_out_path = options.label + ".table" + compression2ending(options.output_compression);
-  string viterbi_out_path = options.label + ".viterbi" + compression2ending(options.output_compression);
+  string file_tag = "";
+  if(tag != "")
+    file_tag = tag + ".";
+  string eval_out_path = options.label + file_tag + ".summary";
+  string occurrence_out_path = options.label + file_tag + ".table" + compression2ending(options.output_compression);
+  string viterbi_out_path = options.label + file_tag + ".viterbi" + compression2ending(options.output_compression);
 
   ofstream summary_out, occurrence_file, viterbi_file;
   summary_out.open(eval_out_path.c_str());
-
-  string tag = "Training ";
-  if(test_data.set_size == 0)
-    tag = "";
 
   if(options.evaluate.summary) {
     size_t col0_w = 10, col1_w = 10, col2_w = 10;
@@ -433,34 +419,16 @@ void evaluate_hmm(HMM &hmm_,
       }
     summary_out << endl;
 
-    Timer train_eval_timer;
-    for(auto &series: training_data)
+    Timer eval_timer;
+    for(auto &series: data)
       eval_contrast(hmm, series, summary_out, options.limit_logp, tag);
-    double time = train_eval_timer.tock();
+    double time = eval_timer.tock();
 
     if(options.timing_information)
-      cerr << "Evaluation of contrast for learning data: " << time << " micro-seconds" << endl;
-
-    if(test_data.set_size != 0) {
-      Timer test_eval_timer;
-      for(auto &series: test_data)
-        eval_contrast(hmm, series, summary_out, options.limit_logp, "Test ");
-      time = test_eval_timer.tock();
-
-      if(options.timing_information)
-        cerr << "Evaluation of contrast for test data: " << time << " micro-seconds" << endl;
-
-      Timer all_eval_timer;
-      for(auto &series: all_data)
-        eval_contrast(hmm, series, summary_out, options.limit_logp, "");
-      time = all_eval_timer.tock();
-
-      if(options.timing_information)
-        cerr << "Evaluation of contrast for all data: " << time << " micro-seconds" << endl;
-    }
+      cerr << "Evaluation of contrast for " << (tag != "" ? "" : tag + " ") << "learning data: " << time << " micro-seconds" << endl;
   }
 
-  if(all_data.set_size != 0) {
+  if(data.set_size != 0) {
     if(options.verbosity >= Verbosity::info)
       cout << "Performance summary in " << eval_out_path << endl
         << "Viterbi path in " << viterbi_out_path << endl
@@ -490,12 +458,12 @@ void evaluate_hmm(HMM &hmm_,
       summary_out << endl;
       Training::Task my_task;
       my_task.measure = Measure::ClassificationPosterior;
-      summary_out << "class log posterior = " << hmm.compute_score(all_data, my_task) << std::endl;
+      summary_out << "class log posterior = " << hmm.compute_score(data, my_task) << std::endl;
       my_task.measure = Measure::ClassificationLikelihood;
-      summary_out << "class log likelihood = " << hmm.compute_score(all_data, my_task) << std::endl;
+      summary_out << "class log likelihood = " << hmm.compute_score(data, my_task) << std::endl;
     }
 
-    for(auto &series: all_data) {
+    for(auto &series: data) {
       vector<ResultsCounts> counts;
       for(auto &data_set: series) {
         ResultsCounts c = evaluate_hmm_single_data_set(hmm, data_set, summary_out, v_out, occurrence_out, options);
