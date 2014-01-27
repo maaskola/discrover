@@ -425,7 +425,7 @@ void evaluate_hmm(const HMM &hmm,
     double time = eval_timer.tock();
 
     if(options.timing_information)
-      cerr << "Evaluation of contrast for " << (tag == "" ? "" : tag + " ") << "learning data: " << time << " micro-seconds" << endl;
+      cerr << "Evaluation of contrast for " << (tag == "" ? "" : tag + " ") << "data: " << time << " micro-seconds" << endl;
   }
 
   if(data.set_size != 0) {
