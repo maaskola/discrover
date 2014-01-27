@@ -25,7 +25,9 @@ ExecutionInformation generate_exec_info(const string &name, const string &hmm_ve
 
   string dir = boost::filesystem::initial_path().string();
 
-  ExecutionInformation exec_info = {name, hmm_version, cmdline, datetime, dir};
+  string program_name = boost::filesystem::path(name).filename().string();
+
+  ExecutionInformation exec_info = {program_name, hmm_version, cmdline, datetime, dir};
   return(exec_info);
 }
 
