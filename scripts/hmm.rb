@@ -185,7 +185,6 @@ module HMM
       ic = 0
       case @version
       when 1..3 then
-        w = @n_states - @first_state
         (@first_state ... (@n_states)).to_a.each{|i|
           4.times{|j|
             p = @emission[i][j]
@@ -205,6 +204,9 @@ module HMM
             ic += p * (Math::log(p) - Math::log(q[j])) if(p > 0)
           }
         }
+      else
+        puts "Error: IC calculation not implemented for this HMM parameter file format."
+        exit(-1)
       end
       ic = ic / Math::log(2.0)
       ic.round(3)
@@ -303,70 +305,104 @@ module HMM
     end
   end
 
-  class Summary
-    attr_accessor :path, :mi, :gtest_statistic, :gtest_pvalue, :gtest_logpvalue, :mcc, :dips_tscore, :dips_sitescore, :correctclass_logp, :files
-    def initialize(path)
-      @path = path
-      @files = {}
-      File.open(path).each{|line|
-        case(line)
-        when /Discriminatory mutual information = (.*)/
-          @mi = $1.to_f
-        when /G-test = (.*)/
-          @gtest_statistic = $1.to_f
-        when /P\(Chi-Square\(G-Test\)\) = (.*)/
-          @gtest_pvalue = $1.to_f
-        when /Log-P\(Chi-Square\(G-Test\)\) = (.*)/
-          @gtest_logpvalue = $1.to_f
-        when /Matthews correlation coefficient = (.*)/
-          @mcc = $1.to_f
-        when /DIPS t-score = (.*)/
-          @dips_tscore = $1.to_f
-        when /DIPS site-score = (.*)/
-          @dips_sitescore = $1.to_f
-        when /log P correct classification = (.*)/
-          @correctclass_logp= $1.to_f
-        when /The log-likelihood for (.*) = (.*)/
-          path = $1
-          score = $2.to_f
-          @files[path] = {} unless @files.key?(path)
-          @files[$1][:log_likelihood] = score
-        when /The expected posterior for (.*) = (.*)/
-          path = $1
-          score = $2.to_f
-          @files[path] = {} unless @files.key?(path)
-          @files[$1][:expected_posterior] = score
-        when /The posterior for sequences with at least one motif of (.*) = (.*) \/ (.*) = (.*)/
-          path = $1
-          n = $2.to_f
-          m = $3.to_f
-          p = $4.to_f
-          @files[path] = {} unless @files.key?(path)
-          @files[path][:positive] = n
-          @files[path][:total] = m
-          @files[path][:p] = p
-        end
-      }
+  class Motif
+    attr_accessor :name, :iupac, :ic
+    def initialize(name, iupac, ic)
+      @name = name
+      @iupac = iupac
+      @ic = ic
     end
     def to_s
-      s = [@path, @mi, @gtest_statistic, @gtest_pvalue, @gtest_logpvalue, @mcc, @dips_tscore, @dips_sitescore, @correctclass_logp].map{|x| x.to_s }.join("\t")
-      files.sort.each{|p, v|
-        s += "\t#{v[:positive]}"
-        s += "\t#{v[:total]}"
-        s += "\t#{v[:p]}"
-      }
-      s
+      "name = #{@name}, iupac = #{@iupac}, ic = #{@ic}"
     end
   end
-  def information_entropy
-    e = 0
-    (@n_states - @first_state).times{|i|
-      state = @first_state + i
-      @n_emissions.times{|j|
-        e -= @emission[i][j] * Math::log(@emission[i][j]) if @emission[i][j] > 0
+
+  class Summary
+    attr_accessor :path, :motifs, :scores
+    def initialize(path)
+      @path = path
+      @motifs = []
+      @scores = {}
+      File.open(path){|f|
+        f.gets # Motif.summary
+        f.gets # Motif name  Consensus     IC [bit]
+        while (l = f.gets.strip) != ""
+          name, iupac, ic = l.split()
+          ic = ic.to_f
+          @motifs << Motif.new(name, iupac, ic)
+        end
+        f.each{|line|
+          line.strip!
+          processed = false
+          @motifs.each{|motif|
+            if line =~ /(.*) decoded (.*) counts - #{motif.name}/
+              seqs, scores = parse_scores(motif.name, f)
+              posterior_or_viterbi = $1
+              motif_or_site = $2
+              kind = (posterior_or_viterbi + " " + motif_or_site).to_sym
+              @scores[motif.name] = {} unless @scores.has_key?(motif.name)
+              @scores[motif.name][{:contrast => seqs, :kind => kind}] = scores
+              processed = true
+              break
+            end
+          }
+          # $stderr.puts "Ignored: " + line unless processed
+        }
       }
-    }
-    e / Math::log(2.0)
+      @scores.each{|motif,scores|
+        scores.each{|score|
+        $stderr.puts [motif, score].join(" ")
+        }
+      }
+    end
+    def parse_scores(motif, f)
+      scores = {}
+      seqs = {}
+      line = f.gets
+      line = f.gets.strip
+      until line =~ /.* - #{motif} /
+        seq, present, absent, percent = line.split()
+        seqs[seq] = {:present => present.to_f, :absent => absent.to_f, :percent => percent.to_f}
+        line = f.gets
+      end
+      final = false
+      while line =~ /.* - #{motif} /
+        case(line)
+        when /Discriminatory mutual information = (.*)/
+          scores[:mi] = $1.to_f
+        when /Expected discriminatory mutual information = (.*)/
+          scores[:exp_mi] = $1.to_f
+        when /Variance of discriminatory mutual information = (.*)/
+          scores[:var_mi] = $1.to_f
+        when /Std\. dev\. of discriminatory mutual information = (.*)/
+          scores[:sd_mi] = $1.to_f
+        when /Bonferroni corrected log-P\(Chi-Square\(G-Test\)\) = (.*)/
+          scores[:bonferroni] = $1.to_f
+          final = true
+        when /Log-P\(Chi-Square\(G-Test\)\) = (.*)/
+          scores[:gtest_pvalue] = $1.to_f
+        when /P\(Chi-Square\(G-Test\)\) = (.*)/
+          scores[:gtest_pvalue] = $1.to_f
+        when /G-test = (.*)/
+          scores[:gtest_statistic] = $1.to_f
+        when /Matthews correlation coefficient = (.*)/
+          scores[:mcc] = $1.to_f
+        when /DIPS t-score = (.*)/
+          scores[:dips_tscore] = $1.to_f
+        when /DIPS site-score = (.*)/
+          scores[:dips_sitescore] = $1.to_f
+        when /log P correct classification = (.*)/
+          scores[:correctclass_logp] = $1.to_f
+        when /og P likelihood difference = (.*)/
+          scores[:dlogl] = $1.to_f
+        end
+        break if final
+        line = f.gets
+        break if line.nil?
+        line.strip!
+      end
+      [seqs, scores]
+    end
   end
 end
 
