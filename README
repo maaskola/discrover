@@ -1,5 +1,5 @@
 
-discrover - discriminative learning for hidden Markov models
+discrover - discriminative sequence motif discovery
 
 Binding site pattern discovery from nucleic acid sequences
 by discriminative learning of hidden Markov models
