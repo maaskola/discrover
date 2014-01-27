@@ -513,7 +513,7 @@ void evaluate_hmm(HMM &hmm_,
             string name = hmm.get_group_name(i);
 
             string exp_motif_tag = "Posterior decoded motif counts - " + name;
-            summary_out << exp_motif_tag << endl;
+            summary_out << endl << exp_motif_tag << endl;
             matrix_t em(counts.size(),2);
             for(size_t j = 0; j < counts.size(); j++) {
               em(j,0) = counts[j].exp_motifs[i];
@@ -522,7 +522,7 @@ void evaluate_hmm(HMM &hmm_,
             count_report(summary_out, em, motif_len, series, hmm.get_pseudo_count(), options.limit_logp, name, tag + exp_motif_tag + " ");
 
             string vit_motif_tag = "Viterbi decoded motif counts - " + name;
-            summary_out << vit_motif_tag << endl;
+            summary_out << endl << vit_motif_tag << endl;
             matrix_t vm(counts.size(),2);
             for(size_t j = 0; j < counts.size(); j++) {
               vm(j,0) = counts[j].viterbi_motifs[i];
@@ -532,7 +532,7 @@ void evaluate_hmm(HMM &hmm_,
 
 
             string exp_tag = "Posterior decoded site counts - " + name;
-            summary_out << exp_tag << endl;
+            summary_out << endl << exp_tag << endl;
             matrix_t e(counts.size(),2);
             for(size_t j = 0; j < counts.size(); j++) {
               e(j,0) = counts[j].exp_sites[i];
@@ -541,7 +541,7 @@ void evaluate_hmm(HMM &hmm_,
             count_report(summary_out, e, motif_len, series, hmm.get_pseudo_count(), options.limit_logp, name, tag + exp_tag + " ");
 
             string vit_tag = "Viterbi decoded site counts - " + name;
-            summary_out << vit_tag << endl;
+            summary_out << endl << vit_tag << endl;
             matrix_t v(counts.size(),2);
             for(size_t j = 0; j < counts.size(); j++) {
               v(j,0) = counts[j].viterbi_sites[i];
