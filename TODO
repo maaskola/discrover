@@ -21,3 +21,5 @@
 * Viterbi decoding occurrence counting is broken when using --padl > 0
 * Provide the discovered motifs as .HMM files with the software distribution
 * Specifying the number of threads with the environment variable OMP_NUM_THREADS doesn't work
+* test to see if the numerical issues due to MT persist, and if they due whether they can be ameliorated
+* print out MCC, DIPS, log likelihood difference for individual contrast eval
