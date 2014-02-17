@@ -161,16 +161,16 @@ please contact the author of this software.
 
 Execute from the package's root directory
 
-```make```
+    make
 
 
 Explanation:
 This will compile the source code. You may make use of parallel building by
 running
 
-```make -j N```
+    make -j N
 
-where N is the number of CPUs that you want to use.
+where ```N``` is the number of CPUs that you want to use.
 
 
 
@@ -180,8 +180,7 @@ where N is the number of CPUs that you want to use.
 
 While still in the root directory of this package, execute
 
-```make install```
-
+    make install
 
 Explanation:
 This will copy the libraries and binaries into the default installation path,
@@ -219,15 +218,19 @@ If no seeds are specified for ```discrover```, ```plasma``` will be used to find
 
 Please refer to the command line help, which is available after installing with
 
-```discrover -h```
-  or
-```discrover --help```
+    discrover -h
+
+or
+
+    discrover --help
 
 Similarly:
 
-```plasma -h```
-  or
-```plasma --help```
+    plasma -h
+
+or
+
+    plasma --help
 
 
 Note that some infrequently used options are hidden by default, and may be shown
