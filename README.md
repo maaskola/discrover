@@ -160,13 +160,15 @@ please contact the author of this software.
 
 Execute from the package's root directory
 
-```make```
+```sh
+make```
 
 Explanation:
 This will compile the source code. You may make use of parallel building by
 running
 
-```make -j N```
+```sh
+make -j N```
 
 where ```N``` is the number of CPUs that you want to use.
 
@@ -178,7 +180,8 @@ where ```N``` is the number of CPUs that you want to use.
 
 While still in the root directory of this package, execute
 
-```make install```
+```sh
+make install```
 
 Explanation:
 This will copy the libraries and binaries into the default installation path,
@@ -192,7 +195,8 @@ variables you can then simply run the ```discrover``` program from anywhere.
 Otherwise, you might still have to add the directories you installed to to ```$PATH```
 and ```$LD_LIBRARY_PATH```. This can be done with a command like
 
-```export PATH=HERE/bin:$PATH
+```sh
+export PATH=HERE/bin:$PATH
 export LD_LIBRARY_PATH=HERE/lib:$LD_LIBRARY_PATH```
 
 where ```HERE``` will have to be the path that you installed to.
