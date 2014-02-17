@@ -174,7 +174,8 @@ where ```N``` is the number of CPUs that you want to use.
 
 While still in the root directory of this package, execute
 
-    make install
+```make install```
+
 Explanation:
 This will copy the libraries and binaries into the default installation path,
 which is ```/usr/local/bin```, ```/usr/local/lib```, and ```/usr/local/share/doc``` if you did
@@ -187,8 +188,9 @@ variables you can then simply run the ```discrover``` program from anywhere.
 Otherwise, you might still have to add the directories you installed to to ```$PATH```
 and ```$LD_LIBRARY_PATH```. This can be done with a command like
 
-    export PATH=HERE/bin:$PATH
-    export LD_LIBRARY_PATH=HERE/lib:$LD_LIBRARY_PATH
+```export PATH=HERE/bin:$PATH
+export LD_LIBRARY_PATH=HERE/lib:$LD_LIBRARY_PATH```
+
 where ```HERE``` will have to be the path that you installed to.
 You might consider putting these commands into your ```~/.bashrc``` file or some place
 similar such that they are executed every time you log into your machine.
@@ -210,17 +212,20 @@ If no seeds are specified for ```discrover```, ```plasma``` will be used to find
 
 Please refer to the command line help, which is available after installing with
 
-    discrover -h
+```discrover -h```
+
 or
 
-    discrover --help
+```discrover --help```
 
 Similarly:
 
-    plasma -h
+```plasma -h```
+
 or
 
-    plasma --help
+```plasma --help```
+
 Note that some infrequently used options are hidden by default, and may be shown
 with the verbose switch:
 
