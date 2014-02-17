@@ -98,9 +98,10 @@ the instructions to configure and build discrover.
 Among other things, you can set the target installation directory in it.
 To do this, find the following lines, and modify them to your liking.
 
-    SET(LOCAL_PREFIX "~/local")
-    SET(CMAKE_INSTALL_PREFIX ${LOCAL_PREFIX})
-    SET(CMAKE_PREFIX_PATH ${LOCAL_PREFIX})
+```SET(LOCAL_PREFIX "~/local")
+SET(CMAKE_INSTALL_PREFIX ${LOCAL_PREFIX})
+SET(CMAKE_PREFIX_PATH ${LOCAL_PREFIX})```
+
 Explanation:
 The variable ```CMAKE_INSTALL_PREFIX``` determines where the software will be
 installed after building. In particular, programs will be installed in
@@ -128,10 +129,11 @@ the next step.
 
 Change to the root directory of the package and execute
 
-    cmake .
+```cmake .```
+
 Alternatively, you can execute
 
-    cmake -DCMAKE_INSTALL_PREFIX:PATH=/desired/installation/path .
+```cmake -DCMAKE_INSTALL_PREFIX:PATH=/desired/installation/path .```
 
 where you would replace ```/desired/installation/path``` by the path to which you
 to install the package. Note that you would have to issue this every time you
@@ -158,12 +160,14 @@ please contact the author of this software.
 
 Execute from the package's root directory
 
-    make
+```make```
+
 Explanation:
 This will compile the source code. You may make use of parallel building by
 running
 
-    make -j N
+```make -j N```
+
 where ```N``` is the number of CPUs that you want to use.
 
 
