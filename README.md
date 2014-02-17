@@ -1,7 +1,6 @@
+# discrover: discriminative discovery of sequence motifs with hidden Markov models
 
-# discrover - discriminative discovery of sequence motifs with hidden Markov models
-
-## Binding site pattern discovery from nucleic acid sequences by discriminative learning of hidden Markov models
+Binding site pattern discovery from nucleic acid sequences by discriminative learning of hidden Markov models
 
 Copyright 2011, Jonas Maaskola
 
