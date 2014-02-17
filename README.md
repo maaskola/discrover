@@ -98,9 +98,11 @@ the instructions to configure and build discrover.
 Among other things, you can set the target installation directory in it.
 To do this, find the following lines, and modify them to your liking.
 
-```SET(LOCAL_PREFIX "~/local")
+```cmake
+SET(LOCAL_PREFIX "~/local")
 SET(CMAKE_INSTALL_PREFIX ${LOCAL_PREFIX})
-SET(CMAKE_PREFIX_PATH ${LOCAL_PREFIX})```
+SET(CMAKE_PREFIX_PATH ${LOCAL_PREFIX})
+```
 
 Explanation:
 The variable ```CMAKE_INSTALL_PREFIX``` determines where the software will be
@@ -129,11 +131,15 @@ the next step.
 
 Change to the root directory of the package and execute
 
-```cmake .```
+```sh
+cmake .
+```
 
 Alternatively, you can execute
 
-```cmake -DCMAKE_INSTALL_PREFIX:PATH=/desired/installation/path .```
+```sh
+cmake -DCMAKE_INSTALL_PREFIX:PATH=/desired/installation/path .
+```
 
 where you would replace ```/desired/installation/path``` by the path to which you
 to install the package. Note that you would have to issue this every time you
@@ -161,14 +167,16 @@ please contact the author of this software.
 Execute from the package's root directory
 
 ```sh
-make```
+make
+```
 
 Explanation:
 This will compile the source code. You may make use of parallel building by
 running
 
 ```sh
-make -j N```
+make -j N
+```
 
 where ```N``` is the number of CPUs that you want to use.
 
@@ -181,7 +189,8 @@ where ```N``` is the number of CPUs that you want to use.
 While still in the root directory of this package, execute
 
 ```sh
-make install```
+make install
+```
 
 Explanation:
 This will copy the libraries and binaries into the default installation path,
@@ -197,7 +206,8 @@ and ```$LD_LIBRARY_PATH```. This can be done with a command like
 
 ```sh
 export PATH=HERE/bin:$PATH
-export LD_LIBRARY_PATH=HERE/lib:$LD_LIBRARY_PATH```
+export LD_LIBRARY_PATH=HERE/lib:$LD_LIBRARY_PATH
+```
 
 where ```HERE``` will have to be the path that you installed to.
 You might consider putting these commands into your ```~/.bashrc``` file or some place
