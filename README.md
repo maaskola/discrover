@@ -201,7 +201,7 @@ not specify otherwise via [CMakeLists.txt](CMakeLists.txt) in [step 1](#step1), 
 If these locations are part of your ```$PATH``` and ```$LD_LIBRARY_PATH``` environment
 variables you can then simply run the ```discrover``` program from anywhere.
 
-Otherwise, you might still have to add the directories you installed to to ```$PATH```
+Otherwise, you might still have to add the directories you installed to ```$PATH```
 and ```$LD_LIBRARY_PATH```. This can be done with a command like
 
 ```sh
