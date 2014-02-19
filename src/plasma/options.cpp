@@ -37,6 +37,7 @@ namespace Seeding {
     revcomp(false),
     strict(false),
     pseudo_count(1),
+    weighting(false),
     n_seq(0),
     word_stats(false),
     measure_runtime(false),

@@ -129,6 +129,7 @@ void fixup_seeding_options(hmm_options &options) {
   options.seeding.paths = options.paths;
   options.seeding.n_threads = options.n_threads;
   options.seeding.n_seq = options.n_seq;
+  options.seeding.weighting = options.weighting;
   // options.seeding.verbosity = Verbosity::info;
   options.seeding.verbosity = options.verbosity;
   options.seeding.revcomp = options.revcomp;

@@ -192,6 +192,7 @@ double compute_score(const Seeding::DataCollection &collection,
   if(options.verbosity >= Verbosity::debug)
     cout << "Using measure = " << measure2string(measure) << endl;
   double score = 0;
+  double W = 0;
   for(auto &expr: objective) {
     auto series_iter = collection.find(expr.series);
     if(series_iter == end(collection)) {
@@ -201,11 +202,15 @@ double compute_score(const Seeding::DataCollection &collection,
       exit(-1);
     } else {
       auto counts_ = reduce_count(counts, collection, expr.series);
+      double w = options.weighting ? series_iter->set_size : 1;
+      W += w;
       if(options.verbosity >= Verbosity::debug)
         cout << "counts_ = " << counts_ << endl;
-      score += expr.sign * compute_score(*series_iter, counts_, options, measure, length, degeneracy, objective.motif_name, do_correction);
+      score += expr.sign * w * compute_score(*series_iter, counts_, options, measure, length, degeneracy, objective.motif_name, do_correction);
     }
   }
+  if(options.weighting)
+    score /= W;
   if(options.verbosity >= Verbosity::debug)
     cout << "end: compute_score(Seeding::DataCollection) -> " << score << endl;
   return(score);

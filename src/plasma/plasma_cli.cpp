@@ -81,6 +81,7 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
     ;
   if(include_all)
     desc.add_options()
+      ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
       ("pcount,p", po::value<double>(&options.pseudo_count)->default_value(1), "The number of pseudo counts to add to each cell of contingency tables.")
       ("word,w", po::bool_switch(&options.word_stats), "Perform nucleotide level statistics instead of on sequence level.")
       ("time,t", po::bool_switch(&options.measure_runtime), "Report running times.")

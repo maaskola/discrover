@@ -113,6 +113,7 @@ namespace Seeding {
     bool revcomp;
     bool strict;
     double pseudo_count;
+    bool weighting;
     size_t n_seq;
     bool word_stats;
     bool measure_runtime;
