@@ -23,3 +23,5 @@
 * Specifying the number of threads with the environment variable OMP_NUM_THREADS doesn't work
 * test to see if the numerical issues due to MT persist, and if they due whether they can be ameliorated
 * print out MCC, DIPS, log likelihood difference for individual contrast eval
+
+Update INSTALL and README.md regarding the default installation directory (and fix the layout issue with the headings)
