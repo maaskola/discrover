@@ -302,7 +302,7 @@ class HMM {
     friend ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm, const Data::Set &data, std::ostream &out, std::ostream &v_out, std::ostream &occurrence_out, const hmm_options &options);
     friend double train_hmm(HMM &hmm, const Data::Collection &training_data, const Training::Tasks &tasks, const hmm_options &options);
 
-    double compute_score(const Data::Collection &data, const Training::Task &task) const;
+    double compute_score(const Data::Collection &data, const Training::Task &task, bool weighting) const;
 
     void shift_forward(size_t group_idx, size_t n);
     void shift_backward(size_t group_idx, size_t n);
@@ -422,7 +422,7 @@ class HMM {
     HMM build_trial_model(const Gradient &gradient, double alpha, const Training::Task &task) const;
 
     /** Compute the gradient of the desired objective function */
-    Gradient compute_gradient(const Data::Collection &data, double &score, const Training::Task &task) const;
+    Gradient compute_gradient(const Data::Collection &data, double &score, const Training::Task &task, bool weighting) const;
     Gradient compute_gradient(const Data::Series &data, double &score, const Training::Task &task) const;
     double compute_gradient(const Data::Series &data, Gradient &gradient, const Training::Task &task, size_t group_idx) const;
 

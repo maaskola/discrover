@@ -334,7 +334,7 @@ pair<double, HMM> HMM::line_search_more_thuente(const Data::Collection &data,
     nfev++;
     double f;
     HMM trial_hmm = build_trial_model(initial_gradient, stp, task);
-    Gradient trial_gradient = trial_hmm.compute_gradient(data, f, task);
+    Gradient trial_gradient = trial_hmm.compute_gradient(data, f, task, options.weighting);
     if(verbo >= Verbosity::verbose)
       cout << "Function and gradient evaluation!" << endl;
 

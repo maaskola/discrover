@@ -300,7 +300,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
                 options_.label += "." + variant;
               Training::Tasks tasks = hmm_.define_training_tasks(options_);
               train_evaluate(hmm_, all_data, training_data, test_data, options_);
-              double score = hmm_.compute_score(training_data, *tasks.begin());
+              double score = hmm_.compute_score(training_data, *tasks.begin(), options_.weighting);
               if(score > plasma_results[seed_idx].score) {
                 plasma_results[seed_idx].motif = variant;
                 plasma_results[seed_idx].score = score;

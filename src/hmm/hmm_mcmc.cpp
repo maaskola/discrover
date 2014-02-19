@@ -272,7 +272,7 @@ std::vector<std::list<std::pair<HMM, double>>> HMM::mcmc(const Data::Collection 
     const hmm_options &options)
 {
   double temperature = options.sampling.temperature;
-  MCMC::Evaluator<HMM> eval(data, task);
+  MCMC::Evaluator<HMM> eval(data, task, options);
   MCMC::Generator<HMM> gen(options, n_states-first_state);
   MCMC::MonteCarlo<HMM> mcmc(gen, eval, verbosity);
   std::vector<double> temperatures;

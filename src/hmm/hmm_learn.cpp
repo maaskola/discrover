@@ -410,7 +410,8 @@ void HMM::M_Step(const matrix_t &T_, const matrix_t &E_, const Training::Targets
 
 Gradient HMM::compute_gradient(const Data::Collection &data,
     double &score,
-    const Training::Task &task) const
+    const Training::Task &task,
+    bool weighting) const
 {
   if(verbosity >= Verbosity::verbose) {
     std::cerr << "HMM::compute_gradient(Data::Collection)" << std::endl
@@ -426,6 +427,7 @@ Gradient HMM::compute_gradient(const Data::Collection &data,
     gradient.emission = zero_matrix(n_states, n_emissions);
 
   score = 0;
+  double W = 0;
   for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
     if(is_motif_group(group_idx))
       if(task.motif_name == groups[group_idx].name)
@@ -434,15 +436,24 @@ Gradient HMM::compute_gradient(const Data::Collection &data,
           if(iter != end(data)) {
             Gradient g;
             double s = compute_gradient(*iter, g, task, group_idx);
+            double w = iter->set_size;
+            W += w;
             if(not task.targets.transition.empty())
-              gradient.transition += g.transition * expr.sign;
+              gradient.transition += g.transition * expr.sign * (weighting ? w : 1.0);
             if(not task.targets.emission.empty())
-              gradient.emission += g.emission * expr.sign;
+              gradient.emission += g.emission * expr.sign * (weighting ? w : 1.0);
             if(verbosity >= Verbosity::verbose)
               std::cerr << "series = " << expr.series << " score = " << s << std::endl;
-            score += expr.sign * s;
+            score += expr.sign * s * (weighting ? w : 1.0);
           }
         }
+  if(weighting) {
+    score /= W;
+    if(not task.targets.transition.empty())
+      gradient.transition /= W;
+    if(not task.targets.emission.empty())
+      gradient.emission /= W;
+  }
   if(verbosity >= Verbosity::verbose)
     std::cerr << "HMM::compute_gradient::end score = " << score << std::endl;
   return(gradient);
@@ -740,7 +751,7 @@ bool HMM::perform_training_iteration_gradient(const Data::Collection &data,
 
   Timer timer;
   double previous_score;
-  Gradient gradient = compute_gradient(data, previous_score, task);
+  Gradient gradient = compute_gradient(data, previous_score, task, options.weighting);
   double gradient_comp_time = timer.tock();
   if(options.timing_information)
     std::cerr << "Gradient computation time: " << gradient_comp_time << " micro-seconds" << std::endl;

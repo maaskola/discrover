@@ -222,6 +222,7 @@ ostream &operator<<(ostream &os, const hmm_options &options)
     << "class_model = " << options.class_model << endl
     << "revcomp = " << options.revcomp << endl
     << "model_choice = " << options.model_choice << endl
+    << "weighting = " << options.weighting << endl
     << "output_compression = " << options.output_compression << endl
     << "left_padding = " << options.left_padding << endl
     << "right_padding = " << options.right_padding << endl

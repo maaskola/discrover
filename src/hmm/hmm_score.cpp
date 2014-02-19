@@ -271,20 +271,26 @@ double HMM::viterbi_atleast_one(const Data::Set &data, size_t group_idx) const
   return(m);
 };
 
-double HMM::compute_score(const Data::Collection &data, const Training::Task &task) const
+double HMM::compute_score(const Data::Collection &data, const Training::Task &task, bool weighting) const
 {
   std::vector<size_t> all_motifs;
   for(size_t i = 0; i < groups.size(); i++)
     if(groups[i].kind == Group::Kind::Motif)
       all_motifs.push_back(i);
   double score = 0;
+  double W = 0;
+  double w;
   switch(task.measure) {
     case Measure::Likelihood:
       score = log_likelihood(data);
       break;
     case Measure::MutualInformation:
-      for(auto &series: data)
-        score += mutual_information(series, all_motifs);
+      for(auto &series: data) {
+        W += w = series.set_size;
+        score += mutual_information(series, all_motifs) * (weighting ? w : 1);
+      }
+      if(weighting)
+        score /= W;
       break;
     case Measure::RankInformation:
       for(auto &series: data)

@@ -57,16 +57,19 @@ namespace MCMC {
         Data::Collection data;
         Training::Task task;
         Training::State ts;
+        hmm_options options;
       public:
         Evaluator(const Data::Collection &data_,
-            const Training::Task &obj) :
+            const Training::Task &obj,
+            const hmm_options &opt) :
           data(data_),
           task(obj),
-          ts(1) { // TODO make this work with multiple tasks
+          ts(1), // TODO make this work with multiple tasks
+          options(opt) {
           };
 
         double evaluate(const HMM &hmm) const {
-          return(hmm.compute_score(data, task));
+          return(hmm.compute_score(data, task, options.weighting));
         };
     };
 }
