@@ -845,7 +845,7 @@ namespace Seeding {
 
         Timer t;
 
-        if(options.keep_all)
+        if(not options.only_best)
           for(auto &result: find_all(motif_spec, objective)) {
             results.push_back(result);
             if(doreport)

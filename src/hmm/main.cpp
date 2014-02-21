@@ -576,12 +576,18 @@ int main(int argc, const char** argv)
     return(-1);
   }
 
-  if(not options.long_names)
-    if(options.seeding.keep_all or options.wiggle > 0) {
-      std::cout << "Warning: you specified HMM score seed selection and / or wiggle variants, but did not specify --longnames." << std::endl
+  if(not options.long_names) {
+    if(not options.seeding.only_best) {
+      std::cout << "Warning: you did not specify --best seed selection, but did not specify --longnames." << std::endl
+        << "Adding option --longnames." << std::endl;
+      options.long_names = true;
+    } else if(options.wiggle > 0) {
+      std::cout << "Warning: you specified wiggle variants, but did not specify --longnames." << std::endl
         << "Adding option --longnames." << std::endl;
       options.long_names = true;
     }
+  }
+
 
   if(options.line_search.eta <= options.line_search.mu) {
     std::cout << "Error: the Moré-Thuente η parameter must be larger than the µ parameter." << std::endl;

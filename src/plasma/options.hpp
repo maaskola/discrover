@@ -118,7 +118,7 @@ namespace Seeding {
     bool word_stats;
     bool measure_runtime;
     OccurrenceFilter occurrence_filter;
-    bool keep_all;
+    bool only_best;
     Verbosity verbosity;
     bool dump_viterbi;
     bool no_enrichment_filter;

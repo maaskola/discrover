@@ -291,7 +291,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
           cout << motif_spec.name << " result.size() = " << plasma_results.size() << endl;
 
         // seed and learn HMM parameters independently for each Plasma motif
-        if(options.model_choice == ModelChoice::HMMScore) {
+        if(not options.seeding.only_best) {
           for(size_t seed_idx = 0; seed_idx < plasma_results.size(); seed_idx++) {
             string motif = plasma_results[seed_idx].motif;
             string name = motif_spec.name;

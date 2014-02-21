@@ -42,7 +42,7 @@ namespace Seeding {
     word_stats(false),
     measure_runtime(false),
     occurrence_filter(OccurrenceFilter::RemoveSequences),
-    keep_all(false),
+    only_best(false),
     verbosity(Verbosity::info),
     dump_viterbi(false),
     no_enrichment_filter(false),

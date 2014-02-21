@@ -81,7 +81,7 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
     (form_switch(prefix, "deg", allow_short).c_str(), po::value<vector<size_t>>(&options.plasma.degeneracies), "Which degrees of degeneracy to consider. May be given multiple times. A sequence of length N has a maximal degeneracy of 3*N. Unlimited if unspecified.")
     (form_switch(prefix, "rdeg", false).c_str(), po::value<double>(&options.plasma.rel_degeneracy)->default_value(1), "Limit relative degeneracy. 1 corresponds to full degeneracy, and 0 to no degeneracy. For a sequence of length N the degeneracy is maximally 3*N. Thus for a motif of length 8 a maximal relative degeneracy of 0.2 allows (rounded down) 4 degrees of degeneracy.")
     (form_switch(prefix, "generalize", allow_short).c_str(), po::bool_switch(&options.plasma.per_degeneracy), "Whether to report the best motifs at each level of degeneracy. Default is to report only the best motif across all levels of degeneracy. In addition, the best motifs of levels of degeneracy given by --deg will be reported.")
-    (form_switch(prefix, "keepall", false).c_str(), po::bool_switch(&options.keep_all), "Whether to report for each motif specification the best result for each length. Default is to report only the single best motif for each motif specification.")
+    (form_switch(prefix, "best", false).c_str(), po::bool_switch(&options.only_best), "Whether to report only the single best motif for each motif specification.  Default is to report for each motif specification the best result for each length.")
     (form_switch(prefix, "strict", false).c_str(), po::bool_switch(&options.strict), "Do not allow insignificant seeds.")
     ;
   if(include_all)
