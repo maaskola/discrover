@@ -634,24 +634,32 @@ Training::Tasks HMM::define_training_tasks(const hmm_options &options) const
     task.motif_name = objective.motif_name;
     task.measure = objective.measure;
     task.series_expression = objective.series_expression;
+    bool found = false;
     for(auto &group: groups) {
       if(group.name == objective.motif_name) {
+        found = true;
         copy(begin(group.states), end(group.states), back_inserter(task.targets.emission));
         if(do_transition)
           copy(begin(group.states), end(group.states), back_inserter(task.targets.transition));
       }
     }
-    tasks.push_back(task);
 
-    if(options.verbosity >= Verbosity::verbose) {
-      cout << "Generated primary training targets." << endl << "Emissions:";
-      for(auto e: task.targets.emission)
-        cout << " " << e;
-      cout << endl;
-      cout << "Transitions:";
-      for(auto t: task.targets.transition)
-        cout << " " << t;
-      cout << endl;
+    if(not found) {
+      if(options.verbosity >= Verbosity::verbose)
+        cout << "Skipping discriminative training task for motif " << task.motif_name << " because it is not represented in the HMM." << endl;
+    } else {
+      tasks.push_back(task);
+
+      if(options.verbosity >= Verbosity::verbose) {
+        cout << "Generated primary training targets." << endl << "Emissions:";
+        for(auto e: task.targets.emission)
+          cout << " " << e;
+        cout << endl;
+        cout << "Transitions:";
+        for(auto t: task.targets.transition)
+          cout << " " << t;
+        cout << endl;
+      }
     }
   }
 
