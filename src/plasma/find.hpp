@@ -56,8 +56,8 @@ namespace Seeding {
       Results find_fire(size_t length, const Objective &objective, size_t max_degeneracy, const std::set<size_t> &degeneracies) const;
       Results find_mcmc(size_t length, const Objective &objective, size_t max_degeneracy) const;
       rev_map_t determine_initial_candidates(size_t length, const Objective &objective, std::string &best_motif, size_t &n_candidates, double &max_score, Results &results, const std::set<size_t> &degeneracies) const;
-      Results find_all(const Specification::Motif &motif, const Objective &objective, size_t n_motifs) const;
-      Results find_multiple(const Specification::Motif &motif, const Objective &objective, size_t n_motifs) const;
+      Results find_all(const Specification::Motif &motif, const Objective &objective) const;
+      Results find_multiple(const Specification::Motif &motif, const Objective &objective) const;
       void apply_mask(const std::string &motif);
       void apply_mask(const Result &result);
       void rebuild_index();

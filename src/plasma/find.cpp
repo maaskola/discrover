@@ -726,11 +726,11 @@ namespace Seeding {
    * For each length the most discriminative one is found, its occurrences are
    * masked and the procedure is repeated n_motifs times for each length.
    */
-  Results Plasma::find_all(const Specification::Motif &motif, const Objective &objective, size_t n_motifs) const {
+  Results Plasma::find_all(const Specification::Motif &motif, const Objective &objective) const {
     Results results;
     for(auto length: motif.lengths) {
       Plasma plasma(*this);
-      for(size_t i = 0; i < n_motifs; i++) {
+      for(size_t i = 0; i < motif.multiplicity; i++) {
         Results new_results;
         for(auto &result: plasma.find_seeds(length, objective, options.algorithm)) {
           if(options.verbosity >= Verbosity::verbose)
@@ -760,7 +760,7 @@ namespace Seeding {
 
         for(auto &result: new_results) {
           results.push_back(result);
-          if(i != options.n_motifs - 1)
+          if(i != motif.multiplicity - 1)
             plasma.apply_mask(result);
         }
       }
@@ -771,10 +771,10 @@ namespace Seeding {
   /** Finds the most discriminative motif over all included lengths.
    * Occurrences are masked and the procedure is repeated n_motifs times.
    */
-  Results Plasma::find_multiple(const Specification::Motif &motif, const Objective &objective, size_t n_motifs) const {
+  Results Plasma::find_multiple(const Specification::Motif &motif, const Objective &objective) const {
     Plasma plasma(*this);
     Results results;
-    for(size_t i = 0; i < n_motifs; i++) {
+    for(size_t i = 0; i < motif.multiplicity; i++) {
       Results new_results;
       for(auto length: motif.lengths) {
         for(auto &result: plasma.find_seeds(length, objective, options.algorithm)) {
@@ -807,7 +807,7 @@ namespace Seeding {
       Result result = *begin(new_results);
       results.push_back(result);
       // Mask if necessary
-      if(i != options.n_motifs - 1)
+      if(i != motif.multiplicity - 1)
         plasma.apply_mask(result);
     }
     return(results);
@@ -846,13 +846,13 @@ namespace Seeding {
         Timer t;
 
         if(options.keep_all)
-          for(auto &result: find_all(motif_spec, objective, options.n_motifs)) {
+          for(auto &result: find_all(motif_spec, objective)) {
             results.push_back(result);
             if(doreport)
               report(cout, result, collection, options);
           }
         else
-          for(auto &result: find_multiple(motif_spec, objective, options.n_motifs)) {
+          for(auto &result: find_multiple(motif_spec, objective)) {
             results.push_back(result);
             if(doreport)
               report(cout, result, collection, options);
