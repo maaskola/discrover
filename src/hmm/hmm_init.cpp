@@ -159,7 +159,7 @@ void HMM::register_dataset(const Data::Set &data, double class_prior, double mot
         val = motif_p1;
       reg_data.motif_prior[group_idx] = val;
       if(verbosity >= Verbosity::verbose)
-        std::cout << "Registering conditional motif prior " << val << " of group " << group_idx << " for data set " << data.path << " with sha1 " << data.sha1 << std::endl;
+        std::cout << "Registering conditional motif prior " << val << " of group " << group_idx << ": " << groups[group_idx].name << " for data set " << data.path << " with sha1 " << data.sha1 << std::endl;
     }
   registered_datasets[data.sha1] = reg_data;
 }
