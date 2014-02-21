@@ -351,11 +351,10 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
         plasma.options.motif_specifications.erase(plasma.options.motif_specifications.begin() + best_idx);
       }
-      if(options.simultaneity == Training::Simultaneity::Sequential)
+
+      if(options.seeding.only_best)
         train_evaluate(hmm, all_data, training_data, test_data, options);
     }
-    if(options.simultaneity == Training::Simultaneity::Simultaneous and (options.model_choice != ModelChoice::HMMScore or not plasma.options.motif_specifications.empty()))
-      train_evaluate(hmm, all_data, training_data, test_data, options);
   }
   return(hmm);
 }

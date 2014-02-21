@@ -3,54 +3,6 @@
 
 using namespace std;
 
-namespace Training {
-  string simultaneity2string(Simultaneity simultaneity)
-  {
-    switch(simultaneity) {
-      case Simultaneity::Sequential:
-        return("sequential");
-      case Simultaneity::Simultaneous:
-        return("simultaneous");
-      default:
-        return("Inexpressible");
-    }
-  }
-
-  string simultaneity2acronym(Simultaneity simultaneity)
-  {
-    switch(simultaneity) {
-      case Simultaneity::Sequential:
-        return("seq");
-      case Simultaneity::Simultaneous:
-        return("sim");
-      default:
-        return("Inexpressible");
-    }
-  }
-
-  istream& operator>>(istream& in, Simultaneity &simultaneity)
-  {
-    string token;
-    in >> token;
-    if(token == "sim")
-      simultaneity = Simultaneity::Simultaneous;
-    else if(token == "seq")
-      simultaneity = Simultaneity::Sequential;
-    else {
-      cout << "Could not parse simultaneity '" << token << "'." << endl;
-      throw("Could not parse Simultaneity");
-    }
-    cout << "Parse simultaneity: " << simultaneity2string(simultaneity) << endl;
-    return(in);
-  }
-
-  ostream& operator<<(ostream& out, Simultaneity simultaneity)
-  {
-    out << simultaneity2string(simultaneity);
-    return(out);
-  }
-}
-
 istream& operator>>(istream& in, Compression& compression)
 {
   string token;
@@ -118,19 +70,6 @@ ostream &operator<<(ostream &os, const LineSearchOptions &options)
     << "eta = " << options.eta << endl
     << "delta = " << options.delta << endl
     << "max_steps = " << options.max_steps << endl;
-  return(os);
-}
-
-ostream &operator<<(ostream &os, const ModelChoice &choice)
-{
-  switch(choice) {
-    case ModelChoice::SeedScore:
-      os << "Seed score" << endl;
-      break;
-    case ModelChoice::HMMScore:
-      os << "HMM score" << endl;
-      break;
-  }
   return(os);
 }
 
@@ -240,7 +179,6 @@ ostream &operator<<(ostream &os, const hmm_options &options)
     << "conditional_motif_prior1 = " << options.conditional_motif_prior1 << endl
     << "conditional_motif_prior2 = " << options.conditional_motif_prior2 << endl
     << "bg_learning = " << options.bg_learning << endl
-    << "simultaneity = " << options.simultaneity << endl
     // << "objectives = " << options.objectives << endl // TODO: implement
     << "termination = " << options.termination << endl
     << "limit_logp = " << options.limit_logp << endl

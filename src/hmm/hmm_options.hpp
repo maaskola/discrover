@@ -50,19 +50,6 @@ std::ostream& operator<<(std::ostream& out, Compression type);
 
 std::istream& operator>>(std::istream& in, Compression &type);
 
-namespace Training {
-
-  enum class Simultaneity {
-    Sequential,
-    Simultaneous
-  };
-
-  std::string simultaneity2string(Simultaneity simultaneity);
-  std::string simultaneity2acronym(Simultaneity simultaneity);
-  std::istream& operator>>(std::istream& in, Simultaneity &simultaneity);
-  std::ostream& operator<<(std::ostream& out, Simultaneity simultaneity);
-}
-
 struct sampling_options {
   bool do_sampling; // whether to perform Gibbs sampling learning
   int min_size;
@@ -80,11 +67,6 @@ struct termination_options {
   double delta_tolerance;
   double epsilon_tolerance;
   bool absolute_improvement;
-};
-
-enum class ModelChoice {
-  SeedScore,
-  HMMScore
 };
 
 struct LineSearchOptions {
@@ -117,7 +99,6 @@ struct hmm_options {
   bool long_names;
   bool class_model;
   bool revcomp;
-  ModelChoice model_choice;
   bool weighting;
   Compression output_compression;
   size_t left_padding, right_padding;
@@ -136,7 +117,6 @@ struct hmm_options {
   double conditional_motif_prior1, conditional_motif_prior2;
 
   Training::Method bg_learning;
-  Training::Simultaneity simultaneity;
   Training::Objectives objectives;
 
   termination_options termination;
@@ -153,7 +133,6 @@ struct hmm_options {
   ExecutionInformation exec_info;
 };
 
-std::ostream &operator<<(std::ostream &os, const ModelChoice &choice);
 std::ostream &operator<<(std::ostream &os, const Verbosity &verbosity);
 std::ostream &operator<<(std::ostream &os, const LineSearchOptions &options);
 std::ostream &operator<<(std::ostream &os, const termination_options &options);

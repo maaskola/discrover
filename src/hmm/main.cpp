@@ -285,7 +285,6 @@ int main(int argc, const char** argv)
 
   hidden_options.add_options()
     ("bg_learn", po::value<Training::Method>(&options.bg_learning)->default_value(Training::Method::Reestimation, "em"), "How to learn the background. Available are 'fixed', 'em', 'gradient', where the 'em' uses re-estimation to maximize the likelihood contribution of the background parameters, while 'gradient' uses the discriminative objective function.")
-    ("multi", po::value<Training::Simultaneity>(&options.simultaneity)->default_value(Training::Simultaneity::Simultaneous,"sim"), "Wether to add and train automatically determined motifs sequentially or simultaneously. Available are 'seq', 'sim'.")
     ("pscnt", po::value<double>(&options.contingency_pseudo_count)->default_value(1.0, "1"), "The pseudo count to be added to the contingency tables in the discriminative algorithms.")
     ("pscntE", po::value<double>(&options.emission_pseudo_count)->default_value(1.0, "1"), "The pseudo count to be added to the expected emission probabilities before normalization in the Baum-Welch algorithm.")
     ("pscntT", po::value<double>(&options.transition_pseudo_count)->default_value(0.0, "0"), "The pseudo count to be added to the expected transition probabilities before normalization in the Baum-Welch algorithm.")
@@ -533,22 +532,8 @@ int main(int argc, const char** argv)
   // Initialize the plasma options
   fixup_seeding_options(options);
 
-  // When using the Plasma option --keepall
-  if(options.seeding.keep_all)
-    // HMMs are initialized and independently optimized for each Plasma seed
-    options.model_choice = ModelChoice::HMMScore;
-  else
-    // HMMs are sequentially initialized and optimized for each Plasma seed
-    options.model_choice = ModelChoice::SeedScore;
-
   if(options.termination.past == 0) {
     std::cout << "Error: the value of --past must be a number greater than 0." << std::endl;
-  }
-
-  if(options.simultaneity == Training::Simultaneity::Simultaneous and options.wiggle != 0 and options.model_choice == ModelChoice::SeedScore) {
-    std::cout << "Warning: option --wiggle deactivated due to simultaneous motif seeding based on seed scores." << std::endl;
-    std::cout << "If you want to use wiggle variants please use --keepall." << std::endl;
-    options.wiggle = 0;
   }
 
   if(options.termination.max_iter == 0 and options.sampling.do_sampling) {
