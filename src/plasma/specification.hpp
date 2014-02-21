@@ -68,7 +68,19 @@ namespace Specification {
     MSPEC is one of three possibilities (tested in turn)
    * a path to a file. If such a file exists, it will be opened and a PWM will be read from it
    * a IUPAC regular expression
-   * a length specification for lib Plasma
+   * a length specification for lib Plasma, optionally specifying multiplicity
+   * examples:
+   *   signal:2,3:5-9x3
+   *     - the motif ID is "signal"
+   *     - insertions after postions 2 and 3
+   *     - lengths of between 5 and 9
+   *     - three variants to consider
+   *   previous:/home/user/motif.hmm
+   *     - consider the file given above and name the motif "previous"
+   *   motif:4:tgtanata
+   *     - motif ID is "motif"
+   *     - it is the IUPAC string tgtanata
+   *     - it allows one insertion after the first "a"
    */
   struct Motif {
     enum class Kind {
@@ -81,6 +93,7 @@ namespace Specification {
     std::string name;
     std::vector<size_t> insertions;
     std::vector<size_t> lengths;
+    size_t multiplicity;
     Motif(const std::string &s="");
     Motif(const Motif &spec);
   };

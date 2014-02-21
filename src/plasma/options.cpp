@@ -41,7 +41,6 @@ namespace Seeding {
     n_seq(0),
     word_stats(false),
     measure_runtime(false),
-    n_motifs(1),
     occurrence_filter(OccurrenceFilter::RemoveSequences),
     keep_all(false),
     verbosity(Verbosity::info),

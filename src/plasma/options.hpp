@@ -117,7 +117,6 @@ namespace Seeding {
     size_t n_seq;
     bool word_stats;
     bool measure_runtime;
-    size_t n_motifs;
     OccurrenceFilter occurrence_filter;
     bool keep_all;
     Verbosity verbosity;

@@ -83,11 +83,11 @@ namespace Specification {
   }
 
 
-  Motif::Motif(const Motif &s) : kind(s.kind), specification(s.specification), name(s.name), insertions(s.insertions), lengths(s.lengths)
+  Motif::Motif(const Motif &s) : kind(s.kind), specification(s.specification), name(s.name), insertions(s.insertions), lengths(s.lengths), multiplicity(s.multiplicity)
   {
   }
 
-  Motif::Motif(const string &s) : kind(Motif::Kind::Seed), specification(s), name(""), insertions(), lengths()
+  Motif::Motif(const string &s) : kind(Motif::Kind::Seed), specification(s), name(""), insertions(), lengths(), multiplicity(1)
   {
     // cout << "Constructing Specification::Motif from '" << s << "'." << endl;
     size_t pos;
@@ -108,6 +108,10 @@ namespace Specification {
         kind = Kind::Seed;
       else {
         kind = Kind::Plasma;
+        if((pos = specification.find("x")) != string::npos) {
+          multiplicity = atoi(specification.substr(pos+1).c_str());
+          specification = specification.substr(0, pos);
+        }
         lengths = parse_list(specification);
       }
     }
@@ -119,6 +123,7 @@ namespace Specification {
       for(auto x: lengths)
         cout << " " << x;
       cout << endl;
+      cout << "multiplicity = " << multiplicity << endl;
     }
   }
 }
