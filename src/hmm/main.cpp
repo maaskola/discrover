@@ -158,9 +158,6 @@ int main(int argc, const char** argv)
 
   string config_path;
 
-  bool deprecated_timing_information = false;
-  bool deprecated_hmm_score_seeding = false;
-
   string background_initialization;
 
   static const size_t MIN_COLS = 60;
@@ -183,7 +180,6 @@ int main(int argc, const char** argv)
   po::options_description sampling_options("Gibbs sampling options", cols);
   po::options_description termination_options("Termination options", cols);
   po::options_description hidden_options("Hidden options", cols);
-  po::options_description deprecated_options("Deprecated options", cols);
 
   po::options_description seeding_options = gen_iupac_options_description(options.seeding, "", "Seeding options for IUPAC regular expression finding", cols, false, false);
 
@@ -301,11 +297,6 @@ int main(int argc, const char** argv)
     ("longnames", po::bool_switch(&options.long_names), "Form longer output file names that contain some information about the parameters.")
     ;
 
-  deprecated_options.add_options()
-    ("runtime", po::bool_switch(&deprecated_timing_information), "Output information about how long certain parts take to execute. Superseded by the --time option.")
-    ("hmmscore", po::bool_switch(&deprecated_hmm_score_seeding), "Train a HMM for each seed and select seeds in order of their HMM scores. Superseded by the --keepall option.")
-    ;
-
   advanced_options
     .add(mmie_options)
     .add(sampling_options);
@@ -313,8 +304,7 @@ int main(int argc, const char** argv)
   hidden_options
     .add(linesearching_options)
     .add(eval_options)
-    .add(termination_options)
-    .add(deprecated_options);
+    .add(termination_options);
 
   po::options_description simple_options;
   simple_options
@@ -540,30 +530,24 @@ int main(int argc, const char** argv)
   } else
     options.sampling.max_size = -1;
 
-  // treat deprecated options
-  if(deprecated_timing_information) {
-    cerr << "Warning: option --runtime is deprecated. It has been superseded by the --time option." << endl;
-    options.timing_information = true;
-  }
-  if(deprecated_hmm_score_seeding) {
-    std::cout << "Warning: option --hmmscore is deprecated. It has been superseded by the --keepall option." << std::endl;
-    options.seeding.keep_all = true;
-  }
-
   // Initialize the plasma options
   fixup_seeding_options(options);
 
+  // When using the Plasma option --keepall
   if(options.seeding.keep_all)
+    // HMMs are initialized and independently optimized for each Plasma seed
     options.model_choice = ModelChoice::HMMScore;
   else
+    // HMMs are sequentially initialized and optimized for each Plasma seed
     options.model_choice = ModelChoice::SeedScore;
+
   if(options.termination.past == 0) {
     std::cout << "Error: the value of --past must be a number greater than 0." << std::endl;
   }
 
-  if(options.simultaneity == Training::Simultaneity::Simultaneous and options.wiggle != 0 and options.model_choice != ModelChoice::HMMScore) {
+  if(options.simultaneity == Training::Simultaneity::Simultaneous and options.wiggle != 0 and options.model_choice == ModelChoice::SeedScore) {
     std::cout << "Warning: option --wiggle deactivated due to simultaneous motif seeding based on seed scores." << std::endl;
-    std::cout << "If you want to use wiggle variants please use --hmmscore." << std::endl;
+    std::cout << "If you want to use wiggle variants please use --keepall." << std::endl;
     options.wiggle = 0;
   }
 

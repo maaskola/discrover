@@ -281,7 +281,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
           cout << "." << endl;
         }
 
-        // find the next seed with Plasma
+        // find the next set of seeds with Plasma
         Seeding::Results plasma_results = plasma.find(motif_spec, objectives);
 
         // if no seeds are found, don't try to find more seeds
@@ -290,6 +290,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         if(options.verbosity >= Verbosity::debug)
           cout << motif_spec.name << " result.size() = " << plasma_results.size() << endl;
 
+        // seed and learn HMM parameters independently for each Plasma motif
         if(options.model_choice == ModelChoice::HMMScore) {
           for(size_t seed_idx = 0; seed_idx < plasma_results.size(); seed_idx++) {
             string motif = plasma_results[seed_idx].motif;
@@ -324,8 +325,10 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
           cout << "all.size() = " << all_plasma_results.size() << endl;
         plasma_motif_idx++;
       }
-      if(options.verbosity >= Verbosity::debug)
-        cout << "found all" << endl;
+
+      // if(options.verbosity >= Verbosity::debug)
+      //   cout << "found all" << endl;
+
       if(all_plasma_results.empty()) {
         if(options.verbosity >= Verbosity::info)
           cout << "Unable to find any seeds." << endl;
