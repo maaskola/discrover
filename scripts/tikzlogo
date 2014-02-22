@@ -463,8 +463,8 @@ tex_paths.each_with_index{|path, idx|
   end
   cmd = [
     ["cd #{dir}"],
-    ["pdflatex", path, show_output],
-    ["rm", [tex_paths, aux_paths, log_paths].map{|x|x[idx]}.join(" ")]
+    ["pdflatex", File.basename(path), show_output],
+    ["rm", [tex_paths, aux_paths, log_paths].map{|x| File.basename(x[idx]) }.join(" ")]
   ].map{|x| x.join(" ").strip()}.join(" && ")
   puts cmd
   system(cmd) unless options.noexecute
