@@ -177,10 +177,10 @@ end
 def define_default_colors()
 # \\definecolor{colora}{rgb}{0.0,0.5,0.0}
   tikz = <<END
-\\definecolor{colora}{rgb}{0.0,0.75,0.0}
-\\definecolor{colorc}{rgb}{0.0,0.0,1.0}
-\\definecolor{colorg}{rgb}{1,0.6470588,0.0}
-\\definecolor{colort}{rgb}{1.0,0.0,0.0}
+\\definecolor{colora}{rgb}{0.0,0.75,0.0}%
+\\definecolor{colorc}{rgb}{0.0,0.0,1.0}%
+\\definecolor{colorg}{rgb}{1,0.6470588,0.0}%
+\\definecolor{colort}{rgb}{1.0,0.0,0.0}%
 END
   tikz
 end
@@ -210,8 +210,8 @@ $tikz_header = <<HERE
 \\usepackage{xcolor}
 \\usepackage{ifthen}
 \\usetikzlibrary{arrows,decorations.pathmorphing,backgrounds,positioning,fit,petri}
-\\begin{document}
-#{define_colors(options.color)}
+\\begin{document}%
+#{define_colors(options.color)}%
 \\begin{tikzpicture}[>=latex]
 HERE
 
@@ -463,8 +463,8 @@ tex_paths.each_with_index{|path, idx|
   end
   cmd = [
     ["cd #{dir}"],
-    ["pdflatex", path, show_output],
-    ["rm", [tex_paths, aux_paths, log_paths].map{|x|x[idx]}.join(" ")]
+    ["pdflatex", File.basename(path), show_output],
+    ["rm", [tex_paths, aux_paths, log_paths].map{|x| File.basename(x[idx]) }.join(" ")]
   ].map{|x| x.join(" ").strip()}.join(" && ")
   puts cmd
   system(cmd) unless options.noexecute
