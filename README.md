@@ -106,7 +106,7 @@ In particular, the headers of Boost need to be found in ```${CMAKE_PREFIX_PATH}/
 Similarly, the directory ```${CMAKE_PREFIX_PATH}/lib``` tells CMake where to find the Boost libraries if they are not installed in a standard system directory.
 
 By default, both ```CMAKE_INSTALL_PREFIX``` and ```CMAKE_PREFIX_PATH``` are constructed from ```LOCAL_PREFIX```.
-Hence, setting only ```LOCAL_PREFIX``` to match your system might be the only change required in most cases, if necessary at all.
+Hence, setting ```LOCAL_PREFIX``` to match your system might be the only change required in most cases, if necessary at all.
 
 
 After this variable has been adapted to your system, you may proceed with the next step.
