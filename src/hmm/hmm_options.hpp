@@ -85,7 +85,7 @@ struct evaluation_options {
 
 struct hmm_options {
   std::vector<Specification::DataSet> paths;
-  std::vector<Specification::Motif> motif_specifications;
+  Specification::Motifs motif_specifications;
   std::vector<std::string> load_paths;
   std::string label;
   std::vector<std::string> seeds;
