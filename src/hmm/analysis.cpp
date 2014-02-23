@@ -257,16 +257,19 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
     Seeding::Plasma plasma(collection, options.seeding);
     auto lesser_score = [](const Seeding::Result &a, const Seeding::Result &b) { return(a.score < b.score); };
 
-    while(not plasma.options.motif_specifications.empty()) {
+    // while(not plasma.options.motif_specifications.empty()) {
       if(options.verbosity >= Verbosity::debug)
         cout << "motif_specs.size() = " << plasma.options.motif_specifications.size() << endl;
-      if(hmm.get_nmotifs() > 0)
-        plasma.collection.mask(hmm.compute_mask(training_data));
-      Seeding::Results all_plasma_results;
+      // Seeding::Results all_plasma_results;
       size_t plasma_motif_idx = 0;
 
       // while there are motif specifications left
       while(plasma_motif_idx < plasma.options.motif_specifications.size()) {
+
+        if(hmm.get_nmotifs() > 0) {
+          cout << "Masking plasma data collection." << endl;
+          plasma.collection.mask(hmm.compute_mask(training_data));
+        }
 
         // consider the next motif specification
         auto motif_spec = options.motif_specifications[plasma_motif_idx];
@@ -291,70 +294,73 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
           cout << motif_spec.name << " result.size() = " << plasma_results.size() << endl;
 
         // seed and learn HMM parameters independently for each Plasma motif
-        if(not options.seeding.only_best) {
-          for(size_t seed_idx = 0; seed_idx < plasma_results.size(); seed_idx++) {
-            string motif = plasma_results[seed_idx].motif;
-            string name = motif_spec.name;
+        // if(not options.seeding.only_best) {
+        for(size_t seed_idx = 0; seed_idx < plasma_results.size(); seed_idx++) {
+          string motif = plasma_results[seed_idx].motif;
+          string name = motif_spec.name;
 
-            std::cout << "Considering candidate motif " << name << ":" << motif << " and training to determine the HMM score." << std::endl;
+          std::cout << "Considering candidate motif " << name << ":" << motif << " and training to determine the HMM score." << std::endl;
 
-            plasma_results[seed_idx].score = -std::numeric_limits<double>::infinity();
+          plasma_results[seed_idx].score = -std::numeric_limits<double>::infinity();
 
-            for(auto variant: generate_wiggle_variants(motif, options.wiggle, options.verbosity)) {
-              HMM hmm_(hmm);
-              hmm_options options_(options);
-              if(options_.verbosity >= Verbosity::info and options_.wiggle > 0)
-                std::cout << "Considering wiggle variant " << variant << " of candidate motif " << name << ":" << motif << " and training to determine the HMM score." << std::endl;
-              hmm_.add_motif(variant, options_.alpha, expected_seq_size, options_.lambda, name, plasma.options.motif_specifications[plasma_motif_idx].insertions, options.left_padding, options.right_padding);
+          for(auto variant: generate_wiggle_variants(motif, options.wiggle, options.verbosity)) {
+            HMM hmm_(hmm);
+            hmm_options options_(options);
+            if(options_.verbosity >= Verbosity::info and options_.wiggle > 0)
+              std::cout << "Considering wiggle variant " << variant << " of candidate motif " << name << ":" << motif << " and training to determine the HMM score." << std::endl;
+            hmm_.add_motif(variant, options_.alpha, expected_seq_size, options_.lambda, name, plasma.options.motif_specifications[plasma_motif_idx].insertions, options.left_padding, options.right_padding);
 
-              if(options_.long_names)
-                options_.label += "." + variant;
-              Training::Tasks tasks = hmm_.define_training_tasks(options_);
-              train_evaluate(hmm_, all_data, training_data, test_data, options_);
-              double score = hmm_.compute_score(training_data, *tasks.begin(), options_.weighting);
-              if(score > plasma_results[seed_idx].score) {
-                plasma_results[seed_idx].motif = variant;
-                plasma_results[seed_idx].score = score;
-              }
+            if(options_.long_names)
+              options_.label += "." + variant;
+            Training::Tasks tasks = hmm_.define_training_tasks(options_);
+            train_evaluate(hmm_, all_data, training_data, test_data, options_);
+            double score = hmm_.compute_score(training_data, *tasks.begin(), options_.weighting);
+            if(score > plasma_results[seed_idx].score) {
+              plasma_results[seed_idx].motif = variant;
+              plasma_results[seed_idx].score = score;
             }
           }
         }
 
-        all_plasma_results.push_back(*max_element(plasma_results.begin(), plasma_results.end(), lesser_score));
-        if(options.verbosity >= Verbosity::debug)
-          cout << "all.size() = " << all_plasma_results.size() << endl;
+        if(plasma_results.empty()) {
+          if(options.verbosity >= Verbosity::info)
+            cout << "Unable to find any seeds." << endl;
+          plasma.options.motif_specifications.clear();
+        } else {
+          // all_plasma_results.push_back(*max_element(plasma_results.begin(), plasma_results.end(), lesser_score));
+          // if(options.verbosity >= Verbosity::debug)
+          // cout << "all.size() = " << all_plasma_results.size() << endl;
+          // plasma_motif_idx++;
+        // }
+
+        // if(options.verbosity >= Verbosity::debug)
+        //   cout << "found all" << endl;
+
+          auto best_iter = max_element(plasma_results.begin(), plasma_results.end(), lesser_score);
+          size_t best_idx = best_iter - plasma_results.begin();
+
+          if(options.verbosity >= Verbosity::debug)
+            cout << "best_idx = " << best_idx << endl;
+          string motif = best_iter->motif;
+          string name = motif_spec.name;
+          // string name = plasma.options.motif_specifications[best_idx].name;
+
+          if(options.verbosity >= Verbosity::info)
+            cout << "Accepting seed " << name << ":" << motif << endl;
+
+          hmm.add_motif(motif, options.alpha, expected_seq_size, options.lambda, name, plasma.options.motif_specifications[best_idx].insertions, options.left_padding, options.right_padding);
+          if(options.long_names)
+            options.label += "." + motif;
+
+          // plasma.options.motif_specifications.erase(plasma.options.motif_specifications.begin() + best_idx);
+        }
+
         plasma_motif_idx++;
       }
 
-      // if(options.verbosity >= Verbosity::debug)
-      //   cout << "found all" << endl;
-
-      if(all_plasma_results.empty()) {
-        if(options.verbosity >= Verbosity::info)
-          cout << "Unable to find any seeds." << endl;
-        plasma.options.motif_specifications.clear();
-      } else {
-        auto best_iter = max_element(all_plasma_results.begin(), all_plasma_results.end(), lesser_score);
-        size_t best_idx = best_iter - all_plasma_results.begin();
-
-        if(options.verbosity >= Verbosity::debug)
-          cout << "best_idx = " << best_idx << endl;
-        string motif = best_iter->motif;
-        string name = plasma.options.motif_specifications[best_idx].name;
-
-        if(options.verbosity >= Verbosity::info)
-          cout << "Accepting seed " << name << ":" << motif << endl;
-
-        hmm.add_motif(motif, options.alpha, expected_seq_size, options.lambda, name, plasma.options.motif_specifications[best_idx].insertions, options.left_padding, options.right_padding);
-        if(options.long_names)
-          options.label += "." + motif;
-
-        plasma.options.motif_specifications.erase(plasma.options.motif_specifications.begin() + best_idx);
-      }
-
-      if(options.seeding.only_best)
-        train_evaluate(hmm, all_data, training_data, test_data, options);
-    }
+      // if(options.seeding.only_best)
+      //   train_evaluate(hmm, all_data, training_data, test_data, options);
+    // }
   }
   return(hmm);
 }
