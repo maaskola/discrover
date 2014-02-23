@@ -73,8 +73,11 @@ namespace Seeding {
           }
           cout << endl;
         }
-        for(auto pos: iter->second)
+        for(auto pos: iter->second) {
+          if(pos >= seq.sequence.size())
+            pos = 2 * seq.sequence.size() - pos;
           seq.sequence[pos] = mask_symbol;
+        }
         if(verbosity >= Verbosity::debug)
           if(iter != end(mask))
             cout << seq.sequence << endl;
