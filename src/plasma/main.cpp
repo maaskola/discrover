@@ -238,7 +238,7 @@ int main(int argc, const char** argv) {
     cout << "objectives:"; for(auto &x: options.objectives) cout << " " << x; cout << endl;
   }
 
-  Specification::harmonize(options.motif_specifications, options.paths, options.objectives);
+  Specification::harmonize(options.motif_specifications, options.paths, options.objectives, false);
 
   if(options.verbosity >= Verbosity::verbose) {
     cout << "motif_specifications:"; for(auto &x: options.motif_specifications) cout << " " << x; cout << endl;

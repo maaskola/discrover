@@ -34,6 +34,7 @@
 #include <boost/lexical_cast.hpp>
 #include <string>
 #include <vector>
+#include <list>
 #include <set>
 #include <map>
 
@@ -211,7 +212,7 @@ namespace Specification {
    *   - give names to unnamed motifs, making sure not to overwrite given ones
    *   - more that needs to be documented
    */
-  template <typename X> void harmonize(Motifs &motifs, DataSets &data, std::vector<Objective<X>> &objectives, bool add_shuffles=true) {
+  template <typename X> void harmonize(Motifs &motifs, DataSets &data, std::vector<Objective<X>> &objectives, bool demultiplex, bool add_shuffles=true) {
     const bool debug = false;
 
     // find all series names occurring in data set specifications
@@ -315,7 +316,7 @@ namespace Specification {
 
     // give names to unnamed motifs, making sure not to overwrite given ones
     size_t motif_idx = 0;
-    for(auto &motif:motifs)
+    for(auto &motif: motifs)
       if(motif.name == "") {
         std::string name = "motif" + boost::lexical_cast<std::string>(motif_idx++);
         while(motif_names_in_motifs.find(name) != end(motif_names_in_motifs))
@@ -325,7 +326,42 @@ namespace Specification {
       }
 
 
+    // check that no motifs have multiplicity zero
+    for(auto &m: motifs)
+      if(m.multiplicity == 0) {
+        std::cout << "Error: multiplicity of motif \"" << m.name << "\" is zero!" << std::endl;
+        exit(-1);
+      }
 
+
+    // if desired (=yes for Discrover, =no for Plasma) create multiple motifs for which multiplicity > 1
+    std::map<std::string, std::list<std::string>> demux_motif_map;
+    if(demultiplex) {
+      Motifs new_motifs;
+      // std::vector<Specification::Motif> new_motifs;
+      for(auto &motif: motifs) {
+        if(motif.multiplicity == 1)
+          new_motifs.push_back(motif);
+        else {
+          for(size_t i = 0; i < motif.multiplicity; i++) {
+            auto m = motif;
+            m.multiplicity = 1;
+            m.name += "_" + boost::lexical_cast<std::string>(i);
+
+            new_motifs.push_back(m);
+
+            demux_motif_map[motif.name].push_back(m.name);
+
+            motif_names_in_motifs.insert(m.name);
+            std::cout << "Demuxing: " << motif.name << " -> " << m.name << std::endl;
+          }
+          motif_names_in_motifs.erase(motif.name);
+        }
+      }
+      motifs = new_motifs;
+    }
+
+    // TODO make sure that where motif names are mentioned they should be updated for the demultiplexed motif names
 
 //
 //      rg. objectives with empty series... they should be taken to mean all series
@@ -349,8 +385,50 @@ namespace Specification {
       }
     }
 
+    // find sequence sets that mention demuxed motif, and replace by new ones
+    for(auto &spec: data) {
+      std::set<std::string> present_motifs;
+      for(auto &m: spec.motifs)
+        if(demux_motif_map.find(m) == end(demux_motif_map))
+          present_motifs.insert(m);
+        else
+          for(auto &n: demux_motif_map.find(m)->second) {
+            std::cout << "Demuxing (data): " << m << " -> " << n << std::endl;
+            present_motifs.insert(n);
+          }
+      spec.motifs = present_motifs;
+    }
+
+    // find objectives that mention demuxed motif, and replace by new ones
+    if(demultiplex) {
+      std::vector<Objective<X>> objs;
+      for(auto &objective: objectives) {
+        std::string motif_name = objective.motif_name;
+        std::cout << "Check for Demuxing (obj): " << motif_name << std::endl;
+        auto demux_motif_iter = demux_motif_map.find(motif_name);
+        if(demux_motif_iter == end(demux_motif_map)) {
+          objs.push_back(objective);
+          std::cout << "Demuxing (obj): " << motif_name << " ok!" << std::endl;
+        } else
+          for(auto &demuxed: demux_motif_iter->second) {
+            auto obj = objective;
+            obj.motif_name = demuxed;
+            std::cout << "Demuxing (obj): " << motif_name << " -> " << demuxed << std::endl;
+            objs.push_back(obj);
+          }
+      }
+      objectives = objs;
+    }
+
+    for(auto &objective: objectives) {
+      std::cout << "obj <-> check 1: " << objective.motif_name << std::endl;
+    }
+
+    // check that no more than one objective exists for each motif, and that each objective refers to an existing motif
+    // i.e. check that the relation between objective and motifs is one-to-one
     std::set<std::string> motif_names_in_objectives;
     for(auto &objective: objectives) {
+      std::cout << "obj <-> check 2: " << objective.motif_name << std::endl;
       auto pair = motif_names_in_objectives.insert(objective.motif_name);
       if(not pair.second) { // there was already a motif of that name
         std::cout << "Error: motif name in objective not unique: '" << objective.motif_name << "'." << std::endl;
