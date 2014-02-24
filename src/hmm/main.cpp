@@ -501,7 +501,7 @@ int main(int argc, const char** argv)
   }
 
   // check and harmonize specified motifs, paths, and objectives
-  Specification::harmonize(options.motif_specifications, options.paths, options.objectives, true);
+  Specification::harmonize(options.motif_specifications, options.paths, options.objectives, false);
 
   // print information about specified motifs, paths, and objectives
   if(options.verbosity >= Verbosity::debug) {

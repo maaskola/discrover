@@ -255,12 +255,12 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
     }
 
     Seeding::Plasma plasma(collection, options.seeding);
-    auto lesser_score = [](const Seeding::Result &a, const Seeding::Result &b) { return(a.score < b.score); };
 
     if(options.verbosity >= Verbosity::debug)
       cout << "motif_specs.size() = " << plasma.options.motif_specifications.size() << endl;
-    // Seeding::Results all_plasma_results;
     size_t plasma_motif_idx = 0;
+
+    bool first_motif = true;
 
     // while there are motif specifications left
     while(plasma_motif_idx < plasma.options.motif_specifications.size()) {
@@ -292,54 +292,116 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
       if(options.verbosity >= Verbosity::debug)
         cout << motif_spec.name << " result.size() = " << plasma_results.size() << endl;
 
+      vector<pair<string, HMM>> learned_models;
+
       // seed and learn HMM parameters independently for each Plasma motif
       for(size_t seed_idx = 0; seed_idx < plasma_results.size(); seed_idx++) {
         string motif = plasma_results[seed_idx].motif;
         string name = motif_spec.name;
 
-        std::cout << "Considering candidate motif " << name << ":" << motif << " and training to determine the HMM score." << std::endl;
+        cout << "Considering candidate motif " << name << ":" << motif << " and training to determine the HMM score." << endl;
 
-        plasma_results[seed_idx].score = -std::numeric_limits<double>::infinity();
+        plasma_results[seed_idx].score = -numeric_limits<double>::infinity();
 
         for(auto variant: generate_wiggle_variants(motif, options.wiggle, options.verbosity)) {
-          HMM hmm_(hmm);
-          hmm_options options_(options);
-          if(options_.verbosity >= Verbosity::info and options_.wiggle > 0)
-            std::cout << "Considering wiggle variant " << variant << " of candidate motif " << name << ":" << motif << " and training to determine the HMM score." << std::endl;
-          hmm_.add_motif(variant, options_.alpha, expected_seq_size, options_.lambda, name, plasma.options.motif_specifications[plasma_motif_idx].insertions, options.left_padding, options.right_padding);
+          HMM model(hmm);
+          if(options.verbosity >= Verbosity::info and options.wiggle > 0)
+            cout << "Considering wiggle variant " << variant << " of candidate motif " << name << ":" << motif << " and training to determine the HMM score." << endl;
+          model.add_motif(variant, options.alpha, expected_seq_size, options.lambda, name, plasma.options.motif_specifications[plasma_motif_idx].insertions, options.left_padding, options.right_padding);
 
+          hmm_options options_(options);
           if(options_.long_names)
             options_.label += "." + variant;
-          Training::Tasks tasks = hmm_.define_training_tasks(options_);
-          train_evaluate(hmm_, all_data, training_data, test_data, options_);
-          double score = hmm_.compute_score(training_data, *tasks.begin(), options_.weighting);
-          if(score > plasma_results[seed_idx].score) {
-            plasma_results[seed_idx].motif = variant;
-            plasma_results[seed_idx].score = score;
-          }
+          train_evaluate(model, all_data, training_data, test_data, options_);
+
+          learned_models.push_back(make_pair(variant, model));
         }
       }
 
-      if(plasma_results.empty()) {
-        if(options.verbosity >= Verbosity::info)
-          cout << "Unable to find any seeds." << endl;
-        plasma.options.motif_specifications.clear();
-      } else {
+      auto best_score = -numeric_limits<double>::infinity();
+      bool ok = true;
 
-        auto best_iter = max_element(plasma_results.begin(), plasma_results.end(), lesser_score);
-        size_t best_idx = best_iter - plasma_results.begin();
+      cout << "Non-augmented model: " << hmm << endl;
+      // Training::Tasks tasks = hmm.define_training_tasks(options);
+      // double previous_score = hmm.compute_score(masked_training_data, *tasks.begin(), options.weighting);
+      while(ok and not learned_models.empty()) {
+        auto masked_training_data = training_data;
 
-        if(options.verbosity >= Verbosity::debug)
-          cout << "best_idx = " << best_idx << endl;
-        string motif = best_iter->motif;
-        string name = motif_spec.name;
+        const size_t mode = 1;
+        const bool relearn_before_eval = true;
 
-        if(options.verbosity >= Verbosity::info)
-          cout << "Accepting seed " << name << ":" << motif << endl;
+        if(mode == 1) {
+          best_score = -numeric_limits<double>::infinity();
+          if(not first_motif) {
+            cout << "Masking earlier motifs" << endl;
+            masked_training_data.mask(hmm.compute_mask(masked_training_data));
+          }
+        }
 
-        hmm.add_motif(motif, options.alpha, expected_seq_size, options.lambda, name, plasma.options.motif_specifications[best_idx].insertions, options.left_padding, options.right_padding);
-        if(options.long_names)
-          options.label += "." + motif;
+        size_t best_index = 0;
+        auto best_model = hmm;
+        string best_seed = "";
+        bool updated = false;
+
+        size_t index = 0;
+
+        for(auto &learned: learned_models) {
+          string seed = learned.first;
+          auto learned_model = learned.second;
+
+          auto model = learned_model;
+          if(mode == 0) {
+            model = hmm;
+
+            // TODO add the motif from the learned model to model
+            model.add_motifs(learned_model, false);
+            // model.add_motifs(learned_model, true);
+
+            // TODO adapt transition probabilities
+            // TODO or do complete relearning
+            // if(relearn_before_eval)
+          } else
+            model = learned_model;
+
+
+          Training::Tasks tasks = model.define_training_tasks(options);
+          double score = model.compute_score(masked_training_data, *tasks.begin(), options.weighting);
+
+          cout << "Augmented model: " << model << endl;
+          cout << "Score of the model augmented by " << seed << " has a score of " << score << endl;
+          if(score > best_score) {
+            ok = true;
+            updated = true;
+            best_model = model;
+            best_seed = seed;
+            best_score = score;
+            best_index = index;
+          }
+          index++;
+        }
+
+        if(not updated) {
+          cout << "We did not find an improved model." << endl;
+          ok = false;
+        } else {
+          if(mode == 0)
+            hmm = best_model;
+
+          if(options.verbosity >= Verbosity::info)
+            cout << "Accepting seed " << best_seed << endl; // << name << ":" << motif << endl; // TODO
+
+          if(mode == 1)
+            hmm.add_motifs(best_model, false);
+
+          hmm_options options_(options);
+          if(options.long_names)
+            options.label += "." + best_seed;
+          train_evaluate(hmm, all_data, training_data, test_data, options);
+
+          learned_models.erase(begin(learned_models) + best_index);
+          first_motif = false;
+          ok = true;
+        }
       }
 
       plasma_motif_idx++;
