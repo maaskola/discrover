@@ -582,7 +582,7 @@ bool HMM::perform_training_iteration(const Data::Collection &data,
               z += transition(i,j);
         if(z == 0) {
           if(verbosity >= Verbosity::info)
-            std::cerr << "None of the task states are reachable from the non-task states; skipping task." << std::endl;
+            std::cout << "None of the task states are reachable from the non-task states; skipping task." << std::endl;
           continue;
         }
       }
