@@ -46,6 +46,7 @@ namespace Fasta {
     std::string sequence;
     std::string string(size_t width=60) const { return(">" + definition + "\n" + sequence); };
     std::string reverse_complement() const { return(::reverse_complement(sequence)); };
+    size_t mask(std::vector<size_t> pos);
   };
   struct IEntry : public Entry {
     typedef unsigned char alphabet_idx_t;
@@ -54,6 +55,7 @@ namespace Fasta {
     static const alphabet_idx_t empty_symbol = 5;
     seq_t isequence;
     IEntry(const Entry &entry=Entry());
+    size_t mask(std::vector<size_t> pos);
   };
 
   template <typename X>

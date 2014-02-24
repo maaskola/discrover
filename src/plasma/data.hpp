@@ -31,12 +31,27 @@
 #define DATA_HPP
 
 #include <map>
+#include <unordered_map>
+#include <unordered_set>
 #include "specification.hpp"
 #include "fasta.hpp"
 
 std::string sha1hash(const std::string &s);
 
 namespace Data {
+
+  struct RemovalReport {
+    RemovalReport(size_t n=0, size_t s=0);
+    size_t nucleotides;
+    size_t sequences;
+  };
+
+  RemovalReport operator+(const RemovalReport &a, const RemovalReport &b);
+  RemovalReport &operator+=(RemovalReport &a, const RemovalReport &b);
+
+  typedef std::unordered_map<std::string, std::vector<size_t>> mask_sub_t;
+  typedef std::unordered_map<std::string, mask_sub_t> mask_t;
+
   namespace Basic {
     template <typename X>
       struct Set : public Specification::DataSet {
@@ -97,6 +112,48 @@ namespace Data {
         size_t seq_size, set_size;
         std::vector<seq_t> sequences;
         std::string sha1;
+
+        RemovalReport mask(const mask_sub_t &mask) {
+          RemovalReport report;
+          for(auto &seq: sequences) {
+            auto iter = mask.find(seq.definition);
+            if(iter != end(mask)) {
+              report.sequences++;
+              report.nucleotides += seq.mask(iter->second);
+            }
+          }
+          return(report);
+        }
+
+        RemovalReport drop_sequences(const std::unordered_set<std::string> &ids) {
+          const bool noisy_output = false;
+
+          RemovalReport report;
+          auto iter = sequences.rbegin();
+          size_t idx = 0;
+          while(iter != sequences.rend()) {
+            if(noisy_output) {
+              std::cerr << "idx = " << idx << std::endl;
+              std::cerr << "Checking " << path << " " << iter->definition << " for dropping" << std::endl;
+            }
+            if(ids.find(iter->definition) != end(ids)) {
+              if(noisy_output)
+                std::cerr << "Dropping!" << std::endl;
+              report.sequences++;
+              report.nucleotides += iter->sequence.size();
+              set_size--;
+              seq_size -= iter->sequence.size(); // TODO: find out if this is correct for reverse complements
+              auto i = iter;
+              bool done = (++i) == sequences.rend();
+              sequences.erase(--(iter++).base());
+              if(done) break;
+            } else
+              iter++;
+            if(noisy_output)
+              std::cout << "idxB = " << idx++ << std::endl;
+          }
+          return(report);
+        }
       };
 
     template <typename X>
@@ -145,6 +202,26 @@ namespace Data {
         size_t seq_size, set_size;
         sets_t sets;
         std::string name;
+
+        RemovalReport mask(const Data::mask_t &mask) {
+          RemovalReport report;
+          for(auto &data_set: sets) {
+            auto iter = mask.find(data_set.path);
+            if(iter != end(mask))
+              report += data_set.mask(iter->second);
+          }
+          return(report);
+        }
+
+        RemovalReport drop_sequences(std::map<std::string, std::unordered_set<std::string>> &ids) {
+          RemovalReport report;
+          for(auto &data_set: sets) {
+            auto iter = ids.find(data_set.path);
+            if(iter != end(ids))
+              report += data_set.drop_sequences(iter->second);
+          }
+          return(report);
+        }
       };
 
     template <typename X>
@@ -213,6 +290,20 @@ namespace Data {
           });
           return(iter);
         }
+
+        RemovalReport mask(const Data::mask_t &mask) {
+          RemovalReport report;
+          for(auto &data_series: series)
+            report += data_series.mask(mask);
+          return(report);
+        }
+
+        RemovalReport drop_sequences(std::map<std::string, std::unordered_set<std::string>> &ids) {
+          RemovalReport report;
+          for(auto &data_series: series)
+            report += data_series.drop_sequences(ids);
+          return(report);
+        }
       };
 
     template <typename X> typename Set<X>::iterator begin(Set<X> &set) { return(begin(set.sequences)); }
@@ -232,43 +323,23 @@ namespace Data {
   }
 }
 
-#include <unordered_set>
-#include <unordered_map>
-
 namespace Seeding {
-  typedef std::unordered_map<std::string, std::vector<size_t>> mask_sub_t;
-  typedef std::unordered_map<std::string, mask_sub_t> mask_t;
-
-  struct RemovalReport {
-    RemovalReport(size_t n=0, size_t s=0);
-    size_t nucleotides;
-    size_t sequences;
-  };
-
-  RemovalReport operator+(const RemovalReport &a, const RemovalReport &b);
-  RemovalReport &operator+=(RemovalReport &a, const RemovalReport &b);
 
   struct DataSet : public Data::Basic::Set<Fasta::Entry> {
     DataSet();
     DataSet(const Specification::DataSet &s, bool revcomp=false, size_t n_seq=0);
     template <typename X> DataSet(const Data::Basic::Set<X> &s) : Data::Basic::Set<Fasta::Entry>(s) { };
-    RemovalReport mask(const mask_sub_t &mask, char mask_symbol='n');
-    RemovalReport drop_sequences(const std::unordered_set<std::string> &ids);
   };
 
   struct DataSeries : public Data::Basic::Series<DataSet> {
     DataSeries();
     DataSeries(const std::string &name, const Specification::DataSets &s, bool revcomp=false, size_t n_seq=0);
     template <typename X> DataSeries(const Data::Basic::Series<X> &s) : Data::Basic::Series<DataSet>(s) { };
-    RemovalReport mask(const mask_t &mask);
-    RemovalReport drop_sequences(std::map<std::string,std::unordered_set<std::string>> &ids);
   };
 
   struct DataCollection: public Data::Basic::Collection<DataSeries> {
     DataCollection(const Specification::DataSets &s, bool revcomp=false, size_t n_seq=0);
     template <typename X> DataCollection(const Data::Basic::Collection<X> &c) : Data::Basic::Collection<DataSeries>(c) { };
-    RemovalReport mask(const mask_t &mask);
-    RemovalReport drop_sequences(std::map<std::string,std::unordered_set<std::string>> &ids);
   };
 };
 

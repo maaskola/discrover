@@ -441,12 +441,12 @@ class HMM {
     vector_t compute_forward_scale_zeroth_order(const Data::Seq &s) const;
     vector_t compute_forward_scale_higher_order(const Data::Seq &s) const;
 
-    /** The standard forward algorithm with prescaling.
+    /** The standard forward algorithm with pre-scaling.
      *  The scaling vector is assumed to be given. */
     matrix_t compute_forward_prescaled(const Data::Seq &s, const vector_t &scale) const;
     matrix_t compute_forward_prescaled_zeroth_order(const Data::Seq &s, const vector_t &scale) const;
     matrix_t compute_forward_prescaled_higher_order(const Data::Seq &s, const vector_t &scale) const;
-    /** The standard backward algorithm with prescaling.
+    /** The standard backward algorithm with pre-scaling.
      *  The scaling vector is assumed to be given. */
     matrix_t compute_backward_prescaled(const Data::Seq &s, const vector_t &scale) const;
     matrix_t compute_backward_prescaled_zeroth_order(const Data::Seq &s, const vector_t &scale) const;

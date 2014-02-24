@@ -779,6 +779,8 @@ HMM::mask_t HMM::compute_mask(const Data::Collection &data) const
         for(auto state: path) {
           if(state >= first_state)
             v.push_back(idx); // TODO: check: should I insert idx - 1 instead?
+                              // -> No; but there was an issue with reverse complements; fixed in src/plasma/data.cpp DataSet::mask by pos = 2 * n - pos where n is the sequence length
+
           idx++;
         }
         if(not v.empty())

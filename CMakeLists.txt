@@ -24,7 +24,7 @@ SET(CMAKE_BUILD_TYPE Release)
 # Set installation destination and prefix path to find libraries installed on
 # this sytem. If this is not specified, /usr/local/ will be used.
 #
-# SET(LOCAL_PREFIX "~/local")
+# SET(LOCAL_PREFIX "/usr/local")
 # SET(CMAKE_INSTALL_PREFIX ${LOCAL_PREFIX})
 # SET(CMAKE_PREFIX_PATH ${LOCAL_PREFIX})
 
