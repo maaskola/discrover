@@ -813,6 +813,13 @@ bool HMM::perform_training_iteration_gradient(const Data::Collection &data,
 
     new_score = res.first;
     candidate = res.second;
+
+    if(info != 1 and verbosity >= Verbosity::verbose) {
+      std::cout << "Candidate emission = " << candidate.emission << std::endl;
+      std::cout << "Candidate transition = " << candidate.transition << std::endl;
+      std::cout << "Candidate emission gradient = " << gradient.emission << std::endl;
+      std::cout << "Candidate transition gradient = " << gradient.transition << std::endl;
+    }
   }
 
   if(verbosity >= Verbosity::info)
