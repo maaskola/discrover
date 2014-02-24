@@ -564,6 +564,28 @@ bool HMM::perform_training_iteration(const Data::Collection &data,
       if(verbosity >= Verbosity::verbose)
         std::cerr << "Current parameters: " << *this << std::endl;
 
+      // collect the states whose parameters are subject to this task
+      Training::Range task_targets(task.targets.transition.size() + task.targets.emission.size());
+      copy(begin(task.targets.transition), end(task.targets.transition), begin(task_targets));
+      copy(begin(task.targets.emission), end(task.targets.emission), begin(task_targets));
+      sort(begin(task_targets), end(task_targets));
+      task_targets.resize(std::distance(begin(task_targets), unique(begin(task_targets), end(task_targets))));
+
+      // check if the task states are reachable
+      if(find(begin(task_targets), end(task_targets), start_state) == end(task_targets)) {
+        // the task states do not include the start state
+        // check if the task states are reachable from the non-task states
+        double z = 0;
+        for(size_t i = 0; i < n_states; i++)
+          if(find(begin(task_targets), end(task_targets), i) == end(task_targets))
+            for(auto j: task_targets)
+              z += transition(i,j);
+        if(z == 0) {
+          if(verbosity >= Verbosity::info)
+            std::cerr << "None of the task states are reachable from the non-task states; skipping task." << std::endl;
+          continue;
+        }
+      }
 
       if(options.termination.past <= ts.scores[task_idx].size())
         score = *(ts.scores[task_idx].rbegin() + options.termination.past - 1);
