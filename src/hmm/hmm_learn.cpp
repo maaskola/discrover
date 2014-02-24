@@ -575,6 +575,28 @@ bool HMM::perform_training_iteration(const Data::Collection &data,
       if(verbosity >= Verbosity::verbose)
         std::cerr << "Current parameters: " << *this << std::endl;
 
+      // collect the states whose parameters are subject to this task
+      Training::Range task_targets(task.targets.transition.size() + task.targets.emission.size());
+      copy(begin(task.targets.transition), end(task.targets.transition), begin(task_targets));
+      copy(begin(task.targets.emission), end(task.targets.emission), begin(task_targets));
+      sort(begin(task_targets), end(task_targets));
+      task_targets.resize(std::distance(begin(task_targets), unique(begin(task_targets), end(task_targets))));
+
+      // check if the task states are reachable
+      if(find(begin(task_targets), end(task_targets), start_state) == end(task_targets)) {
+        // the task states do not include the start state
+        // check if the task states are reachable from the non-task states
+        double z = 0;
+        for(size_t i = 0; i < n_states; i++)
+          if(find(begin(task_targets), end(task_targets), i) == end(task_targets))
+            for(auto j: task_targets)
+              z += transition(i,j);
+        if(z == 0) {
+          if(verbosity >= Verbosity::info)
+            std::cerr << "None of the task states are reachable from the non-task states; skipping task." << std::endl;
+          continue;
+        }
+      }
 
       if(options.termination.past <= ts.scores[task_idx].size())
         score = *(ts.scores[task_idx].rbegin() + options.termination.past - 1);
@@ -769,6 +791,18 @@ bool HMM::perform_training_iteration_gradient(const Data::Collection &data,
     std::cout << "The transition gradient is : " << gradient.transition << std::endl
       << "The emission gradient is : " << gradient.emission << std::endl;
 
+  double gradient_norm = sqrt(scalar_product(gradient, gradient));
+  if(verbosity >= Verbosity::verbose)
+    std::cout << "Gradient norm = " << gradient_norm << std::endl;
+
+  double max_abs_gradient_component = 0;
+  for(size_t i = 0; i < gradient.emission.size1(); i++)
+    for(size_t j = 0; j < gradient.emission.size2(); j++)
+      max_abs_gradient_component = std::max<double>(max_abs_gradient_component, fabs(gradient.emission(i,j)));
+  for(size_t i = 0; i < gradient.transition.size1(); i++)
+    for(size_t j = 0; j < gradient.transition.size2(); j++)
+      max_abs_gradient_component = std::max<double>(max_abs_gradient_component, fabs(gradient.transition(i,j)));
+
   double new_score = previous_score;
   HMM candidate = *this;
 
@@ -776,9 +810,12 @@ bool HMM::perform_training_iteration_gradient(const Data::Collection &data,
   const double min_gradient = 0;
   // const double min_score = 1e-10;
   // const double min_gradient = 1e-15;
-  if(previous_score < min_score and sqrt(scalar_product(gradient, gradient)) < min_gradient) {
+  if(previous_score < min_score and gradient_norm < min_gradient) {
     if(verbosity >= Verbosity::info)
-      std::cout << "Skipping line search. Score = " << previous_score << " Gradient norm = " << sqrt(scalar_product(gradient, gradient)) << std::endl;
+      std::cout << "Skipping line search. Score = " << previous_score << " Gradient norm = " << gradient_norm << std::endl;
+  } else if(max_abs_gradient_component == 0) {
+    if(verbosity >= Verbosity::info)
+      std::cout << "Skipping line search. Maximal absolute gradient component is zero." << std::endl;
   } else {
     int info;
     std::pair<double, HMM> res = line_search_more_thuente(data, gradient, previous_score, info, task, options);
@@ -787,6 +824,13 @@ bool HMM::perform_training_iteration_gradient(const Data::Collection &data,
 
     new_score = res.first;
     candidate = res.second;
+
+    if(info != 1 and verbosity >= Verbosity::verbose) {
+      std::cout << "Candidate emission = " << candidate.emission << std::endl;
+      std::cout << "Candidate transition = " << candidate.transition << std::endl;
+      std::cout << "Candidate emission gradient = " << gradient.emission << std::endl;
+      std::cout << "Candidate transition gradient = " << gradient.transition << std::endl;
+    }
   }
 
   if(verbosity >= Verbosity::info)
@@ -824,7 +868,7 @@ bool HMM::perform_training_iteration_gradient(const Data::Collection &data,
   }
 
   if(score_difference < 0) {
-    std::cout << "Warning: negative score difference during gradient learning iteration!" << std::endl;
+    std::cout << "Warning: negative score difference during gradient learning iteration! Discarding gradient iteration." << std::endl;
     done = true;
   }
 
