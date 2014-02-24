@@ -361,40 +361,57 @@ size_t HMM::add_motif(const std::string &seq, double alpha, double exp_seq_len, 
 void HMM::add_motifs(const HMM &hmm) {
   for(auto &group: hmm.groups)
     if(group.kind == Group::Kind::Motif) {
+
+      // the number of states in the new group
       size_t n_motif_states = group.states.size();
+
+      // parameter matrices, dimensioned to account for the additional new states
       matrix_t new_transition = zero_matrix(n_states + n_motif_states, n_states + n_motif_states);
       matrix_t new_emission = zero_matrix(n_states + n_motif_states, n_emissions);
+
+      // set transitions from and to the previous states to the previous values
       for(size_t i = 0; i < n_states; i++)
         for(size_t j = 0; j < n_states; j++)
           new_transition(i,j) = transition(i,j);
+
+      // set transitions between consecutive states of the new chain
       for(size_t i = n_states; i < n_states + n_motif_states - 1; i++)
         new_transition(i, i+1) = 1;
+
+      // add transitions from and to the background state from and to the first and last state of the new chain
       new_transition(bg_state, n_states) = hmm.transition(hmm.bg_state, *group.states.begin());
       new_transition(bg_state, bg_state) -= new_transition(bg_state, n_states);
       new_transition(n_states + n_motif_states - 1, bg_state) = hmm.transition(*group.states.rbegin(), hmm.bg_state);
       new_transition(n_states + n_motif_states - 1, n_states) = 1 - new_transition(n_states + n_motif_states - 1, bg_state);
 
+      // set emissions of the previous states to the previous values
       for(size_t i = 0; i < n_states; i++)
         for(size_t j = 0; j < n_emissions; j++)
           new_emission(i,j) = emission(i,j);
+
+      // set emissions of the new states to the new values
       for(size_t i = 0; i < n_motif_states; i++)
         for(size_t j = 0; j < n_emissions; j++)
           new_emission(n_states + i, j) = hmm.emission(group.states[i], j);
 
+      // collect states and orders of new group
       size_t group_idx = groups.size();
       for(size_t i = 0; i < n_motif_states; i++) {
         group_ids.push_back(group_idx);
         order.push_back(hmm.order[group.states[i]]);
       }
 
+      // create new group
       Group new_group = group;
       for(size_t i = 0; i < n_motif_states; i++)
         new_group.states[i] = n_states + i;
       groups.push_back(new_group);
 
+      // adapt state indices
       n_states += n_motif_states;
       last_state += n_motif_states;
 
+      // use new emission and transition parameters
       emission = new_emission;
       transition = new_transition;
     }
