@@ -358,9 +358,15 @@ size_t HMM::add_motif(const std::string &seq, double alpha, double exp_seq_len, 
   return(motif_idx);
 }
 
-void HMM::add_motifs(const HMM &hmm) {
-  for(auto &group: hmm.groups)
-    if(group.kind == Group::Kind::Motif) {
+// when only_additional is used it is assumed that the two HMMs are identical except for the one from which motifs are to be copied has got additional groups
+void HMM::add_motifs(const HMM &hmm, bool only_additional) {
+  auto own_group_iter = begin(groups);
+  for(auto &group: hmm.groups) {
+    if(only_additional and own_group_iter != end(groups)) {
+      std::cout << "Skip adding motif group " << group.name << std::endl;
+      own_group_iter++;
+    } else if(group.kind == Group::Kind::Motif) {
+      std::cout << "Adding motif group " << group.name << std::endl;
 
       // the number of states in the new group
       size_t n_motif_states = group.states.size();
@@ -415,6 +421,7 @@ void HMM::add_motifs(const HMM &hmm) {
       emission = new_emission;
       transition = new_transition;
     }
+  }
   finalize_initialization();
 }
 

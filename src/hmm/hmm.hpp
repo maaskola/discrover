@@ -234,7 +234,7 @@ class HMM {
     size_t add_motif(const matrix_t &e, double exp_seq_len, double lambda, const std::string &name, std::vector<size_t> insertions, size_t pad_left, size_t pad_right);
 
     /* Add motifs of another HMM. */
-    void add_motifs(const HMM &hmm);
+    void add_motifs(const HMM &hmm, bool only_additional=false);
 
     /** Perform HMM training. */
     double train(const Data::Collection &data, const Training::Tasks &tasks, const hmm_options &options);
