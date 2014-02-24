@@ -158,7 +158,7 @@ string pad(const string &s, size_t l, size_t r, char c='n') {
 
 vector<string> generate_wiggle_variants(const string &s,  size_t n, Verbosity verbosity) {
   if(verbosity >= Verbosity::debug)
-    std::cout << "generate_wiggle_variants(" << s << ", " << n << ")" << std::endl;
+    cout << "generate_wiggle_variants(" << s << ", " << n << ")" << endl;
   size_t l = s.size();
   vector<string> variants;
   variants.push_back(s);
@@ -168,7 +168,7 @@ vector<string> generate_wiggle_variants(const string &s,  size_t n, Verbosity ve
   }
   if(verbosity >= Verbosity::debug)
     for(auto &x: variants)
-      std::cout << "Wiggle variant: " << x << std::endl;
+      cout << "Wiggle variant: " << x << endl;
   return(variants);
 }
 
@@ -223,7 +223,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         break;
     }
 
-  if(std::find_if(begin(options.motif_specifications), end(options.motif_specifications), [](const Specification::Motif &motif) {
+  if(find_if(begin(options.motif_specifications), end(options.motif_specifications), [](const Specification::Motif &motif) {
         return(motif.kind == Specification::Motif::Kind::Plasma);
         }) == end(options.motif_specifications)) {
     if(options.verbosity >= Verbosity::info)
@@ -348,9 +348,9 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
   return(hmm);
 }
 
-std::vector<HMM> cross_validation(const Data::Collection &all_data, const hmm_options &options)
+vector<HMM> cross_validation(const Data::Collection &all_data, const hmm_options &options)
 {
-  std::vector<HMM> hmms;
+  vector<HMM> hmms;
   for(size_t cross_validation_iteration = 0; cross_validation_iteration < options.cross_validation_iterations; cross_validation_iteration++) {
     if(options.verbosity >= Verbosity::info and options.cross_validation_iterations > 1)
       cout << "Doing cross-validation " << (cross_validation_iteration + 1) << " of " << options.cross_validation_iterations << "." << endl;
@@ -381,6 +381,6 @@ void perform_analysis(hmm_options &options)
     options.cross_validation_freq = 1;
     options.cross_validation_iterations = 1;
   }
-  std::vector<HMM> hmms = cross_validation(collection, options);
+  vector<HMM> hmms = cross_validation(collection, options);
 }
 
