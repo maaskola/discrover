@@ -302,7 +302,8 @@ class HMM {
     friend ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm, const Data::Set &data, std::ostream &out, std::ostream &v_out, std::ostream &occurrence_out, const hmm_options &options);
     friend double train_hmm(HMM &hmm, const Data::Collection &training_data, const Training::Tasks &tasks, const hmm_options &options);
 
-    double compute_score(const Data::Collection &data, const Training::Task &task, bool weighting) const;
+    double compute_score(const Data::Collection &data, const Measures::Continuous::Measure &measure, bool weighting, const std::vector<size_t> &motifs) const;
+    double compute_score_all_motifs(const Data::Collection &data, const Measures::Continuous::Measure &measure, bool weighting) const;
 
     void shift_forward(size_t group_idx, size_t n);
     void shift_backward(size_t group_idx, size_t n);

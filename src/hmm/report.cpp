@@ -458,9 +458,11 @@ void evaluate_hmm(const HMM &hmm,
       summary_out << endl;
       Training::Task my_task;
       my_task.measure = Measure::ClassificationPosterior;
-      summary_out << "class log posterior = " << hmm.compute_score(data, my_task, options.weighting) << std::endl;
+      // TODO consider using compute_score instead of compute_score_all_motifs
+      summary_out << "class log posterior = " << hmm.compute_score_all_motifs(data, my_task.measure, options.weighting) << std::endl;
       my_task.measure = Measure::ClassificationLikelihood;
-      summary_out << "class log likelihood = " << hmm.compute_score(data, my_task, options.weighting) << std::endl;
+      // TODO consider using compute_score instead of compute_score_all_motifs
+      summary_out << "class log likelihood = " << hmm.compute_score_all_motifs(data, my_task.measure, options.weighting) << std::endl;
     }
 
     for(auto &series: data) {

@@ -271,53 +271,58 @@ double HMM::viterbi_atleast_one(const Data::Set &data, size_t group_idx) const
   return(m);
 };
 
-double HMM::compute_score(const Data::Collection &data, const Training::Task &task, bool weighting) const
+double HMM::compute_score_all_motifs(const Data::Collection &data, const Measures::Continuous::Measure &measure, bool weighting) const
 {
   std::vector<size_t> all_motifs;
   for(size_t i = 0; i < groups.size(); i++)
     if(groups[i].kind == Group::Kind::Motif)
       all_motifs.push_back(i);
+  return(compute_score(data, measure, weighting, all_motifs));
+}
+
+double HMM::compute_score(const Data::Collection &data,  const Measures::Continuous::Measure &measure, bool weighting, const std::vector<size_t> &motifs) const
+{
   double score = 0;
   double W = 0;
   double w;
-  switch(task.measure) {
+  switch(measure) {
     case Measure::Likelihood:
       score = log_likelihood(data);
       break;
     case Measure::MutualInformation:
       for(auto &series: data) {
         W += w = series.set_size;
-        score += mutual_information(series, all_motifs) * (weighting ? w : 1);
+        score += mutual_information(series, motifs) * (weighting ? w : 1);
       }
       if(weighting)
         score /= W;
       break;
     case Measure::RankInformation:
       for(auto &series: data)
-        score = rank_information(series, all_motifs);
+        score = rank_information(series, motifs);
       break;
     case Measure::MatthewsCorrelationCoefficient:
       for(auto &series: data)
-        score += matthews_correlation_coefficient(series, all_motifs);
+        score += matthews_correlation_coefficient(series, motifs);
       break;
     case Measure::DeltaFrequency:
       for(auto &series: data)
-        score += dips_sitescore(series, all_motifs);
+        score += dips_sitescore(series, motifs);
       break;
     case Measure::LogLikelihoodDifference:
       for(auto &series: data)
-        score += log_likelihood_difference(series, all_motifs);
+        score += log_likelihood_difference(series, motifs);
       break;
     case Measure::ClassificationPosterior:
       for(auto &series: data)
-        score += class_likelihood(series, all_motifs, true);
+        score += class_likelihood(series, motifs, true);
       break;
     case Measure::ClassificationLikelihood:
       for(auto &series: data)
-        score += class_likelihood(series, all_motifs, false);
+        score += class_likelihood(series, motifs, false);
       break;
     default:
-      std::cout << "Score calculation for '" << measure2string(task.measure) << "' is not implemented." << std::endl;
+      std::cout << "Score calculation for '" << measure2string(measure) << "' is not implemented." << std::endl;
       assert(0);
   }
   return(score);

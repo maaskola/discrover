@@ -332,7 +332,8 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             string seed = learned.first;
             auto model = learned.second;
             Training::Tasks tasks = model.define_training_tasks(options);
-            double score = model.compute_score(training_data, *tasks.begin(), options.weighting);
+            // TODO consider using compute_score instead of compute_score_all_motifs
+            double score = model.compute_score_all_motifs(training_data, tasks.begin()->measure, options.weighting);
             if(score > best_score) {
               best_score = score;
               best_seed = seed;
