@@ -115,7 +115,7 @@ void HMM::serialize(ostream &os, const ExecutionInformation &exec_info, size_t f
   switch(format_version) {
     case 6:
       os << param_format_string << format_version << endl;
-      os << "# " << exec_info.program_name << " " << exec_info.hmm_version << " [" << GIT_BRANCH << "]" << endl;
+      os << "# " << exec_info.program_name << " " << exec_info.hmm_version << " [" << GIT_BRANCH << " branch]" << endl;
       os << "# Run on " << exec_info.datetime << endl;
       os << "# Run in " << exec_info.directory << endl;
       os << "# Command = " << exec_info.cmdline << endl;
