@@ -40,6 +40,7 @@ double calc_mutual_information(double A, double B, double C, double D, bool norm
 double calc_mutual_information(const confusion_matrix &m, bool normalize);
 double calc_mutual_information(const matrix_t &matrix, double pseudo_count, bool normalize, bool correction, bool variance);
 
+double calc_g_test_from_mi(double mi, double n);
 double calc_g_test(const matrix_t &matrix, double pseudo_count=1.0);
 double calc_log_likelihood_ratio(const matrix_t &matrix, double pseudo_count=1.0);
 
