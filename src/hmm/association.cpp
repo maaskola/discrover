@@ -83,6 +83,10 @@ double calc_mutual_information(const matrix_t &matrix, double pseudo_count, bool
   }
 }
 
+double calc_g_test_from_mi(double mi, double n) {
+  double g = 2 * n * log(2) * mi;
+  return(g);
+}
 
 double calc_g_test(const matrix_t &matrix, double pseudo_count)
 {
@@ -95,7 +99,7 @@ double calc_g_test(const matrix_t &matrix, double pseudo_count)
     for(size_t j = 0; j < matrix.size2(); j++)
       n += matrix(i,j) + pseudo_count;
   double mi = calc_mutual_information(matrix, pseudo_count, true, false, false);
-  double g = 2 * n * log(2) * mi;
+  double g = calc_g_test_from_mi(mi, n);
   return(g);
 }
 
