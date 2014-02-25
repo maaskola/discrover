@@ -319,125 +319,151 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         }
       }
 
-      auto best_score = -numeric_limits<double>::infinity();
-      bool ok = true;
-
-      cout << "Non-augmented model: " << hmm << endl;
-      // Training::Tasks tasks = hmm.define_training_tasks(options);
-      // double previous_score = hmm.compute_score(masked_training_data, *tasks.begin(), options.weighting);
-      while(ok and not learned_models.empty()) {
-        auto masked_training_data = training_data;
-
-        // mode == 0:
-        //   do not mask occurrences of previously identified motifs;
-        //   add candidate motif to current model
-        //   score composite model consisting of candidate motif and previously identified motifs
-        // mode == 1:
-        //   mask occurrences of previously identified motifs;
-        //   score candidate motif as single motif model on masked data
-        const size_t mode = 1;
-        const bool relearn_before_eval = true;
-
-        if(mode == 1) {
-          best_score = -numeric_limits<double>::infinity();
-          if(not first_motif) {
-            cout << "Masking earlier motifs" << endl;
-            masked_training_data.mask(hmm.compute_mask(masked_training_data));
+      if(not options.accept_multiple) {
+        if(learned_models.size() == 1)
+          hmm = learned_models.begin()->second;
+        else {
+          if(options.verbosity >= Verbosity::info)
+            cout << "Evaluating learned models.";
+          auto best_model = hmm;
+          string best_seed = "";
+          double best_score = -numeric_limits<double>::infinity();
+          for(auto &learned: learned_models) {
+            string seed = learned.first;
+            auto model = learned.second;
+            Training::Tasks tasks = model.define_training_tasks(options);
+            double score = model.compute_score(training_data, *tasks.begin(), options.weighting);
+            if(score > best_score) {
+              best_score = score;
+              best_seed = seed;
+              best_model = model;
+            }
+            if(options.verbosity >= Verbosity::info)
+              cout << "Accepting seed " << best_seed << " with score " << best_score << endl;
+            hmm = best_model;
           }
         }
+      } else {
+        auto best_score = -numeric_limits<double>::infinity();
+        bool ok = true;
 
-        size_t best_index = 0;
-        auto best_model = hmm;
-        string best_seed = "";
-        bool updated = false;
+        cout << "Non-augmented model: " << hmm << endl;
+        // Training::Tasks tasks = hmm.define_training_tasks(options);
+        // double previous_score = hmm.compute_score(masked_training_data, *tasks.begin(), options.weighting);
+        while(ok and not learned_models.empty()) {
+          auto masked_training_data = training_data;
 
-        size_t index = 0;
+          // mode == 0:
+          //   do not mask occurrences of previously identified motifs;
+          //   add candidate motif to current model
+          //   score composite model consisting of candidate motif and previously identified motifs
+          // mode == 1:
+          //   mask occurrences of previously identified motifs;
+          //   score candidate motif as single motif model on masked data
+          const size_t mode = 1;
+          const bool relearn_before_eval = true;
 
-        for(auto &learned: learned_models) {
-          string seed = learned.first;
-          auto learned_model = learned.second;
-
-          auto model = learned_model;
-          if(mode == 0) {
-            model = hmm;
-
-            // TODO add the motif from the learned model to model
-            model.add_motifs(learned_model, false);
-            // model.add_motifs(learned_model, true);
-
-            // TODO adapt transition probabilities
-            // TODO or do complete relearning
-            // if(relearn_before_eval)
-          } else
-            model = learned_model;
-
-
-          // TODO consider using the p-value instead of MICO
-          // potentially: regardless of the objective function chosen for training, one might use the MICO p-value for selection!
-          const bool use_mico_pvalue = true;
-          Training::Tasks tasks = model.define_training_tasks(options);
-          if(use_mico_pvalue)
-            for(auto &task: tasks)
-              if(Measures::is_discriminative(task.measure))
-                task.measure = Measures::Continuous::Measure::MutualInformation;
-
-          double score = model.compute_score(masked_training_data, *tasks.begin(), options.weighting);
-          if(use_mico_pvalue) {
-            cout << "mi = " << score << endl;
-            double n = masked_training_data.set_size; // TODO fix this with regards to pseudo counts and exact reference to the relevant contrast
-            double df = 1;
-            size_t motif_len = seed.size();
-            double g = calc_g_test_from_mi(score, n);
-            cout << "g = " << g << endl;
-            double log_p = pchisq(g, df, false, true);
-            cout << "log p(g) = " << log_p << endl;
-            double cor_log_p = log(149) * motif_len + log_p;
-            cout << "corrected log p(g) = " << cor_log_p << endl;
-            score = - cor_log_p;
-            cout << "score = " << score << endl;
-          }
-
-          cout << "Augmented model: " << model << endl;
-          cout << "Score of the model augmented by " << seed << " has a score of " << score << endl;
-          if(score > best_score) {
-            if(not use_mico_pvalue or score > 0) {
-              ok = true;
-              updated = true;
-              best_model = model;
-              best_seed = seed;
-              best_score = score;
-              best_index = index;
+          if(mode == 1) {
+            best_score = -numeric_limits<double>::infinity();
+            if(not first_motif) {
+              cout << "Masking earlier motifs" << endl;
+              masked_training_data.mask(hmm.compute_mask(masked_training_data));
             }
           }
-          index++;
-        }
 
-        if(not updated) {
-          cout << "We did not find an improved model." << endl;
-          ok = false;
-        } else {
-          if(mode == 0)
-            hmm = best_model;
+          size_t best_index = 0;
+          auto best_model = hmm;
+          string best_seed = "";
+          bool updated = false;
 
-          if(options.verbosity >= Verbosity::info)
-            cout << "Accepting seed " << best_seed << " with score " << best_score << endl;
+          size_t index = 0;
 
-          if(mode == 1)
-            hmm.add_motifs(best_model, false);
+          for(auto &learned: learned_models) {
+            string seed = learned.first;
+            auto learned_model = learned.second;
 
-          hmm_options options_(options);
-          if(options.long_names)
-            options.label += "." + best_seed;
+            auto model = learned_model;
+            if(mode == 0) {
+              model = hmm;
 
-          // TODO: remember that learning and evaluation is to a large degree based on groups - not motif names; thus there is some inefficiencies
-          // TODO: learning should perhaps only adapt transitions? this would be very fast...
-          // TODO:   otherwise: if learning should also adapt emissions, then perhaps only those of the new motif?
-          // TODO:   in this case: it might be done on the masked sequences
-          train_evaluate(hmm, all_data, training_data, test_data, options);
+              // TODO add the motif from the learned model to model
+              model.add_motifs(learned_model, false);
+              // model.add_motifs(learned_model, true);
 
-          learned_models.erase(begin(learned_models) + best_index);
-          first_motif = false;
-          ok = true;
+              // TODO adapt transition probabilities
+              // TODO or do complete relearning
+              // if(relearn_before_eval)
+            } else
+              model = learned_model;
+
+
+            // TODO consider using the p-value instead of MICO
+            // potentially: regardless of the objective function chosen for training, one might use the MICO p-value for selection!
+            const bool use_mico_pvalue = true;
+            Training::Tasks tasks = model.define_training_tasks(options);
+            if(use_mico_pvalue)
+              for(auto &task: tasks)
+                if(Measures::is_discriminative(task.measure))
+                  task.measure = Measures::Continuous::Measure::MutualInformation;
+
+            double score = model.compute_score(masked_training_data, *tasks.begin(), options.weighting);
+            if(use_mico_pvalue) {
+              cout << "mi = " << score << endl;
+              double n = masked_training_data.set_size; // TODO fix this with regards to pseudo counts and exact reference to the relevant contrast
+              double df = 1;
+              size_t motif_len = seed.size();
+              double g = calc_g_test_from_mi(score, n);
+              cout << "g = " << g << endl;
+              double log_p = pchisq(g, df, false, true);
+              cout << "log p(g) = " << log_p << endl;
+              double cor_log_p = log(149) * motif_len + log_p;
+              cout << "corrected log p(g) = " << cor_log_p << endl;
+              score = - cor_log_p;
+              cout << "score = " << score << endl;
+            }
+
+            cout << "Augmented model: " << model << endl;
+            cout << "Score of the model augmented by " << seed << " has a score of " << score << endl;
+            if(score > best_score) {
+              if(not use_mico_pvalue or score > 0) {
+                ok = true;
+                updated = true;
+                best_model = model;
+                best_seed = seed;
+                best_score = score;
+                best_index = index;
+              }
+            }
+            index++;
+          }
+
+          if(not updated) {
+            cout << "We did not find an improved model." << endl;
+            ok = false;
+          } else {
+            if(mode == 0)
+              hmm = best_model;
+
+            if(options.verbosity >= Verbosity::info)
+              cout << "Accepting seed " << best_seed << " with score " << best_score << endl;
+
+            if(mode == 1)
+              hmm.add_motifs(best_model, false);
+
+            hmm_options options_(options);
+            if(options.long_names)
+              options.label += "." + best_seed;
+
+            // TODO: remember that learning and evaluation is to a large degree based on groups - not motif names; thus there is some inefficiencies
+            // TODO: learning should perhaps only adapt transitions? this would be very fast...
+            // TODO:   otherwise: if learning should also adapt emissions, then perhaps only those of the new motif?
+            // TODO:   in this case: it might be done on the masked sequences
+            train_evaluate(hmm, all_data, training_data, test_data, options);
+
+            learned_models.erase(begin(learned_models) + best_index);
+            first_motif = false;
+            ok = true;
+          }
         }
       }
 
