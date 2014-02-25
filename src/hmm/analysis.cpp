@@ -430,6 +430,9 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             options.label += "." + best_seed;
 
           // TODO: remember that learning and evaluation is to a large degree based on groups - not motif names; thus there is some inefficiencies
+          // TODO: learning should perhaps only adapt transitions? this would be very fast...
+          // TODO:   otherwise: if learning should also adapt emissions, then perhaps only those of the new motif?
+          // TODO:   in this case: it might be done on the masked sequences
           train_evaluate(hmm, all_data, training_data, test_data, options);
 
           learned_models.erase(begin(learned_models) + best_index);
