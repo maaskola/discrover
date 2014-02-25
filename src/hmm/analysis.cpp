@@ -372,18 +372,42 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             model = learned_model;
 
 
+          // TODO consider using the p-value instead of MICO
+          // potentially: regardless of the objective function chosen for training, one might use the MICO p-value for selection!
+          const bool use_mico_pvalue = true;
           Training::Tasks tasks = model.define_training_tasks(options);
+          if(use_mico_pvalue)
+            for(auto &task: tasks)
+              if(Measures::is_discriminative(task.measure))
+                task.measure = Measures::Continuous::Measure::MutualInformation;
+
           double score = model.compute_score(masked_training_data, *tasks.begin(), options.weighting);
+          if(use_mico_pvalue) {
+            cout << "mi = " << score << endl;
+            double n = masked_training_data.set_size; // TODO fix this with regards to pseudo counts and exact reference to the relevant contrast
+            double df = 1;
+            size_t motif_len = seed.size();
+            double g = calc_g_test_from_mi(score, n);
+            cout << "g = " << g << endl;
+            double log_p = pchisq(g, df, false, true);
+            cout << "log p(g) = " << log_p << endl;
+            double cor_log_p = log(149) * motif_len + log_p;
+            cout << "corrected log p(g) = " << cor_log_p << endl;
+            score = - cor_log_p;
+            cout << "score = " << score << endl;
+          }
 
           cout << "Augmented model: " << model << endl;
           cout << "Score of the model augmented by " << seed << " has a score of " << score << endl;
           if(score > best_score) {
-            ok = true;
-            updated = true;
-            best_model = model;
-            best_seed = seed;
-            best_score = score;
-            best_index = index;
+            if(not use_mico_pvalue or score > 0) {
+              ok = true;
+              updated = true;
+              best_model = model;
+              best_seed = seed;
+              best_score = score;
+              best_index = index;
+            }
           }
           index++;
         }
