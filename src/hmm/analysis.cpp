@@ -357,14 +357,18 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
           // mode == 0:
           //   do not mask occurrences of previously identified motifs;
           //   add candidate motif to current model
-          //   score composite model consisting of candidate motif and previously identified motifs
+          //   score composite model consisting of candidate motif and previously identified motifs on unmasked data
           // mode == 1:
           //   mask occurrences of previously identified motifs;
           //   score candidate motif as single motif model on masked data
-          const size_t mode = 1;
+          // mode == 2:
+          //   mask occurrences of previously identified motifs;
+          //   add candidate motif to current model
+          //   score composite model consisting of candidate motif and previously identified motifs on masked data
+          const size_t mode = 2;
           const bool relearn_before_eval = true;
 
-          if(mode == 1) {
+          if(mode == 1 or mode == 2) {
             best_score = -numeric_limits<double>::infinity();
             if(not first_motif) {
               cout << "Masking earlier motifs" << endl;
@@ -384,7 +388,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             auto learned_model = learned.second;
 
             auto model = learned_model;
-            if(mode == 0) {
+            if(mode == 0 or mode == 2) {
               model = hmm;
 
               // TODO add the motif from the learned model to model
@@ -398,16 +402,29 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
               model = learned_model;
 
 
-            // TODO consider using the p-value instead of MICO
+            if(false) { // currently not needed; might move this code done to the relearning part
+              // TODO make sure the task is actually referring to the newly added motif so that is the motif that is scored
+              Training::Tasks tasks = model.define_training_tasks(options);
+              // TODO this means we want to re-write the discriminative objectives' targets so that they refer only to the last = most recently added motif
+              auto group_it = hmm.groups.rbegin();
+              auto not_in_group = [&group_it](size_t v) { return(find(begin(group_it->states), end(group_it->states), v) == end(group_it->states)); };
+              for(auto &task: tasks)
+                if(Measures::is_discriminative(task.measure)) {
+                  remove_if(task.targets.emission.begin(), task.targets.emission.end(), not_in_group);
+                  remove_if(task.targets.transition.begin(), task.targets.transition.end(), not_in_group);
+                }
+            }
+
             // potentially: regardless of the objective function chosen for training, one might use the MICO p-value for selection!
             const bool use_mico_pvalue = true;
-            Training::Tasks tasks = model.define_training_tasks(options);
+            double score;
+            std::vector<size_t> groups_to_score;
+            groups_to_score.push_back(model.groups.size() - 1); // only add the most recently added group
             if(use_mico_pvalue)
-              for(auto &task: tasks)
-                if(Measures::is_discriminative(task.measure))
-                  task.measure = Measures::Continuous::Measure::MutualInformation;
-
-            double score = model.compute_score(masked_training_data, *tasks.begin(), options.weighting);
+              score = model.compute_score(masked_training_data, Measures::Continuous::Measure::MutualInformation, options.weighting, groups_to_score);
+            else
+              // TODO actually select the specific task - above we do fix all conceivable tasks...
+              score = model.compute_score(masked_training_data, model.define_training_tasks(options).begin()->measure, options.weighting, groups_to_score);
             if(use_mico_pvalue) {
               cout << "mi = " << score << endl;
               double n = masked_training_data.set_size; // TODO fix this with regards to pseudo counts and exact reference to the relevant contrast
@@ -442,7 +459,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             cout << "We did not find an improved model." << endl;
             ok = false;
           } else {
-            if(mode == 0)
+            if(mode == 0 or mode == 2)
               hmm = best_model;
 
             if(options.verbosity >= Verbosity::info)

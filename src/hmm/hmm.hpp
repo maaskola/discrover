@@ -125,6 +125,7 @@ struct ResultsCounts;
 
 ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm, const Data::Set &data, std::ostream &out, std::ostream &v_out, std::ostream &occurrence_out, const hmm_options &options);
 double train_hmm(HMM &hmm, const Data::Collection &training_data, const Training::Tasks &tasks, const hmm_options &options);
+HMM doit(const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options);
 
 struct Group {
   enum class Kind {
@@ -299,8 +300,12 @@ class HMM {
     size_t non_zero_parameters(const Training::Targets &targets) const;
 
     friend std::ostream &operator<<(std::ostream& os, const HMM &hmm);
+    // TODO un-friend this function if possible
     friend ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm, const Data::Set &data, std::ostream &out, std::ostream &v_out, std::ostream &occurrence_out, const hmm_options &options);
+    // TODO un-friend this function if possible
     friend double train_hmm(HMM &hmm, const Data::Collection &training_data, const Training::Tasks &tasks, const hmm_options &options);
+    // TODO un-friend this function if possible
+    friend HMM doit(const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options);
 
     double compute_score(const Data::Collection &data, const Measures::Continuous::Measure &measure, bool weighting, const std::vector<size_t> &motifs) const;
     double compute_score_all_motifs(const Data::Collection &data, const Measures::Continuous::Measure &measure, bool weighting) const;
