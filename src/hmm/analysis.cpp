@@ -338,10 +338,10 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
               best_seed = seed;
               best_model = model;
             }
-            if(options.verbosity >= Verbosity::info)
-              cout << "Accepting seed " << best_seed << " with score " << best_score << endl;
-            hmm = best_model;
           }
+          if(options.verbosity >= Verbosity::info)
+            cout << "Accepting seed " << best_seed << " with score " << best_score << endl;
+          hmm = best_model;
         }
       } else {
         auto best_score = -numeric_limits<double>::infinity();
