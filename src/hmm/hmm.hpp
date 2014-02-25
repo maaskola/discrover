@@ -241,6 +241,7 @@ class HMM {
     /** Initialize HMM background with the Baum-Welch algorithm. */
     void initialize_bg_with_bw(const Data::Collection &collection, const hmm_options &options);
 
+  protected:
     double train_inner(const Data::Collection &data, const Training::Tasks &tasks, const hmm_options &options);
 
     /** Perform iterative HMM training, like re-estimation (expectation maximization) or gradient based. */
@@ -300,6 +301,8 @@ class HMM {
     /** Prepare training tasks according to the objectives given in the options. */
     Training::Tasks define_training_tasks(const hmm_options &options) const;
 
+  protected:
+
     size_t n_parameters() const;
     size_t non_zero_parameters(const Training::Targets &targets) const;
 
@@ -332,7 +335,9 @@ class HMM {
       matrix_t E;
     };
 
+  public:
     vector_t posterior_atleast_one(const Data::Series &data, size_t group_idx) const;
+  protected:
     vector_t posterior_atleast_one(const Data::Set &data, size_t group_idx) const;
     double   sum_posterior_atleast_one(const Data::Set &data, size_t group_idx) const;
     posterior_t posterior_atleast_one(const Data::Seq &data, size_t group_idx) const;
@@ -360,39 +365,47 @@ class HMM {
     double class_likelihood(const Data::Series &data, size_t group_idx, bool compute_posterior) const;
     double class_likelihood(const Data::Set &data, size_t group_idx, bool compute_posterior) const;
 
+    // Discriminative measures, summed over multiple groups
+    /** The likelihood difference */
     double log_likelihood_difference(const Data::Series &data, const std::vector<size_t> &groups) const;
-    double log_likelihood_difference(const Data::Series &data, size_t group_idx) const;
     /** The mutual information of condition and motif occurrence */
     double mutual_information(const Data::Series &data, const std::vector<size_t> &groups) const;
+    /** The mutual information of rank and motif occurrence. */
+    double rank_information(const Data::Series &data, const std::vector<size_t> &groups) const;
+    /** The summed Matthew's correlation coefficients of all individual contrasts. */
+    double matthews_correlation_coefficient(const Data::Series &data, const std::vector<size_t> &groups) const;
+    /** The summed difference of expected occurrence frequencies. */
+    double dips_tscore(const Data::Series &data, const std::vector<size_t> &groups) const;
+    /** The summed difference of site occurrence. */
+    double dips_sitescore(const Data::Series &data, const std::vector<size_t> &groups) const;
+
+  public:
+    // Discriminative measures, for individual groups
+    /** The likelihood difference */
+    double log_likelihood_difference(const Data::Series &data, size_t group_idx) const;
     /** The mutual information of condition and motif occurrence */
     double mutual_information(const Data::Series &data, size_t group_idx) const;
     /** The mutual information of rank and motif occurrence. */
-    double rank_information(const Data::Series &data, const std::vector<size_t> &groups) const;
-    /** The mutual information of rank and motif occurrence. */
     double rank_information(const Data::Series &data, size_t group_idx) const;
-    /** The mutual information of rank and motif occurrence. */
-    double rank_information(const Data::Set &data, size_t group_idx) const;
-    /** The summed Matthew's correlation coefficients of all individual contrasts. */
-    double matthews_correlation_coefficient(const Data::Series &data, const std::vector<size_t> &groups) const;
     /** The summed Matthew's correlation coefficients of all individual contrasts. */
     double matthews_correlation_coefficient(const Data::Series &data, size_t group_idx) const;
     /** The summed difference of expected occurrence frequencies. */
-    double dips_tscore(const Data::Series &data, const std::vector<size_t> &groups) const;
-    /** The summed difference of expected occurrence frequencies. */
     double dips_tscore(const Data::Series &data, size_t group_idx) const;
-    /** The summed difference of site occurrence. */
-    double dips_sitescore(const Data::Series &data, const std::vector<size_t> &groups) const;
     /** The summed difference of site occurrence. */
     double dips_sitescore(const Data::Series &data, size_t group_idx) const;
 
+  protected:
+    // Discriminative measures, for individual sets of sequences
+    /** The mutual information of rank and motif occurrence. */
+    double rank_information(const Data::Set &data, size_t group_idx) const;
 // -------------------------------------------------------------------------------------------
 // Expectation-maximization type learning
 // -------------------------------------------------------------------------------------------
 
+  protected:
+
     /** Perform full expectation-maximization type learning */
     void reestimation(const Data::Collection &data, const Training::Task &task, const hmm_options &options);
-
-  protected:
     /** Perform one iteration of expectation-maximization type learning */
     double reestimationIteration(const Data::Collection &data, const Training::Task &task, const hmm_options &options);
 
