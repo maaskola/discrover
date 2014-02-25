@@ -56,8 +56,44 @@ void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Coll
   Training::Tasks eval_tasks = hmm.define_training_tasks(options);
   Training::Tasks learn_tasks = hmm.define_training_tasks(options);
 
-  if(relearning_phase and (not options.relearn_discriminative))
-    remove_if(begin(learn_tasks), end(learn_tasks), [](const Training::Task &task) { return(Measures::is_discriminative(task.measure)); });
+  if(relearning_phase and (not options.relearn_discriminative)) {
+    set<string> series_names;
+    for(auto &task: eval_tasks)
+      for(auto &expr: task)
+        series_names.insert(expr.series);
+
+    learn_tasks = Training::Tasks();
+    Training::Task task;
+    task.motif_name = "Background";
+    task.measure = Measure::Likelihood;
+    for(auto &series_name: series_names)
+      task.series_expression.push_back({+1, series_name});
+
+    task.targets.emission.push_back(1);
+    for(size_t i = 0; i < hmm.n_states; i++) {
+      // if(i < 2)
+      // if(i < first_state)
+      //   task.targets.emission.push_back(i);
+      task.targets.transition.push_back(i);
+    }
+
+    if(options.verbosity >= Verbosity::verbose) {
+      cout << "Generated generative training targets for re-learning." << endl << "Emissions:";
+      for(auto e: task.targets.emission)
+        cout << " " << e;
+      cout << endl;
+      cout << "Transitions:";
+      for(auto t: task.targets.transition)
+        cout << " " << t;
+      cout << endl;
+    }
+
+    learn_tasks.push_back(task);
+
+
+    // remove_if(begin(learn_tasks), end(learn_tasks), [](const Training::Task &task) { return(Measures::is_discriminative(task.measure)); });
+  }
+
 
   if(not learn_tasks.empty())
     hmm.train(training_data, learn_tasks, options);

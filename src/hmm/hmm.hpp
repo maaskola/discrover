@@ -125,6 +125,7 @@ struct ResultsCounts;
 
 ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm, const Data::Set &data, std::ostream &out, std::ostream &v_out, std::ostream &occurrence_out, const hmm_options &options);
 HMM doit(const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options);
+void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options, bool relearning_phase);
 
 struct Group {
   enum class Kind {
@@ -311,6 +312,8 @@ class HMM {
     friend ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm, const Data::Set &data, std::ostream &out, std::ostream &v_out, std::ostream &occurrence_out, const hmm_options &options);
     // TODO un-friend this function if possible
     friend HMM doit(const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options);
+    // TODO un-friend this function if possible
+    friend void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options, bool relearning_phase);
 
   public:
     double compute_score(const Data::Collection &data, const Measures::Continuous::Measure &measure, bool weighting, const std::vector<size_t> &motifs) const;
