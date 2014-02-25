@@ -420,7 +420,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             hmm = best_model;
 
           if(options.verbosity >= Verbosity::info)
-            cout << "Accepting seed " << best_seed << endl; // << name << ":" << motif << endl; // TODO
+            cout << "Accepting seed " << best_seed << " with score " << best_score << endl;
 
           if(mode == 1)
             hmm.add_motifs(best_model, false);
