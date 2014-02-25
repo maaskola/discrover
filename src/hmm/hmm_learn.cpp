@@ -27,6 +27,7 @@
  * =====================================================================================
  */
 
+#include <fstream>
 #include "../timer.hpp"
 #include "../aux.hpp"
 #include "hmm.hpp"
@@ -95,7 +96,78 @@ void HMM::train_background(const Data::Collection &data, const hmm_options &opti
     std::cout << *this << std::endl;
 }
 
-double HMM::train(const Data::Collection &data, const Training::Tasks &tasks, const hmm_options &options)
+void HMM::initialize_bg_with_bw(const Data::Collection &collection, const hmm_options &options)
+{
+  if(options.verbosity >= Verbosity::info)
+    std::cout << "Initializing background of order " << options.bg_order << " with Baum-Welch algorithm." << std::endl;
+
+  hmm_options bg_options = options;
+  if(options.verbosity == Verbosity::info)
+    bg_options.verbosity = Verbosity::error;
+
+  Timer timer;
+  train_background(collection, bg_options);
+  double time = timer.tock();
+
+  if(options.timing_information)
+    std::cerr << "Background learning: " << time << " micro-seconds" << std::endl;
+}
+
+double HMM::train(const Data::Collection &training_data, const Training::Tasks &tasks, const hmm_options &options)
+{
+  if(options.verbosity >= Verbosity::verbose)
+    std::cout << "Model to be evaluated = " << *this << std::endl;
+  double delta = 0;
+  if(tasks.empty()) {
+    if(options.verbosity >= Verbosity::info)
+      std::cout << "Not performing training because no training tasks were specified." << std::endl;
+  } else {
+    bool any_found = false;
+    for(auto &group: groups)
+      for(auto &task: tasks)
+        if(task.motif_name == group.name) {
+          any_found = true;
+        }
+    if(not any_found) {
+      if(options.verbosity >= Verbosity::info)
+        std::cout << "Skipping training because no motifs specified in the tasks have corresponding states in the HMM." << std::endl;
+    } else {
+      if(options.verbosity >= Verbosity::info)
+        std::cout << "Performing training." << std::endl;
+      Timer learning_timer;
+
+      if(options.verbosity >= Verbosity::verbose)
+        std::cout << "Registering data sets for class based HMMs." << std::endl;
+
+      for(auto &series: training_data)
+        for(auto &data_set: series)
+          register_dataset(data_set, (1.0*data_set.set_size)/training_data.set_size, options.conditional_motif_prior1, options.conditional_motif_prior2);
+
+      delta = train_inner(training_data, tasks, options);
+      if(options.verbosity >= Verbosity::verbose)
+        std::cout << std::endl << "The parameters changed by an L1-norm of " << delta << std::endl;
+
+      double time = learning_timer.tock();
+      if(options.timing_information)
+        std::cerr << "Learning: " << time << " micro-seconds" << std::endl;
+
+      if(options.verbosity >= Verbosity::debug)
+        std::cout << "HMM after training:" << std::endl
+          << *this << std::endl;
+
+      std::string store_to = options.label + ".hmm";
+
+      if(options.verbosity >= Verbosity::info)
+        std::cout << std::endl << "Parameters stored in " << store_to << std::endl;
+
+      std::ofstream os(store_to.c_str());
+      serialize(os, options.exec_info);
+    }
+  }
+  return(delta);
+}
+
+double HMM::train_inner(const Data::Collection &data, const Training::Tasks &tasks, const hmm_options &options)
 {
   if(tasks.empty())
     return(0);

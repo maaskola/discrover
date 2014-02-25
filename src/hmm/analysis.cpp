@@ -16,81 +16,6 @@
 
 using namespace std;
 
-double train_hmm(HMM &hmm,
-    const Data::Collection &training_data,
-    const Training::Tasks &tasks,
-    const hmm_options &options)
-{
-  if(options.verbosity >= Verbosity::verbose)
-    cout << "Model to be evaluated = " << hmm << endl;
-  double delta = 0;
-  if(tasks.empty()) {
-    if(options.verbosity >= Verbosity::info)
-      cout << "Not performing training because no training tasks were specified." << endl;
-  } else {
-    bool any_found = false;
-    for(auto &group: hmm.groups)
-      for(auto &task: tasks)
-        if(task.motif_name == group.name) {
-          any_found = true;
-        }
-    if(not any_found) {
-      if(options.verbosity >= Verbosity::info)
-        cout << "Skipping training because no motifs specified in the tasks have corresponding states in the HMM." << endl;
-    } else {
-      if(options.verbosity >= Verbosity::info)
-        cout << "Performing training." << endl;
-      Timer learning_timer;
-
-      if(options.verbosity >= Verbosity::verbose)
-        cout << "Registering data sets for class based HMMs." << endl;
-
-      for(auto &series: training_data)
-        for(auto &data_set: series)
-          hmm.register_dataset(data_set, (1.0*data_set.set_size)/training_data.set_size, options.conditional_motif_prior1, options.conditional_motif_prior2);
-
-      delta = hmm.train(training_data, tasks, options);
-      if(options.verbosity >= Verbosity::verbose)
-        cout << endl << "The parameters changed by an L1-norm of " << delta << endl;
-
-      double time = learning_timer.tock();
-      if(options.timing_information)
-        cerr << "Learning: " << time << " micro-seconds" << endl;
-
-      if(options.verbosity >= Verbosity::debug)
-        cout << "HMM after training:" << endl
-          << hmm << endl;
-
-      string store_to = options.label + ".hmm";
-
-      if(options.verbosity >= Verbosity::info)
-        cout << endl << "Parameters stored in " << store_to << endl;
-
-      ofstream os(store_to.c_str());
-      hmm.serialize(os, options.exec_info);
-    }
-  }
-  return(delta);
-}
-
-void initialize_bg_with_bw(HMM &hmm, const Data::Collection &collection, const hmm_options &options)
-{
-  if(options.verbosity >= Verbosity::info)
-    cout << "Initializing background of order " << options.bg_order << " with Baum-Welch algorithm." << endl;
-
-  hmm_options bg_options = options;
-  if(options.verbosity == Verbosity::info)
-    bg_options.verbosity = Verbosity::error;
-
-  Timer timer;
-  hmm.train_background(collection, bg_options);
-  double time = timer.tock();
-
-  if(options.timing_information)
-    cerr << "Background learning: " << time << " micro-seconds" << endl;
-}
-
-
 void check_data(const Data::Collection &collection, const hmm_options &options)
 {
   if(options.verbosity >= Verbosity::info)
@@ -131,7 +56,7 @@ void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Coll
   Training::Tasks tasks = hmm.define_training_tasks(options);
 
   if(not tasks.empty())
-    train_hmm(hmm, training_data, tasks, options);
+    hmm.train(training_data, tasks, options);
   if(test_data.set_size != 0) {
     evaluate_hmm(hmm, training_data, "training", tasks, options);
     evaluate_hmm(hmm, test_data, "Test", tasks, options);
@@ -198,7 +123,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
   // train background
   if(n_loaded == 0 and not options.objectives.empty()) {
-    initialize_bg_with_bw(hmm, training_data, options);
+    hmm.initialize_bg_with_bw(training_data, options);
 
     if(options.verbosity >= Verbosity::verbose)
       cout << "Model after background learning = " << hmm << endl;

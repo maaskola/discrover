@@ -124,7 +124,6 @@ class HMM;
 struct ResultsCounts;
 
 ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm, const Data::Set &data, std::ostream &out, std::ostream &v_out, std::ostream &occurrence_out, const hmm_options &options);
-double train_hmm(HMM &hmm, const Data::Collection &training_data, const Training::Tasks &tasks, const hmm_options &options);
 HMM doit(const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options);
 
 struct Group {
@@ -239,6 +238,10 @@ class HMM {
 
     /** Perform HMM training. */
     double train(const Data::Collection &data, const Training::Tasks &tasks, const hmm_options &options);
+    /** Initialize HMM background with the Baum-Welch algorithm. */
+    void initialize_bg_with_bw(const Data::Collection &collection, const hmm_options &options);
+
+    double train_inner(const Data::Collection &data, const Training::Tasks &tasks, const hmm_options &options);
 
     /** Perform iterative HMM training, like re-estimation (expectation maximization) or gradient based. */
     void iterative_training(const Data::Collection &data, const Training::Tasks &tasks, const hmm_options &options);
@@ -266,6 +269,7 @@ class HMM {
 // -------------------------------------------------------------------------------------------
 // Some auxiliary routines
 // -------------------------------------------------------------------------------------------
+  public:
 
     /** The emission information content of the HMM. */
     double information_content(size_t motif_idx) const;
@@ -288,10 +292,10 @@ class HMM {
     /** A getter routine for the pseudo count. */
     double get_pseudo_count() const;
 
+    size_t count_motif(const StatePath &path, size_t motif) const;
+
     /** Generate a random candidate variant for MCMC sampling */
     HMM random_variant(const hmm_options &options, std::mt19937 &rng) const;
-
-    size_t count_motif(const StatePath &path, size_t motif) const;
 
     /** Prepare training tasks according to the objectives given in the options. */
     Training::Tasks define_training_tasks(const hmm_options &options) const;
@@ -303,13 +307,13 @@ class HMM {
     // TODO un-friend this function if possible
     friend ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm, const Data::Set &data, std::ostream &out, std::ostream &v_out, std::ostream &occurrence_out, const hmm_options &options);
     // TODO un-friend this function if possible
-    friend double train_hmm(HMM &hmm, const Data::Collection &training_data, const Training::Tasks &tasks, const hmm_options &options);
-    // TODO un-friend this function if possible
     friend HMM doit(const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options);
 
+  public:
     double compute_score(const Data::Collection &data, const Measures::Continuous::Measure &measure, bool weighting, const std::vector<size_t> &motifs) const;
     double compute_score_all_motifs(const Data::Collection &data, const Measures::Continuous::Measure &measure, bool weighting) const;
 
+  protected:
     void shift_forward(size_t group_idx, size_t n);
     void shift_backward(size_t group_idx, size_t n);
 
