@@ -46,6 +46,7 @@ namespace Seeding {
     verbosity(Verbosity::info),
     dump_viterbi(false),
     no_enrichment_filter(false),
+    fixed_motif_space_mode(false),
     label(""),
     candidate_selection(CandidateSelection::TopN)
     { };

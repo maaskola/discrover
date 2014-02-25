@@ -140,8 +140,13 @@ double compute_logp_gtest(const matrix_t &m, double pseudo_count, bool normalize
   return(-pchisq(compute_gtest(m, pseudo_count, normalize), (m.size1() - 1) * (m.size2() - 1), false, true));
 }
 
-double compute_bonferroni_corrected_logp_gtest(const matrix_t &m, double pseudo_count, bool normalize, size_t length, size_t degeneracy) {
-  double log_correction = compute_correction(length, degeneracy);
+double compute_bonferroni_corrected_logp_gtest(const matrix_t &m, double pseudo_count, bool normalize, size_t length, size_t degeneracy, bool dynamic_mode) {
+  double log_correction;
+  if(dynamic_mode)
+    log_correction = compute_correction(length, degeneracy);
+  else
+    log_correction = log(149);
+
   return(compute_logp_gtest(m, pseudo_count, normalize) - log_correction);
 }
 
@@ -277,7 +282,7 @@ double compute_score(const Seeding::DataSeries &data_series, const count_vector_
       score = compute_logp_gtest(occurrence_table, options.pseudo_count, true);
       break;
     case Measures::Discrete::Measure::CorrectedLogpGtest:
-      score = compute_bonferroni_corrected_logp_gtest(occurrence_table, options.pseudo_count, true, length, degeneracy);
+      score = compute_bonferroni_corrected_logp_gtest(occurrence_table, options.pseudo_count, true, length, degeneracy, not options.fixed_motif_space_mode);
       break;
     case Measures::Discrete::Measure::MatthewsCorrelationCoefficient:
       return(compute_mcc(signal_freq, signal_size - signal_freq, control_freq, control_size - control_freq));

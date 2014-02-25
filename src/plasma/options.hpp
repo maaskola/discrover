@@ -122,6 +122,7 @@ namespace Seeding {
     Verbosity verbosity;
     bool dump_viterbi;
     bool no_enrichment_filter;
+    bool fixed_motif_space_mode;
 
     std::string label;
 

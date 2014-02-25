@@ -78,6 +78,7 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
     (form_switch(prefix, "generalize", allow_short).c_str(), po::bool_switch(&options.plasma.per_degeneracy), "Whether to report the best motifs at each level of degeneracy. Default is to report only the best motif across all levels of degeneracy. In addition, the best motifs of levels of degeneracy given by --deg will be reported.")
     (form_switch(prefix, "keepall", false).c_str(), po::bool_switch(&options.keep_all), "Whether to report for each motif specification the best result for each length. Default is to report only the single best motif for each motif specification.")
     (form_switch(prefix, "strict", false).c_str(), po::bool_switch(&options.strict), "Do not allow insignificant seeds.")
+    (form_switch(prefix, "fix_mspace", false).c_str(), po::bool_switch(&options.fixed_motif_space_mode), "Deactivate dynamic motif space mode. Influences how the multiple-testing correction for the log-p value of the G-test is calculated.")
     ;
   if(include_all)
     desc.add_options()
