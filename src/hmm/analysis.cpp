@@ -90,7 +90,7 @@ void initialize_bg_with_bw(HMM &hmm, const Data::Collection &collection, const h
     cerr << "Background learning: " << time << " micro-seconds" << endl;
 }
 
- 
+
 void check_data(const Data::Collection &collection, const hmm_options &options)
 {
   if(options.verbosity >= Verbosity::info)
@@ -303,6 +303,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
         plasma_results[seed_idx].score = -numeric_limits<double>::infinity();
 
+        // consider all wiggle variants
         for(auto variant: generate_wiggle_variants(motif, options.wiggle, options.verbosity)) {
           HMM model(hmm);
           if(options.verbosity >= Verbosity::info and options.wiggle > 0)
@@ -327,6 +328,13 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
       while(ok and not learned_models.empty()) {
         auto masked_training_data = training_data;
 
+        // mode == 0:
+        //   do not mask occurrences of previously identified motifs;
+        //   add candidate motif to current model
+        //   score composite model consisting of candidate motif and previously identified motifs
+        // mode == 1:
+        //   mask occurrences of previously identified motifs;
+        //   score candidate motif as single motif model on masked data
         const size_t mode = 1;
         const bool relearn_before_eval = true;
 
@@ -396,6 +404,8 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
           hmm_options options_(options);
           if(options.long_names)
             options.label += "." + best_seed;
+
+          // TODO: remember that learning and evaluation is to a large degree based on groups - not motif names; thus there is some inefficiencies
           train_evaluate(hmm, all_data, training_data, test_data, options);
 
           learned_models.erase(begin(learned_models) + best_index);
