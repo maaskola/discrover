@@ -50,18 +50,23 @@ void check_data(const Data::Collection &collection, const hmm_options &options)
 }
 
 
-void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options)
+void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options, bool relearning_phase=false)
 {
-  // Define the training tasks
-  Training::Tasks tasks = hmm.define_training_tasks(options);
+  // Define the learning and evaluation tasks
+  Training::Tasks eval_tasks = hmm.define_training_tasks(options);
+  Training::Tasks learn_tasks = hmm.define_training_tasks(options);
 
-  if(not tasks.empty())
-    hmm.train(training_data, tasks, options);
+  if(relearning_phase and (not options.relearn_discriminative))
+    remove_if(begin(learn_tasks), end(learn_tasks), [](const Training::Task &task) { return(Measures::is_discriminative(task.measure)); });
+
+  if(not learn_tasks.empty())
+    hmm.train(training_data, learn_tasks, options);
+
   if(test_data.set_size != 0) {
-    evaluate_hmm(hmm, training_data, "training", tasks, options);
-    evaluate_hmm(hmm, test_data, "Test", tasks, options);
+    evaluate_hmm(hmm, training_data, "training", eval_tasks, options);
+    evaluate_hmm(hmm, test_data, "Test", eval_tasks, options);
   }
-  evaluate_hmm(hmm, all_data, "", tasks, options);
+  evaluate_hmm(hmm, all_data, "", eval_tasks, options);
 }
 
 double get_expected_seq_size(const Data::Collection &collection)
@@ -401,7 +406,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             // TODO: learning should perhaps only adapt transitions? this would be very fast...
             // TODO:   otherwise: if learning should also adapt emissions, then perhaps only those of the new motif?
             // TODO:   in this case: it might be done on the masked sequences
-            train_evaluate(hmm, all_data, training_data, test_data, options);
+            train_evaluate(hmm, all_data, training_data, test_data, options, true);
 
             learned_models.erase(begin(learned_models) + best_index);
             first_motif = false;

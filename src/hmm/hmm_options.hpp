@@ -101,6 +101,7 @@ struct hmm_options {
   bool revcomp;
   bool weighting;
   bool accept_multiple;
+  bool relearn_discriminative;
   Compression output_compression;
   size_t left_padding, right_padding;
   bool print_posterior;

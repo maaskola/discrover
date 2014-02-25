@@ -253,6 +253,7 @@ int main(int argc, const char** argv)
     ("salt", po::value<unsigned int>(&options.random_salt), "Seed for the random number generator.")
     ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
     ("multiple", po::bool_switch(&options.accept_multiple), "Accept multiple motifs.")
+    ("relearn", po::bool_switch(&options.relearn_discriminative), "When accepting multiple motifs, re-learn Discriminatively. Otherwise, only the background will be adjusted during re-learning.")
     ;
 
   mmie_options.add_options()
