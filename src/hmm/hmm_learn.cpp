@@ -806,7 +806,7 @@ bool HMM::perform_training_iteration_gradient(const Data::Collection &data,
     if(verbosity >= Verbosity::info)
       std::cout << "Skipping line search. Maximal absolute gradient component is zero." << std::endl;
   } else if(gradient_norm == 0) {
-    if(verb >= Verbosity::info)
+    if(verbosity >= Verbosity::info)
       std::cout << "Skipping line search. Gradient norm is zero." << std::endl;
   } else {
     int info;
