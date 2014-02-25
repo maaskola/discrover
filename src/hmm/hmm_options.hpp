@@ -100,6 +100,7 @@ struct hmm_options {
   bool class_model;
   bool revcomp;
   bool weighting;
+  bool accept_multiple;
   Compression output_compression;
   size_t left_padding, right_padding;
   bool print_posterior;

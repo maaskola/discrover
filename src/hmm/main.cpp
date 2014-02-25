@@ -252,6 +252,7 @@ int main(int argc, const char** argv)
     ("iter", po::value<size_t>(&options.termination.max_iter)->default_value(1000), "Maximal number of iterations to perform in training. A value of 0 means no limit, and that the training is only terminated by the tolerance.")
     ("salt", po::value<unsigned int>(&options.random_salt), "Seed for the random number generator.")
     ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
+    ("multiple", po::bool_switch(&options.accept_multiple), "Accept multiple motifs.")
     ;
 
   mmie_options.add_options()

@@ -161,6 +161,7 @@ ostream &operator<<(ostream &os, const hmm_options &options)
     << "class_model = " << options.class_model << endl
     << "revcomp = " << options.revcomp << endl
     << "weighting = " << options.weighting << endl
+    << "accept_multiple = " << options.accept_multiple << endl
     << "output_compression = " << options.output_compression << endl
     << "left_padding = " << options.left_padding << endl
     << "right_padding = " << options.right_padding << endl
