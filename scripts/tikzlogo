@@ -386,13 +386,15 @@ end
 node_width = 0.75 * factor
 node_height = 1.0 * factor
 ARGV.each{|path|
-  direction = (options.revcomp ? "backward" : "forward")
+  directions = [["forward", false]]
+  directions << ["backward", true] if options.revcomp or options.dna
+  directions.each{|direction, revcomp|
   out_path = path + ".#{direction}.tex"
   f = File.open(out_path, "w")
   f.puts $tikz_header
   if options.simplematrix
     e_matrix = read_matrix(path)
-    gen_tex(e_matrix, f, !options.freqlogo, options.background, [node_width] * e_matrix.length, node_height, options.order, ! options.dna, ! options.noaxis, options.revcomp, options.verbose)
+    gen_tex(e_matrix, f, !options.freqlogo, options.background, [node_width] * e_matrix.length, node_height, options.order, ! options.dna, ! options.noaxis, revcomp, options.verbose)
   else
     File.open(path){|g|
       hmm = HMM::Parameters.new(g, options.verbose)
@@ -446,13 +448,14 @@ ARGV.each{|path|
 
         f.puts $tikz_newpage unless first
         first = false
-        gen_tex(e_matrix, f, !options.freqlogo, options.background, widths, node_height, options.order, ! options.dna, ! options.noaxis, options.revcomp, options.verbose)
+        gen_tex(e_matrix, f, !options.freqlogo, options.background, widths, node_height, options.order, ! options.dna, ! options.noaxis, revcomp, options.verbose)
       }
     }
   end
   f.puts $tikz_footer
   f.close
   tex_paths << out_path
+  }
 }
 pdf_paths = tex_paths.map{|x| x.gsub(/.tex$/,".pdf")}
 aux_paths = tex_paths.map{|x| x.gsub(/.tex$/,".aux")}
