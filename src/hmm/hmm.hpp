@@ -533,7 +533,8 @@ class HMM {
 // Output methods
 // -------------------------------------------------------------------------------------------
   public:
-    std::string path2string(const StatePath &path) const;
+    std::string path2string_state(const StatePath &path) const;
+    std::string path2string_group(const StatePath &path) const;
     void to_dot(std::ostream &os, double minimum_transition=0.01) const;
 
 // -------------------------------------------------------------------------------------------

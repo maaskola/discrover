@@ -295,7 +295,7 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
         v_out << ">" << data.sequences[i].definition << endl;
         v_out << "V-sites = " << viterbi_str.str() << " E-sites = " << exp_str.str() << " P(#sites>=1) = " << atl_str.str() << " Viterbi log-p = " << lp << endl;
         v_out << data.sequences[i].sequence << endl;
-        v_out << hmm.path2string(path) << endl;
+        v_out << hmm.path2string_group(path) << endl;
       }
     }
 

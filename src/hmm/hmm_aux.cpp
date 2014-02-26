@@ -323,31 +323,60 @@ void HMM::deserialize(istream &is)
 };
 
 
-string HMM::path2string(const HMM::StatePath &path) const
+string HMM::path2string_state(const HMM::StatePath &path) const
 {
+  const char start_symb = '^';
+  const char bg_symb = '0';
   string p;
   for(size_t j = 0; j < path.size(); j++)
     switch(path[j]) {
       case start_state:
-        p += "^";
+        p += start_symb;
+        break;
+      case bg_state:
+        p += bg_symb;
         break;
       default:
-        if(path[j] < first_state)
-          p += "0";
-        else {
-          char c = path[j] - first_state + 'A';
-          if(c > 'Z')
-            c = c - 'A' + 'a';
+        char x = path[j] - first_state;
+        char c = x + 'A';
+        if(x > 'Z') {
+          c = x - ('Z' - 'A' + 1) + 'a';
           if(c > 'z') {
             cout << "Error: state index is too large" << endl;
             c = '*';
           }
-          p += c;
         }
+        p += c;
         break;
     };
   return(p);
 };
+
+string HMM::path2string_group(const HMM::StatePath &path) const
+{
+  const char start_symb = '^';
+  const char bg_symb = '-';
+  const size_t mode = 1;
+  char first_symb = '0';
+  if(groups.size() - 2 > 10)
+    first_symb = 'A';
+  string p;
+  for(size_t j = 0; j < path.size(); j++)
+    switch(path[j]) {
+      case start_state:
+        p += start_symb;
+        break;
+      case bg_state:
+        p += bg_symb;
+        break;
+      default:
+        char c = first_symb + (group_ids[path[j]] - 2);
+        p += c;
+        break;
+    };
+  return(p);
+};
+
 
 
 void HMM::to_dot(ostream &os, double minimum_transition) const
