@@ -332,7 +332,6 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
           //   add candidate motif to current model
           //   score composite model consisting of candidate motif and previously identified motifs on masked data
           const size_t mode = 2;
-          const bool relearn_before_eval = true;
 
           if(mode == 1 or mode == 2) {
             best_score = -numeric_limits<double>::infinity();
