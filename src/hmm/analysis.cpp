@@ -370,20 +370,6 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             } else
               model = learned_model;
 
-
-            if(false) { // currently not needed; might move this code done to the relearning part
-              // TODO make sure the task is actually referring to the newly added motif so that is the motif that is scored
-              Training::Tasks tasks = model.define_training_tasks(options);
-              // TODO this means we want to re-write the discriminative objectives' targets so that they refer only to the last = most recently added motif
-              auto group_it = hmm.groups.rbegin();
-              auto not_in_group = [&group_it](size_t v) { return(find(begin(group_it->states), end(group_it->states), v) == end(group_it->states)); };
-              for(auto &task: tasks)
-                if(Measures::is_discriminative(task.measure)) {
-                  remove_if(task.targets.emission.begin(), task.targets.emission.end(), not_in_group);
-                  remove_if(task.targets.transition.begin(), task.targets.transition.end(), not_in_group);
-                }
-            }
-
             // potentially: regardless of the objective function chosen for training, one might use the MICO p-value for selection!
             const bool use_mico_pvalue = true;
             double score;
