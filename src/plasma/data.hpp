@@ -125,7 +125,7 @@ namespace Data {
           return(report);
         }
 
-        RemovalReport drop_sequences(const std::unordered_set<std::string> &ids) {
+        RemovalReport drop_sequences(const mask_sub_t &mask) {
           const bool noisy_output = false;
 
           RemovalReport report;
@@ -136,7 +136,7 @@ namespace Data {
               std::cerr << "idx = " << idx << std::endl;
               std::cerr << "Checking " << path << " " << iter->definition << " for dropping" << std::endl;
             }
-            if(ids.find(iter->definition) != end(ids)) {
+            if(mask.find(iter->definition) != end(mask)) {
               if(noisy_output)
                 std::cerr << "Dropping!" << std::endl;
               report.sequences++;
@@ -213,11 +213,11 @@ namespace Data {
           return(report);
         }
 
-        RemovalReport drop_sequences(std::map<std::string, std::unordered_set<std::string>> &ids) {
+        RemovalReport drop_sequences(const Data::mask_t &mask) {
           RemovalReport report;
           for(auto &data_set: sets) {
-            auto iter = ids.find(data_set.path);
-            if(iter != end(ids))
+            auto iter = mask.find(data_set.path);
+            if(iter != end(mask))
               report += data_set.drop_sequences(iter->second);
           }
           return(report);
@@ -298,10 +298,10 @@ namespace Data {
           return(report);
         }
 
-        RemovalReport drop_sequences(std::map<std::string, std::unordered_set<std::string>> &ids) {
+        RemovalReport drop_sequences(const Data::mask_t &mask) {
           RemovalReport report;
           for(auto &data_series: series)
-            report += data_series.drop_sequences(ids);
+            report += data_series.drop_sequences(mask);
           return(report);
         }
       };
