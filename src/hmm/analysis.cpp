@@ -348,6 +348,10 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
           size_t index = 0;
 
+          const bool remove_below_threshold = true;
+          const double threshold = -log(0.05);
+          std::vector<std::string> below_threshold;
+
           for(auto &learned: learned_models) {
             string seed = learned.first;
             auto learned_model = learned.second;
@@ -407,8 +411,8 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
             cout << "Augmented model: " << model << endl;
             cout << "Score of the model augmented by " << seed << " has a score of " << score << endl;
-            if(score > best_score) {
-              if(not use_mico_pvalue or score > 0) {
+            if(not (use_mico_pvalue and remove_below_threshold) or score >= threshold) {
+              if(score > best_score) {
                 ok = true;
                 updated = true;
                 best_model = model;
@@ -416,7 +420,8 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
                 best_score = score;
                 best_index = index;
               }
-            }
+            } else
+              below_threshold.push_back(seed);
             index++;
           }
 
@@ -446,6 +451,37 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             learned_models.erase(begin(learned_models) + best_index);
             first_motif = false;
             ok = true;
+          }
+
+          if(options.verbosity >= Verbosity::verbose) {
+            cout << "To be removed:";
+            for(auto &mod: below_threshold)
+              cout << " " << mod;
+            cout << endl;
+          }
+
+          auto is_below_threshold = [&below_threshold] (const pair<string, HMM> &x) {
+            return(find(begin(below_threshold), end(below_threshold), x.first) != end(below_threshold));
+          };
+
+          if(options.verbosity >= Verbosity::verbose) {
+            cout << "Before removal:";
+            for(auto &mod: learned_models)
+              cout << " " << mod.first;
+            cout << endl;
+            cout << "Before removal " << learned_models.size() << " remaining." << endl;
+          }
+
+          if(remove_below_threshold)
+            learned_models.erase(remove_if(begin(learned_models), end(learned_models), is_below_threshold),
+                end(learned_models));
+
+          if(options.verbosity >= Verbosity::verbose) {
+            cout << "After removal:";
+            for(auto &mod: learned_models)
+              cout << " " << mod.first;
+            cout << endl;
+            cout << "After removal " << learned_models.size() << " remaining." << endl;
           }
         }
       }
