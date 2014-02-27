@@ -31,42 +31,46 @@
 #include "hmm.hpp"
 #include "subhmm.hpp"
 
+using namespace std;
+
 #define DO_PARALLEL 1
 
-double HMM::mutual_information(const Data::Series &data, const std::vector<size_t> &groups) const
-{
-  if(verbosity >= Verbosity::debug)
-    std::cout << "Computing feature-wise mutual information." << std::endl;
-  double mi = 0;
-  for(auto &group_idx: groups)
-    mi += mutual_information(data, group_idx);
-  return(mi);
+size_t make_mask(const vector<size_t> &v) {
+  size_t x = 0;
+  for(auto y: v)
+    x |= 1 << y;
+  return(x);
 }
 
-double HMM::rank_information(const Data::Series &data, const std::vector<size_t> &groups) const
+double HMM::mutual_information(const Data::Series &data, const vector<size_t> &present_groups, const vector<size_t> &absent_groups) const
 {
   if(verbosity >= Verbosity::debug)
-    std::cout << "Computing feature-wise mutual information." << std::endl;
-  double mi = 0;
-  for(auto &group_idx: groups)
-    mi += rank_information(data, group_idx);
-  return(mi);
+    cout << "Computing feature-wise mutual information." << endl;
+  size_t present_mask = make_mask(present_groups); size_t absent_mask = make_mask(absent_groups);
+  return(mutual_information(data, present_mask, absent_mask));
 }
 
-double HMM::matthews_correlation_coefficient(const Data::Series &data, const std::vector<size_t> &groups) const
+double HMM::rank_information(const Data::Series &data, const vector<size_t> &present_groups, const vector<size_t> &absent_groups) const
 {
   if(verbosity >= Verbosity::debug)
-    std::cout << "Computing sum of feature-wise Matthew's correlation coefficient." << std::endl;
-  double mcc = 0;
-  for(auto &group_idx: groups)
-    mcc += matthews_correlation_coefficient(data, group_idx);
-  return(mcc);
+    cout << "Computing feature-wise mutual information." << endl;
+  size_t present_mask = make_mask(present_groups); size_t absent_mask = make_mask(absent_groups);
+  return(rank_information(data, present_mask, absent_mask));
 }
 
-confusion_matrix reduce(const vector_t &v, size_t group_idx, const Data::Series &data, const std::vector<Group> &groups, bool word_stats) {
+double HMM::matthews_correlation_coefficient(const Data::Series &data, const vector<size_t> &present_groups, const vector<size_t> &absent_groups) const
+{
+  if(verbosity >= Verbosity::debug)
+    cout << "Computing sum of feature-wise Matthew's correlation coefficient." << endl;
+  size_t present_mask = make_mask(present_groups); size_t absent_mask = make_mask(absent_groups);
+  return(matthews_correlation_coefficient(data, present_mask, absent_mask));
+}
+
+// TODO FIX ABSENT
+confusion_matrix reduce(const vector_t &v, size_t group_idx, const Data::Series &data, const vector<Group> &groups, bool word_stats) {
   confusion_matrix m = {0, 0, 0, 0};
   for(size_t sample_idx = 0; sample_idx < v.size(); sample_idx++) {
-    if(std::find(data.sets[sample_idx].motifs.begin(), data.sets[sample_idx].motifs.end(), groups[group_idx].name) != data.sets[sample_idx].motifs.end()) {
+    if(find(data.sets[sample_idx].motifs.begin(), data.sets[sample_idx].motifs.end(), groups[group_idx].name) != data.sets[sample_idx].motifs.end()) {
       m.true_positives += v[sample_idx];
       m.false_negatives += (word_stats ? data.sets[sample_idx].seq_size : data.sets[sample_idx].set_size) - v[sample_idx];
     } else {
@@ -77,47 +81,51 @@ confusion_matrix reduce(const vector_t &v, size_t group_idx, const Data::Series 
   return(m);
 }
 
-double HMM::mutual_information(const Data::Series &data, size_t group_idx) const
+double HMM::mutual_information(const Data::Series &data, size_t present_mask, size_t absent_mask) const
 {
   if(verbosity >= Verbosity::debug)
-    std::cout << "HMM::mutual_information(Data::Series, Feature)" << std::endl;
-  vector_t posterior = posterior_atleast_one(data, group_idx);
+    cout << "HMM::mutual_information(Data::Series, Feature)" << endl;
+  vector_t posterior = posterior_atleast_one(data, present_mask, absent_mask);
   matrix_t m(posterior.size(), 2);
   for(size_t i = 0; i < posterior.size(); i++) {
     m(i,0) = posterior(i);
     m(i,1) = data.sets[i].set_size - posterior(i);
   }
   m = m + pseudo_count;
+  cout << "HMM::mutual_information(Data::Series, Feature) present = " << present_mask << " absent = " << absent_mask << endl
+    << "counts = " << m << endl;
   double mi = calc_mutual_information(m, 0, true, false, false);
 //  if(not check_enrichment(data, m, group_idx))
 //    mi = -mi;
   return(mi);
 }
 
-double HMM::rank_information(const Data::Series &data, size_t group_idx) const
+double HMM::rank_information(const Data::Series &data, size_t present_mask, size_t absent_mask) const
 {
   if(verbosity >= Verbosity::debug)
-    std::cout << "HMM::rank_information(Data::Series, Feature)" << std::endl;
+    cout << "HMM::rank_information(Data::Series, Feature)" << endl;
   double ri = 0;
   for(auto &set: data)
-    ri += rank_information(set, group_idx);
+    ri += rank_information(set, present_mask, absent_mask);
   return(ri);
 }
 
 
-double HMM::rank_information(const Data::Set &data, size_t group_idx) const
+double HMM::rank_information(const Data::Set &data, size_t present_mask, size_t absent_mask) const
 {
   if(verbosity >= Verbosity::debug)
-    std::cout << "HMM::rank_information(Data::Set, Feature)" << std::endl;
-  vector_t posterior = posterior_atleast_one(data, group_idx);
+    cout << "HMM::rank_information(Data::Set, Feature)" << endl;
+  vector_t posterior = posterior_atleast_one(data, present_mask, absent_mask);
   return(calc_rank_information(posterior, pseudo_count));
 }
 
-double HMM::matthews_correlation_coefficient(const Data::Series &data, size_t group_idx) const
+double HMM::matthews_correlation_coefficient(const Data::Series &data, size_t present_mask, size_t absent_mask) const
 {
   // TODO find out if there's a proper generalization of the MCC to multiple experiments
-  vector_t posterior = posterior_atleast_one(data, group_idx);
-  confusion_matrix m = reduce(posterior, group_idx, data, groups, false) + pseudo_count;
+  vector_t posterior = posterior_atleast_one(data, present_mask, absent_mask);
+  // TODO FIX ABSENT: adapt reduce
+  // confusion_matrix m = reduce(posterior, group_idx, data, groups, false) + pseudo_count;
+  confusion_matrix m;
   return(calc_matthews_correlation_coefficient(m));
 }
 
@@ -176,76 +184,128 @@ double HMM::expected_posterior(const Data::Seq &data, size_t group_idx) const
   return(m);
 };
 
-vector_t HMM::posterior_atleast_one(const Data::Series &data, size_t group_idx) const
+vector_t HMM::posterior_atleast_one(const Data::Series &data, const vector<size_t> &present_groups, const vector<size_t> &absent_groups) const
+{
+  if(verbosity >= Verbosity::debug) {
+    cout << "HMM::posterior_atleast_one(Data::Series, present_groups=(";
+    bool first = true; for(auto &x: present_groups) { cout << (first ? "" : ",") << x; first = false; } cout << ") absent_groups=(";
+    first = true; for(auto &x: absent_groups) { cout << (first ? "" : ",") << x; first = false; } cout << ")" << endl;
+  }
+  return(posterior_atleast_one(data, make_mask(present_groups), make_mask(absent_groups)));
+}
+
+vector_t HMM::posterior_atleast_one(const Data::Series &data, size_t present_mask, size_t absent_mask) const
 {
   if(verbosity >= Verbosity::debug)
-    std::cout << "HMM::posterior_atleast_one(Data::Series, group_idx=" << group_idx << ")" << std::endl;
+    cout << "HMM::posterior_atleast_one(Data::Series, present_mask=" << present_mask << ", absent_mask=" << absent_mask << endl;
   vector_t v(data.sets.size());
   for(size_t i = 0; i < data.sets.size(); i++)
-    v[i] = sum_posterior_atleast_one(data.sets[i], group_idx);
+    v[i] = sum_posterior_atleast_one(data.sets[i], present_mask, absent_mask);
   return(v);
 }
 
-vector_t HMM::posterior_atleast_one(const Data::Set &data, size_t group_idx) const
+vector_t HMM::posterior_atleast_one(const Data::Set &data, size_t present_mask, size_t absent_mask) const
 {
-  if(verbosity >= Verbosity::debug)
-    std::cout << "HMM::posterior_atleast_one(Data::Set = " << data.path << ", group_idx = " << group_idx << " - '" << groups[group_idx].name << "')" << std::endl;
+  // if(verbosity >= Verbosity::debug)
+  if(true)
+    cout << "HMM::posterior_atleast_one(Data::Set = " << data.path << ", present_mask = " << present_mask << ", absent_mask = " << absent_mask << endl;
 
-  SubHMM subhmm(*this, complementary_states(group_idx));
+  cout << "complementary_states_mask(present_mask)) =";
+  for(auto &state: complementary_states_mask(present_mask))
+    cout << " " << state;
+  cout << endl;
+  cout << "complementary_states_mask(present_mask | absent_mask)) =";
+  for(auto &state: complementary_states_mask(present_mask | absent_mask))
+    cout << " " << state;
+  cout << endl;
 
+  // TODO FIX ABSENT
   vector_t vec(data.set_size);
-  // std::cout << subhmm << std::endl;
+  if(absent_mask == 0) {
+    SubHMM subhmm(*this, complementary_states_mask(present_mask));
 #pragma omp parallel for schedule(static) if(DO_PARALLEL)
-  for(size_t i = 0; i < data.set_size; i++) {
-    double logp = log_likelihood_from_scale(compute_forward_scale(data.sequences[i]));
-    double logp_wo_motif = log_likelihood_from_scale(subhmm.compute_forward_scale(data.sequences[i]));
+    for(size_t i = 0; i < data.set_size; i++) {
+      double logp = log_likelihood_from_scale(compute_forward_scale(data.sequences[i]));
+      double logp_wo_motif = log_likelihood_from_scale(subhmm.compute_forward_scale(data.sequences[i]));
+      double z = 1 - exp(logp_wo_motif - logp);
+      if(verbosity >= Verbosity::debug)
+        cout << "seq = " << data.sequences[i].definition
+          /*  << " " << data.sequences[i].sequence */
+          << " logp = " << logp
+          << " logp_wo_motif = " << logp_wo_motif
+          << " z = " << z << endl;
+      vec[i] = z;
+    }
+  } else {
+    SubHMM subhmm_wo_abs(*this, complementary_states_mask(absent_mask));
+    SubHMM subhmm_wo_abs_wo_motif(*this, complementary_states_mask(present_mask | absent_mask));
+    cout << "Full     :" << *this << endl;
+    cout << "Reduced 1:" << subhmm_wo_abs << endl;
+    cout << "Reduced 2:" << subhmm_wo_abs_wo_motif << endl;
+#pragma omp parallel for schedule(static) if(DO_PARALLEL)
+    for(size_t i = 0; i < data.set_size; i++) {
+      double logp = log_likelihood_from_scale(compute_forward_scale(data.sequences[i]));
+      double logp_wo_abs = log_likelihood_from_scale(subhmm_wo_abs.compute_forward_scale(data.sequences[i]));
+      double logp_wo_abs_wo_motif = log_likelihood_from_scale(subhmm_wo_abs_wo_motif.compute_forward_scale(data.sequences[i]));
 
-    double z = 1 - exp(logp_wo_motif - logp);
-    if(verbosity >= Verbosity::debug)
-      std::cout << "seq = " << data.sequences[i].definition << " " << data.sequences[i].sequence << " logp = " << logp << " logp_wo_motif = " << logp_wo_motif << " z = " << z << std::endl;
-    vec[i] = z;
+      double z = exp(logp_wo_abs - logp) - exp(logp_wo_abs_wo_motif - logp);
+      if(verbosity >= Verbosity::debug) {
+      // if(true) {
+        stringstream s;
+        s << "seq = " << data.sequences[i].definition
+          /*  << " " << data.sequences[i].sequence */
+          << " logp = " << logp
+          << " logp_wo_abs = " << logp_wo_abs
+          << " logp_wo_abs_wo_motif = " << logp_wo_abs_wo_motif
+          << " z = " << z << endl;
+        cout << s.str();
+      }
+      vec[i] = z;
+    }
   }
 
-  if(verbosity >= Verbosity::debug)
-    std::cout << "HMM::posterior_atleast_one(Data::Set = " << data.path << ", group_idx = " << group_idx << " - '" << groups[group_idx].name << "')" << " vec = " << vec << std::endl;
+  // if(verbosity >= Verbosity::debug)
+  if(true)
+    cout << "HMM::posterior_atleast_one(Data::Set = " << data.path << ", present_mask = " << present_mask << ", absent_mask = " << absent_mask << " vec = " << vec << endl;
   return(vec);
 };
 
 
 
-double HMM::sum_posterior_atleast_one(const Data::Set &data, size_t group_idx) const
+double HMM::sum_posterior_atleast_one(const Data::Set &data, size_t present_mask, size_t absent_mask) const
 {
   if(verbosity >= Verbosity::debug)
-    std::cout << "HMM::sum_posterior_atleast_one(Data::Set = " << data.path << ", group_idx = " << group_idx << " - '" << groups[group_idx].name << "')" << std::endl;
+    cout << "HMM::sum_posterior_atleast_one(Data::Set = " << data.path << ", present_mask = " << present_mask << ", absent_mask = " << absent_mask << endl;
 
-  vector_t counts = posterior_atleast_one(data, group_idx);
+  vector_t counts = posterior_atleast_one(data, present_mask, absent_mask);
 
   double m = 0;
   for(auto &x: counts)
     m += x;
 
   if(verbosity >= Verbosity::debug)
-    std::cout << "HMM::sum_posterior_atleast_one(Data::Set = " << data.path << ", group_idx = " << group_idx << " - '" << groups[group_idx].name << "')" << " m = " << m << std::endl;
+    cout << "HMM::posterior_atleast_one(Data::Set = " << data.path << ", present_mask = " << present_mask << ", absent_mask = " << absent_mask << " m = " << m << endl;
   return(m);
 };
 
-HMM::posterior_t HMM::posterior_atleast_one(const Data::Seq &data, size_t group_idx) const
+HMM::posterior_t HMM::posterior_atleast_one(const Data::Seq &data, size_t present_mask, size_t absent_mask) const
 {
   if(verbosity >= Verbosity::debug)
-    std::cout << "HMM::posterior_atleast_one(Data::Seq, group_idx = " << group_idx << " - '" << groups[group_idx].name << "')" << std::endl;
+    cout << "HMM::posterior_atleast_one(Data::Seq, present_mask = " << present_mask << ", absent_mask = " << absent_mask << endl;
 
-  SubHMM subhmm(*this, complementary_states(group_idx));
+  SubHMM subhmm(*this, complementary_states_mask(present_mask));
+  // TODO FIX ABSENT
 
-  // std::cout << subhmm << std::endl;
+  // cout << subhmm << endl;
   double logp = log_likelihood_from_scale(compute_forward_scale(data));
   double logp_wo_motif = log_likelihood_from_scale(subhmm.compute_forward_scale(data));
 
   double z = 1 - exp(logp_wo_motif - logp);
   if(verbosity >= Verbosity::debug)
-    std::cout << "seq = " << data.definition << " " << data.sequence << " logp = " << logp << " logp_wo_motif = " << logp_wo_motif << " z = " << z << std::endl;
+    cout << "seq = " << data.definition << " " << data.sequence << " logp = " << logp << " logp_wo_motif = " << logp_wo_motif << " z = " << z << endl;
 
   if(verbosity >= Verbosity::debug)
-    std::cout << "HMM::posterior_atleast_one(Data::Seq, group_idx = " << group_idx << " - '" << groups[group_idx].name << "')" << " z = " << z << std::endl;
+    cout << "HMM::posterior_atleast_one(Data::Seq, present_mask = " << present_mask << ", absent_mask = " << absent_mask << " z = " << z << endl;
   posterior_t res = {logp, z};
   return(res);
 };
@@ -265,7 +325,7 @@ double HMM::viterbi_atleast_one(const Data::Set &data, size_t group_idx) const
   for(size_t i = 0; i < data.set_size; i++) {
     StatePath path;
     viterbi(data.sequences[i], path);
-    if(std::find(path.begin(), path.end(), groups[group_idx].states[0]) != path.end())
+    if(find(path.begin(), path.end(), groups[group_idx].states[0]) != path.end())
       m++;
   }
   return(m);
@@ -273,14 +333,14 @@ double HMM::viterbi_atleast_one(const Data::Set &data, size_t group_idx) const
 
 double HMM::compute_score_all_motifs(const Data::Collection &data, const Measures::Continuous::Measure &measure, bool weighting) const
 {
-  std::vector<size_t> all_motifs;
+  vector<size_t> all_motifs;
   for(size_t i = 0; i < groups.size(); i++)
     if(groups[i].kind == Group::Kind::Motif)
       all_motifs.push_back(i);
-  return(compute_score(data, measure, weighting, all_motifs));
+  return(compute_score(data, measure, weighting, all_motifs, vector<size_t>()));
 }
 
-double HMM::compute_score(const Data::Collection &data,  const Measures::Continuous::Measure &measure, bool weighting, const std::vector<size_t> &motifs) const
+double HMM::compute_score(const Data::Collection &data, const Measures::Continuous::Measure &measure, bool weighting, const vector<size_t> &present_motifs, const vector<size_t> &absent_motifs) const
 {
   double score = 0;
   double W = 0;
@@ -292,116 +352,114 @@ double HMM::compute_score(const Data::Collection &data,  const Measures::Continu
     case Measure::MutualInformation:
       for(auto &series: data) {
         W += w = series.set_size;
-        score += mutual_information(series, motifs) * (weighting ? w : 1);
+        score += mutual_information(series, present_motifs, absent_motifs) * (weighting ? w : 1);
       }
       if(weighting)
         score /= W;
       break;
     case Measure::RankInformation:
       for(auto &series: data)
-        score = rank_information(series, motifs);
+        score = rank_information(series, present_motifs, absent_motifs);
       break;
     case Measure::MatthewsCorrelationCoefficient:
       for(auto &series: data)
-        score += matthews_correlation_coefficient(series, motifs);
+        score += matthews_correlation_coefficient(series, present_motifs, absent_motifs);
       break;
     case Measure::DeltaFrequency:
       for(auto &series: data)
-        score += dips_sitescore(series, motifs);
+        score += dips_sitescore(series, present_motifs, absent_motifs);
       break;
     case Measure::LogLikelihoodDifference:
       for(auto &series: data)
-        score += log_likelihood_difference(series, motifs);
+        score += log_likelihood_difference(series, present_motifs, absent_motifs);
       break;
     case Measure::ClassificationPosterior:
       for(auto &series: data)
-        score += class_likelihood(series, motifs, true);
+        score += class_likelihood(series, present_motifs, absent_motifs, true);
       break;
     case Measure::ClassificationLikelihood:
       for(auto &series: data)
-        score += class_likelihood(series, motifs, false);
+        score += class_likelihood(series, present_motifs, absent_motifs, false);
       break;
     default:
-      std::cout << "Score calculation for '" << measure2string(measure) << "' is not implemented." << std::endl;
+      cout << "Score calculation for '" << measure2string(measure) << "' is not implemented." << endl;
       assert(0);
   }
   return(score);
 }
 
-double HMM::class_likelihood(const Data::Series &data, const std::vector<size_t> &groups, bool compute_posterior) const
+double HMM::class_likelihood(const Data::Series &data, const vector<size_t> &present_groups, const vector<size_t> &absent_groups, bool compute_posterior) const
 {
-  double l = 0;
-  for(auto group_idx: groups)
-    l += class_likelihood(data, group_idx, compute_posterior);
-  return(l);
+  return(class_likelihood(data, make_mask(present_groups), make_mask(absent_groups), compute_posterior));
 }
 
-double HMM::class_likelihood(const Data::Series &data, size_t group_idx, bool compute_posterior) const
+double HMM::class_likelihood(const Data::Series &data, size_t present_mask, size_t absent_mask, bool compute_posterior) const
 {
   double l = 0;
   for(auto &set: data)
-    l += class_likelihood(set, group_idx, compute_posterior);
+    l += class_likelihood(set, present_mask, absent_mask, compute_posterior);
   if(verbosity >= Verbosity::debug)
-    std::cout << "Data::Series l = " << l << std::endl;
+    cout << "Data::Series l = " << l << endl;
   return(l);
 }
 
 
-double HMM::class_likelihood(const Data::Set &data, size_t group_idx, bool compute_posterior) const
+double HMM::class_likelihood(const Data::Set &data, size_t present_mask, size_t absent_mask, bool compute_posterior) const
 {
-  const double marginal_motif_prior = compute_marginal_motif_prior(group_idx);
-  const double class_cond = get_class_motif_prior(data.sha1, group_idx);
+  // TODO FIX ABSENT
+  // const double marginal_motif_prior = compute_marginal_motif_prior(group_idx);
+  const double marginal_motif_prior  = 0.5;
+  // TODO FIX ABSENT
+  // const double class_cond = get_class_motif_prior(data.sha1, group_idx);
+  const double class_cond = 0.2;
   const double log_class_prior = log(get_class_prior(data.sha1));
 
   double l = 0;
 #pragma omp parallel for schedule(static) reduction(+:l) if(DO_PARALLEL)
   for(size_t i = 0; i < data.set_size; i++) {
-    posterior_t res = posterior_atleast_one(data.sequences[i], group_idx);
+    posterior_t res = posterior_atleast_one(data.sequences[i], present_mask, absent_mask);
     double p = res.posterior;
     double x = log_class_prior + log(p * class_cond / marginal_motif_prior + (1-p) * (1-class_cond) / (1-marginal_motif_prior));
     if(not compute_posterior)
       x += res.log_likelihood;
     if(verbosity >= Verbosity::debug)
-      std::cout << "Sequence " << data.sequences[i].definition << " p = " << p << " class log likelihood = " << x << " exp -> " << exp(x) << std::endl;
+      cout << "Sequence " << data.sequences[i].definition << " p = " << p << " class log likelihood = " << x << " exp -> " << exp(x) << endl;
     l += x;
   }
   if(verbosity >= Verbosity::debug)
-    std::cout << "Data::Set " << data.path << " l = " << l << std::endl;
+    cout << "Data::Set " << data.path << " l = " << l << endl;
   return(l);
 }
 
-double HMM::log_likelihood_difference(const Data::Series &data, const std::vector<size_t> &groups) const
+double HMM::log_likelihood_difference(const Data::Series &data, const vector<size_t> &present_groups, const vector<size_t> &absent_groups) const
 {
-  double s = 0;
-  for(auto group_idx: groups)
-    s += log_likelihood_difference(data, group_idx);
-  return(s);
+  return(log_likelihood_difference(data, make_mask(present_groups), make_mask(absent_groups)));
 }
 
-double HMM::log_likelihood_difference(const Data::Series &data, size_t group_idx) const
+double HMM::log_likelihood_difference(const Data::Series &data, size_t present_mask, size_t absent_mask) const
 {
   double d = 0;
   for(size_t sample_idx = 0; sample_idx < data.sets.size(); sample_idx++) {
     bool signal = false;
-    if(data.sets[sample_idx].motifs.find(groups[group_idx].name) != data.sets[sample_idx].motifs.end())
-      signal = true;
+    // TODO FIX ABSENT
+    // if(data.sets[sample_idx].motifs.find(groups[group_idx].name) != data.sets[sample_idx].motifs.end())
+    //   signal = true;
     d += (signal ? 1 : -1) * log_likelihood(data.sets[sample_idx]);
   }
   return(d);
 }
 
-double HMM::dips_sitescore(const Data::Series &data, const std::vector<size_t> &groups) const
+double HMM::dips_sitescore(const Data::Series &data, const vector<size_t> &present_groups, const vector<size_t> &absent_groups) const
 {
-  double t = 0;
-  for(auto &group_idx: groups)
-    t += dips_sitescore(data, group_idx);
-  return(t);
+  return(dips_sitescore(data, make_mask(present_groups), make_mask(absent_groups)));
 }
 
-double HMM::dips_sitescore(const Data::Series &data, size_t group_idx) const
+double HMM::dips_sitescore(const Data::Series &data, size_t present_mask, size_t absent_mask) const
 {
-  vector_t posterior = posterior_atleast_one(data, group_idx);
-  confusion_matrix m = reduce(posterior, group_idx, data, groups, false) + pseudo_count;
+  vector_t posterior = posterior_atleast_one(data, present_mask, absent_mask);
+  // TODO FIX ABSENT: adapt reduce
+  // confusion_matrix m = reduce(posterior, group_idx, data, groups, false) + pseudo_count;
+  confusion_matrix m;
   size_t signal_size = m.true_positives + m.false_negatives;
   size_t control_size = m.false_positives + m.true_negatives;
 
@@ -409,18 +467,19 @@ double HMM::dips_sitescore(const Data::Series &data, size_t group_idx) const
   return(t);
 }
 
-double HMM::dips_tscore(const Data::Series &data, const std::vector<size_t> &groups) const
+double HMM::dips_tscore(const Data::Series &data, const vector<size_t> &present_groups, const vector<size_t> &absent_groups) const
 {
-  double t = 0;
-  for(auto &group_idx: groups)
-    t += dips_tscore(data, group_idx);
-  return(t);
+  return(dips_tscore(data, make_mask(present_groups), make_mask(absent_groups)));
 }
 
-double HMM::dips_tscore(const Data::Series &data, size_t group_idx) const
+double HMM::dips_tscore(const Data::Series &data, size_t present_mask, size_t absent_mask) const
 {
-  vector_t posterior = expected_posterior(data, group_idx);
-  confusion_matrix m = reduce(posterior, group_idx, data, groups, true) + pseudo_count;
+  // TODO FIX ABSENT
+  // vector_t posterior = expected_posterior(data, group_idx);
+  vector_t posterior;
+  // TODO FIX ABSENT: adapt reduce
+  // confusion_matrix m = reduce(posterior, group_idx, data, groups, true) + pseudo_count;
+  confusion_matrix m;
   size_t signal_size = m.true_positives + m.false_negatives;
   size_t control_size = m.false_positives + m.true_negatives;
 

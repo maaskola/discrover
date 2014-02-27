@@ -317,6 +317,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         cout << "Non-augmented model: " << hmm << endl;
         // Training::Tasks tasks = hmm.define_training_tasks(options);
         // double previous_score = hmm.compute_score(masked_training_data, *tasks.begin(), options.weighting);
+        vector<size_t> absent_groups;
         while(ok and not learned_models.empty()) {
           auto masked_training_data = training_data;
 
@@ -376,10 +377,10 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             std::vector<size_t> groups_to_score;
             groups_to_score.push_back(model.groups.size() - 1); // only add the most recently added group
             if(use_mico_pvalue)
-              score = model.compute_score(masked_training_data, Measures::Continuous::Measure::MutualInformation, options.weighting, groups_to_score);
+              score = model.compute_score(masked_training_data, Measures::Continuous::Measure::MutualInformation, options.weighting, groups_to_score, absent_groups);
             else
               // TODO actually select the specific task - above we do fix all conceivable tasks...
-              score = model.compute_score(masked_training_data, model.define_training_tasks(options).begin()->measure, options.weighting, groups_to_score);
+              score = model.compute_score(masked_training_data, model.define_training_tasks(options).begin()->measure, options.weighting, groups_to_score, absent_groups);
             if(use_mico_pvalue) {
               cout << "mi = " << score << endl;
               double n = masked_training_data.set_size; // TODO fix this with regards to pseudo counts and exact reference to the relevant contrast
@@ -434,12 +435,15 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             // TODO:   in this case: it might be done on the masked sequences
             train_evaluate(hmm, all_data, training_data, test_data, options, true);
 
+            absent_groups.push_back(hmm.groups.size() - 1);
+
             learned_models.erase(begin(learned_models) + best_index);
             first_motif = false;
             ok = true;
           }
 
-          if(options.verbosity >= Verbosity::verbose) {
+          // if(options.verbosity >= Verbosity::verbose) {
+          if(true) {
             cout << "To be removed:";
             for(auto &mod: below_threshold)
               cout << " " << mod;
@@ -450,7 +454,8 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             return(find(begin(below_threshold), end(below_threshold), x.first) != end(below_threshold));
           };
 
-          if(options.verbosity >= Verbosity::verbose) {
+          // if(options.verbosity >= Verbosity::verbose) {
+          if(true) {
             cout << "Before removal:";
             for(auto &mod: learned_models)
               cout << " " << mod.first;
@@ -462,7 +467,8 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             learned_models.erase(remove_if(begin(learned_models), end(learned_models), is_below_threshold),
                 end(learned_models));
 
-          if(options.verbosity >= Verbosity::verbose) {
+          // if(options.verbosity >= Verbosity::verbose) {
+          if(true) {
             cout << "After removal:";
             for(auto &mod: learned_models)
               cout << " " << mod.first;

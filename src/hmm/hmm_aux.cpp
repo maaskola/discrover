@@ -356,7 +356,6 @@ string HMM::path2string_group(const HMM::StatePath &path) const
 {
   const char start_symb = '^';
   const char bg_symb = '-';
-  const size_t mode = 1;
   char first_symb = '0';
   if(groups.size() - 2 > 10)
     first_symb = 'A';
@@ -835,6 +834,22 @@ Training::Range HMM::complementary_states(size_t group_idx) const
   for(size_t i = start_state; i < n_states; i++)
     if(not is_motif_state(i) or group_ids[i] != group_idx)
       range.push_back(i);
+  if(verbosity >= Verbosity::debug) {
+    cout << "Complementary states =";
+    for(auto &x: range)
+      cout << " " << x;
+    cout << endl;
+  }
+  return(range);
+}
+
+Training::Range HMM::complementary_states_mask(size_t present_mask) const
+{
+  Training::Range range;
+  for(size_t i = start_state; i < n_states; i++)
+    range.push_back(i);
+  auto in_mask = [&] (size_t state) { return((present_mask & (1 << group_ids[state])) != 0); };
+  range.erase(remove_if(begin(range), end(range), in_mask), end(range));
   if(verbosity >= Verbosity::debug) {
     cout << "Complementary states =";
     for(auto &x: range)

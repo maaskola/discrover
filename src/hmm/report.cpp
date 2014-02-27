@@ -75,16 +75,19 @@ void eval_contrast(const HMM &hmm, const Data::Series &data, ostream &ofs, bool 
   for(size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
     if(hmm.is_motif_group(group_idx)) {
       size_t motif_len = hmm.get_motif_len(group_idx);
-      vector_t v = hmm.posterior_atleast_one(data, group_idx);
+      // TODO FIX ABSENT
+      size_t present_mask = 1 << group_idx;
+      size_t absent_mask = 0;
+      vector_t v = hmm.posterior_atleast_one(data, present_mask, absent_mask);
       matrix_t counts(v.size(), 2);
       for(size_t i = 0; i < v.size(); i++) {
         counts(i,0) = v(i);
         counts(i,1) = data.sets[i].set_size - v(i);
       }
-      double mcc = hmm.matthews_correlation_coefficient(data, group_idx); // TODO compute from count table
+      double mcc = hmm.matthews_correlation_coefficient(data, present_mask, absent_mask); // TODO compute from count table
       // double llr = calc_log_likelihood_ratio(counts, hmm.pseudo_count);
       // double dips_tscore = hmm.dips_tscore(data, feature);
-      double dips_sitescore = hmm.dips_sitescore(data, group_idx);
+      double dips_sitescore = hmm.dips_sitescore(data, present_mask, absent_mask);
       // double correct_class = hmm.correct_classification(data);  // TODO: reactivate
 
       string name = hmm.get_group_name(group_idx);
@@ -96,7 +99,7 @@ void eval_contrast(const HMM &hmm, const Data::Series &data, ostream &ofs, bool 
       ofs << tag << "DIPS site-score = " << dips_sitescore * 100 << " %" << endl;
       // ofs << "log P correct classification = " << correct_class << endl; // TODO: reactivate
       // TODO print a table of the likelihoods
-      ofs << tag << "Log likelihood difference = " << hmm.log_likelihood_difference(data, group_idx) << endl; // TODO compute from count table
+      ofs << tag << "Log likelihood difference = " << hmm.log_likelihood_difference(data, present_mask, absent_mask) << endl; // TODO compute from count table
     }
 }
 
@@ -254,7 +257,10 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
   if(options.evaluate.ric)
     for(size_t group_idx = 0; group_idx < n_groups; group_idx++)
       if(hmm.is_motif_group(group_idx)) {
-        double ric = hmm.rank_information(data, group_idx);
+        // TODO FIX ABSENT
+        size_t present_mask = 1 << group_idx;
+        size_t absent_mask = 0;
+        double ric = hmm.rank_information(data, present_mask, absent_mask);
         out << "RIC = " << ric << std::endl;
       }
 
@@ -271,7 +277,10 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
         if(hmm.is_motif_group(group_idx)) {
           if(first) first = false; else { viterbi_str << "/"; exp_str << "/"; atl_str << "/"; }
 
-          double atl = hmm.posterior_atleast_one(data.sequences[i], group_idx).posterior;
+          // TODO FIX ABSENT
+          size_t present_mask = 1 << group_idx;
+          size_t absent_mask = 0;
+          double atl = hmm.posterior_atleast_one(data.sequences[i], present_mask, absent_mask).posterior;
           double expected = hmm.expected_posterior(data.sequences[i], group_idx);
           size_t n_viterbi = hmm.count_motif(path, group_idx);
           atl_counts[motif_idx][i] = atl;
@@ -360,6 +369,10 @@ void evaluate_hmm(const HMM &hmm,
     const Training::Tasks &tasks,
     const hmm_options &options)
 {
+  // TODO see that this does not invalidate previously learned parameters for MMIE!
+  // for(auto &series: data)
+  //   for(auto &data_set: series)
+  //     register_dataset(data_set, (1.0*data_set.set_size)/training_data.set_size, options.conditional_motif_prior1, options.conditional_motif_prior2);
   /*  TODO: re-enable class-based models
   if(options.adapt_classes) {
     if(options.verbosity >= Verbosity::info)
@@ -454,7 +467,8 @@ void evaluate_hmm(const HMM &hmm,
     occurrence_out.push(occurrence_file);
 
 
-    if(options.evaluate.summary) {
+    // TODO reactive!
+    if(false && options.evaluate.summary) {
       summary_out << endl;
       Training::Task my_task;
       my_task.measure = Measure::ClassificationPosterior;

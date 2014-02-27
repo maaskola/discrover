@@ -316,7 +316,7 @@ class HMM {
     friend void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options, bool relearning_phase);
 
   public:
-    double compute_score(const Data::Collection &data, const Measures::Continuous::Measure &measure, bool weighting, const std::vector<size_t> &motifs) const;
+    double compute_score(const Data::Collection &data, const Measures::Continuous::Measure &measure, bool weighting, const std::vector<size_t> &present_motifs, const std::vector<size_t> &absent_motifs) const;
     double compute_score_all_motifs(const Data::Collection &data, const Measures::Continuous::Measure &measure, bool weighting) const;
 
   protected:
@@ -339,11 +339,13 @@ class HMM {
     };
 
   public:
-    vector_t posterior_atleast_one(const Data::Series &data, size_t group_idx) const;
+    vector_t posterior_atleast_one(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups=std::vector<size_t>()) const;
+    vector_t posterior_atleast_one(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
+    // vector_t posterior_atleast_one(const Data::Series &data, size_t present, size_t absent_groups=std::vector<size_t>()) const;
   protected:
-    vector_t posterior_atleast_one(const Data::Set &data, size_t group_idx) const;
-    double   sum_posterior_atleast_one(const Data::Set &data, size_t group_idx) const;
-    posterior_t posterior_atleast_one(const Data::Seq &data, size_t group_idx) const;
+    vector_t    posterior_atleast_one(const Data::Set &data, size_t present_mask, size_t absent_mask) const;
+    double      sum_posterior_atleast_one(const Data::Set &data, size_t present_mask, size_t absent_mask) const;
+    posterior_t posterior_atleast_one(const Data::Seq &data, size_t present_mask, size_t absent_mask) const;
 
     vector_t viterbi_atleast_one(const Data::Series &data, size_t group_idx) const;
     double   viterbi_atleast_one(const Data::Set &data, size_t group_idx) const;
@@ -359,48 +361,56 @@ class HMM {
 // -------------------------------------------------------------------------------------------
 // Generative and discriminative measures
 // -------------------------------------------------------------------------------------------
+// The logic for the present and absent arguments is follows:
+//  at least one of those specified as present has to be present
+//  none of those specified as absent are to be present
+// Furthermore, where present and absent groups are given by vectors, these are vectors of the indices of the respective groups.
+// When they are to be given as masks, then these indices are transformed into bit masks.
 
     double log_likelihood(const Data::Collection &data) const;
     double log_likelihood(const Data::Series &data) const;
     double log_likelihood(const Data::Set &s) const;
 
-    double class_likelihood(const Data::Series &data, const std::vector<size_t> &groups, bool compute_posterior) const;
-    double class_likelihood(const Data::Series &data, size_t group_idx, bool compute_posterior) const;
-    double class_likelihood(const Data::Set &data, size_t group_idx, bool compute_posterior) const;
-
-    // Discriminative measures, summed over multiple groups
-    /** The likelihood difference */
-    double log_likelihood_difference(const Data::Series &data, const std::vector<size_t> &groups) const;
-    /** The mutual information of condition and motif occurrence */
-    double mutual_information(const Data::Series &data, const std::vector<size_t> &groups) const;
-    /** The mutual information of rank and motif occurrence. */
-    double rank_information(const Data::Series &data, const std::vector<size_t> &groups) const;
-    /** The summed Matthew's correlation coefficients of all individual contrasts. */
-    double matthews_correlation_coefficient(const Data::Series &data, const std::vector<size_t> &groups) const;
-    /** The summed difference of expected occurrence frequencies. */
-    double dips_tscore(const Data::Series &data, const std::vector<size_t> &groups) const;
-    /** The summed difference of site occurrence. */
-    double dips_sitescore(const Data::Series &data, const std::vector<size_t> &groups) const;
+    double class_likelihood(const Data::Series &data, const std::vector<size_t> &present_groups,  const std::vector<size_t> &absent_groups, bool compute_posterior) const;
+    double class_likelihood(const Data::Series &data, size_t present_mask, size_t absent_mask, bool compute_posterior) const;
+    double class_likelihood(const Data::Set &data, size_t present_mask, size_t absent_mask, bool compute_posterior) const;
 
   public:
-    // Discriminative measures, for individual groups
+
+    // Discriminative measures, for groups specified by vectors of group indices
     /** The likelihood difference */
-    double log_likelihood_difference(const Data::Series &data, size_t group_idx) const;
+    double log_likelihood_difference(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
     /** The mutual information of condition and motif occurrence */
-    double mutual_information(const Data::Series &data, size_t group_idx) const;
+    double mutual_information(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
     /** The mutual information of rank and motif occurrence. */
-    double rank_information(const Data::Series &data, size_t group_idx) const;
+    double rank_information(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
     /** The summed Matthew's correlation coefficients of all individual contrasts. */
-    double matthews_correlation_coefficient(const Data::Series &data, size_t group_idx) const;
+    double matthews_correlation_coefficient(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
     /** The summed difference of expected occurrence frequencies. */
-    double dips_tscore(const Data::Series &data, size_t group_idx) const;
+    double dips_tscore(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
     /** The summed difference of site occurrence. */
-    double dips_sitescore(const Data::Series &data, size_t group_idx) const;
+    double dips_sitescore(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
+
+  // protected:
+
+    // Discriminative measures, for groups specified by bitmasks
+    /** The likelihood difference */
+    double log_likelihood_difference(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
+    /** The mutual information of condition and motif occurrence */
+    double mutual_information(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
+    /** The mutual information of rank and motif occurrence. */
+    double rank_information(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
+    /** The summed Matthew's correlation coefficients of all individual contrasts. */
+    double matthews_correlation_coefficient(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
+    /** The summed difference of expected occurrence frequencies. */
+    double dips_tscore(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
+    /** The summed difference of site occurrence. */
+    double dips_sitescore(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
 
   protected:
     // Discriminative measures, for individual sets of sequences
     /** The mutual information of rank and motif occurrence. */
-    double rank_information(const Data::Set &data, size_t group_idx) const;
+    double rank_information(const Data::Set &data, size_t present_mask, size_t absent_mask) const;
 // -------------------------------------------------------------------------------------------
 // Expectation-maximization type learning
 // -------------------------------------------------------------------------------------------
@@ -579,6 +589,7 @@ class HMM {
     void register_dataset(const Data::Set &data, double class_prior, double motif_p1, double motif_p2);
   protected:
     Training::Range complementary_states(size_t group_idx) const;
+    Training::Range complementary_states_mask(size_t present_mask) const;
 };
 
 std::ostream &operator<<(std::ostream& os, const HMM &hmm);
