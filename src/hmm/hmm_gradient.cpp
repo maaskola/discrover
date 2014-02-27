@@ -103,8 +103,8 @@ Training::Task cross_optimization_targets(const Training::Task &task, size_t gro
     auto func = [&](size_t state) {
       return(group_idx != group_ids[state]);
     };
-    obj.targets.transition.resize(remove_if(obj.targets.transition.begin(), obj.targets.transition.end(), func) - obj.targets.transition.begin());
-    obj.targets.emission.resize(remove_if(obj.targets.emission.begin(), obj.targets.emission.end(), func) - obj.targets.emission.begin());
+    obj.targets.transition.erase(remove_if(obj.targets.transition.begin(), obj.targets.transition.end(), func), end(obj.targets.transition));
+    obj.targets.emission.erase(remove_if(obj.targets.emission.begin(), obj.targets.emission.end(), func), end(obj.targets.emission));
   }
   return(obj);
 }
