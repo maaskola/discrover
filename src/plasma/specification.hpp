@@ -420,15 +420,10 @@ namespace Specification {
       objectives = objs;
     }
 
-    for(auto &objective: objectives) {
-      std::cout << "obj <-> check 1: " << objective.motif_name << std::endl;
-    }
-
     // check that no more than one objective exists for each motif, and that each objective refers to an existing motif
     // i.e. check that the relation between objective and motifs is one-to-one
     std::set<std::string> motif_names_in_objectives;
     for(auto &objective: objectives) {
-      std::cout << "obj <-> check 2: " << objective.motif_name << std::endl;
       auto pair = motif_names_in_objectives.insert(objective.motif_name);
       if(not pair.second) { // there was already a motif of that name
         std::cout << "Error: motif name in objective not unique: '" << objective.motif_name << "'." << std::endl;
