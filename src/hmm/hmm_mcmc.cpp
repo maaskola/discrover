@@ -188,7 +188,6 @@ void HMM::add_column(size_t n, const std::vector<double> &e)
   transition = new_transition;
 
   group_ids.insert(group_ids.begin() + n, 1); // TODO make this compatible with the next motif_idx semantics
-  order.insert(order.begin() + n, *order.rbegin());
 }
 
 
@@ -241,7 +240,6 @@ void HMM::del_column(size_t n)
   transition = new_transition;
 
   group_ids.erase(group_ids.begin()+n);
-  order.erase(order.begin()+n);
 
   for(auto &group: groups) {
     auto iter = std::find(group.states.begin(), group.states.end(), n);

@@ -112,7 +112,7 @@ struct Group {
 class HMM {
   public:
     // constructors
-    HMM(size_t bg_order, Verbosity verbosity_, double pseudo_count_=1.0);
+    HMM(Verbosity verbosity_, double pseudo_count_=1.0);
     HMM(const std::string &path, Verbosity verbosity_, double pseudo_count_=1.0);
     HMM(const HMM &hmm, bool copy_deep=true);
 
@@ -124,7 +124,7 @@ class HMM {
     /** The size of the alphabet. */
     const static size_t alphabet_size = 4;
     /** The number of emissions. */
-    size_t n_emissions; // = sum(alphabet_size**i, i, 1, bg_order+1)
+    const static size_t n_emissions = alphabet_size;
     /** Level of output verbosity. */
     Verbosity verbosity;
     /** Whether to save intermediate parameters on disc during learning. */
@@ -145,10 +145,6 @@ class HMM {
     std::vector<Group> groups;
     /** Classification of each node */
     std::vector<size_t> group_ids;
-    std::vector<size_t> order;
-    std::vector<size_t> order_offset;
-    size_t max_order;
-    const static size_t initial_history = 0;
 
     /** The transition probabilities. */
     matrix_t transition;
@@ -178,10 +174,9 @@ class HMM {
 // Initialization routines
 // -------------------------------------------------------------------------------------------
 
-    void initialize_emissions(size_t bg_order);
+    void initialize_emissions();
     void initialize_transitions();
     void initialize_bg_transitions();
-    void initialize_order_offsets();
     void initialize_transitions_to_and_from_chain(size_t w, double l, double lambda, size_t first, size_t last, size_t pad_left, size_t pad_right);
     void set_motif_emissions(const matrix_t &e, size_t first, size_t n_insertions, size_t pad_left, size_t pad_right);
     void normalize_transition(matrix_t &m) const;
@@ -319,9 +314,6 @@ class HMM {
     vector_t viterbi_atleast_one(const Data::Series &data, size_t group_idx) const;
     double   viterbi_atleast_one(const Data::Set &data, size_t group_idx) const;
 
-    double viterbi_zeroth_order(const Data::Seq &s, StatePath &path) const;
-    double viterbi_higher_order(const Data::Seq &s, StatePath &path) const;
-
     vector_t expected_posterior(const Data::Series &data, size_t group_idx) const;
     double   expected_posterior(const Data::Set &data, size_t group_idx) const;
 
@@ -437,23 +429,15 @@ class HMM {
     /** The standard forward algorithm with scaling.
      *  The scaling vector is also determined. */
     matrix_t compute_forward_scaled(const Data::Seq &s, vector_t &scale) const;
-    matrix_t compute_forward_scaled_zeroth_order(const Data::Seq &s, vector_t &scale) const;
-    matrix_t compute_forward_scaled_higher_order(const Data::Seq &s, vector_t &scale) const;
     /** Computes only the scaling vector of the standard forward algorithm with scaling. */
     vector_t compute_forward_scale(const Data::Seq &s) const;
-    vector_t compute_forward_scale_zeroth_order(const Data::Seq &s) const;
-    vector_t compute_forward_scale_higher_order(const Data::Seq &s) const;
 
     /** The standard forward algorithm with pre-scaling.
      *  The scaling vector is assumed to be given. */
     matrix_t compute_forward_prescaled(const Data::Seq &s, const vector_t &scale) const;
-    matrix_t compute_forward_prescaled_zeroth_order(const Data::Seq &s, const vector_t &scale) const;
-    matrix_t compute_forward_prescaled_higher_order(const Data::Seq &s, const vector_t &scale) const;
     /** The standard backward algorithm with pre-scaling.
      *  The scaling vector is assumed to be given. */
     matrix_t compute_backward_prescaled(const Data::Seq &s, const vector_t &scale) const;
-    matrix_t compute_backward_prescaled_zeroth_order(const Data::Seq &s, const vector_t &scale) const;
-    matrix_t compute_backward_prescaled_higher_order(const Data::Seq &s, const vector_t &scale) const;
 
     double likelihood_from_scale(const vector_t &scale) const;
     double log_likelihood_from_scale(const vector_t &scale) const;
@@ -538,17 +522,6 @@ class HMM {
     void del_columns(size_t n, std::mt19937 &rng);
     void del_column(size_t n);
 
-    struct History {
-      public:
-        size_t observation;
-        size_t length;
-        History() : observation(0), length(0) { };
-    };
-
-    void update_history(History &history, size_t obs) const;
-    void update_history_front(History &history, size_t obs) const;
-    size_t get_emission_index(size_t state, const History &history) const;
-
     bool is_motif_state(size_t state) const;
   public:
     bool is_motif_group(size_t group_idx) const;
@@ -562,31 +535,6 @@ class HMM {
 };
 
 std::ostream &operator<<(std::ostream& os, const HMM &hmm);
-
-// NOTE: this assumes that the alphabet has size 4, which is okay for nucleic acids, but not for amino acids
-inline size_t HMM::get_emission_index(size_t state, const History &history) const
-{
-  const size_t current_order_plus_1 = order[state] + 1;
-  const size_t available_order_plus_1 = std::min<size_t>(history.length, current_order_plus_1);
-
-  // truncate to available_order_plus_1 positions;
-  // this is identity when available_order_plus_1 == order[state] + 1
-  const size_t mask = (1 << (2 * available_order_plus_1)) - 1;
-  const size_t obs = history.observation & mask;
-
-  size_t res;
-  if(available_order_plus_1 == current_order_plus_1)
-    // return obs if the history size is limited by the order of the state 
-    res = obs;
-  else
-    // otherwise add the corresponding order offset
-    res = obs + order_offset[order[state] - available_order_plus_1];
-  if(false) {
-    std::cerr << "state = " << state << " history.observation = " << history.observation << " -> " << res << std::endl;
-    std::cerr << "current_order_plus_1 = " << current_order_plus_1 << " available_order_plus_1 = " << available_order_plus_1 << " obs = " << obs << " mask = " << mask << " history.length = " << history.length << std::endl;
-  }
-  return(res);
-}
 
 #include "subhmm.hpp"
 

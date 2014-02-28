@@ -140,7 +140,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
     cout << "About to construct HMM." << endl;
 
   // initialize HMM
-  HMM hmm(options.bg_order, options.verbosity, options.contingency_pseudo_count);
+  HMM hmm(options.verbosity, options.contingency_pseudo_count);
 
   // load HMM from file if specified
   size_t n_loaded = 0;

@@ -81,7 +81,7 @@ void HMM::initialize_pred_succ()
 };
 
 /** Initialize the emission matrix */
-void HMM::initialize_emissions(size_t bg_order)
+void HMM::initialize_emissions()
 {
   // Start state does not emit
   for(size_t i = 0; i < n_emissions; i++)
@@ -91,7 +91,6 @@ void HMM::initialize_emissions(size_t bg_order)
   for(size_t i = bg_state; i < n_states; i++)
     for(size_t j = 0; j < n_emissions; j++)
       emission(i,j) = 1.0 / n_emissions;
-  // TODO set up the emissions for higher order emission states
 };
 
 /** Initialize the transition matrix to zero */

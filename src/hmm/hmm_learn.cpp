@@ -68,7 +68,7 @@ std::string line_search_status(int status) {
 
 void HMM::train_background(const Data::Collection &data, const hmm_options &options)
 {
-  HMM bg_hmm(options.bg_order, options.verbosity);
+  HMM bg_hmm(options.verbosity);
 
   Training::Task task;
   task.measure = Measure::Likelihood;
@@ -99,7 +99,7 @@ void HMM::train_background(const Data::Collection &data, const hmm_options &opti
 void HMM::initialize_bg_with_bw(const Data::Collection &collection, const hmm_options &options)
 {
   if(options.verbosity >= Verbosity::info)
-    std::cout << "Initializing background of order " << options.bg_order << " with Baum-Welch algorithm." << std::endl;
+    std::cout << "Initializing background with Baum-Welch algorithm." << std::endl;
 
   hmm_options bg_options = options;
   if(options.verbosity == Verbosity::info)
@@ -238,11 +238,9 @@ double HMM::BaumWelchIteration_single(matrix_t &T, matrix_t &E, const Data::Seq 
     if(not(T.size1() == n_states and T.size2() == n_states))
       T = zero_matrix(n_states, n_states);
 
-    History history;
     // for all transitions except the one to the start state
     for(size_t i = 0; i < L; i++) {
       size_t symbol = s.isequence(i);
-      update_history(history, symbol);
       if(symbol == empty_symbol)
         for(auto k: targets.transition)
           T(k,start_state) += f(i,k) * transition(k,start_state) * b(i+1,start_state);
@@ -250,10 +248,8 @@ double HMM::BaumWelchIteration_single(matrix_t &T, matrix_t &E, const Data::Seq 
         // TODO change the order of the loops
         for(auto k: targets.transition) {
           double f_i_k = f(i,k);
-          for(auto suc : succ[k]) {
-            size_t current_emission = get_emission_index(suc, history);
-            T(k,suc) += f_i_k * transition(k,suc) * emission(suc,current_emission) * b(i+1,suc);
-          }
+          for(auto suc : succ[k])
+            T(k,suc) += f_i_k * transition(k,suc) * emission(suc,symbol) * b(i+1,suc);
         }
     }
 
@@ -266,15 +262,11 @@ double HMM::BaumWelchIteration_single(matrix_t &T, matrix_t &E, const Data::Seq 
     if(not(E.size1() == n_states and E.size2() == n_emissions))
       E = zero_matrix(n_states, n_emissions);
 
-    History history;
     for(size_t i = 0; i < L; i++) {
       size_t symbol = s.isequence(i);
-      update_history(history, symbol);
       if(symbol != empty_symbol)
-        for(auto k: targets.emission) {
-          size_t current_emission = get_emission_index(k, history);
-          E(k, current_emission) += f(i+1,k) * b(i+1,k) * scale(i+1);
-        }
+        for(auto k: targets.emission)
+          E(k, symbol) += f(i+1,k) * b(i+1,k) * scale(i+1);
     }
   }
   return(log_likel);
@@ -295,11 +287,9 @@ double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Seq &s, con
   if(not targets.transition.empty()) {
     matrix_t t = zero_matrix(n_states, n_states);
 
-    History history;
     // for all transitions except the one to the start state
     for(size_t i = 0; i < L; i++) {
       size_t symbol = s.isequence(i);
-      update_history(history, symbol);
       if(symbol == empty_symbol)
         for(auto k: targets.transition)
           t(k,start_state) += f(i,k) * transition(k,start_state) * b(i+1,start_state);
@@ -307,10 +297,8 @@ double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Seq &s, con
         // TODO change the order of the loops
         for(auto k: targets.transition) {
           double f_i_k = f(i,k);
-          for(auto suc : succ[k]) {
-            size_t current_emission = get_emission_index(suc, history);
-            t(k,suc) += f_i_k * transition(k,suc) * emission(suc,current_emission) * b(i+1,suc);
-          }
+          for(auto suc : succ[k])
+            t(k,suc) += f_i_k * transition(k,suc) * emission(suc,symbol) * b(i+1,suc);
         }
     }
 
@@ -328,15 +316,11 @@ double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Seq &s, con
   if(not targets.emission.empty()) {
     matrix_t e = zero_matrix(n_states, n_emissions);
 
-    History history;
     for(size_t i = 0; i < L; i++) {
       size_t symbol = s.isequence(i);
-      update_history(history, symbol);
       if(symbol != empty_symbol)
-        for(auto k: targets.emission) {
-          double current_emission = get_emission_index(k, history);
-          e(k, current_emission) += f(i+1,k) * b(i+1,k) * scale(i+1);
-        }
+        for(auto k: targets.emission)
+          e(k, symbol) += f(i+1,k) * b(i+1,k) * scale(i+1);
     }
 
     if(verbosity >= Verbosity::debug)

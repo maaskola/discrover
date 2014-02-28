@@ -36,7 +36,6 @@ const size_t HMM::start_state;
 const size_t HMM::bg_state;
 
 HMM::HMM(const std::string &path, Verbosity verbosity_, double pseudo_count) :
-  n_emissions(alphabet_size),
   verbosity(verbosity_),
   store_intermediate(false),
   last_state(0),
@@ -44,9 +43,6 @@ HMM::HMM(const std::string &path, Verbosity verbosity_, double pseudo_count) :
   pseudo_count(pseudo_count),
   groups(),
   group_ids(),
-  order(),
-  order_offset(),
-  max_order(0),
   transition(),
   emission(),
   pred(),
@@ -73,12 +69,10 @@ HMM::HMM(const std::string &path, Verbosity verbosity_, double pseudo_count) :
     std::cout << "Error during loading parameters from parameter file " << path << ". Aborting." << std::endl;
     exit(-1);
   }
-  initialize_order_offsets();
   finalize_initialization();
 };
 
 HMM::HMM(const HMM &hmm, bool copy_deep) :
-  n_emissions(hmm.n_emissions),
   verbosity(hmm.verbosity),
   store_intermediate(hmm.store_intermediate),
   last_state(hmm.last_state),
@@ -86,9 +80,6 @@ HMM::HMM(const HMM &hmm, bool copy_deep) :
   pseudo_count(hmm.pseudo_count),
   groups(hmm.groups),
   group_ids(hmm.group_ids),
-  order(hmm.order),
-  order_offset(hmm.order_offset),
-  max_order(hmm.max_order),
   transition(hmm.transition),
   emission(hmm.emission),
   pred(hmm.pred),
@@ -100,20 +91,10 @@ HMM::HMM(const HMM &hmm, bool copy_deep) :
 {
   if(verbosity >= Verbosity::debug)
     std::cout << "Called HMM constructor 2." << std::endl;
-  initialize_order_offsets();
   finalize_initialization();
 };
 
-size_t calc_num_emissions(size_t asize, size_t order)
-{
-  size_t x = 0;
-  for(size_t i = 1; i <= order+1; i++)
-    x += ipow(asize, i);
-  return(x);
-}
-
-HMM::HMM(size_t bg_order, Verbosity verbosity_, double pseudo_count_) :
-  n_emissions(calc_num_emissions(alphabet_size, bg_order)),
+HMM::HMM(Verbosity verbosity_, double pseudo_count_) :
   verbosity(verbosity_),
   store_intermediate(false),
   last_state(1),
@@ -121,9 +102,6 @@ HMM::HMM(size_t bg_order, Verbosity verbosity_, double pseudo_count_) :
   pseudo_count(pseudo_count_),
   groups(),
   group_ids(),
-  order(std::vector<size_t>(n_states, 0)),
-  order_offset(std::vector<size_t>(n_states)),
-  max_order(bg_order),
   transition(zero_matrix(n_states, n_states)),
   emission(zero_matrix(n_states, n_emissions)),
   pred(),
@@ -134,8 +112,7 @@ HMM::HMM(size_t bg_order, Verbosity verbosity_, double pseudo_count_) :
   registered_datasets()
 {
   if(verbosity >= Verbosity::debug)
-    std::cout << "Called HMM constructor 3." << std::endl
-      << "bg_order = " << bg_order << std::endl;
+    std::cout << "Called HMM constructor 3." << std::endl;
   Group special({Group::Kind::Special, "Special", {start_state}});
   groups.push_back(special);
   group_ids.push_back(0);
@@ -143,12 +120,10 @@ HMM::HMM(size_t bg_order, Verbosity verbosity_, double pseudo_count_) :
   Group background({Group::Kind::Background, "Background", {bg_state}});
   groups.push_back(background);
   group_ids.push_back(1);
-  order[bg_state] = bg_order; // for the start and end state
-  initialize_order_offsets();
   initialize_transitions();
   initialize_bg_transitions();
 
-  initialize_emissions(bg_order);
+  initialize_emissions();
 
   normalize_emission(emission);
   normalize_transition(transition);
@@ -204,9 +179,6 @@ size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda, cons
   for(size_t i = 0; i < previous.transition.size1(); i++)
     for(size_t j = 0; j < previous.transition.size2(); j++)
       transition(i,j) = previous.transition(i,j);
-
-  for(size_t i = 0; i < n_total; i++)
-    order.push_back(0); // TODO: make configurable
 
   set_motif_emissions(e, first_padded, n_insertions, pad_left, pad_right);
 
@@ -400,12 +372,10 @@ void HMM::add_motifs(const HMM &hmm, bool only_additional) {
         for(size_t j = 0; j < n_emissions; j++)
           new_emission(n_states + i, j) = hmm.emission(group.states[i], j);
 
-      // collect states and orders of new group
+      // collect states of new group
       size_t group_idx = groups.size();
-      for(size_t i = 0; i < n_motif_states; i++) {
+      for(size_t i = 0; i < n_motif_states; i++)
         group_ids.push_back(group_idx);
-        order.push_back(hmm.order[group.states[i]]);
-      }
 
       // create new group
       Group new_group = group;

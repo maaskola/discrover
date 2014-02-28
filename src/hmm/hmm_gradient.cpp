@@ -793,18 +793,10 @@ matrix_t HMM::transition_gradient(const matrix_t &T, const Training::Range &rang
 matrix_t HMM::emission_gradient(const matrix_t &E, const Training::Range &range) const
 {
   matrix_t m = zero_matrix(n_states, n_emissions);
-  for(auto j: range) {
-    size_t max_emission = alphabet_size;
-    if(order[j] > 0)
-      max_emission += order_offset[order[j]-1];
-    for(size_t k = 0; k < max_emission; k++) {
-      size_t lower = k / alphabet_size;
-      size_t upper = lower + alphabet_size;
-      for(size_t l = lower; l < upper; l++) {
+  for(auto j: range)
+    for(size_t k = 0; k < n_emissions; k++)
+      for(size_t l = 0; l < n_emissions; l++)
         m(j,k) += E(j,l) * (((k==l) ? 1 : 0) - emission(j,k));
-      }
-    }
-  }
   return(m);
 }
 

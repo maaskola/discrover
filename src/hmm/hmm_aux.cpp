@@ -113,6 +113,7 @@ void HMM::serialize(ostream &os, const ExecutionInformation &exec_info, size_t f
   const string emission_matrix_string = "Emission matrix";
   const size_t output_precision = 15;
   switch(format_version) {
+    // TODO bump version because no order is stored?
     case 6:
       os << param_format_string << format_version << endl;
       os << "# " << exec_info.program_name << " " << exec_info.hmm_version << " [" << GIT_BRANCH << " branch]" << endl;
@@ -136,10 +137,6 @@ void HMM::serialize(ostream &os, const ExecutionInformation &exec_info, size_t f
       os << "State class";
       for(auto &motif: group_ids)
         os << " " << motif;
-      os << endl;
-      os << "State order";
-      for(auto &o: order)
-        os << " " << o;
       os << endl;
       os << transition_matrix_string << endl;
       os.precision(output_precision);
@@ -168,7 +165,6 @@ void HMM::deserialize(istream &is)
 {
   groups = vector<Group>();
   group_ids = vector<size_t>();
-  order = vector<size_t>();
 
   const string param_format_string = "# HMM parameter format version ";
   string line;
@@ -207,7 +203,11 @@ void HMM::deserialize(istream &is)
 
     n_states = atoi(line.c_str());
     safeGetline(is, line);
-    n_emissions = atoi(line.c_str());
+    size_t n_emis = atoi(line.c_str());
+    if(n_emis != n_emissions) {
+      cout << "Error: this version only works with " << n_emissions << " emissions, while the .hmm file specifies " << n_emis << "." << endl;
+      exit(-1);
+    }
 
     if(verbosity >= Verbosity::debug)
       cout << "n_states = " << n_states << " n_emissions " << n_emissions << endl;
@@ -268,22 +268,24 @@ void HMM::deserialize(istream &is)
     }
 
     safeGetline(is, line);
-    if(line.substr(0, 11) != "State order") {
-      cout << "Error loading HMM parameters: expected \"State order\" but found instead: \"" << line << "\"." << endl;
-      exit(-1);
-    }
+    if(line.substr(0, 11) == "State order") {
+      cout << "Found a state order line; checking that all orders are zero, and ignoring." << endl;
 
-    line = line.substr(12);
-    while(line != "") {
-      size_t start = line.find(" ");
-      if(start > 0) {
-        size_t o = atoi(line.substr(0,start).c_str());
-        order.push_back(o);
+      line = line.substr(12);
+      while(line != "") {
+        size_t start = line.find(" ");
+        if(start > 0) {
+          size_t o = atoi(line.substr(0,start).c_str());
+          if(o != 0) {
+            cout << "Error: Found a non-zero state order. This version version only works for zeroth order." << endl;
+            exit(-1);
+          }
+        }
+        if(start == string::npos)
+          break;
+        else
+          line = line.substr(start+1);
       }
-      if(start == string::npos)
-        break;
-      else
-        line = line.substr(start+1);
     }
 
 
@@ -318,7 +320,6 @@ void HMM::deserialize(istream &is)
     exit(-1);
   }
 
-  initialize_order_offsets();
   finalize_initialization();
 };
 
@@ -449,14 +450,11 @@ bool HMM::check_consistency() const
   bool ok = true;
   ok = ok and check_consistency_transitions();
   ok = ok and check_consistency_emissions();
-  ok = ok and (group_ids.size() == order.size() and group_ids.size() == n_states);
+  ok = ok and group_ids.size() == n_states;
   for(auto &m: groups)
     for(auto &state: m.states)
       if(state > n_states)
         ok = false;
-  for(auto &o: order)
-    if(o > max_order)
-      ok = false;
   for(auto &d: group_ids)
     if(d > groups.size())
       ok = false;
@@ -517,82 +515,6 @@ void HMM::set_motif_emissions(const matrix_t &e, size_t first_padded, size_t n_i
   }
 }
 
-// NOTE: this assumes that the alphabet has size 4, which is okay for nucleic acids, but not for amino acids
-void HMM::update_history(History &history, size_t obs) const
-{
-  if(verbosity >= Verbosity::everything)
-    cout << "obs = " << obs << endl
-      << "history = " << history.observation << endl
-      << "history length = " << history.length << endl
-      << "alphabet_size = " << alphabet_size << endl
-      << "max_order  = " << max_order  << endl
-      << "history * alphabet_size = " << history.observation * alphabet_size << endl
-      << "history << 2 = " << (history.observation << 2) << endl
-      << "ipow(alphabet_size, max_order + 1) = " << ipow(alphabet_size, max_order + 1) << endl
-      << "(1 << (2 * (max_order + 1))) = " << (1 << (2 * (max_order + 1))) << endl;
-  if(obs == empty_symbol) {
-    history.observation = 0;
-    history.length = 0;
-  } else {
-    history.observation = ((history.observation << 2)         // left shift one position
-        + obs)                                                // add the new observation
-      % (1 << (2 * (max_order + 1)));                         // truncate to max_order position
-    history.length++;
-    history.length = min<size_t>(history.length, max_order + 1);
-  }
-  if(verbosity >= Verbosity::everything)
-    cout << "new history = " << history.observation << " length = " << history.length << endl;
-}
-
-// NOTE: this assumes that the alphabet has size 4, which is okay for nucleic acids, but not for amino acids
-void HMM::update_history_front(History &history, size_t obs) const
-{
-  if(verbosity >= Verbosity::everything)
-    cout << "adding obs = " << obs << endl
-      << "prev history = " << history.observation << endl
-      << "prev history length = " << history.length<< endl
-      << "alphabet_size = " << alphabet_size << endl
-      << "max_order  = " << max_order  << endl
-      << "history / alphabet_size = " << history.observation / alphabet_size << endl
-      << "history >> 2 = " << (history.observation >> 2) << endl;
-  if(obs == empty_symbol) {
-    if(history.length > 0) {
-      history.observation = history.observation >> 2;
-      history.length--;
-    }
-  } else {
-    history.observation = (obs << (2 * max_order))    // left shift obs to the most significant position
-      + (history.observation >> 2);                   // add the previous history, right-shifted one position
-    history.length++;
-    history.length = min<size_t>(history.length, max_order + 1);
-  }
-  if(verbosity >= Verbosity::everything)
-    cout << "new history = " << history.observation << endl;
-}
-
-void HMM::initialize_order_offsets()
-{
-  max_order = 0;
-  for(auto &o: order)
-    if(o > max_order)
-      max_order = o;
-
-  order_offset.resize(max_order);
-  double n = 0;
-  for(size_t i = 0; i < max_order; i++)
-    order_offset[i] = n += ipow(alphabet_size, max_order - i + 1);
-  if(verbosity >= Verbosity::debug) {
-    cout << "order =";
-    for(auto o: order)
-      cout << " " << o;
-    cout << endl;
-    cout << "order_offset =";
-    for(auto o: order_offset)
-      cout << " " << o;
-    cout << endl;
-  }
-}
-
 void HMM::normalize_transition(matrix_t &m) const
 {
   for(size_t k = 0; k < m.size1(); k++) {
@@ -611,36 +533,17 @@ void HMM::normalize_transition(matrix_t &m) const
 void HMM::normalize_emission(matrix_t &m) const
 {
   for(size_t k = bg_state; k < m.size1(); k++) {
-    size_t offset = 0;
     if(verbosity >= Verbosity::debug)
-      cout << "k = " << k << endl
-        << "order[" << k << "] = " << order[k] << endl;
-    for(int i = order[k]; i >= 0; i--) {
-      size_t begin = offset;
-      offset += ipow(alphabet_size, i+1);
-      size_t end = offset;
-
-      if(verbosity >= Verbosity::debug)
-        cout << "Doing all emissions in " << begin << " to " << end << endl;
-      size_t x = begin;
-      while(x < end) {
-        size_t y = x + alphabet_size;
-        if(verbosity >= Verbosity::debug)
-          cout << "Doing emission " << x << " to " << y << endl;
-
-        double z = 0;
-        for(size_t b = x; b < y; b++)
-          z += m(k,b);
-        if(z > 0)
-          for(size_t b = x; b < y; b++)
-            m(k,b) = m(k,b) / z;
-        else
-          for(size_t b = x; b < y; b++)
-            m(k,b) = 0;
-
-        x = y;
-      }
-    }
+      cout << "k = " << k << endl;
+    double z = 0;
+    for(size_t b = 0; b < n_emissions; b++)
+      z += m(k,b);
+    if(z > 0)
+      for(size_t b = 0; b < n_emissions; b++)
+        m(k,b) /= z;
+    else
+      for(size_t b = 0; b < n_emissions; b++)
+        m(k,b) = 0;
   }
 
   // enforce emissions of start state
@@ -772,7 +675,7 @@ size_t HMM::non_zero_parameters(const Training::Targets &training_targets) const
 
 size_t HMM::n_parameters() const
 {
-  size_t n = (n_states * (n_states - 1)) + (n_states * (3 * ipow(alphabet_size, max_order)));
+  size_t n = n_states * (n_states - 1) + n_states * (alphabet_size - 1 );
   if(verbosity >= Verbosity::verbose)
     cout << "n_parameters = " << n << endl;
   return(n);
