@@ -75,7 +75,7 @@ void eval_contrast(const HMM &hmm, const Data::Series &data, ostream &ofs, bool 
   for(size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
     if(hmm.is_motif_group(group_idx)) {
       size_t motif_len = hmm.get_motif_len(group_idx);
-      // TODO FIX ABSENT
+      // TODO FIX ABSENT - done?
       size_t present_mask = 1 << group_idx;
       size_t absent_mask = 0;
       vector_t v = hmm.posterior_atleast_one(data, present_mask, absent_mask);
@@ -257,7 +257,7 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
   if(options.evaluate.ric)
     for(size_t group_idx = 0; group_idx < n_groups; group_idx++)
       if(hmm.is_motif_group(group_idx)) {
-        // TODO FIX ABSENT
+        // TODO FIX ABSENT - done?
         size_t present_mask = 1 << group_idx;
         size_t absent_mask = 0;
         double ric = hmm.rank_information(data, present_mask, absent_mask);
@@ -277,7 +277,7 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
         if(hmm.is_motif_group(group_idx)) {
           if(first) first = false; else { viterbi_str << "/"; exp_str << "/"; atl_str << "/"; }
 
-          // TODO FIX ABSENT
+          // TODO FIX ABSENT - done?
           size_t present_mask = 1 << group_idx;
           size_t absent_mask = 0;
           double atl = hmm.posterior_atleast_one(data.sequences[i], present_mask, absent_mask).posterior;
