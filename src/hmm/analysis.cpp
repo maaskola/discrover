@@ -98,7 +98,7 @@ void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Coll
   evaluate_hmm(hmm, all_data, "", eval_tasks, options);
 }
 
-double get_expected_seq_size(const Data::Collection &collection)
+double calc_expected_seq_size(const Data::Collection &collection)
 {
   return(1.0 * collection.seq_size / collection.set_size);
 }
@@ -163,7 +163,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
       cout << "Model after background learning = " << hmm << endl;
   }
 
-  double expected_seq_size = get_expected_seq_size(all_data);
+  double expected_seq_size = calc_expected_seq_size(all_data);
   if(options.verbosity >= Verbosity::info)
     cout << "The average sequence size is " << expected_seq_size << "nt." << endl;
 
