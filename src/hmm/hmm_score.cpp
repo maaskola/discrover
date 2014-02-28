@@ -212,18 +212,19 @@ vector_t HMM::posterior_atleast_one(const Data::Series &data, size_t present_mas
 
 vector_t HMM::posterior_atleast_one(const Data::Set &data, size_t present_mask, size_t absent_mask) const
 {
-  // if(verbosity >= Verbosity::debug)
-  if(true)
+  if(verbosity >= Verbosity::debug)
     cout << "HMM::posterior_atleast_one(Data::Set = " << data.path << ", present_mask = " << present_mask << ", absent_mask = " << absent_mask << endl;
 
-  cout << "complementary_states_mask(present_mask)) =";
-  for(auto &state: complementary_states_mask(present_mask))
-    cout << " " << state;
-  cout << endl;
-  cout << "complementary_states_mask(present_mask | absent_mask)) =";
-  for(auto &state: complementary_states_mask(present_mask | absent_mask))
-    cout << " " << state;
-  cout << endl;
+  if(verbosity >= Verbosity::debug) {
+    cout << "complementary_states_mask(present_mask)) =";
+    for(auto &state: complementary_states_mask(present_mask))
+      cout << " " << state;
+    cout << endl;
+    cout << "complementary_states_mask(present_mask | absent_mask)) =";
+    for(auto &state: complementary_states_mask(present_mask | absent_mask))
+      cout << " " << state;
+    cout << endl;
+  }
 
   // TODO FIX ABSENT - done?
   vector_t vec(data.set_size);
@@ -245,9 +246,11 @@ vector_t HMM::posterior_atleast_one(const Data::Set &data, size_t present_mask, 
   } else {
     SubHMM subhmm_wo_abs(*this, complementary_states_mask(absent_mask));
     SubHMM subhmm_wo_abs_wo_motif(*this, complementary_states_mask(present_mask | absent_mask));
-    cout << "Full     :" << *this << endl;
-    cout << "Reduced 1:" << subhmm_wo_abs << endl;
-    cout << "Reduced 2:" << subhmm_wo_abs_wo_motif << endl;
+    if(verbosity >= Verbosity::debug) {
+      cout << "Full     :" << *this << endl;
+      cout << "Reduced 1:" << subhmm_wo_abs << endl;
+      cout << "Reduced 2:" << subhmm_wo_abs_wo_motif << endl;
+    }
 #pragma omp parallel for schedule(static) if(DO_PARALLEL)
     for(size_t i = 0; i < data.set_size; i++) {
       double logp = log_likelihood_from_scale(compute_forward_scale(data.sequences[i]));
@@ -270,8 +273,7 @@ vector_t HMM::posterior_atleast_one(const Data::Set &data, size_t present_mask, 
     }
   }
 
-  // if(verbosity >= Verbosity::debug)
-  if(true)
+  if(verbosity >= Verbosity::debug)
     cout << "HMM::posterior_atleast_one(Data::Set = " << data.path << ", present_mask = " << present_mask << ", absent_mask = " << absent_mask << " vec = " << vec << endl;
   return(vec);
 };
