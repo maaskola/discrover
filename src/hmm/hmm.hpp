@@ -61,24 +61,6 @@
    probabilities, or just one of the two sets of probabilities.
 */
 
-
-// TODO
-// Discriminative learning:
-// * D  implement topological extension for conditional modeling
-// * E2  implement separation based on expected posterior motif probability gradient
-//
-// Test these approaches' generalization capabilities:
-//   ML-based, signal only:
-//      Baum-Welch on signal only
-//      Viterbi on signal only
-//      Likelihood gradient on signal only
-//   ML-based, discriminative
-//      Baum-Welch on extended topology
-//      Likelihood gradient on extended topology
-//   MMI-based
-//      MI gradient
-//
-
 // #define BOOST_UBLAS_MOVE_SEMANTICS // TODO find out if this helps
 
 #include <boost/container/map.hpp>
@@ -113,19 +95,8 @@ inline double scalar_product(const Gradient &gradient1, const Gradient &gradient
 /** The directional derivate */
 inline double dderiv(const Gradient &direction, const Gradient &gradient)
 {
-  assert(fabs(sqrt(scalar_product(direction,direction)) - 1) < 1e-6);
-  double x = scalar_product(direction, gradient); // / sqrt(scalar_product(direction, direction));
-  return(x);
+  return(scalar_product(direction, gradient));
 }
-
-
-class HMM;
-
-struct ResultsCounts;
-
-ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm, const Data::Set &data, std::ostream &out, std::ostream &v_out, std::ostream &occurrence_out, const hmm_options &options);
-HMM doit(const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options);
-void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options, bool relearning_phase);
 
 struct Group {
   enum class Kind {
@@ -282,6 +253,9 @@ class HMM {
     /** A getter routine for the group names. */
     std::string get_group_name(size_t idx) const;
 
+    /** A getter routine for the number of states. */
+    size_t get_nstates() const;
+
     /** A getter routine for the number of groups, including the constitutive one. */
     size_t get_ngroups() const;
 
@@ -308,12 +282,6 @@ class HMM {
     size_t non_zero_parameters(const Training::Targets &targets) const;
 
     friend std::ostream &operator<<(std::ostream& os, const HMM &hmm);
-    // TODO un-friend this function if possible
-    friend ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm, const Data::Set &data, std::ostream &out, std::ostream &v_out, std::ostream &occurrence_out, const hmm_options &options);
-    // TODO un-friend this function if possible
-    friend HMM doit(const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options);
-    // TODO un-friend this function if possible
-    friend void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options, bool relearning_phase);
 
   public:
     double compute_score(const Data::Collection &data, const Measures::Continuous::Measure &measure, bool weighting, const std::vector<size_t> &present_motifs, const std::vector<size_t> &absent_motifs) const;
@@ -341,31 +309,32 @@ class HMM {
   public:
     vector_t posterior_atleast_one(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups=std::vector<size_t>()) const;
     vector_t posterior_atleast_one(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
-    // vector_t posterior_atleast_one(const Data::Series &data, size_t present, size_t absent_groups=std::vector<size_t>()) const;
-  protected:
-    vector_t    posterior_atleast_one(const Data::Set &data, size_t present_mask, size_t absent_mask) const;
-    double      sum_posterior_atleast_one(const Data::Set &data, size_t present_mask, size_t absent_mask) const;
+    double viterbi(const Data::Seq &s, StatePath &path) const;
     posterior_t posterior_atleast_one(const Data::Seq &data, size_t present_mask, size_t absent_mask) const;
+    double expected_posterior(const Data::Seq &data, size_t group_idx) const;
+  protected:
+    vector_t posterior_atleast_one(const Data::Set &data, size_t present_mask, size_t absent_mask) const;
+    double   sum_posterior_atleast_one(const Data::Set &data, size_t present_mask, size_t absent_mask) const;
 
     vector_t viterbi_atleast_one(const Data::Series &data, size_t group_idx) const;
     double   viterbi_atleast_one(const Data::Set &data, size_t group_idx) const;
 
-    double viterbi(const Data::Seq &s, StatePath &path) const;
     double viterbi_zeroth_order(const Data::Seq &s, StatePath &path) const;
     double viterbi_higher_order(const Data::Seq &s, StatePath &path) const;
 
     vector_t expected_posterior(const Data::Series &data, size_t group_idx) const;
     double   expected_posterior(const Data::Set &data, size_t group_idx) const;
-    double   expected_posterior(const Data::Seq &data, size_t group_idx) const;
 
 // -------------------------------------------------------------------------------------------
 // Generative and discriminative measures
 // -------------------------------------------------------------------------------------------
-// The logic for the present and absent arguments is follows:
+// The logic for the present and absent arguments is as follows:
 //  at least one of those specified as present has to be present
 //  none of those specified as absent are to be present
 // Furthermore, where present and absent groups are given by vectors, these are vectors of the indices of the respective groups.
 // When they are to be given as masks, then these indices are transformed into bit masks.
+
+  public:
 
     double log_likelihood(const Data::Collection &data) const;
     double log_likelihood(const Data::Series &data) const;
@@ -374,8 +343,6 @@ class HMM {
     double class_likelihood(const Data::Series &data, const std::vector<size_t> &present_groups,  const std::vector<size_t> &absent_groups, bool compute_posterior) const;
     double class_likelihood(const Data::Series &data, size_t present_mask, size_t absent_mask, bool compute_posterior) const;
     double class_likelihood(const Data::Set &data, size_t present_mask, size_t absent_mask, bool compute_posterior) const;
-
-  public:
 
     // Discriminative measures, for groups specified by vectors of group indices
     /** The likelihood difference */
@@ -407,10 +374,10 @@ class HMM {
     /** The summed difference of site occurrence. */
     double dips_sitescore(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
 
-  protected:
     // Discriminative measures, for individual sets of sequences
     /** The mutual information of rank and motif occurrence. */
     double rank_information(const Data::Set &data, size_t present_mask, size_t absent_mask) const;
+
 // -------------------------------------------------------------------------------------------
 // Expectation-maximization type learning
 // -------------------------------------------------------------------------------------------
@@ -582,12 +549,14 @@ class HMM {
     void update_history_front(History &history, size_t obs) const;
     size_t get_emission_index(size_t state, const History &history) const;
 
-  public:
     bool is_motif_state(size_t state) const;
+  public:
     bool is_motif_group(size_t group_idx) const;
 
-    void register_dataset(const Data::Set &data, double class_prior, double motif_p1, double motif_p2);
+    void print_occurrence_table(const std::string &file, const Data::Seq &seq, const StatePath &path, std::ostream &out) const;
+
   protected:
+    void register_dataset(const Data::Set &data, double class_prior, double motif_p1, double motif_p2);
     Training::Range complementary_states(size_t group_idx) const;
     Training::Range complementary_states_mask(size_t present_mask) const;
 };
@@ -618,8 +587,6 @@ inline size_t HMM::get_emission_index(size_t state, const History &history) cons
   }
   return(res);
 }
-
-confusion_matrix reduce(const vector_t &v, size_t group_idx, const Data::Series &data, bool word_stats);
 
 #include "subhmm.hpp"
 

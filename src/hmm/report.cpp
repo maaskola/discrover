@@ -316,19 +316,9 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
 //      v_out << endl;
 //    }
 
-    if(options.evaluate.occurrence_table) {
+    if(options.evaluate.occurrence_table)
       // print to motif occurrence table
-      for(size_t pos = 0; pos < path.size(); pos++)
-        for(size_t group_idx = 0; group_idx < n_groups; group_idx++)
-          if(hmm.is_motif_group(group_idx) and
-              path[pos] == hmm.groups[group_idx].states[0]) {
-            size_t end = pos + 1;
-            while(end != path.size() and path[end] > path[pos])
-              end++;
-            string seq = data.sequences[i].sequence.substr(pos, end-pos);
-            occurrence_out << data.path << "\t" << data.sequences[i].definition << "\t" << pos << "\t" << hmm.groups[group_idx].name << "\t" << seq << endl;
-          }
-    }
+      hmm.print_occurrence_table(data.path, data.sequences[i], path, occurrence_out);
   }
 
   if(options.evaluate.summary) {
@@ -467,7 +457,7 @@ void evaluate_hmm(const HMM &hmm,
     occurrence_out.push(occurrence_file);
 
 
-    // TODO reactive!
+    // TODO reactivate!
     if(false && options.evaluate.summary) {
       summary_out << endl;
       Training::Task my_task;

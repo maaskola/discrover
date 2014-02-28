@@ -70,12 +70,8 @@ void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Coll
       task.series_expression.push_back({+1, series_name});
 
     task.targets.emission.push_back(1);
-    for(size_t i = 0; i < hmm.n_states; i++) {
-      // if(i < 2)
-      // if(i < first_state)
-      //   task.targets.emission.push_back(i);
+    for(size_t i = 0; i < hmm.get_nstates(); i++)
       task.targets.transition.push_back(i);
-    }
 
     if(options.verbosity >= Verbosity::verbose) {
       cout << "Generated generative training targets for re-learning." << endl << "Emissions:";
@@ -89,9 +85,6 @@ void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Coll
     }
 
     learn_tasks.push_back(task);
-
-
-    // remove_if(begin(learn_tasks), end(learn_tasks), [](const Training::Task &task) { return(Measures::is_discriminative(task.measure)); });
   }
 
 
@@ -375,7 +368,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             const bool use_mico_pvalue = true;
             double score;
             std::vector<size_t> groups_to_score;
-            groups_to_score.push_back(model.groups.size() - 1); // only add the most recently added group
+            groups_to_score.push_back(model.get_ngroups() - 1); // only add the most recently added group
             if(use_mico_pvalue)
               score = model.compute_score(masked_training_data, Measures::Continuous::Measure::MutualInformation, options.weighting, groups_to_score, absent_groups);
             else
@@ -435,7 +428,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             // TODO:   in this case: it might be done on the masked sequences
             train_evaluate(hmm, all_data, training_data, test_data, options, true);
 
-            absent_groups.push_back(hmm.groups.size() - 1);
+            absent_groups.push_back(hmm.get_ngroups() - 1);
 
             learned_models.erase(begin(learned_models) + best_index);
             first_motif = false;

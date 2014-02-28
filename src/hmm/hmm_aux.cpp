@@ -878,6 +878,11 @@ string HMM::get_group_name(size_t idx) const
   return(groups[idx].name);
 }
 
+size_t HMM::get_nstates() const
+{
+  return(n_states);
+}
+
 size_t HMM::get_ngroups() const
 {
   return(groups.size());
@@ -901,5 +906,23 @@ size_t HMM::get_motif_len(size_t motif_idx) const
 {
   size_t len = groups[motif_idx].states.size();
   return(len);
+}
+
+void HMM::print_occurrence_table(const string &file_path, const Data::Seq &seq, const StatePath &path, ostream &out) const
+{
+  for(size_t pos = 0; pos < path.size(); pos++)
+    for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
+      if(is_motif_group(group_idx) and
+          path[pos] == groups[group_idx].states[0]) {
+        size_t end = pos + 1;
+        while(end != path.size() and path[end] > path[pos])
+          end++;
+        string motif = seq.sequence.substr(pos, end-pos);
+        out << file_path
+          << "\t" << seq.definition
+          << "\t" << pos
+          << "\t" << groups[group_idx].name
+          << "\t" << motif << endl;
+      }
 }
 
