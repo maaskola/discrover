@@ -196,7 +196,7 @@ You might consider putting these commands into your ```~/.bashrc``` file or some
 
 
 
-## How to run
+## Usage
 
 Below is a minimal description on how use this package.
 Please refer to the [manual](doc/discrover-manual.pdf) for more information.
