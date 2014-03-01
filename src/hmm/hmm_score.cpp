@@ -44,11 +44,13 @@ size_t make_mask(const vector<size_t> &v) {
 
 vector<size_t> unpack_mask(const size_t x) {
   vector<size_t> v;
+  size_t z = 0;
   size_t y = 1;
   while(x >= y) {
     if((x & y) != 0)
-      v.push_back(y);
+      v.push_back(z);
     y = y << 1;
+    z++;
   }
   return(v);
 }
