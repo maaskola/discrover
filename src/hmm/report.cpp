@@ -265,8 +265,8 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
       }
 
   for(size_t i = 0; i < data.sequences.size(); i++) {
-    HMM::StatePath path;
-    double lp = hmm.viterbi(data.sequences[i], path);
+    HMM::StatePath viterbi_path;
+    double lp = hmm.viterbi(data.sequences[i], viterbi_path);
 
     if(options.evaluate.viterbi_path or options.evaluate.summary) {
       stringstream viterbi_str, exp_str, atl_str;
@@ -282,7 +282,7 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
           size_t absent_mask = 0;
           double atl = hmm.posterior_atleast_one(data.sequences[i], present_mask, absent_mask).posterior;
           double expected = hmm.expected_posterior(data.sequences[i], present_mask);
-          size_t n_viterbi = hmm.count_motif(path, group_idx);
+          size_t n_viterbi = hmm.count_motif(viterbi_path, group_idx);
           atl_counts[motif_idx][i] = atl;
           exp_counts[motif_idx][i] = expected;
           vit_counts[motif_idx][i] = n_viterbi;
@@ -304,7 +304,7 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
         v_out << ">" << data.sequences[i].definition << endl;
         v_out << "V-sites = " << viterbi_str.str() << " E-sites = " << exp_str.str() << " P(#sites>=1) = " << atl_str.str() << " Viterbi log-p = " << lp << endl;
         v_out << data.sequences[i].sequence << endl;
-        v_out << hmm.path2string_group(path) << endl;
+        v_out << hmm.path2string_group(viterbi_path) << endl;
       }
     }
 
@@ -318,7 +318,7 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
 
     if(options.evaluate.occurrence_table)
       // print to motif occurrence table
-      hmm.print_occurrence_table(data.path, data.sequences[i], path, occurrence_out);
+      hmm.print_occurrence_table(data.path, data.sequences[i], viterbi_path, occurrence_out);
   }
 
   if(options.evaluate.summary) {
