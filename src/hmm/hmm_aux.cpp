@@ -182,27 +182,37 @@ void HMM::deserialize(istream &is)
       const string key_b = "Motif_prior[0] ";
       const string key_c = "Motif_prior[1] ";
       // TODO parse information regarding registered data sets
-      // if(line.substr(0, key_a.size()) == key_a)
-      //   class_prior = atof(line.substr(key_a.size()).c_str());
-      // else
-      //   cout << "Error trying to parse HMM parameters: class prior could not be parsed: '" << line << "'." << endl;
-      safeGetline(is, line);
-      // TODO parse information regarding registered data sets
-      // if(line.substr(0, key_b.size()) == key_b)
-      //   motif_prior[0] = atof(line.substr(key_b.size()).c_str());
-      // else
-      //   cout << "Error trying to parse HMM parameters: first conditional motif prior could not be parsed: '" << line << "'." << endl;
-      safeGetline(is, line);
-      // TODO parse information regarding registered data sets
-      // if(line.substr(0, key_c.size()) == key_c)
-      //   motif_prior[1] = atof(line.substr(key_c.size()).c_str());
-      // else
-      //   cout << "Error trying to parse HMM parameters: second conditional motif prior could not be parsed: '" << line << "'." << endl;
-      safeGetline(is, line);
+      while(line.find(" states") == string::npos)
+        safeGetline(is, line);
+      if(false) {
+        // if(line.substr(0, key_a.size()) == key_a)
+        //   class_prior = atof(line.substr(key_a.size()).c_str());
+        // else
+        //   cout << "Error trying to parse HMM parameters: class prior could not be parsed: '" << line << "'." << endl;
+        safeGetline(is, line);
+        // TODO parse information regarding registered data sets
+        // if(line.substr(0, key_b.size()) == key_b)
+        //   motif_prior[0] = atof(line.substr(key_b.size()).c_str());
+        // else
+        //   cout << "Error trying to parse HMM parameters: first conditional motif prior could not be parsed: '" << line << "'." << endl;
+        safeGetline(is, line);
+        // TODO parse information regarding registered data sets
+        // if(line.substr(0, key_c.size()) == key_c)
+        //   motif_prior[1] = atof(line.substr(key_c.size()).c_str());
+        // else
+        //   cout << "Error trying to parse HMM parameters: second conditional motif prior could not be parsed: '" << line << "'." << endl;
+        safeGetline(is, line);
+      }
     }
 
+    if(verbosity >= Verbosity::debug)
+      cerr << "n_states line = " << line << endl;
     n_states = atoi(line.c_str());
+    if(verbosity >= Verbosity::debug)
+      cerr << "n_states = " << n_states << endl;
     safeGetline(is, line);
+    if(verbosity >= Verbosity::debug)
+      cerr << "line = " << line << endl;
     size_t n_emis = atoi(line.c_str());
     if(n_emis != n_emissions) {
       cout << "Error: this version only works with " << n_emissions << " emissions, while the .hmm file specifies " << n_emis << "." << endl;
@@ -286,6 +296,7 @@ void HMM::deserialize(istream &is)
         else
           line = line.substr(start+1);
       }
+      safeGetline(is,line);
     }
 
 
@@ -294,7 +305,10 @@ void HMM::deserialize(istream &is)
     transition.resize(n_states, n_states);
     emission.resize(n_states, n_emissions);
 
-    safeGetline(is,line);
+    if(line != "Transition matrix") {
+      cout << "Error: expecting line \"Transition matrix\", but got instead \"" << line << "\"." << endl;
+      exit(-1);
+    }
     for(size_t i = 0; i < n_states; i++) {
       size_t tmp;
       is >> tmp;
@@ -303,6 +317,10 @@ void HMM::deserialize(istream &is)
     }
     safeGetline(is,line);
     safeGetline(is,line);
+    if(line != "Emission matrix") {
+      cout << "Error: expecting line \"Emission matrix\", but got instead \"" << line << "\"." << endl;
+      exit(-1);
+    }
     for(size_t i = 0; i < n_states; i++) {
       size_t tmp;
       is >> tmp;
@@ -310,7 +328,6 @@ void HMM::deserialize(istream &is)
         is >> emission(i,j);
     }
   } else {
-//    first_state = atoi(line.c_str());
     is >> transition;
     is >> emission;
     last_state = transition.size1() - 1;
