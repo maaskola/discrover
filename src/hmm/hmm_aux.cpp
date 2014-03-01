@@ -830,8 +830,7 @@ size_t HMM::get_motif_len(size_t motif_idx) const
 
 void HMM::print_occurrence_table_header(ostream &out) const
 {
-  out << "file\tseq\tpos\tmotifname\tmotif\tstrand\tforwardpos\tcenterdist" << endl;
-
+  out << "file\tseq\tpos\tmotifidx\tmotifname\tmotif\tstrand\tforwardpos\tcenterdist" << endl;
 }
 
 void HMM::print_occurrence_table(const string &file_path, const Data::Seq &seq, const StatePath &path, ostream &out) const
@@ -872,6 +871,7 @@ void HMM::print_occurrence_table(const string &file_path, const Data::Seq &seq, 
         out << file_path
           << "\t" << seq.definition
           << "\t" << pos
+          << "\t" << group_idx
           << "\t" << groups[group_idx].name
           << "\t" << motif
           << "\t" << (strand ? "+" : "-")
