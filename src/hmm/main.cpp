@@ -227,7 +227,7 @@ int main(int argc, const char** argv)
     ("no-summary", po::bool_switch(&options.evaluate.summary)->default_value(true), "Do not print summary information.")
     ("no-viterbi", po::bool_switch(&options.evaluate.viterbi_path)->default_value(true), "Do not print the Viterbi path.")
     ("no-occ-table", po::bool_switch(&options.evaluate.occurrence_table)->default_value(true), "Do not print the occurrence table.")
-    ("no-ric", po::bool_switch(&options.evaluate.ric)->default_value(true), "Do not print the RIC analysis.")
+    ("ric", po::bool_switch(&options.evaluate.ric), "Perform a rank information coefficient analysis.")
     ;
 
 
