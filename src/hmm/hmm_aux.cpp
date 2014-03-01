@@ -811,8 +811,28 @@ size_t HMM::get_motif_len(size_t motif_idx) const
   return(len);
 }
 
+void HMM::print_occurrence_table_header(ostream &out) const
+{
+  out << "file\tseq\tpos\tmotifname\tmotif\tstrand\tforwardpos\tcenterdist" << endl;
+
+}
+
 void HMM::print_occurrence_table(const string &file_path, const Data::Seq &seq, const StatePath &path, ostream &out) const
 {
+  size_t seqlen = seq.sequence.size();
+  size_t midpoint = seqlen / 2;
+  bool revcomp = false;
+  // reverse-complementary sequences look like this: xxx$xxx
+  // so their length is 2n + 1, and the middle nucleotide is $
+  if(seqlen % 2 == 1 and seq.sequence[midpoint] == '$')
+    revcomp = true;
+
+  double center;
+  if(revcomp)
+    center = (midpoint - 1) / 2.0;
+  else
+    center = (seqlen - 1) / 2.0;
+
   for(size_t pos = 0; pos < path.size(); pos++)
     for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
       if(is_motif_group(group_idx) and
@@ -821,11 +841,25 @@ void HMM::print_occurrence_table(const string &file_path, const Data::Seq &seq, 
         while(end != path.size() and path[end] > path[pos])
           end++;
         string motif = seq.sequence.substr(pos, end-pos);
+
+        bool strand = (not revcomp) or (pos < midpoint);
+        // forward_pos is the position relative to the forward strand
+        long forward_pos = pos;
+        if(strand == false)
+          // forward_pos = seqlen - pos - (end - pos) + 1;
+          forward_pos = seqlen - end;
+        double rel_pos = forward_pos - center;
+        double motif_center_pos = rel_pos + (end - pos - 1) / 2.0;
+        // double motif_center_pos = forward_pos - center + motif.size() / 2.0;
+        // double motif_center_pos = (end + pos) / 2.0;
         out << file_path
           << "\t" << seq.definition
           << "\t" << pos
           << "\t" << groups[group_idx].name
-          << "\t" << motif << endl;
+          << "\t" << motif
+          << "\t" << (strand ? "+" : "-")
+          << "\t" << forward_pos
+          << "\t" << motif_center_pos << endl;
       }
 }
 

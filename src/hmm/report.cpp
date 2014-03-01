@@ -456,6 +456,8 @@ void evaluate_hmm(const HMM &hmm,
     v_out.push(viterbi_file);
     occurrence_out.push(occurrence_file);
 
+    hmm.print_occurrence_table_header(occurrence_out);
+
 
     // TODO reactivate!
     if(false && options.evaluate.summary) {

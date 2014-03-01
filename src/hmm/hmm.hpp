@@ -526,6 +526,7 @@ class HMM {
   public:
     bool is_motif_group(size_t group_idx) const;
 
+    void print_occurrence_table_header(std::ostream &out) const;
     void print_occurrence_table(const std::string &file, const Data::Seq &seq, const StatePath &path, std::ostream &out) const;
 
   protected:
