@@ -862,12 +862,9 @@ void HMM::print_occurrence_table(const string &file_path, const Data::Seq &seq, 
         // forward_pos is the position relative to the forward strand
         long forward_pos = pos;
         if(strand == false)
-          // forward_pos = seqlen - pos - (end - pos) + 1;
           forward_pos = seqlen - end;
         double rel_pos = forward_pos - center;
         double motif_center_pos = rel_pos + (end - pos - 1) / 2.0;
-        // double motif_center_pos = forward_pos - center + motif.size() / 2.0;
-        // double motif_center_pos = (end + pos) / 2.0;
         out << file_path
           << "\t" << seq.definition
           << "\t" << pos
