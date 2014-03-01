@@ -306,7 +306,7 @@ class HMM {
     vector_t posterior_atleast_one(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
     double viterbi(const Data::Seq &s, StatePath &path) const;
     posterior_t posterior_atleast_one(const Data::Seq &data, size_t present_mask, size_t absent_mask) const;
-    double expected_posterior(const Data::Seq &data, size_t group_idx) const;
+    double expected_posterior(const Data::Seq &data, size_t present_mask) const;
   protected:
     vector_t posterior_atleast_one(const Data::Set &data, size_t present_mask, size_t absent_mask) const;
     double   sum_posterior_atleast_one(const Data::Set &data, size_t present_mask, size_t absent_mask) const;
@@ -314,8 +314,8 @@ class HMM {
     vector_t viterbi_atleast_one(const Data::Series &data, size_t group_idx) const;
     double   viterbi_atleast_one(const Data::Set &data, size_t group_idx) const;
 
-    vector_t expected_posterior(const Data::Series &data, size_t group_idx) const;
-    double   expected_posterior(const Data::Set &data, size_t group_idx) const;
+    vector_t expected_posterior(const Data::Series &data, size_t present_mask) const;
+    double   expected_posterior(const Data::Set &data, size_t present_mask) const;
 
 // -------------------------------------------------------------------------------------------
 // Generative and discriminative measures
@@ -346,7 +346,7 @@ class HMM {
     /** The summed Matthew's correlation coefficients of all individual contrasts. */
     double matthews_correlation_coefficient(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
     /** The summed difference of expected occurrence frequencies. */
-    double dips_tscore(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
+    double dips_tscore(const Data::Series &data, const std::vector<size_t> &present_groups) const;
     /** The summed difference of site occurrence. */
     double dips_sitescore(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
 
@@ -362,7 +362,7 @@ class HMM {
     /** The summed Matthew's correlation coefficients of all individual contrasts. */
     double matthews_correlation_coefficient(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
     /** The summed difference of expected occurrence frequencies. */
-    double dips_tscore(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
+    double dips_tscore(const Data::Series &data, size_t present_mask) const;
     /** The summed difference of site occurrence. */
     double dips_sitescore(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
 

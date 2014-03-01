@@ -42,6 +42,17 @@ size_t make_mask(const vector<size_t> &v) {
   return(x);
 }
 
+vector<size_t> unpack_mask(const size_t x) {
+  vector<size_t> v;
+  size_t y = 1;
+  while(x >= y) {
+    if((x & y) != 0)
+      v.push_back(y);
+    y = y << 1;
+  }
+  return(v);
+}
+
 double HMM::mutual_information(const Data::Series &data, const vector<size_t> &present_groups, const vector<size_t> &absent_groups) const
 {
   if(verbosity >= Verbosity::debug)
@@ -160,33 +171,38 @@ double HMM::log_likelihood(const Data::Set &data) const
   return(l);
 }
 
-vector_t HMM::expected_posterior(const Data::Series &data, size_t group_idx) const
+vector_t HMM::expected_posterior(const Data::Series &data, size_t present_mask) const
 {
   vector_t v = zero_vector(data.sets.size());
   for(size_t i = 0; i < data.sets.size(); i++)
-    v(i) = expected_posterior(data.sets[i], group_idx);
+    v(i) = expected_posterior(data.sets[i], present_mask);
   return(v);
 };
 
-double HMM::expected_posterior(const Data::Set &data, size_t group_idx) const
+double HMM::expected_posterior(const Data::Set &data, size_t present_mask) const
 {
   double m = 0;
+  vector<size_t> present = unpack_mask(present_mask);
 #pragma omp parallel for schedule(static) reduction(+:m) if(DO_PARALLEL)
   for(size_t i = 0; i < data.set_size; i++) {
     vector_t scale;
     matrix_t f = compute_forward_scaled(data.sequences[i], scale);
     matrix_t b = compute_backward_prescaled(data.sequences[i], scale);
-    m += expected_state_posterior(groups[group_idx].states[0], f, b, scale); // Assume the first state of each motif is constitutive for the motif
+    for(auto group_idx: present)
+      m += expected_state_posterior(groups[group_idx].states[0], f, b, scale); // Assume the first state of each motif is constitutive for the motif
   }
   return(m);
 };
 
-double HMM::expected_posterior(const Data::Seq &data, size_t group_idx) const
+double HMM::expected_posterior(const Data::Seq &data, size_t present_mask) const
 {
+  vector<size_t> present = unpack_mask(present_mask);
   vector_t scale;
   matrix_t f = compute_forward_scaled(data, scale);
   matrix_t b = compute_backward_prescaled(data, scale);
-  double m = expected_state_posterior(groups[group_idx].states[0], f, b, scale); // Assume the first state of each motif is constitutive for the motif
+  double m = 0;
+  for(auto group_idx: present)
+    m += expected_state_posterior(groups[group_idx].states[0], f, b, scale); // Assume the first state of each motif is constitutive for the motif
   return(m);
 };
 
@@ -503,16 +519,15 @@ double HMM::dips_sitescore(const Data::Series &data, size_t present_mask, size_t
   return(t);
 }
 
-double HMM::dips_tscore(const Data::Series &data, const vector<size_t> &present_groups, const vector<size_t> &absent_groups) const
+double HMM::dips_tscore(const Data::Series &data, const vector<size_t> &present_groups) const
 {
-  return(dips_tscore(data, make_mask(present_groups), make_mask(absent_groups)));
+  return(dips_tscore(data, make_mask(present_groups)));
 }
 
-double HMM::dips_tscore(const Data::Series &data, size_t present_mask, size_t absent_mask) const
+double HMM::dips_tscore(const Data::Series &data, size_t present_mask) const
 {
-  // TODO FIX ABSENT
-  // vector_t posterior = expected_posterior(data, group_idx);
-  vector_t posterior;
+  // TODO FIX ABSENT - done?
+  vector_t posterior = expected_posterior(data, present_mask);
   // TODO FIX ABSENT: adapt reduce - done?
   confusion_matrix m = reduce(posterior, present_mask, data, groups, true) + pseudo_count;
   size_t signal_size = m.true_positives + m.false_negatives;

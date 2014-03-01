@@ -281,7 +281,7 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
           size_t present_mask = 1 << group_idx;
           size_t absent_mask = 0;
           double atl = hmm.posterior_atleast_one(data.sequences[i], present_mask, absent_mask).posterior;
-          double expected = hmm.expected_posterior(data.sequences[i], group_idx);
+          double expected = hmm.expected_posterior(data.sequences[i], present_mask);
           size_t n_viterbi = hmm.count_motif(path, group_idx);
           atl_counts[motif_idx][i] = atl;
           exp_counts[motif_idx][i] = expected;
