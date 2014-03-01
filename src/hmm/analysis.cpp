@@ -50,46 +50,49 @@ void check_data(const Data::Collection &collection, const hmm_options &options)
 }
 
 
-void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options, bool relearning_phase=false)
+void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options, bool do_training, bool relearning_phase=false)
 {
   // Define the learning and evaluation tasks
   Training::Tasks eval_tasks = hmm.define_training_tasks(options);
-  Training::Tasks learn_tasks = hmm.define_training_tasks(options);
 
-  if(relearning_phase and (not options.relearn_discriminative)) {
-    set<string> series_names;
-    for(auto &task: eval_tasks)
-      for(auto &expr: task)
-        series_names.insert(expr.series);
+  if(do_training) {
+    // define the training tasks
+    Training::Tasks learn_tasks = hmm.define_training_tasks(options);
 
-    learn_tasks = Training::Tasks();
-    Training::Task task;
-    task.motif_name = "Background";
-    task.measure = Measure::Likelihood;
-    for(auto &series_name: series_names)
-      task.series_expression.push_back({+1, series_name});
+    if(relearning_phase and (not options.relearn_discriminative)) {
+      set<string> series_names;
+      for(auto &task: eval_tasks)
+        for(auto &expr: task)
+          series_names.insert(expr.series);
 
-    task.targets.emission.push_back(1);
-    for(size_t i = 0; i < hmm.get_nstates(); i++)
-      task.targets.transition.push_back(i);
+      learn_tasks = Training::Tasks();
+      Training::Task task;
+      task.motif_name = "Background";
+      task.measure = Measure::Likelihood;
+      for(auto &series_name: series_names)
+        task.series_expression.push_back({+1, series_name});
 
-    if(options.verbosity >= Verbosity::verbose) {
-      cout << "Generated generative training targets for re-learning." << endl << "Emissions:";
-      for(auto e: task.targets.emission)
-        cout << " " << e;
-      cout << endl;
-      cout << "Transitions:";
-      for(auto t: task.targets.transition)
-        cout << " " << t;
-      cout << endl;
+      task.targets.emission.push_back(1);
+      for(size_t i = 0; i < hmm.get_nstates(); i++)
+        task.targets.transition.push_back(i);
+
+      if(options.verbosity >= Verbosity::verbose) {
+        cout << "Generated generative training targets for re-learning." << endl << "Emissions:";
+        for(auto e: task.targets.emission)
+          cout << " " << e;
+        cout << endl;
+        cout << "Transitions:";
+        for(auto t: task.targets.transition)
+          cout << " " << t;
+        cout << endl;
+      }
+
+      learn_tasks.push_back(task);
     }
 
-    learn_tasks.push_back(task);
+    if(not learn_tasks.empty())
+      hmm.train(training_data, learn_tasks, options);
   }
-
-
-  if(not learn_tasks.empty())
-    hmm.train(training_data, learn_tasks, options);
 
   if(test_data.set_size != 0) {
     evaluate_hmm(hmm, training_data, "training", eval_tasks, options);
@@ -144,11 +147,14 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
   // load HMM from file if specified
   size_t n_loaded = 0;
+  bool training_necessary = false;
   for(auto &load_path: options.load_paths)
     if(n_loaded++ == 0)
       hmm = HMM(load_path, options.verbosity, options.contingency_pseudo_count);
-    else
+    else {
       hmm.add_motifs(HMM(load_path, options.verbosity, options.contingency_pseudo_count));
+      training_necessary = true;
+    }
 
   if(options.verbosity >= Verbosity::verbose)
     cout << "Model after initialization = " << hmm << endl;
@@ -176,9 +182,11 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
       case Specification::Motif::Kind::Seed:
         // use IUPAC regular expression
         hmm.add_motif(spec.specification, options.alpha, expected_seq_size, options.lambda, spec.name, spec.insertions, options.left_padding, options.right_padding);
+        training_necessary = true;
         break;
       case Specification::Motif::Kind::Plasma:
         options.seeding.motif_specifications.push_back(spec);
+        training_necessary = true;
         break;
     }
 
@@ -187,7 +195,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         }) == end(options.motif_specifications)) {
     if(options.verbosity >= Verbosity::info)
       cout << "No automatic seeds are used." << endl;
-    train_evaluate(hmm, all_data, training_data, test_data, options);
+    train_evaluate(hmm, all_data, training_data, test_data, options, training_necessary);
   } else {
     if(options.verbosity >= Verbosity::info)
       cout << "Determining seeds automatically." << endl;
@@ -272,7 +280,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
           hmm_options options_(options);
           if(options_.long_names)
             options_.label += "." + variant;
-          train_evaluate(model, all_data, training_data, test_data, options_);
+          train_evaluate(model, all_data, training_data, test_data, options_, training_necessary);
 
           learned_models.push_back(make_pair(variant, model));
         }
@@ -426,7 +434,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             // TODO: learning should perhaps only adapt transitions? this would be very fast...
             // TODO:   otherwise: if learning should also adapt emissions, then perhaps only those of the new motif?
             // TODO:   in this case: it might be done on the masked sequences
-            train_evaluate(hmm, all_data, training_data, test_data, options, true);
+            train_evaluate(hmm, all_data, training_data, test_data, options, training_necessary, true);
 
             absent_groups.push_back(hmm.get_ngroups() - 1);
 

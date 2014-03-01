@@ -640,7 +640,7 @@ Training::Tasks HMM::define_training_tasks(const hmm_options &options) const
   // And then the generative part
   if(options.bg_learning != Training::Method::None) {
     Training::Task task;
-    if(atleast_one_discriminative_task) {
+    if(atleast_one_discriminative_task or options.objectives.empty()) {
       task.motif_name = "Generative parameters";
       task.measure = Measure::Likelihood;
     } else {
