@@ -302,7 +302,6 @@ class HMM {
     };
 
   public:
-    vector_t posterior_atleast_one(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups=std::vector<size_t>()) const;
     vector_t posterior_atleast_one(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
     double viterbi(const Data::Seq &s, StatePath &path) const;
     posterior_t posterior_atleast_one(const Data::Seq &data, size_t present_mask, size_t absent_mask) const;

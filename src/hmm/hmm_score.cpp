@@ -208,16 +208,6 @@ double HMM::expected_posterior(const Data::Seq &data, size_t present_mask) const
   return(m);
 };
 
-vector_t HMM::posterior_atleast_one(const Data::Series &data, const vector<size_t> &present_groups, const vector<size_t> &absent_groups) const
-{
-  if(verbosity >= Verbosity::debug) {
-    cout << "HMM::posterior_atleast_one(Data::Series, present_groups=(";
-    bool first = true; for(auto &x: present_groups) { cout << (first ? "" : ",") << x; first = false; } cout << ") absent_groups=(";
-    first = true; for(auto &x: absent_groups) { cout << (first ? "" : ",") << x; first = false; } cout << ")" << endl;
-  }
-  return(posterior_atleast_one(data, make_mask(present_groups), make_mask(absent_groups)));
-}
-
 vector_t HMM::posterior_atleast_one(const Data::Series &data, size_t present_mask, size_t absent_mask) const
 {
   if(verbosity >= Verbosity::debug)
