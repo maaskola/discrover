@@ -19,29 +19,29 @@ using namespace std;
 void check_data(const Data::Collection &collection, const hmm_options &options)
 {
   if(options.verbosity >= Verbosity::info)
-    for(auto &series: collection) {
-      cout << "Data collection has " << series.set_size << " sequences with a total size of " << series.seq_size << " nucleotides." << endl;
-      for(auto &set: series) {
-        cout << set.path << " has " << set.set_size << " sequences with a total size of " << set.seq_size << " nucleotides." << endl;
+    for(auto &contrast: collection) {
+      cout << "Data collection has " << contrast.set_size << " sequences with a total size of " << contrast.seq_size << " nucleotides." << endl;
+      for(auto &dataset: contrast) {
+        cout << dataset.path << " has " << dataset.set_size << " sequences with a total size of " << dataset.seq_size << " nucleotides." << endl;
         if(options.verbosity >= Verbosity::verbose) {
-          cout << "The SHA1 of this set is " << set.sha1 << endl;
+          cout << "The SHA1 of this set is " << dataset.sha1 << endl;
           cout << "The first 3 sequences are:" << endl;
           size_t i = 0;
-          for(auto &seq: set) {
+          for(auto &seq: dataset) {
             cout << ">" << seq.definition << endl << seq.sequence << endl;
             if(++i >= 3) break;
           }
         }
         if(options.verbosity >= Verbosity::debug)
-          for(auto &seq: set)
+          for(auto &seq: dataset)
             cout << ">" << seq.definition << endl << seq.sequence << endl;
       }
     }
 
 // TODO re-enable warning
 //  if(options.training_method != Training::Method::none and not is_generative(options.objective.measure) and options.objective.measure != Measure::rank_information) {
-//    for(auto &series: collection) {
-//      if(series.sets.size() < 2) {
+//    for(auto &contrast: collection) {
+//      if(contrast.sets.size() < 2) {
 //        cout << "Please note that for discriminative training you need to specify multiple sequence sets using -f." << endl;
 //        exit(-1);
 //      }
@@ -60,17 +60,17 @@ void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Coll
     Training::Tasks learn_tasks = hmm.define_training_tasks(options);
 
     if(relearning_phase and (not options.relearn_discriminative)) {
-      set<string> series_names;
+      set<string> contrast_names;
       for(auto &task: eval_tasks)
         for(auto &expr: task)
-          series_names.insert(expr.series);
+          contrast_names.insert(expr.contrast);
 
       learn_tasks = Training::Tasks();
       Training::Task task;
       task.motif_name = "Background";
       task.measure = Measure::Likelihood;
-      for(auto &series_name: series_names)
-        task.series_expression.push_back({+1, series_name});
+      for(auto &contrast_name: contrast_names)
+        task.contrast_expression.push_back({+1, contrast_name});
 
       task.targets.emission.push_back(1);
       for(size_t i = 0; i < hmm.get_nstates(); i++)
@@ -200,22 +200,22 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
     if(options.verbosity >= Verbosity::info)
       cout << "Determining seeds automatically." << endl;
 
-    Seeding::DataCollection collection(training_data);
+    Seeding::Collection collection(training_data);
 
     if(options.verbosity >= Verbosity::debug) {
-      for(auto &ser: training_data)
-        for(auto &set: ser) {
-          cerr << "HMM::Series " << ser.name << " set -> motifs:";
-          for(auto &m: set.motifs)
+      for(auto &contrast: training_data)
+        for(auto &dataset: contrast) {
+          cerr << "HMM::Contrast " << contrast.name << " set -> motifs:";
+          for(auto &m: dataset.motifs)
             cerr << " " << m;
           cerr << endl;
         }
     }
     if(options.verbosity >= Verbosity::debug) {
-      for(auto &ser: collection)
-        for(auto &set: ser) {
-          cerr << "Seeding::Series " << ser.name << " set -> motifs:";
-          for(auto &m: set.motifs)
+      for(auto &contrast: collection)
+        for(auto &dataset: contrast) {
+          cerr << "Seeding::Contrast " << contrast.name << " set -> motifs:";
+          for(auto &m: dataset.motifs)
             cerr << " " << m;
           cerr << endl;
         }

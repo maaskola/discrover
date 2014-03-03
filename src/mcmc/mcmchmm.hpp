@@ -54,15 +54,15 @@ namespace MCMC {
   template <>
     class Evaluator<HMM> {
       private:
-        Data::Collection data;
+        Data::Collection collection;
         Training::Task task;
         Training::State ts;
         hmm_options options;
       public:
-        Evaluator(const Data::Collection &data_,
+        Evaluator(const Data::Collection &col,
             const Training::Task &obj,
             const hmm_options &opt) :
-          data(data_),
+          collection(col),
           task(obj),
           ts(1), // TODO make this work with multiple tasks
           options(opt) {
@@ -70,7 +70,7 @@ namespace MCMC {
 
         double evaluate(const HMM &hmm) const {
           // TODO consider using compute_score instead of compute_score_all_motifs
-          return(hmm.compute_score_all_motifs(data, task.measure, options.weighting));
+          return(hmm.compute_score_all_motifs(collection, task.measure, options.weighting));
         };
     };
 }

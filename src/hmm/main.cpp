@@ -192,17 +192,18 @@ int main(int argc, const char** argv)
     ;
 
   basic_options.add_options()
-    ("fasta,f", po::value<vector<Specification::DataSet>>(&options.paths)->required(), "Path to FASTA file with sequences. May be given multiple times. The path may be prepended by a comma separated list of names of motifs enriched in the file, with the syntax [NAMES:[SERIES:]]PATH, where NAMES is NAME[,NAMES] is a set of motif names, and SERIES is the name of a series this data set belongs to. Also see the example above. Note that you should prepend the path with a double colon if the path contains at least one colon.")
-   ("motif,m", po::value<vector<Specification::Motif>>(&options.motif_specifications), "Motif specification. May be given multiple times, and can be specified in multiple ways:\n"
-        "1. \tUsing the IUPAC code for nucleic acids.\n"
-        "2. \tA length specification. "
-        "Motifs of the indicated lengths are sought. "
-        "A length specification is a comma separated list of length ranges, "
-        "where a length range is either a single length, or an expression of the form 'x-y' to indicate lengths x up to y. "
-        "A length specification also allows to specify a multiplicity separated by an 'x'. "
-        "Thus examples are '8' for just length 8, '5-7' for lengths 5, 6, and 7, '5-8x2' for two motifs of lengths 5 to 8, '5-8,10x3' for three motifs of lengths 5, 6, 7, 8, and 10.\n"
-        "3. \tBy specifying the path to a file with a PWM.\n"
-        "Regardless of the way a motif is specified, it may be given a name, and an insertions string. The syntax is [NAME:[INSERT:]]MOTIFSPEC. If MOTIFSPEC is a path and contains at least one colon please just prepend two colons. The insertions string is a comma separated list of positions after which to add an insertion state. Positions are 1 indexed, and must be greater 1 and less than the motif length.")
+    ("fasta,f", po::value<vector<Specification::Set>>(&options.paths)->required(), "Path to FASTA file with sequences. May be given multiple times. The path may be prepended by a comma separated list of names of motifs enriched in the file, with the syntax [NAMES:[CONTRAST:]]PATH, where NAMES is NAME[,NAMES] is a set of motif names, and CONTRAST is the name of a contrast this data set belongs to. Also see the example above. Note that you should prepend the path with a double colon if the path contains at least one colon.")
+    ("motif,m", po::value<vector<Specification::Motif>>(&options.motif_specifications),
+     "Motif specification. May be given multiple times, and can be specified in multiple ways:\n"
+     "1. \tUsing the IUPAC code for nucleic acids.\n"
+     "2. \tA length specification. "
+     "Motifs of the indicated lengths are sought. "
+     "A length specification is a comma separated list of length ranges, "
+     "where a length range is either a single length, or an expression of the form 'x-y' to indicate lengths x up to y. "
+     "A length specification also allows to specify a multiplicity separated by an 'x'. "
+     "Thus examples are '8' for just length 8, '5-7' for lengths 5, 6, and 7, '5-8x2' for two motifs of lengths 5 to 8, '5-8,10x3' for three motifs of lengths 5, 6, 7, 8, and 10.\n"
+     "3. \tBy specifying the path to a file with a PWM.\n"
+     "Regardless of the way a motif is specified, it may be given a name, and an insertions string. The syntax is [NAME:[INSERT:]]MOTIFSPEC. If MOTIFSPEC is a path and contains at least one colon please just prepend two colons. The insertions string is a comma separated list of positions after which to add an insertion state. Positions are 1 indexed, and must be greater 1 and less than the motif length.")
    ;
   basic_options_optional.add_options()
     ("score", po::value<Training::Objectives>(&options.objectives)->default_value(Training::Objectives(1,Training::Objective("mi")), "mi"), "The significance measure. May be one of\n"

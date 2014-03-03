@@ -258,7 +258,7 @@ int main(int argc, const char** argv) {
   MCMC::EntropySource::seed(r_unif(rng));
 
   Seeding::Plasma plasma(options);
-  Seeding::DataCollection ds = plasma.collection;
+  Seeding::Collection ds = plasma.collection;
   typedef Seeding::Result res_t;
   vector<res_t> results;
 
@@ -274,7 +274,7 @@ int main(int argc, const char** argv) {
     report(cout, results[0], ds, options);
   else {
     sort(begin(results), end(results), [](const res_t &a, const res_t &b) { return(a.log_p <= b.log_p); });
-    Seeding::DataCollection original_ds = ds;
+    Seeding::Collection original_ds = ds;
     Seeding::Options opts = options;
     opts.occurrence_filter = Seeding::OccurrenceFilter::RemoveSequences;
     for(auto &r: results) {

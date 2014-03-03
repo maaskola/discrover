@@ -265,12 +265,12 @@ void HMM::del_columns(size_t n, std::mt19937 &rng)
   finalize_initialization();
 }
 
-std::vector<std::list<std::pair<HMM, double>>> HMM::mcmc(const Data::Collection &data,
+std::vector<std::list<std::pair<HMM, double>>> HMM::mcmc(const Data::Collection &collection,
     const Training::Task &task,
     const hmm_options &options)
 {
   double temperature = options.sampling.temperature;
-  MCMC::Evaluator<HMM> eval(data, task, options);
+  MCMC::Evaluator<HMM> eval(collection, task, options);
   MCMC::Generator<HMM> gen(options, n_states-first_state);
   MCMC::MonteCarlo<HMM> mcmc(gen, eval, verbosity);
   std::vector<double> temperatures;

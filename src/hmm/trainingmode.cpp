@@ -56,7 +56,7 @@ namespace Training {
   Seeding::Objective corresponding_objective(const Objective &x, bool use_mi_to_seed) {
     Seeding::Objective y;
     y.motif_name = x.motif_name;
-    y.series_expression = x.series_expression;
+    y.contrast_expression = x.contrast_expression;
     if(use_mi_to_seed)
       y.measure = Measures::Discrete::Measure::MutualInformation;
     else

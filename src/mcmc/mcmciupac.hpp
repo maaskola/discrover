@@ -166,16 +166,16 @@ namespace MCMC {
   template <>
     class Evaluator<Motif> {
       private:
-        Seeding::DataCollection data;
+        Seeding::Collection collection;
         Seeding::Options options;
         Seeding::Objective objective;
       public:
-        Evaluator(const Seeding::DataCollection &data_, const Seeding::Options &opt, const Seeding::Objective &obj) :
-          data(data_), options(opt), objective(obj) { };
+        Evaluator(const Seeding::Collection &col, const Seeding::Options &opt, const Seeding::Objective &obj) :
+          collection(col), options(opt), objective(obj) { };
 
         double evaluate(const Motif &motif) const {
-          count_vector_t counts = count_motif(data, motif, options);
-          double score = compute_score(data, counts, options, objective, motif.size(), Seeding::motif_degeneracy(motif));
+          count_vector_t counts = count_motif(collection, motif, options);
+          double score = compute_score(collection, counts, options, objective, motif.size(), Seeding::motif_degeneracy(motif));
           return(score);
         };
     };

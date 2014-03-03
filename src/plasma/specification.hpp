@@ -44,23 +44,23 @@ namespace Measures {
 };
 
 namespace Specification {
-  /** the format is [MIDs[:SERIES:]]PATH
+  /** the format is [MIDs[:CONTRAST:]]PATH
    * where
    * MIDs a set of motif ID (optional)
-   * SERIES is the name of a series this data set belongs to; if unspecified, the unnamed general series is used
+   * CONTRAST is the name of a contrast this data set belongs to; if unspecified, the unnamed general contrast is used
    * PATH a path to a FASTA file
    */
-  struct DataSet {
-    std::string series;
+  struct Set {
+    std::string contrast;
     std::string path;
     bool is_shuffle;
     std::set<std::string> motifs;
-    DataSet(const std::string &s, bool shuffled=false);
-    DataSet(const DataSet &spec);
-    DataSet();
+    Set(const std::string &s, bool shuffled=false);
+    Set(const Set &spec);
+    Set();
   };
 
-  typedef std::vector<DataSet> DataSets;
+  typedef std::vector<Set> Sets;
 
   /** the format is [MID[:INSERT:]]MSPEC
     where
@@ -101,18 +101,18 @@ namespace Specification {
 
   typedef std::vector<Motif> Motifs;
 
-  namespace Series {
+  namespace Contrast {
     /**
-      SERIESEXP is a series expression, as below
-      SERIESEXP: ATOM | SERIESEXP-ATOM | SERIESEXP+ATOM
+      CONTRASTEXP is a contrast expression, as below
+      CONTRASTEXP: ATOM | CONTRASTEXP-ATOM | CONTRASTEXP+ATOM
      */
     struct Atom {
       int sign;
-      std::string series;
+      std::string contrast;
     };
 
     typedef std::vector<Atom> Expression;
-    Expression make_series(const std::string &path);
+    Expression make_contrast(const std::string &path);
 
     std::string to_string(const Atom &atom);
     std::string to_string(const Expression &expr);
@@ -120,34 +120,34 @@ namespace Specification {
     std::ostream &operator<<(std::ostream &out, const Expression &expr);
   }
 
-  /** the format is [MID[:SERIESEXP:]]OBJ
+  /** the format is [MID[:CONTRASTEXP:]]OBJ
     where
     MID is a motif ID (optional)
-    SERIESEXP is a series expression, as below
+    CONTRASTEXP is a contrast expression, as below
     OBJ is a string parsable as the desired objection function type (of template type X), i.e. it requires a definition of void parse_measure(const std::string&, &X)
-    TODO: document that series names may not contain - or +
+    TODO: document that contrast names may not contain - or +
    */
   template <typename X>
   struct Objective {
     typedef X measure_t;
-    typedef Series::Atom series_atom_t;
-    typedef Series::Expression series_expression_t;
-    typedef typename series_expression_t::iterator iterator;
-    typedef typename series_expression_t::const_iterator const_iterator;
+    typedef Contrast::Atom contrast_atom_t;
+    typedef Contrast::Expression contrast_expression_t;
+    typedef typename contrast_expression_t::iterator iterator;
+    typedef typename contrast_expression_t::const_iterator const_iterator;
 
     std::string motif_name;
-    series_expression_t series_expression;
+    contrast_expression_t contrast_expression;
     measure_t measure;
 
     Objective() :
       motif_name(""),
-      series_expression(),
+      contrast_expression(),
       measure(measure_t::Undefined)
     { };
 
     Objective(const std::string &s) :
       motif_name(""),
-      series_expression(),
+      contrast_expression(),
       measure()
     {
       std::string specification = s;
@@ -158,7 +158,7 @@ namespace Specification {
       }
       if((pos = specification.find(":")) != std::string::npos) {
         std::string expr_s = specification.substr(0,pos);
-        series_expression = Series::make_series(expr_s);
+        contrast_expression = Contrast::make_contrast(expr_s);
         specification = specification.substr(pos+1);
       }
       parse_measure(specification, measure);
@@ -166,18 +166,18 @@ namespace Specification {
 
     Objective(const Objective &obj) :
       motif_name(obj.motif_name),
-      series_expression(obj.series_expression),
+      contrast_expression(obj.contrast_expression),
       measure(obj.measure)
     { };
   };
 
-  template <typename X> typename Objective<X>::iterator begin(Objective<X> &objective) { return(begin(objective.series_expression)); }
-  template <typename X> typename Objective<X>::iterator end(Objective<X> &objective) { return(end(objective.series_expression)); }
-  template <typename X> typename Objective<X>::const_iterator begin(const Objective<X> &objective) { return(begin(objective.series_expression)); }
-  template <typename X> typename Objective<X>::const_iterator end(const Objective<X> &objective) { return(end(objective.series_expression)); }
+  template <typename X> typename Objective<X>::iterator begin(Objective<X> &objective) { return(begin(objective.contrast_expression)); }
+  template <typename X> typename Objective<X>::iterator end(Objective<X> &objective) { return(end(objective.contrast_expression)); }
+  template <typename X> typename Objective<X>::const_iterator begin(const Objective<X> &objective) { return(begin(objective.contrast_expression)); }
+  template <typename X> typename Objective<X>::const_iterator end(const Objective<X> &objective) { return(end(objective.contrast_expression)); }
 
   std::istream &operator>>(std::istream &in, Motif &m);
-  std::istream &operator>>(std::istream &in, DataSet &spec);
+  std::istream &operator>>(std::istream &in, Set &spec);
   template <typename X> std::istream &operator>>(std::istream &in, Objective<X> &spec) {
     std::string token;
     in >> token;
@@ -186,112 +186,112 @@ namespace Specification {
   }
 
   std::string to_string(const Motif &spec);
-  std::string to_string(const DataSet &spec);
+  std::string to_string(const Set &spec);
   template <typename X> std::string to_string(const Objective<X> &spec) {
-    std::string s = std::string(spec.motif_name) + ":" + to_string(spec.series_expression) + ":" + measure2string(spec.measure);
+    std::string s = std::string(spec.motif_name) + ":" + to_string(spec.contrast_expression) + ":" + measure2string(spec.measure);
     return(s);
   }
 
   std::ostream &operator<<(std::ostream &out, const Motif &m);
-  std::ostream &operator<<(std::ostream &out, const DataSet &spec);
+  std::ostream &operator<<(std::ostream &out, const Set &spec);
   template <typename X> std::ostream &operator<<(std::ostream &out, Objective<X> &spec) {
     out << to_string(spec);
     return(out);
   }
 
   /** A routine to interpret what the user has specified in terms of motifs, data sets, and objectives.
-   * Series:
-   *   - find all series names occurring in data set specifications
-   *   - give names to unnamed series, making sure not to overwrite given ones
-   *   - find all series names occurring in objective specifications
-   *   - find all series names given in either data or objective specification
-   *   - add all series to those objectives that don't have any series annotated
-   *   - check that the series for the 2x2 measures are binary and that all discriminative ones are at least binary
+   * Contrasts:
+   *   - find all contrast names occurring in data set specifications
+   *   - give names to unnamed contrasts, making sure not to overwrite given ones
+   *   - find all contrast names occurring in objective specifications
+   *   - find all contrast names given in either data or objective specification
+   *   - add all contrasts to those objectives that don't have any contrast annotated
+   *   - check that the contrasts for the 2x2 measures are binary and that all discriminative ones are at least binary
    * Motifs:
    *   - get all motif names and check that none are duplicated
    *   - give names to unnamed motifs, making sure not to overwrite given ones
    *   - more that needs to be documented
    */
-  template <typename X> void harmonize(Motifs &motifs, DataSets &data, std::vector<Objective<X>> &objectives, bool demultiplex, bool add_shuffles=true) {
+  template <typename X> void harmonize(Motifs &motifs, Sets &sets, std::vector<Objective<X>> &objectives, bool demultiplex, bool add_shuffles=true) {
     const bool debug = false;
 
-    // find all series names occurring in data set specifications
-    std::set<std::string> series_names_in_data;
-    for(auto &spec: data)
-      if(spec.series != "")
-        series_names_in_data.insert(spec.series);
+    // find all contrast names occurring in data set specifications
+    std::set<std::string> contrast_names_in_data;
+    for(auto &spec: sets)
+      if(spec.contrast != "")
+        contrast_names_in_data.insert(spec.contrast);
 
-    // give a name to unnamed series, making sure not to overwrite given ones
+    // give a name to unnamed contrasts, making sure not to overwrite given ones
     size_t contrast_idx = 0;
     std::string unnamed_name = "contrast" + boost::lexical_cast<std::string>(contrast_idx++);
-    while(series_names_in_data.find(unnamed_name) != end(series_names_in_data))
+    while(contrast_names_in_data.find(unnamed_name) != end(contrast_names_in_data))
       unnamed_name = "contrast" + boost::lexical_cast<std::string>(contrast_idx++);
-    series_names_in_data.insert(unnamed_name);
-    for(auto &spec: data)
-      if(spec.series == "")
-        spec.series = unnamed_name;
+    contrast_names_in_data.insert(unnamed_name);
+    for(auto &spec: sets)
+      if(spec.contrast == "")
+        spec.contrast = unnamed_name;
 
 
 
-    // find all series names occurring in objective specifications
-    std::set<std::string> series_names_in_objectives;
+    // find all contrast names occurring in objective specifications
+    std::set<std::string> contrast_names_in_objectives;
     for(auto &objective: objectives)
       for(auto &atom: objective)
-        series_names_in_objectives.insert(atom.series);
+        contrast_names_in_objectives.insert(atom.contrast);
 
     if(debug) {
-      std::cout << "Found series name in data specifications:";
-      for(auto &s: series_names_in_data)
+      std::cout << "Found contrast name in data specifications:";
+      for(auto &s: contrast_names_in_data)
         std::cout << " '" << s << "'";
       std::cout << std::endl;
-      std::cout << "Found series name in objectives:";
-      for(auto &s: series_names_in_objectives)
+      std::cout << "Found contrast name in objectives:";
+      for(auto &s: contrast_names_in_objectives)
         std::cout << " '" << s << "'";
       std::cout << std::endl;
     }
 
 
-    // find all series names
-    std::set<std::string> all_series_names;
-    for(auto &s: series_names_in_data)
-      all_series_names.insert(s);
-    for(auto &s: series_names_in_objectives)
-      all_series_names.insert(s);
+    // find all contrast names
+    std::set<std::string> all_contrast_names;
+    for(auto &s: contrast_names_in_data)
+      all_contrast_names.insert(s);
+    for(auto &s: contrast_names_in_objectives)
+      all_contrast_names.insert(s);
 
-    // add all series to those objectives that don't have any series annotated
+    // add all contrasts to those objectives that don't have any contrast annotated
     for(auto &objective: objectives)
-      if(objective.series_expression.empty())
-        for(auto &s: all_series_names)
-          objective.series_expression.push_back({+1, s});
+      if(objective.contrast_expression.empty())
+        for(auto &s: all_contrast_names)
+          objective.contrast_expression.push_back({+1, s});
 
 
 
-    // check that the series for the 2x2 measures are binary and that all discriminative ones are at least binary
+    // check that the contrasts for the 2x2 measures are binary and that all discriminative ones are at least binary
     for(auto &objective: objectives)
       for(auto &atom: objective) {
-        size_t series_size = 0;
-        for(auto &spec: data)
-          if(atom.series == spec.series)
-            series_size++;
+        size_t contrast_size = 0;
+        for(auto &spec: sets)
+          if(atom.contrast == spec.contrast)
+            contrast_size++;
         if(Measures::is_discriminative(objective.measure))
-          if(series_size < 2) {
-            if(add_shuffles and series_size == 1) {
-              DataSet shuffle_spec;
-              for(auto &spec: data)
-                if(atom.series == spec.series) {
-                  shuffle_spec = DataSet(spec.path, true);
-                  shuffle_spec.series = spec.series;
+          if(contrast_size < 2) {
+            if(add_shuffles and contrast_size == 1) {
+              Set shuffle_spec;
+              for(auto &spec: sets)
+                if(atom.contrast == spec.contrast) {
+                  shuffle_spec = Set(spec.path, true);
+                  shuffle_spec.contrast = spec.contrast;
                   break;
                 }
-              data.push_back(shuffle_spec);
+              sets.push_back(shuffle_spec);
             } else {
-              std::cout << "Error: discriminative measure '" << objective.measure << "' requires at least a binary contrast in series '" << atom.series << "'." << std::endl;
+              std::cout << "Error: discriminative measure '" << objective.measure << "' requires at least a binary contrast in contrast '" << atom.contrast << "'." << std::endl;
               exit(-1);
             }
           }
         if(Measures::is_two_by_two(objective.measure))
-          if(series_size != 2) {
-            std::cout << "Error: 2x2 measure '" << objective.measure << "' only works on binary contrasts, and series '" << atom.series << "' is not binary." << std::endl;
+          if(contrast_size != 2) {
+            std::cout << "Error: 2x2 measure '" << objective.measure << "' only works on binary contrasts, and contrast '" << atom.contrast << "' is not binary." << std::endl;
             exit(-1);
           }
       }
@@ -364,7 +364,7 @@ namespace Specification {
     // TODO make sure that where motif names are mentioned they should be updated for the demultiplexed motif names
 
 //
-//      rg. objectives with empty series... they should be taken to mean all series
+//      rg. objectives with empty contrast... they should be taken to mean all contrasts
 
     if(debug) {
       std::cout << "Found motif name in motif specification:";
@@ -386,14 +386,14 @@ namespace Specification {
     }
 
     // find sequence sets that mention demuxed motif, and replace by new ones
-    for(auto &spec: data) {
+    for(auto &spec: sets) {
       std::set<std::string> present_motifs;
       for(auto &m: spec.motifs)
         if(demux_motif_map.find(m) == end(demux_motif_map))
           present_motifs.insert(m);
         else
           for(auto &n: demux_motif_map.find(m)->second) {
-            std::cout << "Demuxing (data): " << m << " -> " << n << std::endl;
+            std::cout << "Demuxing (sets): " << m << " -> " << n << std::endl;
             present_motifs.insert(n);
           }
       spec.motifs = present_motifs;

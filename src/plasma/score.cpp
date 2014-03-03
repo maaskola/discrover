@@ -158,13 +158,13 @@ double compute_delta_frequency(double a, double b, double c, double d) {
   return a / (a + b) - c / (c + d);
 }
 
-count_vector_t reduce_count(const count_vector_t &full, const Seeding::DataCollection &collection, const string &series_name) {
+count_vector_t reduce_count(const count_vector_t &full, const Seeding::Collection &collection, const string &contrast_name) {
   count_vector_t counts(full.size());
   auto iter = begin(counts);
   auto full_iter = begin(full);
-  for(auto &series: collection) {
-    size_t n = series.sets.size();
-    if(series.name == series_name) {
+  for(auto &contrast: collection) {
+    size_t n = contrast.sets.size();
+    if(contrast.name == contrast_name) {
       std::copy(full_iter, full_iter+n, iter);
       iter += n;
       full_iter += n;
@@ -175,11 +175,11 @@ count_vector_t reduce_count(const count_vector_t &full, const Seeding::DataColle
   return(counts);
 }
 
-double compute_score(const Seeding::DataCollection &collection, const Seeding::Result &result, const Seeding::Options &options, Measures::Discrete::Measure measure, bool do_correction) {
+double compute_score(const Seeding::Collection &collection, const Seeding::Result &result, const Seeding::Options &options, Measures::Discrete::Measure measure, bool do_correction) {
   return(compute_score(collection, result.counts, options, result, result.motif.length(), Seeding::motif_degeneracy(result.motif), measure, do_correction));
 }
 
-double compute_score(const Seeding::DataCollection &collection,
+double compute_score(const Seeding::Collection &collection,
     const count_vector_t &counts,
     const Seeding::Options &options,
     const Seeding::Objective &objective,
@@ -187,9 +187,9 @@ double compute_score(const Seeding::DataCollection &collection,
     size_t degeneracy,
     Measures::Discrete::Measure measure,
     bool do_correction) {
-// double compute_score(const Seeding::DataCollection &collection, const count_vector_t &counts, const Seeding::Options &options, Measures::Discrete::Measure measure, size_t length, size_t degeneracy, bool do_correction) {
+// double compute_score(const Seeding::Collection &collection, const count_vector_t &counts, const Seeding::Options &options, Measures::Discrete::Measure measure, size_t length, size_t degeneracy, bool do_correction) {
   if(options.verbosity >= Verbosity::debug) {
-    cout << "compute_score(Seeding::DataCollection)" << endl;
+    cout << "compute_score(Seeding::Collection)" << endl;
     cout << "counts = " << counts << endl;
   }
   if(measure == Measures::Discrete::Measure::Undefined)
@@ -199,63 +199,63 @@ double compute_score(const Seeding::DataCollection &collection,
   double score = 0;
   double W = 0;
   for(auto &expr: objective) {
-    auto series_iter = collection.find(expr.series);
-    if(series_iter == end(collection)) {
-      cout << "Error: couldn't find series for objective series expression: " << expr << endl;
+    auto contrast_iter = collection.find(expr.contrast);
+    if(contrast_iter == end(collection)) {
+      cout << "Error: couldn't find contrast for objective contrast expression: " << expr << endl;
       for(auto &x: collection)
-        cout << "This series is present: " << x.name << std::endl;
+        cout << "This contrast is present: " << x.name << std::endl;
       exit(-1);
     } else {
-      auto counts_ = reduce_count(counts, collection, expr.series);
-      double w = options.weighting ? series_iter->set_size : 1;
+      auto counts_ = reduce_count(counts, collection, expr.contrast);
+      double w = options.weighting ? contrast_iter->set_size : 1;
       W += w;
       if(options.verbosity >= Verbosity::debug)
         cout << "counts_ = " << counts_ << endl;
-      score += expr.sign * w * compute_score(*series_iter, counts_, options, measure, length, degeneracy, objective.motif_name, do_correction);
+      score += expr.sign * w * compute_score(*contrast_iter, counts_, options, measure, length, degeneracy, objective.motif_name, do_correction);
     }
   }
   if(options.weighting)
     score /= W;
   if(options.verbosity >= Verbosity::debug)
-    cout << "end: compute_score(Seeding::DataCollection) -> " << score << endl;
+    cout << "end: compute_score(Seeding::Collection) -> " << score << endl;
   return(score);
 }
 
-double compute_score(const Seeding::DataSeries &data_series, const count_vector_t &counts, const Seeding::Options &options, Measures::Discrete::Measure measure, size_t length, size_t degeneracy, const string &motif_name, bool do_correction) {
+double compute_score(const Seeding::Contrast &contrast, const count_vector_t &counts, const Seeding::Options &options, Measures::Discrete::Measure measure, size_t length, size_t degeneracy, const string &motif_name, bool do_correction) {
   if(measure == Measures::Discrete::Measure::Undefined) {
     cout << "Error in compute_score: Measures::Discrete::Measure::undefined." << endl;
     exit(-1);
   }
-  if(measure != Measures::Discrete::Measure::SignalFrequency and data_series.sets.size() < 2)
+  if(measure != Measures::Discrete::Measure::SignalFrequency and contrast.sets.size() < 2)
     return(-std::numeric_limits<double>::infinity());
 
   matrix_t occurrence_table = matrix_t(counts.size(), 2);
   for(size_t i = 0; i < counts.size(); i++) {
     occurrence_table(i,0) = counts[i];
-    occurrence_table(i,1) = (options.word_stats ? data_series.sets[i].seq_size : data_series.sets[i].set_size) - counts[i];
+    occurrence_table(i,1) = (options.word_stats ? contrast.sets[i].seq_size : contrast.sets[i].set_size) - counts[i];
   }
   double signal_freq = 0, control_freq = 0;
   size_t signal_size = 0, control_size = 0;
 
   size_t sample_idx = 0;
   bool signal_present = false;
-  for(auto &data_set: data_series) {
+  for(auto &dataset: contrast) {
     if(excessive_debug and options.verbosity >= Verbosity::debug) {
-      std::cerr << "motifs in data_set:";
-      for(auto &x: data_set.motifs)
+      std::cerr << "motifs in dataset:";
+      for(auto &x: dataset.motifs)
         std::cerr << " " << x;
       std::cerr << std::endl;
       std::cerr << "looking for: " << motif_name;
     }
-    if(find(begin(data_set.motifs), end(data_set.motifs), motif_name) != end(data_set.motifs)) {
+    if(find(begin(dataset.motifs), end(dataset.motifs), motif_name) != end(dataset.motifs)) {
       signal_freq += occurrence_table(sample_idx, 0);
-      signal_size += (options.word_stats ? data_set.seq_size : data_set.set_size);
+      signal_size += (options.word_stats ? dataset.seq_size : dataset.set_size);
       signal_present = true;
       if(excessive_debug and options.verbosity >= Verbosity::debug)
         std::cerr << " - found!" << std::endl;
     } else {
       control_freq += occurrence_table(sample_idx, 0);
-      control_size += (options.word_stats ? data_set.seq_size : data_set.set_size);
+      control_size += (options.word_stats ? dataset.seq_size : dataset.set_size);
       if(excessive_debug and options.verbosity >= Verbosity::debug)
         std::cerr << " - not found!" << std::endl;
     }

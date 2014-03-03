@@ -99,7 +99,7 @@ namespace Seeding {
 
     Options();
 
-    Specification::DataSets paths;
+    Specification::Sets paths;
     Specification::Motifs motif_specifications;
     Objectives objectives;
 

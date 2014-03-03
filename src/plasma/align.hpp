@@ -84,8 +84,8 @@ class Index {
     std::vector<idx_t> jmp;    // JMP table
 };
 
-// std::string collapse_data_series(const Seeding::DataSeries &data_series, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set);
-std::string collapse_data_collection(const Seeding::DataCollection &collection, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set, std::vector<size_t> &set2series);
+// std::string collapse_contrast(const Seeding::Contrast &contrast, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set);
+std::string collapse_collection(const Seeding::Collection &collection, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set, std::vector<size_t> &set2contrast);
 
 template <class idx_t=size_t, class lcp_t=size_t, class index_t=Index<std::string, idx_t, lcp_t>>
 class NucleotideIndex {
@@ -99,29 +99,29 @@ class NucleotideIndex {
       paths(i.paths),
       pos2seq(i.pos2seq),
       seq2set(i.seq2set),
-      set2series(i.set2series),
+      set2contrast(i.set2contrast),
       index(i.index) { };
     NucleotideIndex(Verbosity verbosity=Verbosity::info) :
       paths(),
       pos2seq(),
       seq2set(),
-      set2series(),
+      set2contrast(),
       index("", verbosity) { };
-    NucleotideIndex(const Seeding::DataCollection &collection, Verbosity verbosity) :
+    NucleotideIndex(const Seeding::Collection &collection, Verbosity verbosity) :
       paths(),
       pos2seq(),
       seq2set(),
-      set2series(),
-      index(collapse_data_collection(collection, pos2seq, seq2set, set2series), verbosity) {
-        for(auto &series: collection)
-          for(auto &set: series)
-            paths.push_back(set.path);
+      set2contrast(),
+      index(collapse_collection(collection, pos2seq, seq2set, set2contrast), verbosity) {
+        for(auto &contrast: collection)
+          for(auto &dataset: contrast)
+            paths.push_back(dataset.path);
       };
     NucleotideIndex(const std::vector<std::string> &paths_, size_t nseq=0) :
       paths(paths_),
       pos2seq(),
       seq2set(),
-      set2series(),
+      set2contrast(),
       index(read_fasta_with_boundaries(paths, pos2seq, seq2set, nseq)) {
       };
     std::vector<size_t> word_hits_by_file(const std::string &query) const {
@@ -151,7 +151,7 @@ class NucleotideIndex {
     };
   private:
     std::vector<std::string> paths;
-    std::vector<size_t> pos2seq, seq2set, set2series;
+    std::vector<size_t> pos2seq, seq2set, set2contrast;
     index_t index;
 };
 

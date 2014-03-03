@@ -39,13 +39,13 @@
 namespace Seeding {
   /** Count occurrences of non-degenerate words; i.e. of words of the given length, consisting only of ACGT */
   void add_counts(const std::string &seq, size_t length, hash_map_t &counts, size_t idx, const count_vector_t &default_stats, const Options &options);
-  void add_counts(const DataSet &data, size_t len, hash_map_t &counts, size_t idx, const count_vector_t &default_stats, const Options &options);
+  void add_counts(const Set &dataset, size_t len, hash_map_t &counts, size_t idx, const count_vector_t &default_stats, const Options &options);
 
   typedef uint16_t seq_idx_t;
   typedef std::map<std::string, std::list<seq_idx_t>> Index;
 
-  hash_map_t get_word_counts(const DataCollection &data_series, size_t length, const Options &options);
-  count_vector_t count_motif(const DataCollection &collection, const std::string &motif, const Options &options);
+  hash_map_t get_word_counts(const Collection &collection, size_t length, const Options &options);
+  count_vector_t count_motif(const Collection &collection, const std::string &motif, const Options &options);
 
   void print_counts(const hash_map_t &counts);
 }

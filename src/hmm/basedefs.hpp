@@ -38,8 +38,8 @@
 namespace Data {
   typedef Fasta::IEntry Seq;
   typedef Basic::Set<Seq> Set;
-  typedef Basic::Series<Set> Series;
-  typedef Basic::Collection<Series> Collection;
+  typedef Basic::Contrast<Set> Contrast;
+  typedef Basic::Collection<Contrast> Collection;
 
   typedef std::vector<Seq> Seqs;
 }
@@ -52,8 +52,8 @@ namespace Training {
   };
 }
 
-void prepare_cross_validation(const Data::Collection &data_sets, Data::Collection &training_data, Data::Collection &test_data, double cross_validation_freq, Verbosity verbosity);
-void prepare_cross_validation(const Data::Series &data, Data::Series &training_data, Data::Series &test_data, double cross_validation_freq, Verbosity verbosity);
+void prepare_cross_validation(const Data::Collection &col, Data::Collection &training_data, Data::Collection &test_data, double cross_validation_freq, Verbosity verbosity);
+void prepare_cross_validation(const Data::Contrast &contrast, Data::Contrast &training_data, Data::Contrast &test_data, double cross_validation_freq, Verbosity verbosity);
 
 #endif
 

@@ -161,7 +161,7 @@ class HMM {
 
 
     struct RegisteredDataSet {
-      Specification::DataSet spec;
+      Specification::Set spec;
       double class_prior;
       std::map<size_t, double> motif_prior; // the key is supposed to be the group index of the motif
       double get_motif_prior(size_t group_idx) const;
@@ -193,7 +193,7 @@ class HMM {
     void finalize_initialization();
 
     /**  Check whether the motif is enriched in the desired samples */
-    bool check_enrichment(const Data::Series &data, const matrix_t &counts, size_t group_idx) const;
+    bool check_enrichment(const Data::Contrast &contrast, const matrix_t &counts, size_t group_idx) const;
 
   public:
     /* Add a motif based on a IUPAC string. */
@@ -205,26 +205,26 @@ class HMM {
     void add_motifs(const HMM &hmm, bool only_additional=false);
 
     /** Perform HMM training. */
-    double train(const Data::Collection &data, const Training::Tasks &tasks, const hmm_options &options);
+    double train(const Data::Collection &col, const Training::Tasks &tasks, const hmm_options &options);
     /** Initialize HMM background with the Baum-Welch algorithm. */
-    void initialize_bg_with_bw(const Data::Collection &collection, const hmm_options &options);
+    void initialize_bg_with_bw(const Data::Collection &col, const hmm_options &options);
 
   protected:
-    double train_inner(const Data::Collection &data, const Training::Tasks &tasks, const hmm_options &options);
+    double train_inner(const Data::Collection &col, const Training::Tasks &tasks, const hmm_options &options);
 
     /** Perform iterative HMM training, like re-estimation (expectation maximization) or gradient based. */
-    void iterative_training(const Data::Collection &data, const Training::Tasks &tasks, const hmm_options &options);
+    void iterative_training(const Data::Collection &col, const Training::Tasks &tasks, const hmm_options &options);
     /** Perform one iteration of iterative HMM training. */
-    bool perform_training_iteration(const Data::Collection &data, const Training::Tasks &tasks, const hmm_options &options, Training::State &ts);
+    bool perform_training_iteration(const Data::Collection &col, const Training::Tasks &tasks, const hmm_options &options, Training::State &ts);
     /** Perform one iteration of gradient training. */
-    bool perform_training_iteration_gradient(const Data::Collection &data, const Training::Task &task, const hmm_options &options, int &center, double &score);
+    bool perform_training_iteration_gradient(const Data::Collection &col, const Training::Task &task, const hmm_options &options, int &center, double &score);
     /** Perform one iteration of re-estimation training. */
-    bool perform_training_iteration_reestimation(const Data::Collection &data, const Training::Task &task, const hmm_options &options, double &score);
+    bool perform_training_iteration_reestimation(const Data::Collection &col, const Training::Task &task, const hmm_options &options, double &score);
     /** Perform one iteration of class parameter re-estimation training. */
-    bool reestimate_class_parameters(const Data::Collection &data, const Training::Task &task, const hmm_options &options, double &score);
+    bool reestimate_class_parameters(const Data::Collection &col, const Training::Task &task, const hmm_options &options, double &score);
 
     /** Perform HMM training for the background part of the model using Baum-Welch. */
-    void train_background(const Data::Collection &data, const hmm_options &options);
+    void train_background(const Data::Collection &col, const hmm_options &options);
 
 // -------------------------------------------------------------------------------------------
 // Saving and loading
@@ -280,8 +280,8 @@ class HMM {
     friend std::ostream &operator<<(std::ostream& os, const HMM &hmm);
 
   public:
-    double compute_score(const Data::Collection &data, const Measures::Continuous::Measure &measure, bool weighting, const std::vector<size_t> &present_motifs, const std::vector<size_t> &absent_motifs) const;
-    double compute_score_all_motifs(const Data::Collection &data, const Measures::Continuous::Measure &measure, bool weighting) const;
+    double compute_score(const Data::Collection &col, const Measures::Continuous::Measure &measure, bool weighting, const std::vector<size_t> &present_motifs, const std::vector<size_t> &absent_motifs) const;
+    double compute_score_all_motifs(const Data::Collection &col, const Measures::Continuous::Measure &measure, bool weighting) const;
 
   protected:
     void shift_forward(size_t group_idx, size_t n);
@@ -303,19 +303,19 @@ class HMM {
     };
 
   public:
-    vector_t posterior_atleast_one(const Data::Series &data, bitmask_t present, bitmask_t absent) const;
+    vector_t posterior_atleast_one(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const;
     double viterbi(const Data::Seq &s, StatePath &path) const;
-    posterior_t posterior_atleast_one(const Data::Seq &data, bitmask_t present, bitmask_t absent) const;
-    double expected_posterior(const Data::Seq &data, bitmask_t present) const;
+    posterior_t posterior_atleast_one(const Data::Seq &seq, bitmask_t present, bitmask_t absent) const;
+    double expected_posterior(const Data::Seq &seq, bitmask_t present) const;
   protected:
-    vector_t posterior_atleast_one(const Data::Set &data, bitmask_t present, bitmask_t absent) const;
-    double   sum_posterior_atleast_one(const Data::Set &data, bitmask_t present, bitmask_t absent) const;
+    vector_t posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t absent) const;
+    double   sum_posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t absent) const;
 
-    vector_t viterbi_atleast_one(const Data::Series &data, bitmask_t present) const;
-    double   viterbi_atleast_one(const Data::Set &data, bitmask_t present) const;
+    vector_t viterbi_atleast_one(const Data::Contrast &contrast, bitmask_t present) const;
+    double   viterbi_atleast_one(const Data::Set &dataset, bitmask_t present) const;
 
-    vector_t expected_posterior(const Data::Series &data, bitmask_t present) const;
-    double   expected_posterior(const Data::Set &data, bitmask_t present) const;
+    vector_t expected_posterior(const Data::Contrast &contrast, bitmask_t present) const;
+    double   expected_posterior(const Data::Set &dataset, bitmask_t present) const;
 
 // -------------------------------------------------------------------------------------------
 // Generative and discriminative measures
@@ -328,47 +328,47 @@ class HMM {
 
   public:
 
-    double log_likelihood(const Data::Collection &data) const;
-    double log_likelihood(const Data::Series &data) const;
+    double log_likelihood(const Data::Collection &col) const;
+    double log_likelihood(const Data::Contrast &contrast) const;
     double log_likelihood(const Data::Set &s) const;
 
-    double class_likelihood(const Data::Series &data, const std::vector<size_t> &present_groups,  const std::vector<size_t> &absent_groups, bool compute_posterior) const;
-    double class_likelihood(const Data::Series &data, bitmask_t present, bitmask_t absent, bool compute_posterior) const;
-    double class_likelihood(const Data::Set &data, bitmask_t present, bitmask_t absent, bool compute_posterior) const;
+    double class_likelihood(const Data::Contrast &contrast, const std::vector<size_t> &present_groups,  const std::vector<size_t> &absent_groups, bool compute_posterior) const;
+    double class_likelihood(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent, bool compute_posterior) const;
+    double class_likelihood(const Data::Set &dataset, bitmask_t present, bitmask_t absent, bool compute_posterior) const;
 
     // Discriminative measures, for groups specified by vectors of group indices
     /** The likelihood difference */
-    double log_likelihood_difference(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
+    double log_likelihood_difference(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
     /** The mutual information of condition and motif occurrence */
-    double mutual_information(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
+    double mutual_information(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
     /** The mutual information of rank and motif occurrence. */
-    double rank_information(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
+    double rank_information(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
     /** The summed Matthew's correlation coefficients of all individual contrasts. */
-    double matthews_correlation_coefficient(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
+    double matthews_correlation_coefficient(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
     /** The summed difference of expected occurrence frequencies. */
-    double dips_tscore(const Data::Series &data, const std::vector<size_t> &present_groups) const;
+    double dips_tscore(const Data::Contrast &contrast, const std::vector<size_t> &present_groups) const;
     /** The summed difference of site occurrence. */
-    double dips_sitescore(const Data::Series &data, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
+    double dips_sitescore(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
 
   // protected:
 
     // Discriminative measures, for groups specified by bitmasks
     /** The likelihood difference */
-    double log_likelihood_difference(const Data::Series &data, bitmask_t present, bitmask_t absent) const;
+    double log_likelihood_difference(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const;
     /** The mutual information of condition and motif occurrence */
-    double mutual_information(const Data::Series &data, bitmask_t present, bitmask_t absent) const;
+    double mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const;
     /** The mutual information of rank and motif occurrence. */
-    double rank_information(const Data::Series &data, bitmask_t present, bitmask_t absent) const;
+    double rank_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const;
     /** The summed Matthew's correlation coefficients of all individual contrasts. */
-    double matthews_correlation_coefficient(const Data::Series &data, bitmask_t present, bitmask_t absent) const;
+    double matthews_correlation_coefficient(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const;
     /** The summed difference of expected occurrence frequencies. */
-    double dips_tscore(const Data::Series &data, bitmask_t present) const;
+    double dips_tscore(const Data::Contrast &contrast, bitmask_t present) const;
     /** The summed difference of site occurrence. */
-    double dips_sitescore(const Data::Series &data, bitmask_t present, bitmask_t absent) const;
+    double dips_sitescore(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const;
 
     // Discriminative measures, for individual sets of sequences
     /** The mutual information of rank and motif occurrence. */
-    double rank_information(const Data::Set &data, bitmask_t present, bitmask_t absent) const;
+    double rank_information(const Data::Set &dataset, bitmask_t present, bitmask_t absent) const;
 
 // -------------------------------------------------------------------------------------------
 // Expectation-maximization type learning
@@ -377,20 +377,20 @@ class HMM {
   protected:
 
     /** Perform full expectation-maximization type learning */
-    void reestimation(const Data::Collection &data, const Training::Task &task, const hmm_options &options);
+    void reestimation(const Data::Collection &col, const Training::Task &task, const hmm_options &options);
     /** Perform one iteration of expectation-maximization type learning */
-    double reestimationIteration(const Data::Collection &data, const Training::Task &task, const hmm_options &options);
+    double reestimationIteration(const Data::Collection &col, const Training::Task &task, const hmm_options &options);
 
     void M_Step(const matrix_t &T, const matrix_t &E, const Training::Targets &targets, const hmm_options &options);
 
     /** Perform one iteration of scaled Baum-Welch learning for a data collection */
-    double BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Collection &data, const Training::Targets &targets, const hmm_options &options) const;
+    double BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Collection &col, const Training::Targets &targets, const hmm_options &options) const;
     /** Perform one iteration of scaled Baum-Welch learning for a data set */
-    double BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Set &data, const Training::Targets &targets, const hmm_options &options) const;
+    double BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Set &dataset, const Training::Targets &targets, const hmm_options &options) const;
     /** Perform one iteration of Viterbi learning for a data collection */
-    double ViterbiIteration(matrix_t &T, matrix_t &E, const Data::Collection &data, const Training::Targets &targets, const hmm_options &options);
+    double ViterbiIteration(matrix_t &T, matrix_t &E, const Data::Collection &col, const Training::Targets &targets, const hmm_options &options);
     /** Perform one iteration of Viterbi learning for a data set */
-    double ViterbiIteration(matrix_t &T, matrix_t &E, const Data::Set &data, const Training::Targets &targets, const hmm_options &options);
+    double ViterbiIteration(matrix_t &T, matrix_t &E, const Data::Set &dataset, const Training::Targets &targets, const hmm_options &options);
 
     double BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Seq &s, const Training::Targets &targets) const;
     double BaumWelchIteration_single(matrix_t &T, matrix_t &E, const Data::Seq &s, const Training::Targets &targets) const;
@@ -400,7 +400,7 @@ class HMM {
 // -------------------------------------------------------------------------------------------
 //
     /** Perform parallel tempering */
-    std::vector<std::list<std::pair<HMM, double>>> mcmc(const Data::Collection &data, const Training::Task &task, const hmm_options &options);
+    std::vector<std::list<std::pair<HMM, double>>> mcmc(const Data::Collection &col, const Training::Task &task, const hmm_options &options);
 
 // -------------------------------------------------------------------------------------------
 // Gradient learning
@@ -408,18 +408,18 @@ class HMM {
 
     /** Perform gradient line searching with the desired objective function
      * using an approximate exponential step search.  **/
-    std::pair<double, HMM> line_search(const Data::Collection &data, const Gradient &gradient, const Training::Task &task, int &center) const;
+    std::pair<double, HMM> line_search(const Data::Collection &col, const Gradient &gradient, const Training::Task &task, int &center) const;
     /** Perform gradient line searching with the Moré-Thuente algorithm and the
      * desired objective function. */
-    std::pair<double, HMM> line_search_more_thuente(const Data::Collection &data, const Gradient &gradient, double score, int &info, const Training::Task &task, const hmm_options &options) const;
+    std::pair<double, HMM> line_search_more_thuente(const Data::Collection &col, const Gradient &gradient, double score, int &info, const Training::Task &task, const hmm_options &options) const;
     /** Auxiliary routine to build candidate HMM for a given direction and step
      * size. */
     HMM build_trial_model(const Gradient &gradient, double alpha, const Training::Task &task) const;
 
     /** Compute the gradient of the desired objective function */
-    Gradient compute_gradient(const Data::Collection &data, double &score, const Training::Task &task, bool weighting) const;
-    Gradient compute_gradient(const Data::Series &data, double &score, const Training::Task &task) const;
-    double compute_gradient(const Data::Series &data, Gradient &gradient, const Training::Task &task, size_t group_idx) const;
+    Gradient compute_gradient(const Data::Collection &col, double &score, const Training::Task &task, bool weighting) const;
+    Gradient compute_gradient(const Data::Contrast &contrast, double &score, const Training::Task &task) const;
+    double compute_gradient(const Data::Contrast &contrast, Gradient &gradient, const Training::Task &task, size_t group_idx) const;
 
 
 // -------------------------------------------------------------------------------------------
@@ -456,31 +456,31 @@ class HMM {
     double log_likelihood_gradient(const Data::Seqs &s, const Training::Targets &targets, matrix_t &transition_g, matrix_t &emission_g) const;
 
     /** Gradient of mutual information of class and motif occurrence with respect to transformed transition and emission probabilities */
-    double mutual_information_gradient(const Data::Series &data, const Training::Task &task, size_t group_idx, Gradient &g) const;
+    double mutual_information_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const;
 
     /** Gradient of mutual information of rank and motif occurrence with respect to transformed transition and emission probabilities */
-    double rank_information_gradient(const Data::Series &data, const Training::Task &task, size_t group_idx, Gradient &g) const;
-    double rank_information_gradient(const Data::Set &data, const Training::Task &task, size_t group_idx, Gradient &g) const;
+    double rank_information_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const;
+    double rank_information_gradient(const Data::Set &dataset, const Training::Task &task, size_t group_idx, Gradient &g) const;
 
     /** Gradient of Matthew's correlation coefficient of class and motif occurrence with respect to transformed transition and emission probabilities */
-    double matthews_correlation_coefficient_gradient(const Data::Series &data, const Training::Task &task, size_t group_idx, Gradient &g) const;
+    double matthews_correlation_coefficient_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const;
 
     /** Gradient of Chi-Square of class and motif occurrence with respect to transformed transition and emission probabilities */
-    double chi_square_gradient(const Data::Series &data, const Training::Task &task, size_t group_idx, Gradient &g) const;
+    double chi_square_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const;
 
     /** Gradient of log likelihood difference with respect to transformed transition and emission probabilities */
-    double log_likelihood_difference_gradient(const Data::Series &data, const Training::Task &task, size_t group_idx, Gradient &g) const;
+    double log_likelihood_difference_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const;
 
     /** Gradient of site frequency difference with respect to transformed transition and emission probabilities */
-    double site_frequency_difference_gradient(const Data::Series &data, const Training::Task &task, size_t group_idx, Gradient &g) const;
+    double site_frequency_difference_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const;
 
     /** Gradient of class likelihood with respect to transformed transition and emission probabilities */
-    double class_likelihood_gradient(const Data::Series &data, const Training::Task &task, size_t group_idx, Gradient &g) const;
-    double class_likelihood_gradient(const Data::Set &data, const Training::Task &task, size_t group_idx, Gradient &g) const;
+    double class_likelihood_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const;
+    double class_likelihood_gradient(const Data::Set &dataset, const Training::Task &task, size_t group_idx, Gradient &g) const;
 
     /** Gradient of the expected posterior probability of having at least one site with respect to transformed transition and emission probabilities */
     posterior_t posterior_gradient(const Data::Set &s, const Training::Task &task, size_t group_idx, matrix_t &transition_g, matrix_t &emission_g) const;
-    posterior_gradient_t posterior_gradient(const Data::Seq &data, const Training::Task &task, size_t group_idx, matrix_t &transition_g, matrix_t &emission_g) const;
+    posterior_gradient_t posterior_gradient(const Data::Seq &seq, const Training::Task &task, size_t group_idx, matrix_t &transition_g, matrix_t &emission_g) const;
 
 
     /** (Log) likelihood gradient with respect to transformed transition probabilities */
@@ -508,7 +508,7 @@ class HMM {
 
     void switch_intermediate(bool new_state) { store_intermediate=new_state; };
 
-    mask_t compute_mask(const Data::Collection &data) const;
+    mask_t compute_mask(const Data::Collection &col) const;
 
 // -------------------------------------------------------------------------------------------
 // Methods for candidate generation in MCMC sampling
@@ -530,7 +530,7 @@ class HMM {
     void print_occurrence_table(const std::string &file, const Data::Seq &seq, const StatePath &path, std::ostream &out) const;
 
   protected:
-    void register_dataset(const Data::Set &data, double class_prior, double motif_p1, double motif_p2);
+    void register_dataset(const Data::Set &dataset, double class_prior, double motif_p1, double motif_p2);
     Training::Range complementary_states(size_t group_idx) const;
     Training::Range complementary_states_mask(bitmask_t present) const;
 };

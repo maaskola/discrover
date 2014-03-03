@@ -36,17 +36,17 @@ string readfile(const string &path) {
 }
 
 namespace Specification {
-  DataSet::DataSet() : series(""), path(""), is_shuffle(false), motifs() {
+  Set::Set() : contrast(""), path(""), is_shuffle(false), motifs() {
     if(false)
-      cout << "Specification::DataSet standard constructor" << endl;
+      cout << "Specification::Set standard constructor" << endl;
   };
-  DataSet::DataSet(const DataSet &spec) : series(spec.series), path(spec.path), is_shuffle(spec.is_shuffle), motifs(spec.motifs) {
+  Set::Set(const Set &spec) : contrast(spec.contrast), path(spec.path), is_shuffle(spec.is_shuffle), motifs(spec.motifs) {
     if(false)
-      cout << "Specification::DataSet copy constructor: '" << spec.path << "'" << endl;
+      cout << "Specification::Set copy constructor: '" << spec.path << "'" << endl;
   };
-  DataSet::DataSet(const string &token, bool is_shuffle_) : DataSet() {
+  Set::Set(const string &token, bool is_shuffle_) : Set() {
     if(false)
-      cout << "Specification::DataSet string constructor: '" << token << "'." << endl;
+      cout << "Specification::Set string constructor: '" << token << "'." << endl;
     // the format is [NAMES:[SERIES:]]seq.fa e.g. pum,qki:bg0:seq.fa or :bg0:seq.fa or seq.fa
     // so if a file name contains at least one ":" then one would just have to write ::file_name_with_:_.fa
     is_shuffle = is_shuffle_;
@@ -57,7 +57,7 @@ namespace Specification {
       for(auto &motif: tokenize(motif_token, ","))
         motifs.insert(motif);
       if((pos = rest.find(":")) != string::npos) {
-        series = rest.substr(0, pos);
+        contrast = rest.substr(0, pos);
         path = rest.substr(pos+1);
       } else
         path = rest;
@@ -75,7 +75,7 @@ namespace Specification {
     }
 
     if(false) {
-      cout << "Constructed DataSet:\npath = " << path << "\n" << "series = " << series << "\n" << "motifs  =";
+      cout << "Constructed Set:\npath = " << path << "\n" << "contrast = " << contrast << "\n" << "motifs  =";
       for(auto x: motifs) cout << " " << x;
       cout << endl;
       cout << "This is" << (is_shuffle ? "" : " not") << " a shuffle." << endl;
@@ -129,9 +129,9 @@ namespace Specification {
 }
 
 namespace Specification {
-  namespace Series {
-    Expression make_series(const string &path) {
-      // cout << "make_series(" << path << ")" << endl;
+  namespace Contrast {
+    Expression make_contrast(const string &path) {
+      // cout << "make_contrast(" << path << ")" << endl;
       Expression expr;
       string s = path;
       while(s.size() > 0) {
@@ -153,7 +153,7 @@ namespace Specification {
       return(expr);
     }
     string to_string(const Atom &atom) {
-      return(string() + (atom.sign > 0 ? "+" : "-") + atom.series);
+      return(string() + (atom.sign > 0 ? "+" : "-") + atom.contrast);
     }
     ostream &operator<<(ostream &out, const Atom &atom) {
       out << to_string(atom);
@@ -178,12 +178,12 @@ namespace Specification {
       return(out);
     }
   }
-  istream &operator>>(istream &in, Specification::DataSet &spec) {
+  istream &operator>>(istream &in, Specification::Set &spec) {
     // the format is [0,1,2:]seq.fa e.g. 0,1,2:seq.fa or 0,1:seq.fa or seq.fa
     // so if a file name contains at least one ":" then one would just have to write :file_name_with_:_.fa
     string token;
     in >> token;
-    spec = Specification::DataSet(token);
+    spec = Specification::Set(token);
     return(in);
   }
 
@@ -199,7 +199,7 @@ namespace Specification {
     return(out);
   }
 
-  std::ostream &operator<<(std::ostream &out, const DataSet &spec) {
+  std::ostream &operator<<(std::ostream &out, const Set &spec) {
     out << to_string(spec);
     return(out);
   }
@@ -217,7 +217,7 @@ namespace Specification {
     s += spec.specification;
     return(s);
   }
-  string to_string(const DataSet &spec) {
+  string to_string(const Set &spec) {
     string s = "";
     bool first = true;
     for(auto &m: spec.motifs) {
@@ -227,7 +227,7 @@ namespace Specification {
         s += ",";
       s += m;
     }
-    s += ":" + spec.series + ":" + spec.path;
+    s += ":" + spec.contrast + ":" + spec.path;
     if(spec.is_shuffle)
       s += "_SHUFFLE";
     return(s);

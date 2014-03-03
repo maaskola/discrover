@@ -194,7 +194,7 @@ Gradient normalize(const Gradient &gradient)
  *                  TOLERANCES MAY BE TOO SMALL.
  *
  **/
-pair<double, HMM> HMM::line_search_more_thuente(const Data::Collection &data,
+pair<double, HMM> HMM::line_search_more_thuente(const Data::Collection &collection,
     const Gradient &initial_gradient_,
     double initial_score,
     int &info,
@@ -334,7 +334,7 @@ pair<double, HMM> HMM::line_search_more_thuente(const Data::Collection &data,
     nfev++;
     double f;
     HMM trial_hmm = build_trial_model(initial_gradient, stp, task);
-    Gradient trial_gradient = trial_hmm.compute_gradient(data, f, task, options.weighting);
+    Gradient trial_gradient = trial_hmm.compute_gradient(collection, f, task, options.weighting);
     if(verbo >= Verbosity::verbose)
       cout << "Function and gradient evaluation!" << endl;
 

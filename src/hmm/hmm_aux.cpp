@@ -582,7 +582,7 @@ Training::Tasks HMM::define_training_tasks(const hmm_options &options) const
     Training::Task task;
     task.motif_name = objective.motif_name;
     task.measure = objective.measure;
-    task.series_expression = objective.series_expression;
+    task.contrast_expression = objective.contrast_expression;
     bool found = false;
     for(auto &group: groups) {
       if(group.name == objective.motif_name) {
@@ -631,11 +631,11 @@ Training::Tasks HMM::define_training_tasks(const hmm_options &options) const
     }
   }
 
-  // get all series names
-  set<string> series_names;
+  // get all contrast names
+  set<string> contrast_names;
   for(auto &task: tasks)
     for(auto &expr: task)
-      series_names.insert(expr.series);
+      contrast_names.insert(expr.contrast);
 
   // And then the generative part
   if(options.bg_learning != Training::Method::None) {
@@ -648,8 +648,8 @@ Training::Tasks HMM::define_training_tasks(const hmm_options &options) const
       task.measure = options.objectives[0].measure;
     }
 
-    for(auto &series_name: series_names)
-      task.series_expression.push_back({+1, series_name});
+    for(auto &contrast_name: contrast_names)
+      task.contrast_expression.push_back({+1, contrast_name});
     for(size_t i = 0; i < n_states; i++) {
       if(e_states.find(i) == end(e_states))
         if(i > start_state)
@@ -720,15 +720,15 @@ bool HMM::is_motif_state(size_t state_idx) const
   return(is_motif_group(group_ids[state_idx]));
 }
 
-HMM::mask_t HMM::compute_mask(const Data::Collection &data) const
+HMM::mask_t HMM::compute_mask(const Data::Collection &collection) const
 {
   if(verbosity >= Verbosity::debug)
-    cout << "HMM::compute-mask(Data::Series)" << endl;
+    cout << "HMM::compute-mask(Data::Collection)" << endl;
   HMM::mask_t mask;
-  for(auto &series: data)
-    for(auto &data_set: series) {
+  for(auto &contrast: collection)
+    for(auto &dataset: contrast) {
       mask_sub_t m;
-      for(auto &seq: data_set) {
+      for(auto &seq: dataset) {
         vector<size_t> v;
         HMM::StatePath path;
         viterbi(seq, path);
@@ -743,7 +743,7 @@ HMM::mask_t HMM::compute_mask(const Data::Collection &data) const
           m[seq.definition] = v;
       }
       if(not m.empty())
-        mask[data_set.path] = m;
+        mask[dataset.path] = m;
     }
   return(mask);
 }

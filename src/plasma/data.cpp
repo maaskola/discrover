@@ -52,23 +52,23 @@ namespace Data {
 
 
 namespace Seeding {
-  DataSet::DataSet() :
+  Set::Set() :
   Data::Basic::Set<Fasta::Entry>() {
   }
 
-  DataSet::DataSet(const Specification::DataSet &s, bool revcomp, size_t n_seq) :
+  Set::Set(const Specification::Set &s, bool revcomp, size_t n_seq) :
     Data::Basic::Set<Fasta::Entry>(s, revcomp, n_seq) { };
 
-  DataSeries::DataSeries() :
-  Data::Basic::Series<DataSet>() {
+  Contrast::Contrast() :
+  Data::Basic::Contrast<Set>() {
   }
 
-  DataSeries::DataSeries(const std::string &name, const Specification::DataSets &paths, bool revcomp, size_t n_seq) :
-  Data::Basic::Series<DataSet>(name, paths, revcomp, n_seq) {
+  Contrast::Contrast(const std::string &name, const Specification::Sets &paths, bool revcomp, size_t n_seq) :
+  Data::Basic::Contrast<Set>(name, paths, revcomp, n_seq) {
   }
 
-  DataCollection::DataCollection(const Specification::DataSets &paths, bool revcomp, size_t n_seq) :
-  Data::Basic::Collection<DataSeries>(paths, revcomp, n_seq) {
+  Collection::Collection(const Specification::Sets &paths, bool revcomp, size_t n_seq) :
+  Data::Basic::Collection<Contrast>(paths, revcomp, n_seq) {
   }
 }
 

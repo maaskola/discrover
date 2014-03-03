@@ -17,10 +17,10 @@
 
 using namespace std;
 
-void print_table(ostream &ofs, const matrix_t m, const Data::Series &data, size_t width, size_t prec) {
+void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast, size_t width, size_t prec) {
   size_t w = 0;
   for(size_t i = 0; i < m.size1(); i++) {
-    size_t n = data.sets[i].path.size();
+    size_t n = contrast.sets[i].path.size();
     if(n > w)
       w = n;
   }
@@ -32,7 +32,7 @@ void print_table(ostream &ofs, const matrix_t m, const Data::Series &data, size_
 
   size_t prev_prec = ofs.precision();
   for(size_t i = 0; i < m.size1(); i++) {
-    ofs << left << setw(w) << data.sets[i].path;
+    ofs << left << setw(w) << contrast.sets[i].path;
     for(size_t j = 0; j < m.size2(); j++)
       ofs << right << fixed << setprecision(prec) << setw(width) << m(i,j);
     if(m.size2() == 2)
@@ -43,15 +43,15 @@ void print_table(ostream &ofs, const matrix_t m, const Data::Series &data, size_
   ofs.precision(prev_prec);
 }
 
-void count_report(ostream &ofs, const matrix_t counts, size_t motif_len, const Data::Series &data, double pseudo_count, bool limit_logp, const string &name, const string &prefix)
+void count_report(ostream &ofs, const matrix_t counts, size_t motif_len, const Data::Contrast &contrast, double pseudo_count, bool limit_logp, const string &name, const string &prefix)
 {
   size_t df = (counts.size1() - 1) * (counts.size2() - 1);
-  print_table(ofs, counts, data, 10, 2);
+  print_table(ofs, counts, contrast, 10, 2);
   double mutualinf = calc_mutual_information(counts, pseudo_count, true, false, false);
   double exp_mutualinf = calc_mutual_information(counts, pseudo_count, true, true, false);
   double var_mutualinf = calc_mutual_information(counts, pseudo_count, true, true, true);
   double g = calc_g_test(counts, pseudo_count);
-  // double correct_class = hmm.correct_classification(data);  // TODO: reactivate
+  // double correct_class = hmm.correct_classification(contrast);  // TODO: reactivate
   double log_p_g = pchisq(g, df, false, true);
   double cor_log_p_g_stringent = log(149) * motif_len + log_p_g;
   if(limit_logp)
@@ -67,9 +67,9 @@ void count_report(ostream &ofs, const matrix_t counts, size_t motif_len, const D
   ofs << prefix << "Bonferroni corrected log-P(Chi-Square(G-Test)) = " << cor_log_p_g_stringent << endl;
 }
 
-void eval_contrast(const HMM &hmm, const Data::Series &data, ostream &ofs, bool limit_logp, const string &tag)
+void eval_contrast(const HMM &hmm, const Data::Contrast &contrast, ostream &ofs, bool limit_logp, const string &tag)
 {
-  // double mi = hmm.mutual_information(data, contrast);
+  // double mi = hmm.mutual_information(contrast, contrast);
   // ofs << "Summed discriminatory mutual information = " << mi << " bit per sequence" << endl;
 
   for(size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
@@ -79,31 +79,31 @@ void eval_contrast(const HMM &hmm, const Data::Series &data, ostream &ofs, bool 
       size_t present_mask = 1 << group_idx;
       size_t absent_mask = 0;
       // TODO EVALUATION
-      vector_t v = hmm.posterior_atleast_one(data, present_mask, absent_mask);
+      vector_t v = hmm.posterior_atleast_one(contrast, present_mask, absent_mask);
       matrix_t counts(v.size(), 2);
       for(size_t i = 0; i < v.size(); i++) {
         counts(i,0) = v(i);
-        counts(i,1) = data.sets[i].set_size - v(i);
+        counts(i,1) = contrast.sets[i].set_size - v(i);
       }
       // TODO EVALUATION
-      double mcc = hmm.matthews_correlation_coefficient(data, present_mask, absent_mask); // TODO compute from count table
+      double mcc = hmm.matthews_correlation_coefficient(contrast, present_mask, absent_mask); // TODO compute from count table
       // double llr = calc_log_likelihood_ratio(counts, hmm.pseudo_count);
-      // double dips_tscore = hmm.dips_tscore(data, feature);
+      // double dips_tscore = hmm.dips_tscore(contrast, feature);
       // TODO EVALUATION
-      double dips_sitescore = hmm.dips_sitescore(data, present_mask, absent_mask);
-      // double correct_class = hmm.correct_classification(data);  // TODO: reactivate
+      double dips_sitescore = hmm.dips_sitescore(contrast, present_mask, absent_mask);
+      // double correct_class = hmm.correct_classification(contrast);  // TODO: reactivate
 
       string name = hmm.get_group_name(group_idx);
 
       ofs << endl << tag << "Expected occurrence statistics for motif " << name << endl;
-      count_report(ofs, counts, motif_len, data, hmm.get_pseudo_count(), limit_logp, name, tag);
+      count_report(ofs, counts, motif_len, contrast, hmm.get_pseudo_count(), limit_logp, name, tag);
       ofs << tag << "Matthews correlation coefficient = " << mcc << endl;
       // ofs << "DIPS t-score = " << dips_tscore * 100 << " %" << endl;
       ofs << tag << "DIPS site-score = " << dips_sitescore * 100 << " %" << endl;
       // ofs << "log P correct classification = " << correct_class << endl; // TODO: reactivate
       // TODO print a table of the likelihoods
       // TODO EVALUATION
-      ofs << tag << "Log likelihood difference = " << hmm.log_likelihood_difference(data, present_mask, absent_mask) << endl; // TODO compute from count table
+      ofs << tag << "Log likelihood difference = " << hmm.log_likelihood_difference(contrast, present_mask, absent_mask) << endl; // TODO compute from count table
     }
 }
 
@@ -217,7 +217,7 @@ template <class T> void correlation_report(const std::vector<T> &x, std::ostream
 }
 
 ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
-    const Data::Set &data,
+    const Data::Set &dataset,
     ostream &out,
     ostream &v_out,
     ostream &occurrence_out,
@@ -234,19 +234,19 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
 
   if(options.evaluate.summary) {
     // TODO EVALUATION
-    double log_likelihood = hmm.log_likelihood(data);
-    // out << endl << "Summary of " << data.path << endl;
-    // out << "Total sequences = " << data.sequences.size() << endl;
-    out << "Log-likelihood of " << data.path << " = " << log_likelihood << endl;
+    double log_likelihood = hmm.log_likelihood(dataset);
+    // out << endl << "Summary of " << dataset.path << endl;
+    // out << "Total sequences = " << dataset.sequences.size() << endl;
+    out << "Log-likelihood of " << dataset.path << " = " << log_likelihood << endl;
     // out << "Akaike information criterion AIC = " << 2 * hmm.n_parameters() - 2 * log_likelihood << endl;
     //      out << "Akaike information criterion AIC = " << 2 * hmm.non_zero_parameters(hmm.gen_training_targets(options)) - 2 * log_likelihood << endl;
   }
 
   if(options.evaluate.viterbi_path)
-    v_out << "# " << data.path << " details following" << endl;
+    v_out << "# " << dataset.path << " details following" << endl;
 
   const size_t n_groups = hmm.get_ngroups();
-  const size_t n = data.sequences.size();
+  const size_t n = dataset.sequences.size();
   size_t number_motifs = 0;
   for(size_t group_idx = 0; group_idx < n_groups; group_idx++)
     if(hmm.is_motif_group(group_idx))
@@ -266,14 +266,14 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
         size_t present_mask = 1 << group_idx;
         size_t absent_mask = 0;
         // TODO EVALUATION
-        double ric = hmm.rank_information(data, present_mask, absent_mask);
+        double ric = hmm.rank_information(dataset, present_mask, absent_mask);
         out << "RIC = " << ric << std::endl;
       }
 
-  for(size_t i = 0; i < data.sequences.size(); i++) {
+  for(size_t i = 0; i < dataset.sequences.size(); i++) {
     HMM::StatePath viterbi_path;
     // TODO EVALUATION
-    double lp = hmm.viterbi(data.sequences[i], viterbi_path);
+    double lp = hmm.viterbi(dataset.sequences[i], viterbi_path);
 
     if(options.evaluate.viterbi_path or options.evaluate.summary) {
       stringstream viterbi_str, exp_str, atl_str;
@@ -288,9 +288,9 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
           size_t present_mask = 1 << group_idx;
           size_t absent_mask = 0;
           // TODO EVALUATION
-          double atl = hmm.posterior_atleast_one(data.sequences[i], present_mask, absent_mask).posterior;
+          double atl = hmm.posterior_atleast_one(dataset.sequences[i], present_mask, absent_mask).posterior;
           // TODO EVALUATION
-          double expected = hmm.expected_posterior(data.sequences[i], present_mask);
+          double expected = hmm.expected_posterior(dataset.sequences[i], present_mask);
           size_t n_viterbi = hmm.count_motif(viterbi_path, group_idx);
           atl_counts[motif_idx][i] = atl;
           exp_counts[motif_idx][i] = expected;
@@ -310,15 +310,15 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
           motif_idx++;
         }
       if(options.evaluate.viterbi_path) {
-        v_out << ">" << data.sequences[i].definition << endl;
+        v_out << ">" << dataset.sequences[i].definition << endl;
         v_out << "V-sites = " << viterbi_str.str() << " E-sites = " << exp_str.str() << " P(#sites>=1) = " << atl_str.str() << " Viterbi log-p = " << lp << endl;
-        v_out << data.sequences[i].sequence << endl;
+        v_out << dataset.sequences[i].sequence << endl;
         v_out << hmm.path2string_group(viterbi_path) << endl;
       }
     }
 
 //    if(options.print_posterior) {
-//      vector_t posterior = hmm.motif_posterior(data.sequences[i]);
+//      vector_t posterior = hmm.motif_posterior(dataset.sequences[i]);
 //      v_out << "Posterior ";
 //      for(auto v : posterior)
 //        v_out << " " << v;
@@ -327,7 +327,7 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
 
     if(options.evaluate.occurrence_table)
       // print to motif occurrence table
-      hmm.print_occurrence_table(data.path, data.sequences[i], viterbi_path, occurrence_out);
+      hmm.print_occurrence_table(dataset.path, dataset.sequences[i], viterbi_path, occurrence_out);
   }
 
   if(options.evaluate.summary) {
@@ -357,36 +357,36 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
 
   double time = timer.tock();
   if(options.timing_information)
-    cerr << "Evaluation for " << data.path << ": " << time << " micro-seconds" << endl;
+    cerr << "Evaluation for " << dataset.path << ": " << time << " micro-seconds" << endl;
   ResultsCounts results = {n_sites, n_motifs, n_viterbi_sites, n_viterbi_motifs};
   return(results);
 }
 
 void evaluate_hmm(const HMM &hmm,
-    const Data::Collection &data,
+    const Data::Collection &collection,
     const string &tag,
     const Training::Tasks &tasks,
     const hmm_options &options)
 {
   // TODO see that this does not invalidate previously learned parameters for MMIE!
-  // for(auto &series: data)
-  //   for(auto &data_set: series)
-  //     register_dataset(data_set, (1.0*data_set.set_size)/training_data.set_size, options.conditional_motif_prior1, options.conditional_motif_prior2);
+  // for(auto &contrast: collection)
+  //   for(auto &dataset: contrast)
+  //     register_dataset(dataset, (1.0*dataset.set_size)/training_data.set_size, options.conditional_motif_prior1, options.conditional_motif_prior2);
   /*  TODO: re-enable class-based models
   if(options.adapt_classes) {
     if(options.verbosity >= Verbosity::info)
-      cout << "Registering data sets for class based HMMs." << endl;
+      cout << "Registering collection sets for class based HMMs." << endl;
 
-    for(auto &series: data)
-      for(auto &data: series)
-        hmm.register_class_hmm(data);
+    for(auto &contrast: collection)
+      for(auto &dataset: contrast)
+        hmm.register_class_hmm(dataset);
     }
     Training::Targets generative_targets = hmm.gen_secondary_training_targets(options.training_type);
     Training::Task generative_task;
     generative_task.method = Training::Method::reestimation;
     generative_task.measure = Measure::likelihood;
     generative_task.targets = generative_targets;
-    hmm.reestimation(data, generative_task, options);
+    hmm.reestimation(dataset, generative_task, options);
   } */
 
   ios_base::openmode flags = ios_base::out;
@@ -432,15 +432,15 @@ void evaluate_hmm(const HMM &hmm,
     summary_out << endl;
 
     Timer eval_timer;
-    for(auto &series: data)
-      eval_contrast(hmm, series, summary_out, options.limit_logp, tag);
+    for(auto &contrast: collection)
+      eval_contrast(hmm, contrast, summary_out, options.limit_logp, tag);
     double time = eval_timer.tock();
 
     if(options.timing_information)
       cerr << "Evaluation of contrast for " << (tag == "" ? "" : tag + " ") << "data: " << time << " micro-seconds" << endl;
   }
 
-  if(data.set_size != 0) {
+  if(collection.set_size != 0) {
     if(options.verbosity >= Verbosity::info)
       cout << "Performance summary in " << eval_out_path << endl
         << "Viterbi path in " << viterbi_out_path << endl
@@ -475,17 +475,17 @@ void evaluate_hmm(const HMM &hmm,
       my_task.measure = Measure::ClassificationPosterior;
       // TODO EVALUATION
       // TODO consider using compute_score instead of compute_score_all_motifs
-      summary_out << "class log posterior = " << hmm.compute_score_all_motifs(data, my_task.measure, options.weighting) << std::endl;
+      summary_out << "class log posterior = " << hmm.compute_score_all_motifs(collection, my_task.measure, options.weighting) << std::endl;
       my_task.measure = Measure::ClassificationLikelihood;
       // TODO EVALUATION
       // TODO consider using compute_score instead of compute_score_all_motifs
-      summary_out << "class log likelihood = " << hmm.compute_score_all_motifs(data, my_task.measure, options.weighting) << std::endl;
+      summary_out << "class log likelihood = " << hmm.compute_score_all_motifs(collection, my_task.measure, options.weighting) << std::endl;
     }
 
-    for(auto &series: data) {
+    for(auto &contrast: collection) {
       vector<ResultsCounts> counts;
-      for(auto &data_set: series) {
-        ResultsCounts c = evaluate_hmm_single_data_set(hmm, data_set, summary_out, v_out, occurrence_out, options);
+      for(auto &dataset: contrast) {
+        ResultsCounts c = evaluate_hmm_single_data_set(hmm, dataset, summary_out, v_out, occurrence_out, options);
         counts.push_back(c);
       }
 
@@ -504,18 +504,18 @@ void evaluate_hmm(const HMM &hmm,
             matrix_t em(counts.size(),2);
             for(size_t j = 0; j < counts.size(); j++) {
               em(j,0) = counts[j].exp_motifs[i];
-              em(j,1) = series.sets[j].seq_size - em(j,0);
+              em(j,1) = contrast.sets[j].seq_size - em(j,0);
             }
-            count_report(summary_out, em, motif_len, series, hmm.get_pseudo_count(), options.limit_logp, name, tag + exp_motif_tag + " ");
+            count_report(summary_out, em, motif_len, contrast, hmm.get_pseudo_count(), options.limit_logp, name, tag + exp_motif_tag + " ");
 
             string vit_motif_tag = "Viterbi decoded motif counts - " + name;
             summary_out << endl << vit_motif_tag << endl;
             matrix_t vm(counts.size(),2);
             for(size_t j = 0; j < counts.size(); j++) {
               vm(j,0) = counts[j].viterbi_motifs[i];
-              vm(j,1) = series.sets[j].seq_size - vm(j,0);
+              vm(j,1) = contrast.sets[j].seq_size - vm(j,0);
             }
-            count_report(summary_out, vm, motif_len, series, hmm.get_pseudo_count(), options.limit_logp, name, tag + vit_motif_tag + " ");
+            count_report(summary_out, vm, motif_len, contrast, hmm.get_pseudo_count(), options.limit_logp, name, tag + vit_motif_tag + " ");
 
 
             string exp_tag = "Posterior decoded site counts - " + name;
@@ -523,18 +523,18 @@ void evaluate_hmm(const HMM &hmm,
             matrix_t e(counts.size(),2);
             for(size_t j = 0; j < counts.size(); j++) {
               e(j,0) = counts[j].exp_sites[i];
-              e(j,1) = series.sets[j].set_size - e(j,0);
+              e(j,1) = contrast.sets[j].set_size - e(j,0);
             }
-            count_report(summary_out, e, motif_len, series, hmm.get_pseudo_count(), options.limit_logp, name, tag + exp_tag + " ");
+            count_report(summary_out, e, motif_len, contrast, hmm.get_pseudo_count(), options.limit_logp, name, tag + exp_tag + " ");
 
             string vit_tag = "Viterbi decoded site counts - " + name;
             summary_out << endl << vit_tag << endl;
             matrix_t v(counts.size(),2);
             for(size_t j = 0; j < counts.size(); j++) {
               v(j,0) = counts[j].viterbi_sites[i];
-              v(j,1) = series.sets[j].set_size - v(j,0);
+              v(j,1) = contrast.sets[j].set_size - v(j,0);
             }
-            count_report(summary_out, v, motif_len, series, hmm.get_pseudo_count(), options.limit_logp, name, tag + vit_tag + " ");
+            count_report(summary_out, v, motif_len, contrast, hmm.get_pseudo_count(), options.limit_logp, name, tag + vit_tag + " ");
           }
         }
       }

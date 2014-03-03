@@ -189,12 +189,12 @@ string read_fasta_with_boundaries(const vector<string> &paths, vector<size_t> &p
   return(s);
 }
 
-string collapse_data_series(const Seeding::DataSeries &data_series, vector<size_t> &pos2seq, vector<size_t> &seq2set) {
+string collapse_contrast(const Seeding::Contrast &contrast, vector<size_t> &pos2seq, vector<size_t> &seq2set) {
   string s;
   size_t set_idx = 0;
   size_t seq_idx = 0;
-  for(auto &data_set: data_series) {
-    for(auto &seq: data_set) {
+  for(auto &dataset: contrast) {
+    for(auto &seq: dataset) {
       s += seq.sequence + "$";
       for(size_t i = 0; i < seq.sequence.size() + 1; i++)
         pos2seq.push_back(seq_idx);
@@ -206,24 +206,24 @@ string collapse_data_series(const Seeding::DataSeries &data_series, vector<size_
   return(s);
 }
 
-string collapse_data_collection(const Seeding::DataCollection &collection, vector<size_t> &pos2seq, vector<size_t> &seq2set, vector<size_t> &set2series) {
+string collapse_collection(const Seeding::Collection &collection, vector<size_t> &pos2seq, vector<size_t> &seq2set, vector<size_t> &set2contrast) {
   string s;
   size_t seq_idx = 0;
   size_t set_idx = 0;
-  size_t series_idx = 0;
-  for(auto &series: collection) {
-    for(auto &set: series) {
-      for(auto &seq: set) {
+  size_t contrast_idx = 0;
+  for(auto &contrast: collection) {
+    for(auto &dataset: contrast) {
+      for(auto &seq: dataset) {
         s += seq.sequence + "$";
         for(size_t i = 0; i < seq.sequence.size() + 1; i++)
           pos2seq.push_back(seq_idx);
         seq2set.push_back(set_idx);
         seq_idx++;
       }
-      set2series.push_back(series_idx);
+      set2contrast.push_back(contrast_idx);
       set_idx++;
     }
-    series_idx++;
+    contrast_idx++;
   }
   return(s);
 }

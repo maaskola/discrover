@@ -39,14 +39,14 @@ namespace Seeding {
   struct Plasma {
     public:
       Options options;
-      DataCollection collection;
+      Collection collection;
     private:
       bool index_ready;
       bool needs_rebuilding;
       NucleotideIndex<size_t,size_t> index;
     public:
       Plasma(const Options &options);
-      Plasma(const DataCollection &collection_, const Options &opt);
+      Plasma(const Collection &collection_, const Options &opt);
       Results find(const Specification::Motif &motif, const Objectives &objectives, bool doreport=true) const;
       void apply_mask(const Results &results);
     private:
@@ -63,9 +63,9 @@ namespace Seeding {
       void rebuild_index();
   };
 
-  void report(std::ostream &os, const Objective &objective, const std::string &motif, const DataCollection &collection, const Options &options);
-  void report(std::ostream &os, const Result &result, const DataCollection &collection, const Options &options);
-  void viterbi_dump(const std::string &motif, const DataCollection &collection, std::ostream &out, const Options &options);
+  void report(std::ostream &os, const Objective &objective, const std::string &motif, const Collection &collection, const Options &options);
+  void report(std::ostream &os, const Result &result, const Collection &collection, const Options &options);
+  void viterbi_dump(const std::string &motif, const Collection &collection, std::ostream &out, const Options &options);
 }
 
 #endif   /* ----- #ifndef FIND_HPP  ----- */

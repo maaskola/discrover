@@ -146,20 +146,20 @@ void HMM::initialize_transitions_to_and_from_chain(size_t w, double l, double la
 }
 
 
-void HMM::register_dataset(const Data::Set &data, double class_prior, double motif_p1, double motif_p2)
+void HMM::register_dataset(const Data::Set &dataset, double class_prior, double motif_p1, double motif_p2)
 {
   if(verbosity >= Verbosity::verbose)
-    std::cout << "register_data_set(data.path=" << data.path << ( data.is_shuffle ? " shuffle" : " ") << ", sha1=" << data.sha1 << ", class_prior=" << class_prior << ")" << std::endl;
-  RegisteredDataSet reg_data({data, class_prior, std::map<size_t, double>()});
+    std::cout << "register_data_set(dataset.path=" << dataset.path << ( dataset.is_shuffle ? " shuffle" : " ") << ", sha1=" << dataset.sha1 << ", class_prior=" << class_prior << ")" << std::endl;
+  RegisteredDataSet reg_data({dataset, class_prior, std::map<size_t, double>()});
   for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
     if(is_motif_group(group_idx)) {
       double val = motif_p2;
-      if(data.motifs.find(groups[group_idx].name) != end(data.motifs))
+      if(dataset.motifs.find(groups[group_idx].name) != end(dataset.motifs))
         val = motif_p1;
       reg_data.motif_prior[group_idx] = val;
       if(verbosity >= Verbosity::verbose)
-        std::cout << "Registering conditional motif prior " << val << " of group " << group_idx << ": " << groups[group_idx].name << " for data set " << data.path << " with sha1 " << data.sha1 << std::endl;
+        std::cout << "Registering conditional motif prior " << val << " of group " << group_idx << ": " << groups[group_idx].name << " for data set " << dataset.path << " with sha1 " << dataset.sha1 << std::endl;
     }
-  registered_datasets[data.sha1] = reg_data;
+  registered_datasets[dataset.sha1] = reg_data;
 }
 

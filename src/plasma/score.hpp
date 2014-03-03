@@ -47,14 +47,14 @@ double compute_delta_frequency(double a, double b, double c, double d);
  * If measure is Measure::Undefined then the measure is used that is a member of Options options
  **/
 double compute_score(
-    const Seeding::DataCollection &collection,
+    const Seeding::Collection &collection,
     const Seeding::Result &result,
     const Seeding::Options &options,
     Measures::Discrete::Measure measure=Measures::Discrete::Measure::Undefined,
     bool do_correction=false
   );
 double compute_score(
-    const Seeding::DataCollection &collection,
+    const Seeding::Collection &collection,
     const count_vector_t &counts,
     const Seeding::Options &options,
     const Seeding::Objective &objective,
@@ -63,8 +63,8 @@ double compute_score(
     Measures::Discrete::Measure measure=Measures::Discrete::Measure::Undefined,
     bool do_correction=false);
 double compute_score(
-    const Seeding::DataSeries &data_series,
-    const count_vector_t &contrast,
+    const Seeding::Contrast &contrast,
+    const count_vector_t &counts,
     const Seeding::Options &options,
     Measures::Discrete::Measure measure,
     size_t length,

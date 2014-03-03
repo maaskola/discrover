@@ -45,7 +45,7 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
   po::options_description desc(name, cols);
   if(include_all)
     desc.add_options()
-      ("fasta,f", po::value<vector<Specification::DataSet>>(&options.paths)->required(), "FASTA file(s) with nucleic acid sequences.")
+      ("fasta,f", po::value<vector<Specification::Set>>(&options.paths)->required(), "FASTA file(s) with nucleic acid sequences.")
       ("motif,m", po::value<vector<Specification::Motif>>(&options.motif_specifications)->required(), "Motif specification. "
        "May be given multiple times, and can be specified in multiple ways:\n"
        "1. \tUsing the IUPAC code for nucleic acids.\n"

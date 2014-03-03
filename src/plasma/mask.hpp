@@ -33,12 +33,12 @@
 #include "options.hpp"
 
 namespace Seeding {
-  void remove_seqs_with_motif(const std::string &motif, DataSet &data_set, const Options &options);
+  void remove_seqs_with_motif(const std::string &motif, Set &dataset, const Options &options);
   bool mask_motif_occurrences(const std::string &motif, std::string &seq, const Options &options, char mask_symbol='n');
-  void mask_motif_occurrences(const std::string &motif, DataSet &data_set, const Options &options);
-  void mask_motif_occurrences(const std::string &motif, DataSeries &data_series, const Options &options);
-  void remove_seqs_with_motif(const std::string &motif, DataSeries &data_series, const Options &options);
-  void apply_mask(DataCollection &d, const std::string &motif, const Options &options);
+  void mask_motif_occurrences(const std::string &motif, Set &dataset, const Options &options);
+  void mask_motif_occurrences(const std::string &motif, Contrast &contrast, const Options &options);
+  void remove_seqs_with_motif(const std::string &motif, Contrast &contrast, const Options &options);
+  void apply_mask(Collection &collection, const std::string &motif, const Options &options);
 };
 
 #endif   /* ----- #ifndef MASK_HPP  ----- */
