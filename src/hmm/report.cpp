@@ -78,15 +78,18 @@ void eval_contrast(const HMM &hmm, const Data::Series &data, ostream &ofs, bool 
       // TODO FIX ABSENT - done?
       size_t present_mask = 1 << group_idx;
       size_t absent_mask = 0;
+      // TODO EVALUATION
       vector_t v = hmm.posterior_atleast_one(data, present_mask, absent_mask);
       matrix_t counts(v.size(), 2);
       for(size_t i = 0; i < v.size(); i++) {
         counts(i,0) = v(i);
         counts(i,1) = data.sets[i].set_size - v(i);
       }
+      // TODO EVALUATION
       double mcc = hmm.matthews_correlation_coefficient(data, present_mask, absent_mask); // TODO compute from count table
       // double llr = calc_log_likelihood_ratio(counts, hmm.pseudo_count);
       // double dips_tscore = hmm.dips_tscore(data, feature);
+      // TODO EVALUATION
       double dips_sitescore = hmm.dips_sitescore(data, present_mask, absent_mask);
       // double correct_class = hmm.correct_classification(data);  // TODO: reactivate
 
@@ -99,6 +102,7 @@ void eval_contrast(const HMM &hmm, const Data::Series &data, ostream &ofs, bool 
       ofs << tag << "DIPS site-score = " << dips_sitescore * 100 << " %" << endl;
       // ofs << "log P correct classification = " << correct_class << endl; // TODO: reactivate
       // TODO print a table of the likelihoods
+      // TODO EVALUATION
       ofs << tag << "Log likelihood difference = " << hmm.log_likelihood_difference(data, present_mask, absent_mask) << endl; // TODO compute from count table
     }
 }
@@ -229,6 +233,7 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
   map<size_t,size_t> n_viterbi_motifs;
 
   if(options.evaluate.summary) {
+    // TODO EVALUATION
     double log_likelihood = hmm.log_likelihood(data);
     // out << endl << "Summary of " << data.path << endl;
     // out << "Total sequences = " << data.sequences.size() << endl;
@@ -260,12 +265,14 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
         // TODO FIX ABSENT - done?
         size_t present_mask = 1 << group_idx;
         size_t absent_mask = 0;
+        // TODO EVALUATION
         double ric = hmm.rank_information(data, present_mask, absent_mask);
         out << "RIC = " << ric << std::endl;
       }
 
   for(size_t i = 0; i < data.sequences.size(); i++) {
     HMM::StatePath viterbi_path;
+    // TODO EVALUATION
     double lp = hmm.viterbi(data.sequences[i], viterbi_path);
 
     if(options.evaluate.viterbi_path or options.evaluate.summary) {
@@ -280,7 +287,9 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
           // TODO FIX ABSENT - done?
           size_t present_mask = 1 << group_idx;
           size_t absent_mask = 0;
+          // TODO EVALUATION
           double atl = hmm.posterior_atleast_one(data.sequences[i], present_mask, absent_mask).posterior;
+          // TODO EVALUATION
           double expected = hmm.expected_posterior(data.sequences[i], present_mask);
           size_t n_viterbi = hmm.count_motif(viterbi_path, group_idx);
           atl_counts[motif_idx][i] = atl;
@@ -464,9 +473,11 @@ void evaluate_hmm(const HMM &hmm,
       summary_out << endl;
       Training::Task my_task;
       my_task.measure = Measure::ClassificationPosterior;
+      // TODO EVALUATION
       // TODO consider using compute_score instead of compute_score_all_motifs
       summary_out << "class log posterior = " << hmm.compute_score_all_motifs(data, my_task.measure, options.weighting) << std::endl;
       my_task.measure = Measure::ClassificationLikelihood;
+      // TODO EVALUATION
       // TODO consider using compute_score instead of compute_score_all_motifs
       summary_out << "class log likelihood = " << hmm.compute_score_all_motifs(data, my_task.measure, options.weighting) << std::endl;
     }
