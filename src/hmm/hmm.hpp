@@ -119,6 +119,7 @@ class HMM {
     typedef std::unordered_map<std::string, std::vector<size_t>> mask_sub_t;
     typedef std::unordered_map<std::string, mask_sub_t> mask_t;
     typedef boost::numeric::ublas::vector<size_t> StatePath;
+    typedef size_t bitmask_t;
 
   protected:
     /** The size of the alphabet. */
@@ -302,19 +303,19 @@ class HMM {
     };
 
   public:
-    vector_t posterior_atleast_one(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
+    vector_t posterior_atleast_one(const Data::Series &data, bitmask_t present, bitmask_t absent) const;
     double viterbi(const Data::Seq &s, StatePath &path) const;
-    posterior_t posterior_atleast_one(const Data::Seq &data, size_t present_mask, size_t absent_mask) const;
-    double expected_posterior(const Data::Seq &data, size_t present_mask) const;
+    posterior_t posterior_atleast_one(const Data::Seq &data, bitmask_t present, bitmask_t absent) const;
+    double expected_posterior(const Data::Seq &data, bitmask_t present) const;
   protected:
-    vector_t posterior_atleast_one(const Data::Set &data, size_t present_mask, size_t absent_mask) const;
-    double   sum_posterior_atleast_one(const Data::Set &data, size_t present_mask, size_t absent_mask) const;
+    vector_t posterior_atleast_one(const Data::Set &data, bitmask_t present, bitmask_t absent) const;
+    double   sum_posterior_atleast_one(const Data::Set &data, bitmask_t present, bitmask_t absent) const;
 
-    vector_t viterbi_atleast_one(const Data::Series &data, size_t group_idx) const;
-    double   viterbi_atleast_one(const Data::Set &data, size_t group_idx) const;
+    vector_t viterbi_atleast_one(const Data::Series &data, bitmask_t present) const;
+    double   viterbi_atleast_one(const Data::Set &data, bitmask_t present) const;
 
-    vector_t expected_posterior(const Data::Series &data, size_t present_mask) const;
-    double   expected_posterior(const Data::Set &data, size_t present_mask) const;
+    vector_t expected_posterior(const Data::Series &data, bitmask_t present) const;
+    double   expected_posterior(const Data::Set &data, bitmask_t present) const;
 
 // -------------------------------------------------------------------------------------------
 // Generative and discriminative measures
@@ -332,8 +333,8 @@ class HMM {
     double log_likelihood(const Data::Set &s) const;
 
     double class_likelihood(const Data::Series &data, const std::vector<size_t> &present_groups,  const std::vector<size_t> &absent_groups, bool compute_posterior) const;
-    double class_likelihood(const Data::Series &data, size_t present_mask, size_t absent_mask, bool compute_posterior) const;
-    double class_likelihood(const Data::Set &data, size_t present_mask, size_t absent_mask, bool compute_posterior) const;
+    double class_likelihood(const Data::Series &data, bitmask_t present, bitmask_t absent, bool compute_posterior) const;
+    double class_likelihood(const Data::Set &data, bitmask_t present, bitmask_t absent, bool compute_posterior) const;
 
     // Discriminative measures, for groups specified by vectors of group indices
     /** The likelihood difference */
@@ -353,21 +354,21 @@ class HMM {
 
     // Discriminative measures, for groups specified by bitmasks
     /** The likelihood difference */
-    double log_likelihood_difference(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
+    double log_likelihood_difference(const Data::Series &data, bitmask_t present, bitmask_t absent) const;
     /** The mutual information of condition and motif occurrence */
-    double mutual_information(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
+    double mutual_information(const Data::Series &data, bitmask_t present, bitmask_t absent) const;
     /** The mutual information of rank and motif occurrence. */
-    double rank_information(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
+    double rank_information(const Data::Series &data, bitmask_t present, bitmask_t absent) const;
     /** The summed Matthew's correlation coefficients of all individual contrasts. */
-    double matthews_correlation_coefficient(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
+    double matthews_correlation_coefficient(const Data::Series &data, bitmask_t present, bitmask_t absent) const;
     /** The summed difference of expected occurrence frequencies. */
-    double dips_tscore(const Data::Series &data, size_t present_mask) const;
+    double dips_tscore(const Data::Series &data, bitmask_t present) const;
     /** The summed difference of site occurrence. */
-    double dips_sitescore(const Data::Series &data, size_t present_mask, size_t absent_mask) const;
+    double dips_sitescore(const Data::Series &data, bitmask_t present, bitmask_t absent) const;
 
     // Discriminative measures, for individual sets of sequences
     /** The mutual information of rank and motif occurrence. */
-    double rank_information(const Data::Set &data, size_t present_mask, size_t absent_mask) const;
+    double rank_information(const Data::Set &data, bitmask_t present, bitmask_t absent) const;
 
 // -------------------------------------------------------------------------------------------
 // Expectation-maximization type learning
@@ -531,7 +532,7 @@ class HMM {
   protected:
     void register_dataset(const Data::Set &data, double class_prior, double motif_p1, double motif_p2);
     Training::Range complementary_states(size_t group_idx) const;
-    Training::Range complementary_states_mask(size_t present_mask) const;
+    Training::Range complementary_states_mask(bitmask_t present) const;
 };
 
 std::ostream &operator<<(std::ostream& os, const HMM &hmm);
