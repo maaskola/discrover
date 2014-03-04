@@ -58,7 +58,7 @@ vector<size_t> unpack_mask(const size_t x) {
 double HMM::mutual_information(const Data::Contrast &contrast, const vector<size_t> &present_groups, const vector<size_t> &absent_groups) const
 {
   if(verbosity >= Verbosity::debug)
-    cout << "Computing feature-wise mutual information." << endl;
+    cout << "Computing mutual information." << endl;
   bitmask_t present = make_mask(present_groups); bitmask_t absent = make_mask(absent_groups);
   return(mutual_information(contrast, present, absent));
 }
@@ -66,7 +66,7 @@ double HMM::mutual_information(const Data::Contrast &contrast, const vector<size
 double HMM::rank_information(const Data::Contrast &contrast, const vector<size_t> &present_groups, const vector<size_t> &absent_groups) const
 {
   if(verbosity >= Verbosity::debug)
-    cout << "Computing feature-wise mutual information." << endl;
+    cout << "Computing mutual information." << endl;
   bitmask_t present = make_mask(present_groups); bitmask_t absent = make_mask(absent_groups);
   return(rank_information(contrast, present, absent));
 }
@@ -74,7 +74,7 @@ double HMM::rank_information(const Data::Contrast &contrast, const vector<size_t
 double HMM::matthews_correlation_coefficient(const Data::Contrast &contrast, const vector<size_t> &present_groups, const vector<size_t> &absent_groups) const
 {
   if(verbosity >= Verbosity::debug)
-    cout << "Computing sum of feature-wise Matthew's correlation coefficient." << endl;
+    cout << "Computing sum of Matthew's correlation coefficient." << endl;
   bitmask_t present = make_mask(present_groups); bitmask_t absent = make_mask(absent_groups);
   return(matthews_correlation_coefficient(contrast, present, absent));
 }
@@ -104,7 +104,7 @@ confusion_matrix reduce(const vector_t &v, HMM::bitmask_t present, const Data::C
 double HMM::mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const
 {
   if(verbosity >= Verbosity::debug)
-    cout << "HMM::mutual_information(Data::Contrast, Feature)" << endl;
+    cout << "HMM::mutual_information(Data::Contrast)" << endl;
   vector_t posterior = posterior_atleast_one(contrast, present, absent);
   matrix_t m(posterior.size(), 2);
   for(size_t i = 0; i < posterior.size(); i++) {
@@ -112,7 +112,7 @@ double HMM::mutual_information(const Data::Contrast &contrast, bitmask_t present
     m(i,1) = contrast.sets[i].set_size - posterior(i);
   }
   m = m + pseudo_count;
-  cout << "HMM::mutual_information(Data::Contrast, Feature) present = " << present << " absent = " << absent << endl
+  cout << "HMM::mutual_information(Data::Contrast) present = " << present << " absent = " << absent << endl
     << "counts = " << m << endl;
   double mi = calc_mutual_information(m, 0, true, false, false);
 //  if(not check_enrichment(contrast, m, group_idx))
@@ -123,7 +123,7 @@ double HMM::mutual_information(const Data::Contrast &contrast, bitmask_t present
 double HMM::rank_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const
 {
   if(verbosity >= Verbosity::debug)
-    cout << "HMM::rank_information(Data::Contrast, Feature)" << endl;
+    cout << "HMM::rank_information(Data::Contrast)" << endl;
   double ri = 0;
   for(auto &dataset: contrast)
     ri += rank_information(dataset, present, absent);
@@ -134,7 +134,7 @@ double HMM::rank_information(const Data::Contrast &contrast, bitmask_t present, 
 double HMM::rank_information(const Data::Set &dataset, bitmask_t present, bitmask_t absent) const
 {
   if(verbosity >= Verbosity::debug)
-    cout << "HMM::rank_information(Data::Set, Feature)" << endl;
+    cout << "HMM::rank_information(Data::Set)" << endl;
   vector_t posterior = posterior_atleast_one(dataset, present, absent);
   return(calc_rank_information(posterior, pseudo_count));
 }
