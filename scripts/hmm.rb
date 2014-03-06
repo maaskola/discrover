@@ -166,11 +166,11 @@ module HMM
             if line =~ /State order (.*)/
               @order = $1.split(" ").map{|x| x.to_i}
             else
-              raise "Format conflict in line: #{line}"
+              raise "Format conflict in line: #{line}" unless line =~ /Transition matrix/
             end
           end
 
-          line = f.gets.strip
+          line = f.gets.strip unless line =~ /Transition matrix/
           raise "Format conflict in line: #{line}" if line != "Transition matrix"
           @transition = []
           @n_states.times{|i|
