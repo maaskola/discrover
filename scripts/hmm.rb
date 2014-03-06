@@ -28,6 +28,34 @@ def boostify(x)
   y
 end
 
+$present2iupac = {"a" => "a",
+  "c" => "c",
+  "g" => "g",
+  "t" => "t",
+  "u" => "u",
+  "ac" => "m",
+  "gt" => "k",
+  "ag" => "r",
+  "ct" => "y",
+  "at" => "w",
+  "cg" => "s",
+  "acg" => "v",
+  "act" => "h",
+  "agt" => "d",
+  "cgt" => "b",
+  "acgt" => "n"
+}
+
+def consensus_pos(x, threshold=0.1)
+  present = []
+  "acgt".split("").each_with_index{|y, idx| present << y if x[idx] > threshold}
+  $present2iupac[present.join("")]
+end
+
+def consensus(x, threshold=0.1)
+  x.map{|y| consensus_pos(y, threshold)}.join("")
+end
+
 module HMM
   class MotifStates
     attr_accessor :name, :states
@@ -273,6 +301,8 @@ module HMM
           1
         end
       }
+      # $stderr.puts "topo order = #{states}"
+      states
     end
 
     def reachable_from_state(state)
