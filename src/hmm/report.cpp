@@ -94,8 +94,9 @@ void eval_contrast(const HMM &hmm, const Data::Contrast &contrast, ostream &ofs,
       // double correct_class = hmm.correct_classification(contrast);  // TODO: reactivate
 
       string name = hmm.get_group_name(group_idx);
+      string consensus = hmm.get_group_consensus(group_idx);
 
-      ofs << endl << tag << "Expected occurrence statistics for motif " << name << endl;
+      ofs << endl << tag << "Expected occurrence statistics for motif " << name << ":" << consensus << endl;
       count_report(ofs, counts, motif_len, contrast, hmm.get_pseudo_count(), limit_logp, name, tag);
       ofs << tag << "Matthews correlation coefficient = " << mcc << endl;
       // ofs << "DIPS t-score = " << dips_tscore * 100 << " %" << endl;
@@ -498,8 +499,9 @@ void evaluate_hmm(const HMM &hmm,
           if(hmm.is_motif_group(i)) {
             size_t motif_len = hmm.get_motif_len(i);
             string name = hmm.get_group_name(i);
+            string consensus = hmm.get_group_consensus(i);
 
-            string exp_motif_tag = "Posterior decoded motif counts - " + name;
+            string exp_motif_tag = "Posterior decoded motif counts - " + name + ":" + consensus;
             summary_out << endl << exp_motif_tag << endl;
             matrix_t em(counts.size(),2);
             for(size_t j = 0; j < counts.size(); j++) {
@@ -508,7 +510,7 @@ void evaluate_hmm(const HMM &hmm,
             }
             count_report(summary_out, em, motif_len, contrast, hmm.get_pseudo_count(), options.limit_logp, name, tag + exp_motif_tag + " ");
 
-            string vit_motif_tag = "Viterbi decoded motif counts - " + name;
+            string vit_motif_tag = "Viterbi decoded motif counts - " + name + ":" + consensus;
             summary_out << endl << vit_motif_tag << endl;
             matrix_t vm(counts.size(),2);
             for(size_t j = 0; j < counts.size(); j++) {
@@ -518,7 +520,7 @@ void evaluate_hmm(const HMM &hmm,
             count_report(summary_out, vm, motif_len, contrast, hmm.get_pseudo_count(), options.limit_logp, name, tag + vit_motif_tag + " ");
 
 
-            string exp_tag = "Posterior decoded site counts - " + name;
+            string exp_tag = "Posterior decoded site counts - " + name + ":" + consensus;
             summary_out << endl << exp_tag << endl;
             matrix_t e(counts.size(),2);
             for(size_t j = 0; j < counts.size(); j++) {
@@ -527,7 +529,7 @@ void evaluate_hmm(const HMM &hmm,
             }
             count_report(summary_out, e, motif_len, contrast, hmm.get_pseudo_count(), options.limit_logp, name, tag + exp_tag + " ");
 
-            string vit_tag = "Viterbi decoded site counts - " + name;
+            string vit_tag = "Viterbi decoded site counts - " + name + ":" + consensus;
             summary_out << endl << vit_tag << endl;
             matrix_t v(counts.size(),2);
             for(size_t j = 0; j < counts.size(); j++) {
