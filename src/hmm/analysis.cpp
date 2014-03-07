@@ -12,7 +12,6 @@
 #include "report.hpp"
 #include "../timer.hpp"
 #include "../plasma/find.hpp"
-#include "../stats_config.hpp"
 
 using namespace std;
 
