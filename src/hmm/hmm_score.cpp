@@ -351,27 +351,6 @@ HMM::posterior_t HMM::posterior_atleast_one(const Data::Seq &seq, bitmask_t pres
   return(res);
 };
 
-vector_t HMM::viterbi_atleast_one(const Data::Contrast &contrast, size_t group_idx) const
-{
-  vector_t v(contrast.sets.size());
-  for(size_t i = 0; i < contrast.sets.size(); i++)
-    v[i] = viterbi_atleast_one(contrast.sets[i], group_idx);
-  return(v);
-}
-
-double HMM::viterbi_atleast_one(const Data::Set &dataset, size_t group_idx) const
-{
-  double m = 0;
-#pragma omp parallel for schedule(static) reduction(+:m) if(DO_PARALLEL)
-  for(size_t i = 0; i < dataset.set_size; i++) {
-    StatePath path;
-    viterbi(dataset.sequences[i], path);
-    if(find(path.begin(), path.end(), groups[group_idx].states[0]) != path.end())
-      m++;
-  }
-  return(m);
-};
-
 double HMM::compute_score_all_motifs(const Data::Collection &collection, const Measures::Continuous::Measure &measure, bool weighting) const
 {
   vector<size_t> all_motifs;

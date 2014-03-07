@@ -311,9 +311,6 @@ class HMM {
     vector_t posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t absent) const;
     double   sum_posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t absent) const;
 
-    vector_t viterbi_atleast_one(const Data::Contrast &contrast, bitmask_t present) const;
-    double   viterbi_atleast_one(const Data::Set &dataset, bitmask_t present) const;
-
     vector_t expected_posterior(const Data::Contrast &contrast, bitmask_t present) const;
     double   expected_posterior(const Data::Set &dataset, bitmask_t present) const;
 
