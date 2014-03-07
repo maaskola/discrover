@@ -136,6 +136,11 @@ vector<string> generate_wiggle_variants(const string &s,  size_t n, Verbosity ve
 
 HMM doit(const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options_)
 {
+  // potentially: regardless of the objective function chosen for training, one might use the MICO p-value for selection!
+  const bool use_mico_pvalue = true; // whether to use MICO p-value in multiple motif mode
+  const bool drop_below_mico_pvalue_threshold = true; // whether to drop models below MICO p-value threshold in multiple motif mode
+  const double p_mico_threshold = -log(0.05); // MICO p-value threshold to drop models in multiple motif mode
+
   hmm_options options = options_;
 
   if(options.verbosity >= Verbosity::debug)
@@ -226,8 +231,6 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
       cout << "motif_specs.size() = " << plasma.options.motif_specifications.size() << endl;
     size_t plasma_motif_idx = 0;
 
-    bool first_motif = true;
-
     // while there are motif specifications left
     while(plasma_motif_idx < plasma.options.motif_specifications.size()) {
 
@@ -306,20 +309,20 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
               best_model = model;
             }
           }
-          if(options.verbosity >= Verbosity::info)
-            cout << "Accepting seed " << best_seed << " with score " << best_score << endl;
-          hmm = best_model;
+          if(best_score >= -numeric_limits<double>::infinity()) {
+            if(options.verbosity >= Verbosity::info)
+              cout << "Accepting seed " << best_seed << " with score " << best_score << endl;
+            hmm = best_model;
+          } else
+            if(options.verbosity >= Verbosity::info)
+              cout << "We did not find an acceptable model." << endl;
         }
       } else {
-        auto best_score = -numeric_limits<double>::infinity();
         bool ok = true;
 
-        cout << "Non-augmented model: " << hmm << endl;
-        // Training::Tasks tasks = hmm.define_training_tasks(options);
-        // double previous_score = hmm.compute_score(masked_training_data, *tasks.begin(), options.weighting);
+        // cout << "Non-augmented model: " << hmm << endl;
         vector<size_t> absent_groups;
         while(ok and not learned_models.empty()) {
-          auto masked_training_data = training_data;
 
           // mode == 0:
           //   do not mask occurrences of previously identified motifs;
@@ -332,74 +335,119 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
           //   mask occurrences of previously identified motifs;
           //   add candidate motif to current model
           //   score composite model consisting of candidate motif and previously identified motifs on masked data
-          const size_t mode = 2;
+          // const size_t mode = 2;
+          // const bool do_mask = false;
 
-          if(mode == 1 or mode == 2) {
-            best_score = -numeric_limits<double>::infinity();
-            if(not first_motif) {
-              cout << "Masking earlier motifs" << endl;
-              masked_training_data.mask(hmm.compute_mask(masked_training_data));
-            }
-          }
+          // auto masked_training_data = training_data;
+          // if(mode == 1 or mode == 2) {
+          //   if(do_mask) {
+          //     // TODO only do this when motifs have already been learned
+          //     cout << "Masking earlier motifs" << endl;
+          //     masked_training_data.mask(hmm.compute_mask(masked_training_data));
+          //   }
+          // }
+
+          auto data = training_data;
 
           size_t best_index = 0;
           auto best_model = hmm;
           string best_seed = "";
           bool updated = false;
+          double best_score = -numeric_limits<double>::infinity();
 
           size_t index = 0;
 
-          const bool remove_below_threshold = true;
-          const double threshold = -log(0.05);
-          std::vector<std::string> below_threshold;
+          vector<string> below_threshold;
 
           for(auto &learned: learned_models) {
             string seed = learned.first;
             auto learned_model = learned.second;
 
             auto model = learned_model;
-            if(mode == 0 or mode == 2) {
+            // if(mode == 0 or mode == 2) {
+            if(true) {
               model = hmm;
-
-              // TODO add the motif from the learned model to model
               model.add_motifs(learned_model, false);
               // model.add_motifs(learned_model, true);
 
-              // TODO adapt transition probabilities
-              // TODO or do complete relearning
-              // if(relearn_before_eval)
-            } else
-              model = learned_model;
+              // TODO adapt transition probabilities?
+              // TODO or do complete relearning?
+            }
+            // } else
+            //   model = learned_model;
 
-            // potentially: regardless of the objective function chosen for training, one might use the MICO p-value for selection!
-            const bool use_mico_pvalue = true;
-            double score;
-            std::vector<size_t> groups_to_score;
-            groups_to_score.push_back(model.get_ngroups() - 1); // only add the most recently added group
-            if(use_mico_pvalue)
-              score = model.compute_score(masked_training_data, Measures::Continuous::Measure::MutualInformation, options.weighting, groups_to_score, absent_groups);
-            else
+            double df = 0;
+            for(auto &contrast: data)
+              df += (contrast.sets.size() - 1); // TODO only use the relevant contrasts for this motif
+
+            size_t motif_len = seed.size();
+            double n = data.set_size; // TODO fix this with regards to pseudo counts and exact reference to the relevant contrast
+
+            vector<size_t> groups_to_score = {model.get_ngroups() - 1}; // only add the most recently added group
+
+            double score = -numeric_limits<double>::infinity();
+
+            if(not use_mico_pvalue)
               // TODO actually select the specific task - above we do fix all conceivable tasks...
-              score = model.compute_score(masked_training_data, model.define_training_tasks(options).begin()->measure, options.weighting, groups_to_score, absent_groups);
-            if(use_mico_pvalue) {
-              cout << "mi = " << score << endl;
-              double n = masked_training_data.set_size; // TODO fix this with regards to pseudo counts and exact reference to the relevant contrast
-              double df = 1;
-              size_t motif_len = seed.size();
-              double g = calc_g_test_from_mi(score, n);
-              cout << "g = " << g << endl;
-              double log_p = pchisq(g, df, false, true);
-              cout << "log p(g) = " << log_p << endl;
-              double cor_log_p = log(149) * motif_len + log_p;
-              cout << "corrected log p(g) = " << cor_log_p << endl;
-              score = - cor_log_p;
+              score = model.compute_score(data, model.define_training_tasks(options).begin()->measure, options.weighting, groups_to_score, absent_groups);
+            else {
+              if(absent_groups.empty()) {
+                score = model.compute_score(data, Measures::Continuous::Measure::MutualInformation, options.weighting, groups_to_score, vector<size_t>());
+                // score = model.compute_score(data, Measures::Continuous::Measure::MutualInformation, options.weighting, groups_to_score, absent_groups);
+                cout << "mi = " << score << endl;
+              } else {
+                cout << "Scoring residual information - motifs:" << endl;
+
+                if(not options.revcomp) {
+
+                  if(options.verbosity >= Verbosity::info)
+                  for(size_t i = 0; i < model.get_ngroups(); i++)
+                    if(model.is_motif_group(i))
+                      cout << (find(begin(groups_to_score), end(groups_to_score), i) != end(groups_to_score) ? "+" : "-")
+                        << " " << model.get_group_consensus(i) << endl;
+
+                  score = model.compute_score(data, Measures::Continuous::Measure::ResidualMutualInformation, options.weighting, groups_to_score, vector<size_t>(), absent_groups);
+
+                } else {
+
+                  if(options.verbosity >= Verbosity::info)
+                    cout << "Adding reverse complementary motifs." << endl;
+
+                  pair<HMM, map<size_t,size_t>> rc = model.add_revcomp_motifs();
+                  HMM rc_model = rc.first;
+                  map<size_t,size_t> rc_assoc = rc.second;
+
+                  auto rc_groups_to_score = groups_to_score;
+                  for(auto x: groups_to_score)
+                    rc_groups_to_score.push_back(rc_assoc[x]);
+
+                  auto rc_absent_groups = absent_groups;
+                  for(auto x: absent_groups)
+                    rc_absent_groups.push_back(rc_assoc[x]);
+
+                  if(options.verbosity >= Verbosity::info)
+                    for(size_t i = 0; i < rc_model.get_ngroups(); i++)
+                      if(rc_model.is_motif_group(i))
+                        cout << (find(begin(rc_groups_to_score), end(rc_groups_to_score), i) != end(rc_groups_to_score) ? "+" : "-")
+                          << " " << rc_model.get_group_consensus(i) << endl;
+
+                  score = rc_model.compute_score(data, Measures::Continuous::Measure::ResidualMutualInformation, options.weighting, rc_groups_to_score, vector<size_t>(), rc_absent_groups);
+
+                }
+
+                cout << "residual mutual information = " << score << endl;
+              }
+
+              if(score > -numeric_limits<double>::infinity())
+                score = - corrected_pvalue(score, n, df, motif_len, Verbosity::verbose);
               cout << "score = " << score << endl;
             }
 
-            cout << "Augmented model: " << model << endl;
-            cout << "Score of the model augmented by " << seed << " has a score of " << score << endl;
-            if(not (use_mico_pvalue and remove_below_threshold) or score >= threshold) {
+            // cout << "Augmented model: " << model;
+            cout << "Score of the model augmented by " << seed << " has a score of " << score << endl << endl;
+            if(not (use_mico_pvalue and drop_below_mico_pvalue_threshold) or score >= p_mico_threshold) {
               if(score > best_score) {
+                cout << "This is the currently best model!" << endl << endl;
                 ok = true;
                 updated = true;
                 best_model = model;
@@ -416,13 +464,15 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             cout << "We did not find an improved model." << endl;
             ok = false;
           } else {
-            if(mode == 0 or mode == 2)
+            // if(mode == 0 or mode == 2)
+            if(true)
               hmm = best_model;
 
             if(options.verbosity >= Verbosity::info)
               cout << "Accepting seed " << best_seed << " with score " << best_score << endl;
 
-            if(mode == 1)
+            // if(mode == 1)
+            if(false)
               hmm.add_motifs(best_model, false);
 
             hmm_options options_(options);
@@ -438,12 +488,10 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             absent_groups.push_back(hmm.get_ngroups() - 1);
 
             learned_models.erase(begin(learned_models) + best_index);
-            first_motif = false;
             ok = true;
           }
 
-          // if(options.verbosity >= Verbosity::verbose) {
-          if(true) {
+          if(options.verbosity >= Verbosity::info) {
             cout << "To be removed:";
             for(auto &mod: below_threshold)
               cout << " " << mod;
@@ -454,8 +502,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             return(find(begin(below_threshold), end(below_threshold), x.first) != end(below_threshold));
           };
 
-          // if(options.verbosity >= Verbosity::verbose) {
-          if(true) {
+          if(options.verbosity >= Verbosity::info) {
             cout << "Before removal:";
             for(auto &mod: learned_models)
               cout << " " << mod.first;
@@ -463,12 +510,11 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             cout << "Before removal " << learned_models.size() << " remaining." << endl;
           }
 
-          if(remove_below_threshold)
+          if(drop_below_mico_pvalue_threshold)
             learned_models.erase(remove_if(begin(learned_models), end(learned_models), is_below_threshold),
                 end(learned_models));
 
-          // if(options.verbosity >= Verbosity::verbose) {
-          if(true) {
+          if(options.verbosity >= Verbosity::info) {
             cout << "After removal:";
             for(auto &mod: learned_models)
               cout << " " << mod.first;
