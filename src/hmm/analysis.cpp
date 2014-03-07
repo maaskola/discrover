@@ -376,52 +376,48 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
               } else {
                 cout << "Scoring residual information - motifs:" << endl;
 
-                if(not options.revcomp) {
+                auto scoring_present_groups = groups_to_score;
+                auto scoring_absent_groups = absent_groups;
+                auto scoring_model = model;
 
-                  if(options.verbosity >= Verbosity::info)
-                  for(size_t i = 0; i < model.get_ngroups(); i++)
-                    if(model.is_motif_group(i))
-                      cout << (find(begin(groups_to_score), end(groups_to_score), i) != end(groups_to_score) ? "+" : "-")
-                        << " " << model.get_group_consensus(i) << endl;
-
-                  score = model.compute_score(data, Measures::Continuous::Measure::ResidualMutualInformation, options.weighting, groups_to_score, vector<size_t>(), absent_groups);
-
-                } else {
-
+                if(options.revcomp) {
                   if(options.verbosity >= Verbosity::info)
                     cout << "Adding reverse complementary motifs." << endl;
 
                   pair<HMM, map<size_t,size_t>> rc = model.add_revcomp_motifs();
-                  HMM rc_model = rc.first;
+                  scoring_model = rc.first;
                   map<size_t,size_t> rc_assoc = rc.second;
 
-                  auto rc_groups_to_score = groups_to_score;
+                  // add reverse-complementary motifs of the present motifs
                   for(auto x: groups_to_score)
-                    rc_groups_to_score.push_back(rc_assoc[x]);
+                    scoring_present_groups.push_back(rc_assoc[x]);
 
-                  auto rc_absent_groups = absent_groups;
+                  // add reverse-complementary motifs of the absent motifs
                   for(auto x: absent_groups)
-                    rc_absent_groups.push_back(rc_assoc[x]);
-
-                  if(options.verbosity >= Verbosity::info)
-                    for(size_t i = 0; i < rc_model.get_ngroups(); i++)
-                      if(rc_model.is_motif_group(i))
-                        cout << (find(begin(rc_groups_to_score), end(rc_groups_to_score), i) != end(rc_groups_to_score) ? "+" : "-")
-                          << " " << rc_model.get_group_consensus(i) << endl;
-
-                  score = rc_model.compute_score(data, Measures::Continuous::Measure::ResidualMutualInformation, options.weighting, rc_groups_to_score, vector<size_t>(), rc_absent_groups);
-
+                    scoring_absent_groups.push_back(rc_assoc[x]);
                 }
 
-                cout << "residual mutual information = " << score << endl;
+                if(options.verbosity >= Verbosity::info)
+                  for(size_t i = 0; i < scoring_model.get_ngroups(); i++)
+                    if(scoring_model.is_motif_group(i))
+                      cout << (find(begin(scoring_present_groups), end(scoring_present_groups), i) != end(scoring_present_groups) ? "+" : "-")
+                        << " " << scoring_model.get_group_consensus(i) << endl;
+
+                score = scoring_model.compute_score(data, Measures::Continuous::Measure::ResidualMutualInformation, options.weighting, scoring_present_groups, vector<size_t>(), scoring_absent_groups);
+
+                if(options.verbosity >= Verbosity::info)
+                  cout << "residual mutual information = " << score << endl;
               }
 
               if(score > -numeric_limits<double>::infinity())
                 score = - corrected_pvalue(score, n, df, motif_len, Verbosity::verbose);
-              cout << "score = " << score << endl;
+              if(options.verbosity >= Verbosity::info)
+                cout << "score = " << score << endl;
             }
 
-            cout << "Score of the model augmented by " << seed << " has a score of " << score << endl << endl;
+            if(options.verbosity >= Verbosity::info)
+              cout << "Score of the model augmented by " << seed << " has a score of " << score << endl << endl;
+
             if(not (use_mico_pvalue and drop_below_mico_pvalue_threshold) or score >= p_mico_threshold) {
               if(score > best_score) {
                 cout << "This is the currently best model!" << endl << endl;
