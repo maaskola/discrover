@@ -215,6 +215,8 @@ namespace Specification {
       s += boost::lexical_cast<string>(l);
     }
     s += spec.specification;
+    if(spec.multiplicity > 1)
+      s += "x" + boost::lexical_cast<string>(spec.multiplicity);
     return(s);
   }
   string to_string(const Set &spec) {
