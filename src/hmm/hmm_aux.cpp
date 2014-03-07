@@ -877,3 +877,29 @@ void HMM::print_occurrence_table(const string &file_path, const Data::Seq &seq, 
       }
 }
 
+std::pair<HMM, std::map<size_t, size_t>> HMM::add_revcomp_motifs() const
+{
+  HMM rc = *this;
+  // reverse complement motifs
+  for(size_t i = 0; i < groups.size(); i++)
+    if(groups[i].kind == Group::Kind::Motif)
+      for(size_t j = 0; j < groups[i].states.size(); j++)
+        for(size_t k = 0; k < n_emissions; k++)
+          rc.emission(groups[i].states[j], k) = emission(groups[i].states[groups[i].states.size() - j - 1], n_emissions - k - 1);
+
+  for(size_t i = 0; i < first_state; i++) {
+    rc.transition(start_state, start_state) += rc.transition(start_state, i) /= 2;
+    rc.transition(bg_state, bg_state) += rc.transition(bg_state, i) /= 2;
+  }
+
+  HMM hmm = *this;
+  hmm.add_motifs(rc);
+
+  map<size_t,size_t> assoc;
+  size_t idx = 0;
+  for(size_t i = 0; i < groups.size(); i++)
+    if(groups[i].kind == Group::Kind::Motif)
+      assoc[i] = groups.size() + idx++;
+
+  return(make_pair(hmm, assoc));
+}

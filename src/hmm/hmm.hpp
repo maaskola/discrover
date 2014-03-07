@@ -488,6 +488,8 @@ class HMM {
     /** (Log) likelihood gradient with respect to transformed emission probabilities */
     matrix_t emission_gradient(const matrix_t &E, const Training::Range &allowed) const;
 
+  public:
+    std::pair<HMM, std::map<size_t, size_t>> add_revcomp_motifs() const;
 
 // -------------------------------------------------------------------------------------------
 // Output methods
