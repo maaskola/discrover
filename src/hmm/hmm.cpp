@@ -339,7 +339,8 @@ void HMM::add_motifs(const HMM &hmm, bool only_additional) {
       std::cout << "Skip adding motif group " << group.name << std::endl;
       own_group_iter++;
     } else if(group.kind == Group::Kind::Motif) {
-      std::cout << "Adding motif group " << group.name << ":" << hmm.get_group_consensus(idx) << std::endl;
+      if(verbosity >= Verbosity::info)
+        std::cout << "Adding motif group " << group.name << ":" << hmm.get_group_consensus(idx) << std::endl;
 
       // the number of states in the new group
       size_t n_motif_states = group.states.size();
