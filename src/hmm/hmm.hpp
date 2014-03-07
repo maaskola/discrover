@@ -191,12 +191,12 @@ class HMM {
     bool check_enrichment(const Data::Contrast &contrast, const matrix_t &counts, size_t group_idx) const;
 
   public:
-    /* Add a motif based on a IUPAC string. */
+    /** Add a motif based on a IUPAC string. */
     size_t add_motif(const std::string &seq, double alpha, double exp_seq_len, double lambda, const std::string &name, const std::vector<size_t> &insertions, size_t pad_left, size_t pad_right);
-    /* Add a motif based on a matrix. */
+    /** Add a motif based on a matrix. */
     size_t add_motif(const matrix_t &e, double exp_seq_len, double lambda, const std::string &name, std::vector<size_t> insertions, size_t pad_left, size_t pad_right);
 
-    /* Add motifs of another HMM. */
+    /** Add motifs of another HMM. */
     void add_motifs(const HMM &hmm, bool only_additional=false);
 
     /** Perform HMM training. */
@@ -259,7 +259,8 @@ class HMM {
     /** A getter routine for the pseudo count. */
     double get_pseudo_count() const;
 
-    size_t count_motif(const StatePath &path, size_t motif) const;
+    /** Count number of occurrences of a given motif in a Viterbi parse */
+    size_t count_motif(const StatePath &path, size_t motif_idx) const;
 
     /** Generate a random candidate variant for MCMC sampling */
     HMM random_variant(const Options::HMM &options, std::mt19937 &rng) const;
