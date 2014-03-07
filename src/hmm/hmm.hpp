@@ -305,16 +305,38 @@ class HMM {
     };
 
   public:
+
     vector_t posterior_atleast_one(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const;
     double viterbi(const Data::Seq &s, StatePath &path) const;
     posterior_t posterior_atleast_one(const Data::Seq &seq, bitmask_t present, bitmask_t absent) const;
     double expected_posterior(const Data::Seq &seq, bitmask_t present) const;
+
   protected:
+
     vector_t posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t absent) const;
     double   sum_posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t absent) const;
 
     vector_t expected_posterior(const Data::Contrast &contrast, bitmask_t present) const;
     double   expected_posterior(const Data::Set &dataset, bitmask_t present) const;
+
+  public:
+    // posterior statistics of pairs of motifs
+    struct pair_posterior_t {
+      double log_likelihood;
+      double posterior_first;
+      double posterior_second;
+      double posterior_both;
+      double posterior_none;
+    };
+
+    typedef std::vector<pair_posterior_t> pair_posteriors_t;
+
+  protected:
+
+    pair_posteriors_t pair_posterior_atleast_one(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent, bitmask_t previous) const;
+
+    pair_posteriors_t pair_posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t absent, bitmask_t previous) const;
+    pair_posterior_t sum_pair_posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t absent, bitmask_t previous) const;
 
 // -------------------------------------------------------------------------------------------
 // Generative and discriminative measures
@@ -536,6 +558,9 @@ class HMM {
     Training::Range complementary_states_mask(bitmask_t present) const;
 };
 
+
+HMM::pair_posterior_t &operator+=(HMM::pair_posterior_t &one, const HMM::pair_posterior_t &two);
+std::ostream &operator<<(std::ostream &os, const HMM::pair_posterior_t &one);
 std::ostream &operator<<(std::ostream& os, const HMM &hmm);
 
 #include "subhmm.hpp"
