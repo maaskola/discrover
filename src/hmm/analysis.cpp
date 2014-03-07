@@ -353,8 +353,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             auto model = hmm;
             model.add_motifs(learned_model, false);
 
-            // TODO adapt transition probabilities?
-            // TODO or do complete relearning?
+            // TODO re-learn at this point?
 
             // motif_len, n, and df are needed for MICO p-value computation
             const size_t motif_len = seed.size();
@@ -451,10 +450,6 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             if(options.long_names)
               options.label += "." + best_seed;
 
-            // TODO: remember that learning and evaluation is to a large degree based on groups - not motif names; thus there is some inefficiencies
-            // TODO: learning should perhaps only adapt transitions? this would be very fast...
-            // TODO:   otherwise: if learning should also adapt emissions, then perhaps only those of the new motif?
-            // TODO:   in this case: it might be done on the masked sequences
             train_evaluate(hmm, all_data, training_data, test_data, options, training_necessary, true);
 
             absent_groups.push_back(hmm.get_ngroups() - 1);
