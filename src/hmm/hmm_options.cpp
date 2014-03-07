@@ -3,20 +3,6 @@
 
 using namespace std;
 
-istream& operator>>(istream& in, Compression& compression)
-{
-  string token;
-  in >> token;
-  if(token == "none")
-    compression = Compression::none;
-  else if(token == "gzip" or token == "gz")
-    compression = Compression::gzip;
-  else if(token == "bzip2" or token == "bz2")
-    compression = Compression::bzip2;
-//  else throw boost::program_options::validation_error("Invalid unit");
-  return in;
-}
-
 
 string compression2ending(Compression compression)
 {
@@ -44,10 +30,85 @@ string compression2string(Compression compression)
   return("");
 }
 
-ostream& operator<<(ostream& out, Compression compression)
+istream& operator>>(istream &in, Compression &compression)
+{
+  string token;
+  in >> token;
+  if(token == "none")
+    compression = Compression::none;
+  else if(token == "gzip" or token == "gz")
+    compression = Compression::gzip;
+  else if(token == "bzip2" or token == "bz2")
+    compression = Compression::bzip2;
+  else {
+    cout << "Error: can not parse compression type '" << token << "'." << endl;
+    exit(-1);
+  }
+  return in;
+}
+
+istream &operator>>(istream &is, Relearning &relearning)
+{
+  string word;
+  is >> word;
+  if(word == "none")
+    relearning = Relearning::None;
+  else if(word == "reest")
+    relearning = Relearning::Reestimation;
+  else if(word == "full")
+    relearning = Relearning::Full;
+  else {
+    cout << "Error: can not parse relearning mode '" << word << "'." << endl;
+    exit(-1);
+  }
+  return(is);
+}
+
+ostream& operator<<(ostream &out, const Compression &compression)
 {
   out << compression2string(compression);
   return out;
+}
+
+ostream &operator<<(ostream &os, const Relearning &relearning)
+{
+  switch(relearning) {
+    case Relearning::None:
+      os << "none";
+      break;
+    case Relearning::Reestimation:
+      os << "reest";
+      break;
+    case Relearning::Full:
+      os << "full";
+      break;
+  }
+  return(os);
+}
+
+ostream &operator<<(ostream &os, const Verbosity &verbosity)
+{
+  switch(verbosity) {
+    case Verbosity::nothing:
+      os << "nothing" << endl;
+      break;
+    case Verbosity::error:
+      os << "error" << endl;
+      break;
+    case Verbosity::info:
+      os << "info" << endl;
+      break;
+    case Verbosity::verbose:
+      os << "verbose" << endl;
+      break;
+    case Verbosity::debug:
+      os << "debug" << endl;
+      break;
+    case Verbosity::everything:
+      os << "everything" << endl;
+      break;
+  }
+  return(os);
 }
 
 template <typename X> ostream& operator<<(ostream &os, const vector<X> &v)
@@ -85,31 +146,6 @@ ostream &operator<<(ostream &os, const termination_options &options)
   return(os);
 }
 
-ostream &operator<<(ostream &os, const Verbosity &verbosity)
-{
-  switch(verbosity) {
-    case Verbosity::nothing:
-      os << "nothing" << endl;
-      break;
-    case Verbosity::error:
-      os << "error" << endl;
-      break;
-    case Verbosity::info:
-      os << "info" << endl;
-      break;
-    case Verbosity::verbose:
-      os << "verbose" << endl;
-      break;
-    case Verbosity::debug:
-      os << "debug" << endl;
-      break;
-    case Verbosity::everything:
-      os << "everything" << endl;
-      break;
-  }
-  return(os);
-}
-
 ostream &operator<<(ostream &os, const sampling_options &options)
 {
   os << "Sampling options:" << endl
@@ -137,39 +173,6 @@ ostream &operator<<(ostream &os, const evaluation_options &eval_info)
   os << "Evaluate, print occurrence table:\t" << endl << eval_info.occurrence_table << endl;
   os << "Evaluate, print summary:\t" << endl << eval_info.summary << endl;
   return(os);
-}
-
-std::ostream &operator<<(std::ostream &os, const Relearning &relearning)
-{
-  switch(relearning) {
-    case Relearning::None:
-      os << "none";
-      break;
-    case Relearning::Reestimation:
-      os << "reest";
-      break;
-    case Relearning::Full:
-      os << "full";
-      break;
-  }
-  return(os);
-}
-
-std::istream &operator>>(std::istream &is, Relearning &relearning)
-{
-  string word;
-  is >> word;
-  if(word == "none")
-    relearning = Relearning::None;
-  else if(word == "reest")
-    relearning = Relearning::Reestimation;
-  else if(word == "full")
-    relearning = Relearning::Full;
-  else {
-    cout << "Error: can not parse relearning mode '" << word << "'." << endl;
-    exit(-1);
-  }
-  return(is);
 }
 
 ostream &operator<<(ostream &os, const hmm_options &options)
@@ -224,4 +227,3 @@ ostream &operator<<(ostream &os, const hmm_options &options)
     << "exec_info = " << options.exec_info << endl;
   return(os);
 }
-

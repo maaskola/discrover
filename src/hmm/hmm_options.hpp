@@ -45,10 +45,15 @@ enum class Compression {
 
 std::string compression2string(Compression compression);
 std::string compression2ending(Compression compression);
-std::istream& operator>>(std::istream& in, Compression &type);
-std::ostream& operator<<(std::ostream& out, Compression type);
 
-std::istream& operator>>(std::istream& in, Compression &type);
+enum class Relearning {
+  None, // Just add, no relearning
+  Reestimation, // Adapt transitions and background emissions
+  Full // Re-train both previous and newly added motifs
+    // TODO: one might want to add the following modes to train only the most recently added motif:
+    //   * using conditional MI
+    //   * using the motif's objective
+};
 
 struct sampling_options {
   bool do_sampling; // whether to perform Gibbs sampling learning
@@ -81,15 +86,6 @@ struct evaluation_options {
   bool summary;
   bool viterbi_path;
   bool ric;
-};
-
-enum class Relearning {
-  None, // Just add, no relearning
-  Reestimation, // Adapt transitions and background emissions
-  Full // Re-train both previous and newly added motifs
-    // TODO: one might want to add the following modes to train only the most recently added motif:
-    //   * using conditional MI
-    //   * using the motif's objective
 };
 
 struct hmm_options {
@@ -144,14 +140,16 @@ struct hmm_options {
   ExecutionInformation exec_info;
 };
 
+std::istream &operator>>(std::istream &in, Compression &type);
 std::istream &operator>>(std::istream &is, Relearning &relearning);
 
+std::ostream &operator<<(std::ostream &os, const Compression &type);
+std::ostream &operator<<(std::ostream &os, const Relearning &relearning);
 std::ostream &operator<<(std::ostream &os, const Verbosity &verbosity);
 std::ostream &operator<<(std::ostream &os, const LineSearchOptions &options);
 std::ostream &operator<<(std::ostream &os, const termination_options &options);
 std::ostream &operator<<(std::ostream &os, const sampling_options &options);
 std::ostream &operator<<(std::ostream &os, const ExecutionInformation &exec_info);
-std::ostream &operator<<(std::ostream &os, const Relearning &relearning);
 std::ostream &operator<<(std::ostream &os, const hmm_options &options);
 
 #endif
