@@ -37,18 +37,25 @@ using namespace std;
 
 HMM::bitmask_t make_mask(const vector<size_t> &v) {
   HMM::bitmask_t x = 0;
-  for(auto y: v)
+  for(auto y: v) {
+    if(y > HMM::max_motifs) {
+      cout << "Error: trying to construct mask for too many motifs! The offending index was: " << y << ", and there may only be " << HMM::max_motifs << " motifs in this version." << endl;
+      exit(-1);
+    }
+    // TODO implement in terms of set() or operator[] methods
     x |= 1 << y;
+  }
   return(x);
 }
 
-vector<size_t> unpack_mask(const size_t x) {
+vector<size_t> unpack_mask(const HMM::bitmask_t x) {
   vector<size_t> v;
   size_t z = 0;
-  size_t y = 1;
-  while(x >= y) {
+  HMM::bitmask_t y = 1;
+  while(x.to_ullong() >= y.to_ullong()) {
     if((x & y) != 0)
       v.push_back(z);
+    // TODO implement in terms of test() or operator[] methods
     y = y << 1;
     z++;
   }
@@ -85,7 +92,7 @@ confusion_matrix reduce(const vector_t &v, HMM::bitmask_t present, const Data::C
   for(size_t sample_idx = 0; sample_idx < v.size(); sample_idx++) {
     bool signal = false;
     for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
-      if(((1 << group_idx) & present) != 0 and
+      if((HMM::bitmask_t(1 << group_idx) & present) != 0 and
           contrast.sets[sample_idx].motifs.find(groups[group_idx].name) != end(contrast.sets[sample_idx].motifs)) {
         signal = true;
         break;
@@ -112,8 +119,10 @@ double HMM::mutual_information(const Data::Contrast &contrast, bitmask_t present
     m(i,1) = contrast.sets[i].set_size - posterior(i);
   }
   m = m + pseudo_count;
-  cout << "HMM::mutual_information(Data::Contrast) present = " << present << " absent = " << absent << endl
-    << "counts = " << m << endl;
+  cout << "HMM::mutual_information(Data::Contrast)" << endl
+    << "present = " << present << endl
+    << "absent  = " << absent << endl
+    << "counts  = " << m << endl;
   double mi = calc_mutual_information(m, 0, true, false, false);
 //  if(not check_enrichment(contrast, m, group_idx))
 //    mi = -mi;
@@ -211,7 +220,9 @@ double HMM::expected_posterior(const Data::Seq &seq, bitmask_t present) const
 vector_t HMM::posterior_atleast_one(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const
 {
   if(verbosity >= Verbosity::debug)
-    cout << "HMM::posterior_atleast_one(Data::Contrast, present=" << present << ", absent=" << absent << endl;
+    cout << "HMM::posterior_atleast_one(Data::Contrast)" << endl
+      << "present =" << present << endl
+      << "absent  =" << absent << endl;
   vector_t v(contrast.sets.size());
   for(size_t i = 0; i < contrast.sets.size(); i++)
     v[i] = sum_posterior_atleast_one(contrast.sets[i], present, absent);
@@ -221,7 +232,9 @@ vector_t HMM::posterior_atleast_one(const Data::Contrast &contrast, bitmask_t pr
 vector_t HMM::posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t absent) const
 {
   if(verbosity >= Verbosity::debug)
-    cout << "HMM::posterior_atleast_one(Data::Set = " << dataset.path << ", present = " << present << ", absent = " << absent << endl;
+    cout << "HMM::posterior_atleast_one(Data::Set = " << dataset.path << ")" << endl
+      << "present = " << present << endl
+      << "absent  = " << absent << endl;
 
   if(verbosity >= Verbosity::debug) {
     cout << "complementary_states_mask(present)) =";
@@ -267,7 +280,6 @@ vector_t HMM::posterior_atleast_one(const Data::Set &dataset, bitmask_t present,
 
       double z = exp(logp_wo_abs - logp) - exp(logp_wo_abs_wo_motif - logp);
       if(verbosity >= Verbosity::debug) {
-      // if(true) {
         stringstream s;
         s << "seq = " << dataset.sequences[i].definition
           /*  << " " << dataset.sequences[i].sequence */
@@ -282,7 +294,10 @@ vector_t HMM::posterior_atleast_one(const Data::Set &dataset, bitmask_t present,
   }
 
   if(verbosity >= Verbosity::debug)
-    cout << "HMM::posterior_atleast_one(Data::Set = " << dataset.path << ", present = " << present << ", absent = " << absent << " vec = " << vec << endl;
+    cout << "HMM::posterior_atleast_one(Data::Set = " << dataset.path << ")" << endl
+      << "present = " << present << endl
+      << "absent  = " << absent << endl
+      << "vec = " << vec << endl;
   return(vec);
 };
 
@@ -291,7 +306,9 @@ vector_t HMM::posterior_atleast_one(const Data::Set &dataset, bitmask_t present,
 double HMM::sum_posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t absent) const
 {
   if(verbosity >= Verbosity::debug)
-    cout << "HMM::sum_posterior_atleast_one(Data::Set = " << dataset.path << ", present = " << present << ", absent = " << absent << endl;
+    cout << "HMM::sum_posterior_atleast_one(Data::Set = " << dataset.path << ")" << endl
+      << "present = " << present << endl
+      << "absent  = " << absent << endl;
 
   vector_t counts = posterior_atleast_one(dataset, present, absent);
 
@@ -300,14 +317,19 @@ double HMM::sum_posterior_atleast_one(const Data::Set &dataset, bitmask_t presen
     m += x;
 
   if(verbosity >= Verbosity::debug)
-    cout << "HMM::posterior_atleast_one(Data::Set = " << dataset.path << ", present = " << present << ", absent = " << absent << " m = " << m << endl;
+    cout << "HMM::sum_posterior_atleast_one(Data::Set = " << dataset.path << ")" << endl
+      << "present = " << present << endl
+      << "absent  = " << absent << endl
+      << "m = " << m << endl;
   return(m);
 };
 
 HMM::posterior_t HMM::posterior_atleast_one(const Data::Seq &seq, bitmask_t present, bitmask_t absent) const
 {
   if(verbosity >= Verbosity::debug)
-    cout << "HMM::posterior_atleast_one(Data::Seq, present = " << present << ", absent = " << absent << endl;
+    cout << "HMM::posterior_atleast_one(Data::Seq)"
+      << "present = " << present << endl
+      << "absent  = " << absent << endl;
 
   // TODO FIX ABSENT - done?
 
@@ -346,7 +368,10 @@ HMM::posterior_t HMM::posterior_atleast_one(const Data::Seq &seq, bitmask_t pres
   }
 
   if(verbosity >= Verbosity::debug)
-    cout << "HMM::posterior_atleast_one(Data::Seq, present = " << present << ", absent = " << absent << " z = " << z << endl;
+    cout << "HMM::posterior_atleast_one(Data::Seq)" << endl
+      << "present = " << present << endl
+      << "absent  = " << absent << endl
+      << "z = " << z << endl;
   posterior_t res = {logp, z};
   return(res);
 };
@@ -463,7 +488,7 @@ double HMM::log_likelihood_difference(const Data::Contrast &contrast, bitmask_t 
     // TODO FIX ABSENT - done?
     bool signal = false;
     for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
-      if(((1 << group_idx) & present) != 0 and
+      if((bitmask_t(1 << group_idx) & present) != 0 and
           contrast.sets[sample_idx].motifs.find(groups[group_idx].name) != end(contrast.sets[sample_idx].motifs)) {
         signal = true;
         break;

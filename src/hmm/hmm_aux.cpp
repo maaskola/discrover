@@ -761,12 +761,14 @@ Training::Range HMM::complementary_states(size_t group_idx) const
   return(range);
 }
 
-Training::Range HMM::complementary_states_mask(size_t present_mask) const
+Training::Range HMM::complementary_states_mask(bitmask_t present_mask) const
 {
   Training::Range range;
   for(size_t i = start_state; i < n_states; i++)
     range.push_back(i);
-  auto in_mask = [&] (size_t state) { return((present_mask & (1 << group_ids[state])) != 0); };
+  auto in_mask = [&] (size_t state) {
+    return((present_mask & bitmask_t(1 << group_ids[state])) != 0);
+  };
   range.erase(remove_if(begin(range), end(range), in_mask), end(range));
   if(verbosity >= Verbosity::debug) {
     cout << "Complementary states =";

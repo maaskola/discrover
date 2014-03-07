@@ -67,6 +67,7 @@
 #include <boost/container/flat_map.hpp>
 #include <list>
 #include <unordered_map>
+#include <bitset>
 #include "association.hpp"
 #include "hmm_options.hpp"
 #include "../verbosity.hpp"
@@ -119,7 +120,8 @@ class HMM {
     typedef std::unordered_map<std::string, std::vector<size_t>> mask_sub_t;
     typedef std::unordered_map<std::string, mask_sub_t> mask_t;
     typedef boost::numeric::ublas::vector<size_t> StatePath;
-    typedef size_t bitmask_t;
+    const static size_t max_motifs = 32;
+    typedef std::bitset<max_motifs> bitmask_t;
 
   protected:
     /** The size of the alphabet. */
