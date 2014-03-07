@@ -66,7 +66,7 @@ std::string line_search_status(int status) {
 }
 
 
-void HMM::train_background(const Data::Collection &collection, const hmm_options &options)
+void HMM::train_background(const Data::Collection &collection, const Options::HMM &options)
 {
   HMM bg_hmm(options.verbosity);
 
@@ -96,12 +96,12 @@ void HMM::train_background(const Data::Collection &collection, const hmm_options
     std::cout << *this << std::endl;
 }
 
-void HMM::initialize_bg_with_bw(const Data::Collection &collection, const hmm_options &options)
+void HMM::initialize_bg_with_bw(const Data::Collection &collection, const Options::HMM &options)
 {
   if(options.verbosity >= Verbosity::info)
     std::cout << "Initializing background with Baum-Welch algorithm." << std::endl;
 
-  hmm_options bg_options = options;
+  Options::HMM bg_options = options;
   if(options.verbosity == Verbosity::info)
     bg_options.verbosity = Verbosity::error;
 
@@ -113,7 +113,7 @@ void HMM::initialize_bg_with_bw(const Data::Collection &collection, const hmm_op
     std::cerr << "Background learning: " << time << " micro-seconds" << std::endl;
 }
 
-double HMM::train(const Data::Collection &collection, const Training::Tasks &tasks, const hmm_options &options)
+double HMM::train(const Data::Collection &collection, const Training::Tasks &tasks, const Options::HMM &options)
 {
   if(options.verbosity >= Verbosity::verbose)
     std::cout << "Model to be evaluated = " << *this << std::endl;
@@ -167,7 +167,7 @@ double HMM::train(const Data::Collection &collection, const Training::Tasks &tas
   return(delta);
 }
 
-double HMM::train_inner(const Data::Collection &collection, const Training::Tasks &tasks, const hmm_options &options)
+double HMM::train_inner(const Data::Collection &collection, const Training::Tasks &tasks, const Options::HMM &options)
 {
   if(tasks.empty())
     return(0);
@@ -199,8 +199,8 @@ double HMM::train_inner(const Data::Collection &collection, const Training::Task
 }
 
 
-// double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Contrast &contrast, const Training::Targets &targets, const hmm_options &options)
-double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Collection &collection, const Training::Targets &targets, const hmm_options &options) const
+// double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Contrast &contrast, const Training::Targets &targets, const Options::HMM &options)
+double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Collection &collection, const Training::Targets &targets, const Options::HMM &options) const
 {
   double log_likel = 0;
   for(auto &contrast: collection)
@@ -212,7 +212,7 @@ double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Collection 
   return(log_likel);
 }
 
-double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Set &dataset, const Training::Targets &targets, const hmm_options &options) const
+double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Set &dataset, const Training::Targets &targets, const Options::HMM &options) const
 {
   double log_likel = 0;
   // TODO find out if there's a performance benefit to the split-up critical regions.
@@ -334,7 +334,7 @@ double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Seq &s, con
   return(log_likel);
 }
 
-double HMM::ViterbiIteration(matrix_t &T, matrix_t &E, const Data::Collection &collection, const Training::Targets &targets, const hmm_options &options)
+double HMM::ViterbiIteration(matrix_t &T, matrix_t &E, const Data::Collection &collection, const Training::Targets &targets, const Options::HMM &options)
 {
   double log_likel = 0;
   for(auto &contrast: collection)
@@ -343,7 +343,7 @@ double HMM::ViterbiIteration(matrix_t &T, matrix_t &E, const Data::Collection &c
   return(log_likel);
 }
 
-double HMM::ViterbiIteration(matrix_t &T, matrix_t &E, const Data::Set &dataset, const Training::Targets &training_targets, const hmm_options &options)
+double HMM::ViterbiIteration(matrix_t &T, matrix_t &E, const Data::Set &dataset, const Training::Targets &training_targets, const Options::HMM &options)
 {
   double log_likel = 0;
 #pragma omp parallel for reduction(+:log_likel) shared(E, T) if(DO_PARALLEL)
@@ -378,14 +378,14 @@ double HMM::ViterbiIteration(matrix_t &T, matrix_t &E, const Data::Set &dataset,
   return(log_likel);
 }
 
-void HMM::reestimation(const Data::Collection &collection, const Training::Task &task, const hmm_options &options)
+void HMM::reestimation(const Data::Collection &collection, const Training::Task &task, const Options::HMM &options)
 {
   Training::Tasks tasks;
   tasks.push_back(task);
   iterative_training(collection, tasks, options);
 }
 
-double HMM::reestimationIteration(const Data::Collection &collection, const Training::Task &task, const hmm_options &options)
+double HMM::reestimationIteration(const Data::Collection &collection, const Training::Task &task, const Options::HMM &options)
 {
   double log_likel = -std::numeric_limits<double>::infinity();
   if(store_intermediate)
@@ -414,7 +414,7 @@ double HMM::reestimationIteration(const Data::Collection &collection, const Trai
   return(log_likel);
 };
 
-void HMM::M_Step(const matrix_t &T_, const matrix_t &E_, const Training::Targets &targets, const hmm_options &options)
+void HMM::M_Step(const matrix_t &T_, const matrix_t &E_, const Training::Targets &targets, const Options::HMM &options)
 {
   if(verbosity >= Verbosity::verbose) {
     if(not targets.transition.empty())
@@ -579,7 +579,7 @@ double HMM::compute_gradient(const Data::Contrast &contrast,
 
 void HMM::iterative_training(const Data::Collection &collection,
     const Training::Tasks &tasks,
-    const hmm_options &options)
+    const Options::HMM &options)
 {
   size_t iteration = 0;
 
@@ -617,7 +617,7 @@ void HMM::iterative_training(const Data::Collection &collection,
 
 bool HMM::perform_training_iteration(const Data::Collection &collection,
     const Training::Tasks &tasks,
-    const hmm_options &options,
+    const Options::HMM &options,
     Training::State &ts)
 {
   bool done = true;
@@ -680,7 +680,7 @@ bool HMM::perform_training_iteration(const Data::Collection &collection,
 
 bool HMM::reestimate_class_parameters(const Data::Collection &collection,
     const Training::Task &task,
-    const hmm_options &options,
+    const Options::HMM &options,
     double &score)
 {
   if(verbosity >= Verbosity::debug)
@@ -768,7 +768,7 @@ bool HMM::reestimate_class_parameters(const Data::Collection &collection,
 
 bool HMM::perform_training_iteration_reestimation(const Data::Collection &collection,
     const Training::Task &task,
-    const hmm_options &options,
+    const Options::HMM &options,
     double &score)
 {
   bool done = false;
@@ -815,7 +815,7 @@ std::string consensus(const matrix_t &m, const Training::Range &states, double t
 
 bool HMM::perform_training_iteration_gradient(const Data::Collection &collection,
     const Training::Task &task,
-    const hmm_options &options,
+    const Options::HMM &options,
     int &center,
     double &score)
 {

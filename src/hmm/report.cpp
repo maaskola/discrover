@@ -222,7 +222,7 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
     ostream &out,
     ostream &v_out,
     ostream &occurrence_out,
-    const hmm_options &options)
+    const Options::HMM &options)
 {
   const size_t width = 12;
   const size_t prec = 5;
@@ -367,7 +367,7 @@ void evaluate_hmm(const HMM &hmm,
     const Data::Collection &collection,
     const string &tag,
     const Training::Tasks &tasks,
-    const hmm_options &options)
+    const Options::HMM &options)
 {
   // TODO see that this does not invalidate previously learned parameters for MMIE!
   // for(auto &contrast: collection)
@@ -391,7 +391,7 @@ void evaluate_hmm(const HMM &hmm,
   } */
 
   ios_base::openmode flags = ios_base::out;
-  if(options.output_compression != Compression::none)
+  if(options.output_compression != Options::Compression::none)
     flags |= ios_base::binary;
 
   string file_tag = "";
@@ -452,11 +452,11 @@ void evaluate_hmm(const HMM &hmm,
 
     boost::iostreams::filtering_stream<boost::iostreams::output> v_out, occurrence_out;
     switch(options.output_compression) {
-      case Compression::gzip:
+      case Options::Compression::gzip:
         v_out.push(boost::iostreams::gzip_compressor());
         occurrence_out.push(boost::iostreams::gzip_compressor());
         break;
-      case Compression::bzip2:
+      case Options::Compression::bzip2:
         v_out.push(boost::iostreams::bzip2_compressor());
         occurrence_out.push(boost::iostreams::bzip2_compressor());
         break;

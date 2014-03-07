@@ -37,9 +37,9 @@ namespace MCMC {
   template <>
     class Generator<HMM> {
       private:
-        hmm_options options;
+        Options::HMM options;
       public:
-        Generator(const hmm_options &opt, size_t w) :
+        Generator(const Options::HMM &opt, size_t w) :
           options(opt)
         {
           if(options.sampling.min_size == -1)
@@ -57,11 +57,11 @@ namespace MCMC {
         Data::Collection collection;
         Training::Task task;
         Training::State ts;
-        hmm_options options;
+        Options::HMM options;
       public:
         Evaluator(const Data::Collection &col,
             const Training::Task &obj,
-            const hmm_options &opt) :
+            const Options::HMM &opt) :
           collection(col),
           task(obj),
           ts(1), // TODO make this work with multiple tasks

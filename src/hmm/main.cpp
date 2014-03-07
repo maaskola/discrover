@@ -120,7 +120,7 @@ Measures::Discrete::Measure measure2iupac_objective(const Measure measure) {
   }
 }
 
-void fixup_seeding_options(hmm_options &options) {
+void fixup_seeding_options(Options::HMM &options) {
 // TODO REACTIVATE if(set_objective)
 // TODO REACTIVATE    options.seeding.objective = {measure2iupac_objective(options.measure);
   // options.seeding.objective = Seeding::Objective::corrected_logp_gtest;
@@ -151,7 +151,7 @@ int main(int argc, const char** argv)
 
   namespace po = boost::program_options;
 
-  hmm_options options;
+  Options::HMM options;
   options.exec_info = generate_exec_info(argv[0], GIT_DESCRIPTION, cmdline(argc, argv));
   options.class_model = false;
   options.random_salt = generate_rng_seed();
@@ -254,7 +254,7 @@ int main(int argc, const char** argv)
     ("salt", po::value<unsigned int>(&options.random_salt), "Seed for the random number generator.")
     ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
     ("multiple", po::bool_switch(&options.accept_multiple), "Accept multiple motifs.")
-    ("relearn", po::value<Relearning>(&options.relearning)->default_value(Relearning::Full, "full"), "When accepting multiple motifs, whether and how to re-learn the model after a new motif is added. Choices: 'none', 'reest', 'full'.")
+    ("relearn", po::value<Options::Relearning>(&options.relearning)->default_value(Options::Relearning::Full, "full"), "When accepting multiple motifs, whether and how to re-learn the model after a new motif is added. Choices: 'none', 'reest', 'full'.")
     ;
 
   mmie_options.add_options()
@@ -296,7 +296,7 @@ int main(int argc, const char** argv)
     ("pscnt", po::value<double>(&options.contingency_pseudo_count)->default_value(1.0, "1"), "The pseudo count to be added to the contingency tables in the discriminative algorithms.")
     ("pscntE", po::value<double>(&options.emission_pseudo_count)->default_value(1.0, "1"), "The pseudo count to be added to the expected emission probabilities before normalization in the Baum-Welch algorithm.")
     ("pscntT", po::value<double>(&options.transition_pseudo_count)->default_value(0.0, "0"), "The pseudo count to be added to the expected transition probabilities before normalization in the Baum-Welch algorithm.")
-    ("compress", po::value<Compression>(&options.output_compression)->default_value(Compression::gzip, "gz"), "Compression method to use for larger output files. Available are: 'none', 'gz' or 'gzip', 'bz2' or 'bzip2'.") // TODO make the code conditional on the presence of zlib
+    ("compress", po::value<Options::Compression>(&options.output_compression)->default_value(Options::Compression::gzip, "gz"), "Compression method to use for larger output files. Available are: 'none', 'gz' or 'gzip', 'bz2' or 'bzip2'.") // TODO make the code conditional on the presence of zlib
     ("miseeding", po::bool_switch(&options.use_mi_to_seed), "Disregard automatic seeding choice and use MICO for seeding.")
     ("absthresh", po::bool_switch(&options.termination.absolute_improvement), "Whether improvement should be gauged by absolute value. Default is relative to the current score.")
     ("intermediate", po::bool_switch(&options.store_intermediate), "Write out intermediate parameters during training.")

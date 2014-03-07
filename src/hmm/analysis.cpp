@@ -15,7 +15,7 @@
 
 using namespace std;
 
-void check_data(const Data::Collection &collection, const hmm_options &options)
+void check_data(const Data::Collection &collection, const Options::HMM &options)
 {
   if(options.verbosity >= Verbosity::info)
     for(auto &contrast: collection) {
@@ -49,7 +49,7 @@ void check_data(const Data::Collection &collection, const hmm_options &options)
 }
 
 
-void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options, bool do_training, bool relearning_phase=false)
+void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const Options::HMM &options, bool do_training, bool relearning_phase=false)
 {
   // Define the learning and evaluation tasks
   Training::Tasks eval_tasks = hmm.define_training_tasks(options);
@@ -60,15 +60,15 @@ void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Coll
 
     if(relearning_phase) {
       switch(options.relearning) {
-        case Relearning::None:
+        case Options::Relearning::None:
           learn_tasks = Training::Tasks();
           break;
-        case Relearning::Full:
+        case Options::Relearning::Full:
           break;
         // case Relearning::Added:
         // TODO implement
         //   break;
-        case Relearning::Reestimation:
+        case Options::Relearning::Reestimation:
           {
             set<string> contrast_names;
             for(auto &task: eval_tasks)
@@ -146,14 +146,14 @@ vector<string> generate_wiggle_variants(const string &s,  size_t n, Verbosity ve
 }
 
 
-HMM doit(const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const hmm_options &options_)
+HMM doit(const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const Options::HMM &options_)
 {
   // potentially: regardless of the objective function chosen for training, one might use the MICO p-value for selection!
   const bool use_mico_pvalue = true; // whether to use MICO p-value in multiple motif mode
   const bool drop_below_mico_pvalue_threshold = true; // whether to drop models below MICO p-value threshold in multiple motif mode
   const double p_mico_threshold = -log(0.05); // MICO p-value threshold to drop models in multiple motif mode
 
-  hmm_options options = options_;
+  Options::HMM options = options_;
 
   if(options.verbosity >= Verbosity::debug)
     cout << "About to construct HMM." << endl;
@@ -291,7 +291,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             cout << "Considering wiggle variant " << variant << " of candidate motif " << name << ":" << motif << " and training to determine the HMM score." << endl;
           model.add_motif(variant, options.alpha, expected_seq_size, options.lambda, name, plasma.options.motif_specifications[plasma_motif_idx].insertions, options.left_padding, options.right_padding);
 
-          hmm_options options_(options);
+          Options::HMM options_(options);
           if(options_.long_names)
             options_.label += "." + variant;
           train_evaluate(model, all_data, training_data, test_data, options_, training_necessary);
@@ -447,7 +447,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             if(options.verbosity >= Verbosity::info)
               cout << "Accepting seed " << best_seed << " with score " << best_score << endl;
 
-            hmm_options options_(options);
+            Options::HMM options_(options);
             if(options.long_names)
               options.label += "." + best_seed;
 
@@ -502,14 +502,14 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
   return(hmm);
 }
 
-vector<HMM> cross_validation(const Data::Collection &all_data, const hmm_options &options)
+vector<HMM> cross_validation(const Data::Collection &all_data, const Options::HMM &options)
 {
   vector<HMM> hmms;
   for(size_t cross_validation_iteration = 0; cross_validation_iteration < options.cross_validation_iterations; cross_validation_iteration++) {
     if(options.verbosity >= Verbosity::info and options.cross_validation_iterations > 1)
       cout << "Doing cross-validation " << (cross_validation_iteration + 1) << " of " << options.cross_validation_iterations << "." << endl;
 
-    hmm_options opt = options;
+    Options::HMM opt = options;
 
     if(options.cross_validation_freq < 1)
       opt.label += ".cv" + boost::lexical_cast<string>(cross_validation_iteration);
@@ -522,7 +522,7 @@ vector<HMM> cross_validation(const Data::Collection &all_data, const hmm_options
   return(hmms);
 }
 
-void perform_analysis(hmm_options &options)
+void perform_analysis(Options::HMM &options)
 {
   if(options.verbosity >= Verbosity::verbose)
     cout << "Loading sequences." << endl;

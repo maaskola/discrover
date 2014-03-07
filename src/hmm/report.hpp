@@ -60,13 +60,13 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm_,
     ostream &out,
     ostream &v_out,
     ostream &occurrence_out,
-    const hmm_options &options);
+    const Options::HMM &options);
 
 void evaluate_hmm(const HMM &hmm_,
     const Data::Collection &collection,
     const std::string &tag,
     const Training::Tasks &tasks,
-    const hmm_options &options);
+    const Options::HMM &options);
  
 #endif
 

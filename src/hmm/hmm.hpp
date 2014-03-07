@@ -207,26 +207,26 @@ class HMM {
     void add_motifs(const HMM &hmm, bool only_additional=false);
 
     /** Perform HMM training. */
-    double train(const Data::Collection &col, const Training::Tasks &tasks, const hmm_options &options);
+    double train(const Data::Collection &col, const Training::Tasks &tasks, const Options::HMM &options);
     /** Initialize HMM background with the Baum-Welch algorithm. */
-    void initialize_bg_with_bw(const Data::Collection &col, const hmm_options &options);
+    void initialize_bg_with_bw(const Data::Collection &col, const Options::HMM &options);
 
   protected:
-    double train_inner(const Data::Collection &col, const Training::Tasks &tasks, const hmm_options &options);
+    double train_inner(const Data::Collection &col, const Training::Tasks &tasks, const Options::HMM &options);
 
     /** Perform iterative HMM training, like re-estimation (expectation maximization) or gradient based. */
-    void iterative_training(const Data::Collection &col, const Training::Tasks &tasks, const hmm_options &options);
+    void iterative_training(const Data::Collection &col, const Training::Tasks &tasks, const Options::HMM &options);
     /** Perform one iteration of iterative HMM training. */
-    bool perform_training_iteration(const Data::Collection &col, const Training::Tasks &tasks, const hmm_options &options, Training::State &ts);
+    bool perform_training_iteration(const Data::Collection &col, const Training::Tasks &tasks, const Options::HMM &options, Training::State &ts);
     /** Perform one iteration of gradient training. */
-    bool perform_training_iteration_gradient(const Data::Collection &col, const Training::Task &task, const hmm_options &options, int &center, double &score);
+    bool perform_training_iteration_gradient(const Data::Collection &col, const Training::Task &task, const Options::HMM &options, int &center, double &score);
     /** Perform one iteration of re-estimation training. */
-    bool perform_training_iteration_reestimation(const Data::Collection &col, const Training::Task &task, const hmm_options &options, double &score);
+    bool perform_training_iteration_reestimation(const Data::Collection &col, const Training::Task &task, const Options::HMM &options, double &score);
     /** Perform one iteration of class parameter re-estimation training. */
-    bool reestimate_class_parameters(const Data::Collection &col, const Training::Task &task, const hmm_options &options, double &score);
+    bool reestimate_class_parameters(const Data::Collection &col, const Training::Task &task, const Options::HMM &options, double &score);
 
     /** Perform HMM training for the background part of the model using Baum-Welch. */
-    void train_background(const Data::Collection &col, const hmm_options &options);
+    void train_background(const Data::Collection &col, const Options::HMM &options);
 
 // -------------------------------------------------------------------------------------------
 // Saving and loading
@@ -269,10 +269,10 @@ class HMM {
     size_t count_motif(const StatePath &path, size_t motif) const;
 
     /** Generate a random candidate variant for MCMC sampling */
-    HMM random_variant(const hmm_options &options, std::mt19937 &rng) const;
+    HMM random_variant(const Options::HMM &options, std::mt19937 &rng) const;
 
     /** Prepare training tasks according to the objectives given in the options. */
-    Training::Tasks define_training_tasks(const hmm_options &options) const;
+    Training::Tasks define_training_tasks(const Options::HMM &options) const;
 
   protected:
 
@@ -402,20 +402,20 @@ class HMM {
   protected:
 
     /** Perform full expectation-maximization type learning */
-    void reestimation(const Data::Collection &col, const Training::Task &task, const hmm_options &options);
+    void reestimation(const Data::Collection &col, const Training::Task &task, const Options::HMM &options);
     /** Perform one iteration of expectation-maximization type learning */
-    double reestimationIteration(const Data::Collection &col, const Training::Task &task, const hmm_options &options);
+    double reestimationIteration(const Data::Collection &col, const Training::Task &task, const Options::HMM &options);
 
-    void M_Step(const matrix_t &T, const matrix_t &E, const Training::Targets &targets, const hmm_options &options);
+    void M_Step(const matrix_t &T, const matrix_t &E, const Training::Targets &targets, const Options::HMM &options);
 
     /** Perform one iteration of scaled Baum-Welch learning for a data collection */
-    double BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Collection &col, const Training::Targets &targets, const hmm_options &options) const;
+    double BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Collection &col, const Training::Targets &targets, const Options::HMM &options) const;
     /** Perform one iteration of scaled Baum-Welch learning for a data set */
-    double BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Set &dataset, const Training::Targets &targets, const hmm_options &options) const;
+    double BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Set &dataset, const Training::Targets &targets, const Options::HMM &options) const;
     /** Perform one iteration of Viterbi learning for a data collection */
-    double ViterbiIteration(matrix_t &T, matrix_t &E, const Data::Collection &col, const Training::Targets &targets, const hmm_options &options);
+    double ViterbiIteration(matrix_t &T, matrix_t &E, const Data::Collection &col, const Training::Targets &targets, const Options::HMM &options);
     /** Perform one iteration of Viterbi learning for a data set */
-    double ViterbiIteration(matrix_t &T, matrix_t &E, const Data::Set &dataset, const Training::Targets &targets, const hmm_options &options);
+    double ViterbiIteration(matrix_t &T, matrix_t &E, const Data::Set &dataset, const Training::Targets &targets, const Options::HMM &options);
 
     double BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Seq &s, const Training::Targets &targets) const;
     double BaumWelchIteration_single(matrix_t &T, matrix_t &E, const Data::Seq &s, const Training::Targets &targets) const;
@@ -425,7 +425,7 @@ class HMM {
 // -------------------------------------------------------------------------------------------
 //
     /** Perform parallel tempering */
-    std::vector<std::list<std::pair<HMM, double>>> mcmc(const Data::Collection &col, const Training::Task &task, const hmm_options &options);
+    std::vector<std::list<std::pair<HMM, double>>> mcmc(const Data::Collection &col, const Training::Task &task, const Options::HMM &options);
 
 // -------------------------------------------------------------------------------------------
 // Gradient learning
@@ -436,7 +436,7 @@ class HMM {
     std::pair<double, HMM> line_search(const Data::Collection &col, const Gradient &gradient, const Training::Task &task, int &center) const;
     /** Perform gradient line searching with the Moré-Thuente algorithm and the
      * desired objective function. */
-    std::pair<double, HMM> line_search_more_thuente(const Data::Collection &col, const Gradient &gradient, double score, int &info, const Training::Task &task, const hmm_options &options) const;
+    std::pair<double, HMM> line_search_more_thuente(const Data::Collection &col, const Gradient &gradient, double score, int &info, const Training::Task &task, const Options::HMM &options) const;
     /** Auxiliary routine to build candidate HMM for a given direction and step
      * size. */
     HMM build_trial_model(const Gradient &gradient, double alpha, const Training::Task &task) const;

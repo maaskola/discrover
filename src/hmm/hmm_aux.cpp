@@ -566,7 +566,7 @@ void HMM::normalize_emission(matrix_t &m) const
     m(start_state,b) = 0;
 }
 
-Training::Tasks HMM::define_training_tasks(const hmm_options &options) const
+Training::Tasks HMM::define_training_tasks(const Options::HMM &options) const
 {
   Training::Tasks tasks;
 

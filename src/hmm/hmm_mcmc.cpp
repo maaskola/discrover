@@ -88,7 +88,7 @@ void HMM::modify_transition(std::mt19937 &rng, double eps)
     transition(col,i) /= z;
 }
 
-HMM HMM::random_variant(const hmm_options &options, std::mt19937 &rng) const
+HMM HMM::random_variant(const Options::HMM &options, std::mt19937 &rng) const
 {
   HMM candidate(*this);
   unsigned n_cols = n_states - first_state;
@@ -267,7 +267,7 @@ void HMM::del_columns(size_t n, std::mt19937 &rng)
 
 std::vector<std::list<std::pair<HMM, double>>> HMM::mcmc(const Data::Collection &collection,
     const Training::Task &task,
-    const hmm_options &options)
+    const Options::HMM &options)
 {
   double temperature = options.sampling.temperature;
   MCMC::Evaluator<HMM> eval(collection, task, options);

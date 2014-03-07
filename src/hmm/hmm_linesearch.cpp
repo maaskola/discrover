@@ -199,7 +199,7 @@ pair<double, HMM> HMM::line_search_more_thuente(const Data::Collection &collecti
     double initial_score,
     int &info,
     const Training::Task &task,
-    const hmm_options &options) const
+    const Options::HMM &options) const
 {
   const Verbosity verbo = verbosity;
   // const Verbosity verbo = Verbosity::verbose;
