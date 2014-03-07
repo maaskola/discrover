@@ -58,35 +58,47 @@ void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Coll
     // define the training tasks
     Training::Tasks learn_tasks = hmm.define_training_tasks(options);
 
-    if(relearning_phase and (not options.relearn_discriminative)) {
-      set<string> contrast_names;
-      for(auto &task: eval_tasks)
-        for(auto &expr: task)
-          contrast_names.insert(expr.contrast);
+    if(relearning_phase) {
+      switch(options.relearning) {
+        case Relearning::None:
+          learn_tasks = Training::Tasks();
+          break;
+        case Relearning::Full:
+          break;
+        // case Relearning::Added:
+        // TODO implement
+        //   break;
+        case Relearning::Reestimation:
+          {
+            set<string> contrast_names;
+            for(auto &task: eval_tasks)
+              for(auto &expr: task)
+                contrast_names.insert(expr.contrast);
 
-      learn_tasks = Training::Tasks();
-      Training::Task task;
-      task.motif_name = "Background";
-      task.measure = Measure::Likelihood;
-      for(auto &contrast_name: contrast_names)
-        task.contrast_expression.push_back({+1, contrast_name});
+            learn_tasks = Training::Tasks();
+            Training::Task task;
+            task.motif_name = "Background";
+            task.measure = Measure::Likelihood;
+            for(auto &contrast_name: contrast_names)
+              task.contrast_expression.push_back({+1, contrast_name});
 
-      task.targets.emission.push_back(1);
-      for(size_t i = 0; i < hmm.get_nstates(); i++)
-        task.targets.transition.push_back(i);
+            task.targets.emission.push_back(1);
+            for(size_t i = 0; i < hmm.get_nstates(); i++)
+              task.targets.transition.push_back(i);
 
-      if(options.verbosity >= Verbosity::verbose) {
-        cout << "Generated generative training targets for re-learning." << endl << "Emissions:";
-        for(auto e: task.targets.emission)
-          cout << " " << e;
-        cout << endl;
-        cout << "Transitions:";
-        for(auto t: task.targets.transition)
-          cout << " " << t;
-        cout << endl;
+            if(options.verbosity >= Verbosity::verbose) {
+              cout << "Generated generative training targets for re-learning." << endl << "Emissions:";
+              for(auto e: task.targets.emission)
+                cout << " " << e;
+              cout << endl;
+              cout << "Transitions:";
+              for(auto t: task.targets.transition)
+                cout << " " << t;
+              cout << endl;
+            }
+            learn_tasks.push_back(task);
+          }
       }
-
-      learn_tasks.push_back(task);
     }
 
     if(not learn_tasks.empty())

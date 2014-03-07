@@ -139,6 +139,39 @@ ostream &operator<<(ostream &os, const evaluation_options &eval_info)
   return(os);
 }
 
+std::ostream &operator<<(std::ostream &os, const Relearning &relearning)
+{
+  switch(relearning) {
+    case Relearning::None:
+      os << "none";
+      break;
+    case Relearning::Reestimation:
+      os << "reest";
+      break;
+    case Relearning::Full:
+      os << "full";
+      break;
+  }
+  return(os);
+}
+
+std::istream &operator>>(std::istream &is, Relearning &relearning)
+{
+  string word;
+  is >> word;
+  if(word == "none")
+    relearning = Relearning::None;
+  else if(word == "reest")
+    relearning = Relearning::Reestimation;
+  else if(word == "full")
+    relearning = Relearning::Full;
+  else {
+    cout << "Error: can not parse relearning mode '" << word << "'." << endl;
+    exit(-1);
+  }
+  return(is);
+}
+
 ostream &operator<<(ostream &os, const hmm_options &options)
 {
   os << "HMM options:" << endl
@@ -162,6 +195,7 @@ ostream &operator<<(ostream &os, const hmm_options &options)
     << "revcomp = " << options.revcomp << endl
     << "weighting = " << options.weighting << endl
     << "accept_multiple = " << options.accept_multiple << endl
+    << "relearning = " << options.relearning << endl
     << "output_compression = " << options.output_compression << endl
     << "left_padding = " << options.left_padding << endl
     << "right_padding = " << options.right_padding << endl

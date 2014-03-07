@@ -83,6 +83,15 @@ struct evaluation_options {
   bool ric;
 };
 
+enum class Relearning {
+  None, // Just add, no relearning
+  Reestimation, // Adapt transitions and background emissions
+  Full // Re-train both previous and newly added motifs
+    // TODO: one might want to add the following modes to train only the most recently added motif:
+    //   * using conditional MI
+    //   * using the motif's objective
+};
+
 struct hmm_options {
   std::vector<Specification::Set> paths;
   Specification::Motifs motif_specifications;
@@ -101,7 +110,7 @@ struct hmm_options {
   bool revcomp;
   bool weighting;
   bool accept_multiple;
-  bool relearn_discriminative;
+  Relearning relearning;
   Compression output_compression;
   size_t left_padding, right_padding;
   bool print_posterior;
@@ -135,11 +144,14 @@ struct hmm_options {
   ExecutionInformation exec_info;
 };
 
+std::istream &operator>>(std::istream &is, Relearning &relearning);
+
 std::ostream &operator<<(std::ostream &os, const Verbosity &verbosity);
 std::ostream &operator<<(std::ostream &os, const LineSearchOptions &options);
 std::ostream &operator<<(std::ostream &os, const termination_options &options);
 std::ostream &operator<<(std::ostream &os, const sampling_options &options);
 std::ostream &operator<<(std::ostream &os, const ExecutionInformation &exec_info);
+std::ostream &operator<<(std::ostream &os, const Relearning &relearning);
 std::ostream &operator<<(std::ostream &os, const hmm_options &options);
 
 #endif
