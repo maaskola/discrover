@@ -107,7 +107,7 @@ Training::Task cross_optimization_targets(const Training::Task &task, size_t gro
 }
 
 
-double HMM::chi_square_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const
+double HMM::chi_square_gradient(const Data::Contrast &contrast, const Training::Task &task, bitmask_t present, Gradient &g) const
 {
   //if(verbosity >= Verbosity::debug)
     std::cout << "HMM::chi_square_gradient(Data::Contrast, Feature)" << std::endl;
@@ -117,12 +117,13 @@ double HMM::chi_square_gradient(const Data::Contrast &contrast, const Training::
   std::vector<matrix_t> trans_g(n_samples), emission_g(n_samples);
 
   if(verbosity >= Verbosity::debug)
-    std::cout << "Looking at group " << group_idx << std::endl;
+    std::cout << "Looking at groups " << present << std::endl;
 
-  Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
+  // TODO check that this is really not needed!
+  // Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
 
   for(size_t sample_idx = 0; sample_idx < n_samples; sample_idx++) {
-    counts(sample_idx, 0) = posterior_gradient(contrast.sets[sample_idx], obj, group_idx, trans_g[sample_idx], emission_g[sample_idx]).posterior;
+    counts(sample_idx, 0) = posterior_gradient(contrast.sets[sample_idx], task, present, trans_g[sample_idx], emission_g[sample_idx]).posterior;
     counts(sample_idx, 1) = contrast.sets[sample_idx].set_size - counts(sample_idx, 0);
   }
 
@@ -196,13 +197,14 @@ double HMM::chi_square_gradient(const Data::Contrast &contrast, const Training::
 }
 
 /** Gradient of Matthew's correlation coefficient. */
-double HMM::matthews_correlation_coefficient_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const
+double HMM::matthews_correlation_coefficient_gradient(const Data::Contrast &contrast, const Training::Task &task, bitmask_t present, Gradient &g) const
 {
   if(verbosity >= Verbosity::debug)
     std::cout << "HMM::mutual_information_gradient(Data::Contrast, Feature)" << std::endl;
   size_t n_samples = contrast.sets.size();
 
-  Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
+  // TODO check that this is really not needed!
+  // Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
 
   Gradient signal_g, control_g;
   if(not task.targets.transition.empty() and g.transition.size1() == 0)
@@ -226,9 +228,11 @@ double HMM::matthews_correlation_coefficient_gradient(const Data::Contrast &cont
     matrix_t trans_g = zero_matrix(n_states, n_states);
     matrix_t emission_g = zero_matrix(n_states, n_emissions);
 
-    double counts = posterior_gradient(contrast.sets[set_idx], task, group_idx, trans_g, emission_g).posterior;
+    double counts = posterior_gradient(contrast.sets[set_idx], task, present, trans_g, emission_g).posterior;
 
-    bool signal = contrast.sets[set_idx].motifs.find(groups[group_idx].name) != contrast.sets[set_idx].motifs.end();
+    // TODO BITMASK deactivated
+    //bool signal = contrast.sets[set_idx].motifs.find(groups[group_idx].name) != contrast.sets[set_idx].motifs.end();
+    bool signal = true;
     size_t total = contrast.sets[set_idx].set_size;
     total += 2 * pseudo_count; // Add pseudo-count
     counts += pseudo_count; // Add pseudo-count
@@ -289,13 +293,14 @@ double HMM::matthews_correlation_coefficient_gradient(const Data::Contrast &cont
   return(mcc);
 }
 
-double HMM::log_likelihood_difference_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const
+double HMM::log_likelihood_difference_gradient(const Data::Contrast &contrast, const Training::Task &task, bitmask_t present, Gradient &g) const
 {
   if(verbosity >= Verbosity::debug)
     std::cout << "HMM::log_likelihood_difference_gradient(Data::Contrast, Feature)" << std::endl;
   size_t n_samples = contrast.sets.size();
 
-  Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
+  // TODO check that this is really not needed!
+  // Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
 
   if(not task.targets.transition.empty() and g.transition.size1() == 0)
     g.transition = zero_matrix(n_states, n_states);
@@ -307,10 +312,11 @@ double HMM::log_likelihood_difference_gradient(const Data::Contrast &contrast, c
   for(size_t set_idx = 0; set_idx < n_samples; set_idx++) {
     matrix_t trans_g = zero_matrix(n_states, n_states);
     matrix_t emission_g = zero_matrix(n_states, n_emissions);
-    double log_likel = log_likelihood_gradient(contrast.sets[set_idx].sequences, obj.targets, trans_g, emission_g);
+    double log_likel = log_likelihood_gradient(contrast.sets[set_idx].sequences, task.targets, trans_g, emission_g);
     double sign = -1.0;
-    if(contrast.sets[set_idx].motifs.find(groups[group_idx].name) != contrast.sets[set_idx].motifs.end())
-      sign = 1.0;
+    // TODO BITMASK deactivated
+    // if(contrast.sets[set_idx].motifs.find(groups[group_idx].name) != contrast.sets[set_idx].motifs.end())
+    //   sign = 1.0;
     log_likelihood_difference += sign * log_likel;
 
     if(verbosity >= Verbosity::debug)
@@ -324,12 +330,13 @@ double HMM::log_likelihood_difference_gradient(const Data::Contrast &contrast, c
   return(log_likelihood_difference);
 }
 
-double HMM::class_likelihood_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const
+double HMM::class_likelihood_gradient(const Data::Contrast &contrast, const Training::Task &task, bitmask_t present, Gradient &g) const
 {
   if(verbosity >= Verbosity::verbose)
     std::cout << "HMM::class_likelihood_gradient(Data::Contrast, Feature)" << std::endl;
 
-  Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
+  // TODO check that this is really not needed!
+  // Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
 
   if(not task.targets.transition.empty() and g.transition.size1() == 0)
     g.transition = zero_matrix(n_states, n_states);
@@ -338,7 +345,7 @@ double HMM::class_likelihood_gradient(const Data::Contrast &contrast, const Trai
 
   double l = 0;
   for(auto &dataset: contrast)
-    l += class_likelihood_gradient(dataset, task, group_idx, g);
+    l += class_likelihood_gradient(dataset, task, present, g);
 
   if(verbosity >= Verbosity::verbose)
     std::cout << "Data::Contrast l = " << l << std::endl;
@@ -359,10 +366,14 @@ double HMM::class_likelihood_gradient(const Data::Contrast &contrast, const Trai
  * likelihood, or maximum mutual information estimation (MMIE). This routine
  * actually only computes the transition and emission probability gradient, the
  * class parameters are reestimated with another routine. */
-double HMM::class_likelihood_gradient(const Data::Set &dataset, const Training::Task &task, size_t group_idx, Gradient &g) const
+double HMM::class_likelihood_gradient(const Data::Set &dataset, const Training::Task &task, bitmask_t present, Gradient &g) const
 {
   if(verbosity >= Verbosity::verbose)
     std::cout << "HMM::class_likelihood_gradient(Data::Set, Feature)" << std::endl;
+  // TODO reactivate
+  std::cout << "Error: class_likelihood_gradient is currently not implemented." << std::endl;
+  exit(-1);
+  /*
   const double marginal_motif_prior = compute_marginal_motif_prior(group_idx);
   const double class_cond = get_class_motif_prior(dataset.sha1, group_idx);
   const double current_class_prior = get_class_prior(dataset.sha1);
@@ -391,6 +402,7 @@ double HMM::class_likelihood_gradient(const Data::Set &dataset, const Training::
 #pragma omp for schedule(static) reduction(+:l)
     for(size_t i = 0; i < dataset.set_size; i++) {
       int thread_idx = omp_get_thread_num();
+      */
 
       /* c                     Class 1
        * not C                 Class 2
@@ -403,6 +415,7 @@ double HMM::class_likelihood_gradient(const Data::Set &dataset, const Training::
        * exp(-x)               1 / P(C|X)
        */
 
+      /*
       matrix_t t, e;
       posterior_gradient_t res = posterior_gradient(dataset.sequences[i], task, group_idx, t, e);
       double p = res.posterior;
@@ -416,9 +429,7 @@ double HMM::class_likelihood_gradient(const Data::Set &dataset, const Training::
       double term_a = class_cond / marginal_motif_prior - 1;
       double term_c = exp(-x) * current_class_prior / (1 - marginal_motif_prior);
 
-      /*
-       * \del \log P(C|X) = P(C) / (P(C|X) * (1 - P(m))) * (P(m|C)/P(m) - 1) * \del P(m|X)
-       */
+      // \del \log P(C|X) = P(C) / (P(C|X) * (1 - P(m))) * (P(m|C)/P(m) - 1) * \del P(m|X)
 
       if(not task.targets.transition.empty())
         t_g[thread_idx] += term_c * t * term_a;
@@ -457,15 +468,17 @@ double HMM::class_likelihood_gradient(const Data::Set &dataset, const Training::
     std::cout << "Data::Set " << dataset.path << " l = " << l << std::endl;
 
   return(l);
+  */
 }
 
-double HMM::site_frequency_difference_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const
+double HMM::site_frequency_difference_gradient(const Data::Contrast &contrast, const Training::Task &task, bitmask_t present, Gradient &g) const
 {
   if(verbosity >= Verbosity::debug)
     std::cout << "HMM::site_frequenc_difference_gradient(Data::Contrast, Feature)" << std::endl;
   size_t n_samples = contrast.sets.size();
 
-  Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
+  // TODO check that this is really not needed!
+  // Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
 
   if(not task.targets.transition.empty() and g.transition.size1() == 0)
     g.transition = zero_matrix(n_states, n_states);
@@ -479,10 +492,11 @@ double HMM::site_frequency_difference_gradient(const Data::Contrast &contrast, c
   for(size_t set_idx = 0; set_idx < n_samples; set_idx++) {
     matrix_t trans_g = zero_matrix(n_states, n_states);
     matrix_t emission_g = zero_matrix(n_states, n_emissions);
-    double counts = posterior_gradient(contrast.sets[set_idx], obj, group_idx, trans_g, emission_g).posterior;
+    double counts = posterior_gradient(contrast.sets[set_idx], task, present, trans_g, emission_g).posterior;
     bool signal = false;
-    if(contrast.sets[set_idx].motifs.find(groups[group_idx].name) != contrast.sets[set_idx].motifs.end())
-      signal = true;
+    // TODO BITMASK deactivated
+    // if(contrast.sets[set_idx].motifs.find(groups[group_idx].name) != contrast.sets[set_idx].motifs.end())
+    //   signal = true;
     size_t total = contrast.sets[set_idx].set_size + 2 * pseudo_count;
     total += 2 * pseudo_count; // Add pseudo-count
     counts += pseudo_count; // Add pseudo-count
@@ -514,7 +528,7 @@ double HMM::site_frequency_difference_gradient(const Data::Contrast &contrast, c
   return(delta_freq);
 }
 
-double HMM::mutual_information_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const
+double HMM::mutual_information_gradient(const Data::Contrast &contrast, const Training::Task &task, bitmask_t present, Gradient &g) const
 {
   if(verbosity >= Verbosity::debug)
     std::cout << "HMM::mutual_information_gradient(Data::Contrast, Feature)" << std::endl;
@@ -532,7 +546,8 @@ double HMM::mutual_information_gradient(const Data::Contrast &contrast, const Tr
   // a vectors of transition and emission gradient matrices for each of the samples
   std::vector<matrix_t> trans_g(n_samples), emission_g(n_samples);
 
-  Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
+  // TODO check that this is really not needed!
+  // Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
 
   // for each of the samples
   for(size_t sample_idx = 0; sample_idx < n_samples; sample_idx++) {
@@ -540,7 +555,7 @@ double HMM::mutual_information_gradient(const Data::Contrast &contrast, const Tr
       std::cout << "Computing posterior gradient for sample " << contrast.sets[sample_idx].path << std::endl;
 
     // compute posterior gradients for transition and emission probabilities, and store the expected occurrences
-    counts(sample_idx, 0) = posterior_gradient(contrast.sets[sample_idx], obj, group_idx, trans_g[sample_idx], emission_g[sample_idx]).posterior;
+    counts(sample_idx, 0) = posterior_gradient(contrast.sets[sample_idx], task, present, trans_g[sample_idx], emission_g[sample_idx]).posterior;
     counts(sample_idx, 1) = contrast.sets[sample_idx].set_size - counts(sample_idx, 0);
 
     if(verbosity >= Verbosity::debug)
@@ -639,7 +654,7 @@ bool HMM::check_enrichment(const Data::Contrast &contrast, const matrix_t &count
   return(ok);
 }
 
-double HMM::rank_information_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const
+double HMM::rank_information_gradient(const Data::Contrast &contrast, const Training::Task &task, bitmask_t present, Gradient &g) const
 {
   if(verbosity >= Verbosity::debug)
     std::cout << "HMM::rank_information_gradient(Data::Contrast, Feature)" << std::endl;
@@ -652,12 +667,12 @@ double HMM::rank_information_gradient(const Data::Contrast &contrast, const Trai
 
   double ri = 0;
   for(auto &dataset: contrast)
-    ri += rank_information_gradient(dataset, task, group_idx, g);
+    ri += rank_information_gradient(dataset, task, present, g);
   return(ri);
 }
 
 
-double HMM::rank_information_gradient(const Data::Set &dataset, const Training::Task &task, size_t group_idx, Gradient &g) const
+double HMM::rank_information_gradient(const Data::Set &dataset, const Training::Task &task, bitmask_t present, Gradient &g) const
 {
   if(verbosity >= Verbosity::debug)
     std::cout << "HMM::rank_information_gradient(Data::Set, Feature)" << std::endl;
@@ -669,7 +684,8 @@ double HMM::rank_information_gradient(const Data::Set &dataset, const Training::
   // a vectors of transition and emission gradient matrices for each of the sequences
   std::vector<Gradient> gradients(n);
 
-  Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
+  // TODO check that this is really not needed
+  // Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
 
   // for each of the samples
 #pragma omp parallel shared(gradients, counts) if(DO_PARALLEL)
@@ -679,7 +695,7 @@ double HMM::rank_information_gradient(const Data::Set &dataset, const Training::
 
     Gradient current_gradient;
     // compute posterior gradients for transition and emission probabilities, and store the expected occurrences
-    double current_counts = posterior_gradient(dataset.sequences[seq_idx], obj, group_idx, current_gradient.transition, current_gradient.emission).posterior;
+    double current_counts = posterior_gradient(dataset.sequences[seq_idx], task, present, current_gradient.transition, current_gradient.emission).posterior;
 
     if(verbosity >= Verbosity::debug)
       std::cout << "Transition gradient of sequence " << dataset.sequences[seq_idx].definition << " = " << gradients[seq_idx].transition << std::endl
@@ -797,13 +813,13 @@ matrix_t HMM::emission_gradient(const matrix_t &E, const Training::Range &range)
   return(m);
 }
 
-HMM::posterior_gradient_t HMM::posterior_gradient(const Data::Seq &seq, const Training::Task &task, size_t group_idx, matrix_t &transition_g, matrix_t &emission_g) const
+HMM::posterior_gradient_t HMM::posterior_gradient(const Data::Seq &seq, const Training::Task &task, bitmask_t present, matrix_t &transition_g, matrix_t &emission_g) const
 {
   // Training::Task task(task_);
   if(verbosity >= Verbosity::debug)
     std::cout << "Posterior gradient calculation (Seq, Feature)." << std::endl;
 
-  SubHMM subhmm(*this, complementary_states(group_idx));
+  SubHMM subhmm(*this, complementary_states_mask(present));
 
   if(verbosity >= Verbosity::debug)
     std::cout << *this << std::endl
@@ -895,13 +911,13 @@ HMM::posterior_gradient_t HMM::posterior_gradient(const Data::Seq &seq, const Tr
   return(result);
 }
 
-HMM::posterior_t HMM::posterior_gradient(const Data::Set &dataset, const Training::Task &task, size_t group_idx, matrix_t &transition_g, matrix_t &emission_g) const
+HMM::posterior_t HMM::posterior_gradient(const Data::Set &dataset, const Training::Task &task, bitmask_t present, matrix_t &transition_g, matrix_t &emission_g) const
 {
   // Training::Task task(task_);
   if(verbosity >= Verbosity::verbose)
     std::cout << "Posterior gradient calculation (Feature)." << std::endl;
 
-  SubHMM subhmm(*this, complementary_states(group_idx));
+  SubHMM subhmm(*this, complementary_states_mask(present));
 
   // std::cout << subhmm << std::endl;
 

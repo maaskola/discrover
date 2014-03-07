@@ -484,25 +484,26 @@ Gradient HMM::compute_gradient(const Data::Collection &collection,
 
   score = 0;
   double W = 0;
+  bitmask_t present = 0;
   for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
-    if(is_motif_group(group_idx))
-      if(task.motif_name == groups[group_idx].name)
-        for(auto &expr: task.contrast_expression) {
-          auto iter = collection.find(expr.contrast);
-          if(iter != end(collection)) {
-            Gradient g;
-            double s = compute_gradient(*iter, g, task, group_idx);
-            double w = iter->set_size;
-            W += w;
-            if(not task.targets.transition.empty())
-              gradient.transition += g.transition * expr.sign * (weighting ? w : 1.0);
-            if(not task.targets.emission.empty())
-              gradient.emission += g.emission * expr.sign * (weighting ? w : 1.0);
-            if(verbosity >= Verbosity::verbose)
-              std::cerr << "contrast = " << expr.contrast << " score = " << s << std::endl;
-            score += expr.sign * s * (weighting ? w : 1.0);
-          }
-        }
+    if(task.motif_name == groups[group_idx].name)
+      present[group_idx] = 1;
+  for(auto &expr: task.contrast_expression) {
+    auto iter = collection.find(expr.contrast);
+    if(iter != end(collection)) {
+      Gradient g;
+      double s = compute_gradient(*iter, g, task, present);
+      double w = iter->set_size;
+      W += w;
+      if(not task.targets.transition.empty())
+        gradient.transition += g.transition * expr.sign * (weighting ? w : 1.0);
+      if(not task.targets.emission.empty())
+        gradient.emission += g.emission * expr.sign * (weighting ? w : 1.0);
+      if(verbosity >= Verbosity::verbose)
+        std::cerr << "contrast = " << expr.contrast << " score = " << s << std::endl;
+      score += expr.sign * s * (weighting ? w : 1.0);
+    }
+  }
   if(weighting) {
     score /= W;
     if(not task.targets.transition.empty())
@@ -535,33 +536,33 @@ Gradient HMM::compute_gradient(const Data::Contrast &contrast,
 double HMM::compute_gradient(const Data::Contrast &contrast,
     Gradient &gradient,
     const Training::Task &task,
-    size_t group_idx) const
+    bitmask_t present) const
 {
   if(verbosity >= Verbosity::verbose)
-    std::cerr << "HMM::compute_gradient(Data::Contrast, task, group_idx)" << std::endl;
+    std::cerr << "HMM::compute_gradient(Data::Contrast, task, present)" << std::endl;
   double score = 0;
   switch(task.measure) {
     case Measure::MutualInformation:
-      score = mutual_information_gradient(contrast, task, group_idx, gradient);
+      score = mutual_information_gradient(contrast, task, present, gradient);
       break;
     case Measure::RankInformation:
-      score = rank_information_gradient(contrast, task, group_idx, gradient);
+      score = rank_information_gradient(contrast, task, present, gradient);
       break;
     case Measure::ChiSquare:
-      score = chi_square_gradient(contrast, task, group_idx, gradient);
+      score = chi_square_gradient(contrast, task, present, gradient);
       break;
     case Measure::MatthewsCorrelationCoefficient:
-      score = matthews_correlation_coefficient_gradient(contrast, task, group_idx, gradient);
+      score = matthews_correlation_coefficient_gradient(contrast, task, present, gradient);
       break;
     case Measure::LogLikelihoodDifference:
-      score = log_likelihood_difference_gradient(contrast, task, group_idx, gradient);
+      score = log_likelihood_difference_gradient(contrast, task, present, gradient);
       break;
     case Measure::DeltaFrequency:
-      score = site_frequency_difference_gradient(contrast, task, group_idx, gradient);
+      score = site_frequency_difference_gradient(contrast, task, present, gradient);
       break;
     case Measure::ClassificationPosterior:
     case Measure::ClassificationLikelihood:
-      score = class_likelihood_gradient(contrast, task, group_idx, gradient);
+      score = class_likelihood_gradient(contrast, task, present, gradient);
       break;
     default:
       std::cout << "Calculation of " << measure2string(task.measure) << " gradient is currently not implemented." << std::endl;
@@ -571,7 +572,7 @@ double HMM::compute_gradient(const Data::Contrast &contrast,
   if(verbosity >= Verbosity::verbose)
     std::cout << "Gradient calculation yielded a score of " << score << "." << std::endl;
   if(verbosity >= Verbosity::verbose)
-    std::cerr << "HMM::compute_gradient(Data::Contrast, task, group_idx)::end" << std::endl;
+    std::cerr << "HMM::compute_gradient(Data::Contrast, task, present)::end" << std::endl;
 
   return(score);
 }

@@ -444,7 +444,7 @@ class HMM {
     /** Compute the gradient of the desired objective function */
     Gradient compute_gradient(const Data::Collection &col, double &score, const Training::Task &task, bool weighting) const;
     Gradient compute_gradient(const Data::Contrast &contrast, double &score, const Training::Task &task) const;
-    double compute_gradient(const Data::Contrast &contrast, Gradient &gradient, const Training::Task &task, size_t group_idx) const;
+    double compute_gradient(const Data::Contrast &contrast, Gradient &gradient, const Training::Task &task, bitmask_t present) const;
 
 
 // -------------------------------------------------------------------------------------------
@@ -481,31 +481,31 @@ class HMM {
     double log_likelihood_gradient(const Data::Seqs &s, const Training::Targets &targets, matrix_t &transition_g, matrix_t &emission_g) const;
 
     /** Gradient of mutual information of class and motif occurrence with respect to transformed transition and emission probabilities */
-    double mutual_information_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const;
+    double mutual_information_gradient(const Data::Contrast &contrast, const Training::Task &task, bitmask_t group_idx, Gradient &g) const;
 
     /** Gradient of mutual information of rank and motif occurrence with respect to transformed transition and emission probabilities */
-    double rank_information_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const;
-    double rank_information_gradient(const Data::Set &dataset, const Training::Task &task, size_t group_idx, Gradient &g) const;
+    double rank_information_gradient(const Data::Contrast &contrast, const Training::Task &task, bitmask_t present, Gradient &g) const;
+    double rank_information_gradient(const Data::Set &dataset, const Training::Task &task, bitmask_t present, Gradient &g) const;
 
     /** Gradient of Matthew's correlation coefficient of class and motif occurrence with respect to transformed transition and emission probabilities */
-    double matthews_correlation_coefficient_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const;
+    double matthews_correlation_coefficient_gradient(const Data::Contrast &contrast, const Training::Task &task, bitmask_t present, Gradient &g) const;
 
     /** Gradient of Chi-Square of class and motif occurrence with respect to transformed transition and emission probabilities */
-    double chi_square_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const;
+    double chi_square_gradient(const Data::Contrast &contrast, const Training::Task &task, bitmask_t present, Gradient &g) const;
 
     /** Gradient of log likelihood difference with respect to transformed transition and emission probabilities */
-    double log_likelihood_difference_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const;
+    double log_likelihood_difference_gradient(const Data::Contrast &contrast, const Training::Task &task, bitmask_t present, Gradient &g) const;
 
     /** Gradient of site frequency difference with respect to transformed transition and emission probabilities */
-    double site_frequency_difference_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const;
+    double site_frequency_difference_gradient(const Data::Contrast &contrast, const Training::Task &task, bitmask_t present, Gradient &g) const;
 
     /** Gradient of class likelihood with respect to transformed transition and emission probabilities */
-    double class_likelihood_gradient(const Data::Contrast &contrast, const Training::Task &task, size_t group_idx, Gradient &g) const;
-    double class_likelihood_gradient(const Data::Set &dataset, const Training::Task &task, size_t group_idx, Gradient &g) const;
+    double class_likelihood_gradient(const Data::Contrast &contrast, const Training::Task &task, bitmask_t present, Gradient &g) const;
+    double class_likelihood_gradient(const Data::Set &dataset, const Training::Task &task, bitmask_t present, Gradient &g) const;
 
     /** Gradient of the expected posterior probability of having at least one site with respect to transformed transition and emission probabilities */
-    posterior_t posterior_gradient(const Data::Set &s, const Training::Task &task, size_t group_idx, matrix_t &transition_g, matrix_t &emission_g) const;
-    posterior_gradient_t posterior_gradient(const Data::Seq &seq, const Training::Task &task, size_t group_idx, matrix_t &transition_g, matrix_t &emission_g) const;
+    posterior_t posterior_gradient(const Data::Set &s, const Training::Task &task, bitmask_t present, matrix_t &transition_g, matrix_t &emission_g) const;
+    posterior_gradient_t posterior_gradient(const Data::Seq &seq, const Training::Task &task, bitmask_t present, matrix_t &transition_g, matrix_t &emission_g) const;
 
 
     /** (Log) likelihood gradient with respect to transformed transition probabilities */
