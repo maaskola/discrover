@@ -97,15 +97,12 @@ double HMM::log_likelihood_gradient(const Data::Seqs &seqs, const Training::Targ
 
 Training::Task cross_optimization_targets(const Training::Task &task, size_t group_idx, const std::vector<size_t> &group_ids)
 {
-  const bool cross_optimize = false;
   Training::Task obj(task);
-  if(not cross_optimize) {
-    auto func = [&](size_t state) {
-      return(group_idx != group_ids[state]);
-    };
-    obj.targets.transition.erase(remove_if(obj.targets.transition.begin(), obj.targets.transition.end(), func), end(obj.targets.transition));
-    obj.targets.emission.erase(remove_if(obj.targets.emission.begin(), obj.targets.emission.end(), func), end(obj.targets.emission));
-  }
+  auto func = [&](size_t state) {
+    return(group_idx != group_ids[state]);
+  };
+  obj.targets.transition.erase(remove_if(obj.targets.transition.begin(), obj.targets.transition.end(), func), end(obj.targets.transition));
+  obj.targets.emission.erase(remove_if(obj.targets.emission.begin(), obj.targets.emission.end(), func), end(obj.targets.emission));
   return(obj);
 }
 
