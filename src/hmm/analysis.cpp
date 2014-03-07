@@ -330,10 +330,10 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
               cout << "We did not find an acceptable model." << endl;
         }
       } else {
-        bool ok = true;
+        bool try_finding_another_motif = true;
 
         vector<size_t> absent_groups;
-        while(ok and not learned_models.empty()) {
+        while(try_finding_another_motif and not learned_models.empty()) {
           auto data = training_data;
 
           size_t best_index = 0;
@@ -426,7 +426,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             if(not (use_mico_pvalue and drop_below_mico_pvalue_threshold) or score >= p_mico_threshold) {
               if(score > best_score) {
                 cout << "This is the currently best model!" << endl << endl;
-                ok = true;
+                try_finding_another_motif = true;
                 updated = true;
                 best_model = model;
                 best_seed = seed;
@@ -440,7 +440,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
           if(not updated) {
             cout << "We did not find an improved model." << endl;
-            ok = false;
+            try_finding_another_motif = false;
           } else {
             hmm = best_model;
 
@@ -458,9 +458,8 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             train_evaluate(hmm, all_data, training_data, test_data, options, training_necessary, true);
 
             absent_groups.push_back(hmm.get_ngroups() - 1);
-
             learned_models.erase(begin(learned_models) + best_index);
-            ok = true;
+            try_finding_another_motif = true;
           }
 
           if(options.verbosity >= Verbosity::info) {
