@@ -41,7 +41,7 @@ void HMM::modify_column(mt19937 &rng)
   uniform_int_distribution<size_t> r_state(first_state, last_state);
   size_t col = r_state(rng);
 
-  uniform_int_distribution<size_t> r_nucl(0, alphabet_size - 1);
+  uniform_int_distribution<size_t> r_nucl(0, n_emissions - 1);
   size_t i = r_nucl(rng);
   size_t j = r_nucl(rng);
   while(i == j)
@@ -201,7 +201,7 @@ void HMM::add_columns(size_t n, mt19937 &rng)
   for(size_t j = 0; j < n; j++) {
     size_t n = n_emissions;
     vector<double> e(n+1, 0); // FIXME: why + 1 ?
-    for(size_t i = 0; i < alphabet_size; i++)
+    for(size_t i = 0; i < n_emissions; i++)
       e[i] = r_unif(rng);
 
     if(pos == 0)

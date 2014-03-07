@@ -124,10 +124,8 @@ class HMM {
     typedef std::bitset<max_motifs> bitmask_t;
 
   protected:
-    /** The size of the alphabet. */
-    const static size_t alphabet_size = 4;
     /** The number of emissions. */
-    const static size_t n_emissions = alphabet_size;
+    const static size_t n_emissions = 4;
     /** Level of output verbosity. */
     Verbosity verbosity;
     /** Whether to save intermediate parameters on disc during learning. */

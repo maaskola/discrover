@@ -690,7 +690,7 @@ size_t HMM::non_zero_parameters(const Training::Targets &training_targets) const
 
 size_t HMM::n_parameters() const
 {
-  size_t n = n_states * (n_states - 1) + n_states * (alphabet_size - 1 );
+  size_t n = n_states * (n_states - 1) + n_states * (n_emissions - 1 );
   if(verbosity >= Verbosity::verbose)
     cout << "n_parameters = " << n << endl;
   return(n);
