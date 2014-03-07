@@ -97,21 +97,9 @@ double HMM::log_likelihood_gradient(const Data::Seqs &seqs, const Training::Targ
   return(lp);
 }
 
-Training::Task cross_optimization_targets(const Training::Task &task, size_t group_idx, const vector<size_t> &group_ids)
-{
-  Training::Task obj(task);
-  auto func = [&](size_t state) {
-    return(group_idx != group_ids[state]);
-  };
-  obj.targets.transition.erase(remove_if(obj.targets.transition.begin(), obj.targets.transition.end(), func), end(obj.targets.transition));
-  obj.targets.emission.erase(remove_if(obj.targets.emission.begin(), obj.targets.emission.end(), func), end(obj.targets.emission));
-  return(obj);
-}
-
-
 double HMM::chi_square_gradient(const Data::Contrast &contrast, const Training::Task &task, bitmask_t present, Gradient &g) const
 {
-  //if(verbosity >= Verbosity::debug)
+  if(verbosity >= Verbosity::debug)
     cout << "HMM::chi_square_gradient(Data::Contrast, Feature)" << endl;
   assert(0);
   size_t n_samples = contrast.sets.size();
@@ -120,9 +108,6 @@ double HMM::chi_square_gradient(const Data::Contrast &contrast, const Training::
 
   if(verbosity >= Verbosity::debug)
     cout << "Looking at groups " << present << endl;
-
-  // TODO check that this is really not needed!
-  // Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
 
   for(size_t sample_idx = 0; sample_idx < n_samples; sample_idx++) {
     counts(sample_idx, 0) = posterior_gradient(contrast.sets[sample_idx], task, present, trans_g[sample_idx], emission_g[sample_idx]).posterior;
@@ -204,9 +189,6 @@ double HMM::matthews_correlation_coefficient_gradient(const Data::Contrast &cont
   if(verbosity >= Verbosity::debug)
     cout << "HMM::mutual_information_gradient(Data::Contrast, Feature)" << endl;
   size_t n_samples = contrast.sets.size();
-
-  // TODO check that this is really not needed!
-  // Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
 
   Gradient signal_g, control_g;
   if(not task.targets.transition.empty() and g.transition.size1() == 0)
@@ -301,9 +283,6 @@ double HMM::log_likelihood_difference_gradient(const Data::Contrast &contrast, c
     cout << "HMM::log_likelihood_difference_gradient(Data::Contrast, Feature)" << endl;
   size_t n_samples = contrast.sets.size();
 
-  // TODO check that this is really not needed!
-  // Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
-
   if(not task.targets.transition.empty() and g.transition.size1() == 0)
     g.transition = zero_matrix(n_states, n_states);
   if(not task.targets.emission.empty() and g.emission.size1() == 0)
@@ -336,9 +315,6 @@ double HMM::class_likelihood_gradient(const Data::Contrast &contrast, const Trai
 {
   if(verbosity >= Verbosity::verbose)
     cout << "HMM::class_likelihood_gradient(Data::Contrast, Feature)" << endl;
-
-  // TODO check that this is really not needed!
-  // Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
 
   if(not task.targets.transition.empty() and g.transition.size1() == 0)
     g.transition = zero_matrix(n_states, n_states);
@@ -479,9 +455,6 @@ double HMM::site_frequency_difference_gradient(const Data::Contrast &contrast, c
     cout << "HMM::site_frequenc_difference_gradient(Data::Contrast, Feature)" << endl;
   size_t n_samples = contrast.sets.size();
 
-  // TODO check that this is really not needed!
-  // Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
-
   if(not task.targets.transition.empty() and g.transition.size1() == 0)
     g.transition = zero_matrix(n_states, n_states);
   if(not task.targets.emission.empty() and g.emission.size1() == 0)
@@ -547,9 +520,6 @@ double HMM::mutual_information_gradient(const Data::Contrast &contrast, const Tr
   matrix_t counts(n_samples, 2);
   // a vectors of transition and emission gradient matrices for each of the samples
   vector<matrix_t> trans_g(n_samples), emission_g(n_samples);
-
-  // TODO check that this is really not needed!
-  // Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
 
   // for each of the samples
   for(size_t sample_idx = 0; sample_idx < n_samples; sample_idx++) {
@@ -685,9 +655,6 @@ double HMM::rank_information_gradient(const Data::Set &dataset, const Training::
   vector_t counts(n);
   // a vectors of transition and emission gradient matrices for each of the sequences
   vector<Gradient> gradients(n);
-
-  // TODO check that this is really not needed
-  // Training::Task obj = cross_optimization_targets(task, group_idx, group_ids);
 
   // for each of the samples
 #pragma omp parallel shared(gradients, counts) if(DO_PARALLEL)

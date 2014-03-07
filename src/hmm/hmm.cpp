@@ -208,7 +208,6 @@ size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda, cons
     for(auto &i: insertions)
       if(i == 0 or i >= e.size1()) {
         // insertions are currently only allowed between motif states
-        // TODO: generalize
         cout << "Error: insertion positions must be within the motif." << endl;
         exit(-1);
       }

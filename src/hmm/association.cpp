@@ -251,7 +251,6 @@ double calc_rank_information(vector_t posterior, double pseudo_count)
   for(size_t i = 0; i < n-1; i++) {
     double mi = calc_mutual_information(p[i] + pseudo_count, q[i] + pseudo_count, r[i] + pseudo_count, s[i] + pseudo_count, true);
     ric += mi;
-    // if(verbosity >= Verbosity::info) // TODO change verbosity
     // cout << "debug " << i << " " << p[i] << " " << q[i] << " " << r[i] << " " << s[i] << " " << p[i] + q[i] + r[i] + s[i] << " " << mi << " " << ric << endl;
   }
   // cout << "debug ric = " <<  ric << endl;
