@@ -4,6 +4,8 @@
 #include <boost/math/distributions/chi_squared.hpp>
 #include "association.hpp"
 
+using namespace std;
+
 const Verbosity association_verbosity = Verbosity::info;
 
 inline vector_t row_sums(const matrix_t &m)
@@ -31,8 +33,8 @@ double calc_mutual_information(const matrix_t &matrix, double pseudo_count, bool
   if(variance)
     correction = true;
   if(association_verbosity >= Verbosity::debug) {
-    std::cout << "calc_mutual_information(matrix_t)" << std::endl;
-    std::cout << "Calculating mutual information of this table:" << std::endl << matrix << std::endl;
+    cout << "calc_mutual_information(matrix_t)" << endl;
+    cout << "Calculating mutual information of this table:" << endl << matrix << endl;
   }
   matrix_t m = matrix;
   if(pseudo_count != 0) {
@@ -59,7 +61,7 @@ double calc_mutual_information(const matrix_t &matrix, double pseudo_count, bool
         mi += m(i,j) * (log(m(i,j)) - log(rs(i)) - log(cs(j)));
   mi /= log(2.0);
   if(association_verbosity >= Verbosity::debug)
-    std::cout << "mi = " << mi << std::endl;
+    cout << "mi = " << mi << endl;
   if(not correction)
     return(mi);
   double j = mi;
@@ -90,8 +92,8 @@ double calc_g_test_from_mi(double mi, double n) {
 double calc_g_test(const matrix_t &matrix, double pseudo_count)
 {
   if(association_verbosity >= Verbosity::debug) {
-    std::cout << "calc_g_test(matrix_t)" << std::endl;
-    std::cout << "Calculating g-test of this table:" << std::endl << matrix << std::endl;
+    cout << "calc_g_test(matrix_t)" << endl;
+    cout << "Calculating g-test of this table:" << endl << matrix << endl;
   }
   size_t n = 0;
   for(size_t i = 0; i < matrix.size1(); i++)
@@ -119,8 +121,8 @@ double corrected_pvalue(double score, double n, double df, double motif_len, Ver
 double calc_log_likelihood_ratio(const matrix_t &matrix, double pseudo_count)
 {
   if(association_verbosity >= Verbosity::debug) {
-    std::cout << "calc_log_likelihood_ratio (matrix_t)" << std::endl;
-    std::cout << "Calculating log likelihood ratio of this table:" << std::endl << matrix << std::endl;
+    cout << "calc_log_likelihood_ratio (matrix_t)" << endl;
+    cout << "Calculating log likelihood ratio of this table:" << endl << matrix << endl;
   }
   size_t n = 0;
   for(size_t i = 0; i < matrix.size1(); i++)
@@ -161,7 +163,7 @@ double chi_sq(const matrix_t &matrix, double pseudo_count=1.0) {
 double calc_mutual_information(double A, double B, double C, double D, bool normalize)
 {
   if(association_verbosity >= Verbosity::debug)
-    std::cout << "calc_mutual_information(A, B, C, D)" << std::endl;
+    cout << "calc_mutual_information(A, B, C, D)" << endl;
   double a = A, b = B, c = C, d = D;
   if(normalize) {
     double n = a + b + c + d;
@@ -181,7 +183,7 @@ double calc_mutual_information(double A, double B, double C, double D, bool norm
   mi += d * (log(d) - lbd - lcd);
   mi /= log(2);
   if(association_verbosity >= Verbosity::debug)
-    std::cout << "mi = " << mi << std::endl;
+    cout << "mi = " << mi << endl;
   return(mi);
 }
 
@@ -190,7 +192,7 @@ double calc_mutual_information(double A, double B, double C, double D, bool norm
  */
 double calc_matthews_correlation_coefficient(double tp, double fp, double fn, double tn)
 {
-  // std::cout << "mcc(" << tp << ", " << fp << ", " << fn << ", " << tn << ")" << std::endl;
+  // cout << "mcc(" << tp << ", " << fp << ", " << fn << ", " << tn << ")" << endl;
   double a = tp+fp;
   double b = tp+fn;
   double c = tn+fp;
@@ -209,10 +211,10 @@ double calc_matthews_correlation_coefficient(const confusion_matrix &m)
 double calc_mutual_information(const confusion_matrix &m, bool normalize)
 {
   if(association_verbosity >= Verbosity::debug)
-    std::cout << "calc_mutual_information(confusion_matrix)" << std::endl;
+    cout << "calc_mutual_information(confusion_matrix)" << endl;
   double mi = calc_mutual_information(m.true_positives, m.false_negatives, m.false_positives, m.true_negatives, normalize);
   if(association_verbosity >= Verbosity::debug)
-    std::cout << "mi = " << mi << std::endl;
+    cout << "mi = " << mi << endl;
   return(mi);
 }
 
@@ -249,9 +251,9 @@ double calc_rank_information(vector_t posterior, double pseudo_count)
     double mi = calc_mutual_information(p[i] + pseudo_count, q[i] + pseudo_count, r[i] + pseudo_count, s[i] + pseudo_count, true);
     ric += mi;
     // if(verbosity >= Verbosity::info) // TODO change verbosity
-    // std::cout << "debug " << i << " " << p[i] << " " << q[i] << " " << r[i] << " " << s[i] << " " << p[i] + q[i] + r[i] + s[i] << " " << mi << " " << ric << std::endl;
+    // cout << "debug " << i << " " << p[i] << " " << q[i] << " " << r[i] << " " << s[i] << " " << p[i] + q[i] + r[i] + s[i] << " " << mi << " " << ric << endl;
   }
-  // std::cout << "debug ric = " <<  ric << std::endl;
+  // cout << "debug ric = " <<  ric << endl;
   ric /= n;
   return(ric);
 }
