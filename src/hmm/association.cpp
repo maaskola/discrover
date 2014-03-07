@@ -3,6 +3,7 @@
 #include <cassert>
 #include <boost/math/distributions/chi_squared.hpp>
 #include "association.hpp"
+#include "../stats_config.hpp"
 
 using namespace std;
 
