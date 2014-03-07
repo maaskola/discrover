@@ -3,7 +3,6 @@
 #include <cassert>
 #include <boost/math/distributions/chi_squared.hpp>
 #include "association.hpp"
-#include "../verbosity.hpp"
 
 const Verbosity association_verbosity = Verbosity::info;
 
@@ -101,6 +100,20 @@ double calc_g_test(const matrix_t &matrix, double pseudo_count)
   double mi = calc_mutual_information(matrix, pseudo_count, true, false, false);
   double g = calc_g_test_from_mi(mi, n);
   return(g);
+}
+
+double corrected_pvalue(double score, double n, double df, double motif_len, Verbosity verbosity)
+{
+  double g = calc_g_test_from_mi(score, n);
+  if(verbosity >= Verbosity::verbose)
+    cout << "g = " << g << endl;
+  double log_p = pchisq(g, df, false, true);
+  if(verbosity >= Verbosity::verbose)
+    cout << "log p(g) = " << log_p << endl;
+  double cor_log_p = log(149) * motif_len + log_p;
+  if(verbosity >= Verbosity::verbose)
+    cout << "corrected log p(g) = " << cor_log_p << endl;
+  return(cor_log_p);
 }
 
 double calc_log_likelihood_ratio(const matrix_t &matrix, double pseudo_count)

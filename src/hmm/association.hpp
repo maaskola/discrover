@@ -32,6 +32,7 @@
 
 #include <vector>
 #include "../matrix.hpp"
+#include "../verbosity.hpp"
 
 /** Computes mutual information of a contingency table
  * a,b,c,d are assumed to be non-negative
@@ -43,6 +44,7 @@ double calc_mutual_information(const matrix_t &matrix, double pseudo_count, bool
 double calc_g_test_from_mi(double mi, double n);
 double calc_g_test(const matrix_t &matrix, double pseudo_count=1.0);
 double calc_log_likelihood_ratio(const matrix_t &matrix, double pseudo_count=1.0);
+double corrected_pvalue(double score, double n, double df, double motif_len, Verbosity verbosity);
 
 /** Computes mutual information of a contingency table
  * a,b,c,d are assumed to be non-negative
