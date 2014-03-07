@@ -21,7 +21,7 @@ vector<string> extract_seq_ids(const string &path, size_t nseq, Verbosity verbos
   ifstream f(path.c_str());
   size_t idx = 0;
   auto parsing = [&](Fasta::Entry &&entry) {
-    s.push_back(std::move(entry.definition));
+    s.push_back(move(entry.definition));
     return(nseq == 0 or idx++ < nseq);
   };
   auto parser = Fasta::make_parser(parsing);

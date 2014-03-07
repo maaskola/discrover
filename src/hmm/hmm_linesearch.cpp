@@ -47,11 +47,11 @@ template <class X> X max3(const X &a, const X& b, const X&c) {
 double update(double current, double step)
 {
   double x = logit(current); //log(current) - log(1 - current);
-  // std::cout << "setting: current " << current << " x = " << x << " e(x) = " << (exp(x) / (exp(x)+1)) << std::endl;
+  // cout << "setting: current " << current << " x = " << x << " e(x) = " << (exp(x) / (exp(x)+1)) << endl;
   double y = x + step;
   double z = exp(y);
   double u = z / (1 + z);
-  // std::cout << "setting: u = " << u << std::endl;
+  // cout << "setting: u = " << u << endl;
   // return(current);
   return(u);
 }

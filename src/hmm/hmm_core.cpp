@@ -31,13 +31,15 @@
 #include "../aux.hpp"
 #include "hmm.hpp"
 
+using namespace std;
+
 double HMM::viterbi(const Data::Seq &s, StatePath &path) const
 {
   // TODO: precompute log probabilities
   size_t L = s.isequence.size();
 
-  vector_t v_current = scalar_vector(n_states, -std::numeric_limits<double>::infinity());
-  vector_t v_previous = scalar_vector(n_states, -std::numeric_limits<double>::infinity());
+  vector_t v_current = scalar_vector(n_states, -numeric_limits<double>::infinity());
+  vector_t v_previous = scalar_vector(n_states, -numeric_limits<double>::infinity());
   v_previous(start_state) = 0;
   boost::numeric::ublas::matrix<size_t> traceback(L,n_states);
   for(size_t i = 0; i < L; i++) {
@@ -52,7 +54,7 @@ double HMM::viterbi(const Data::Seq &s, StatePath &path) const
       }
     else
       for(size_t l = start_state; l < n_states; l++) {
-        double m = -std::numeric_limits<double>::infinity();
+        double m = -numeric_limits<double>::infinity();
         for(size_t k = start_state; k < n_states; k++) {
           double tmp = v_previous(k) + log(transition(k,l));
           if(tmp > m) {
@@ -63,10 +65,10 @@ double HMM::viterbi(const Data::Seq &s, StatePath &path) const
         v_current(l) = log(emission(l, symbol)) + m;
       }
     v_previous = v_current;
-    v_current = scalar_vector(n_states, -std::numeric_limits<double>::infinity());
+    v_current = scalar_vector(n_states, -numeric_limits<double>::infinity());
   }
 
-  double p = -std::numeric_limits<double>::infinity();
+  double p = -numeric_limits<double>::infinity();
   size_t pi = 0;
   for(size_t k = start_state; k < n_states; k++) {
     double tmp = v_previous(k) + log(transition(k,start_state));
@@ -159,7 +161,7 @@ matrix_t HMM::compute_forward_scaled(const Data::Seq &s, vector_t &scale) const
   m(T+1,start_state) = 1;
 
   if(verbosity >= Verbosity::debug)
-    std::cout << "alpha = " << m << std::endl;
+    cout << "alpha = " << m << endl;
   return(m);
 }
 
@@ -219,7 +221,7 @@ matrix_t HMM::compute_backward_prescaled(const Data::Seq &s, const vector_t &sca
   }
 
   if(verbosity >= Verbosity::debug)
-    std::cout << "beta = " << m << std::endl;
+    cout << "beta = " << m << endl;
   return(m);
 }
 

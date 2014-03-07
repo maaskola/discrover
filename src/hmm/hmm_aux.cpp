@@ -877,7 +877,7 @@ void HMM::print_occurrence_table(const string &file_path, const Data::Seq &seq, 
       }
 }
 
-std::pair<HMM, std::map<size_t, size_t>> HMM::add_revcomp_motifs() const
+pair<HMM, map<size_t, size_t>> HMM::add_revcomp_motifs() const
 {
   HMM rc = *this;
   // reverse complement motifs

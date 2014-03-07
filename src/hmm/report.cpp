@@ -108,11 +108,11 @@ void eval_contrast(const HMM &hmm, const Data::Contrast &contrast, ostream &ofs,
     }
 }
 
-template <class X, class Y> double cor_pearson(const std::vector<X> &x, const std::vector<Y> &y)
+template <class X, class Y> double cor_pearson(const vector<X> &x, const vector<Y> &y)
 {
   size_t n = x.size();
-  double zx = std::accumulate(x.begin(), x.end(), 0);
-  double zy = std::accumulate(y.begin(), y.end(), 0);
+  double zx = accumulate(x.begin(), x.end(), 0);
+  double zy = accumulate(y.begin(), y.end(), 0);
   zx /= n;
   zy /= n;
 
@@ -131,12 +131,12 @@ template <class X, class Y> double cor_pearson(const std::vector<X> &x, const st
   return(r);
 }
 
-template <class X> std::vector<double> tied_ranking(const std::vector<X> &x)
+template <class X> vector<double> tied_ranking(const vector<X> &x)
 {
   const size_t n = x.size();
-  std::vector<double> r(n);
-//  std::iota(r.begin(), r.end(), 0);
-  std::map<X,size_t> counts;
+  vector<double> r(n);
+//  iota(r.begin(), r.end(), 0);
+  map<X,size_t> counts;
   for(auto &y: x)
     counts[y]++;
   size_t cumul = 0;
@@ -151,15 +151,15 @@ template <class X> std::vector<double> tied_ranking(const std::vector<X> &x)
   return(r);
 }
 
-template <class X, class Y> double cor_spearman(const std::vector<X> &x, const std::vector<Y> &y)
+template <class X, class Y> double cor_spearman(const vector<X> &x, const vector<Y> &y)
 {
   return(cor_pearson(tied_ranking(x),tied_ranking(y)));
 }
 
-template <class X> double cor_rank(const std::vector<X> &x)
+template <class X> double cor_rank(const vector<X> &x)
 {
-  std::vector<X> y(x.size());
-  std::iota(y.begin(), y.end(), 0);
+  vector<X> y(x.size());
+  iota(y.begin(), y.end(), 0);
   return(cor_pearson(tied_ranking(x),y));
 }
 
@@ -187,13 +187,13 @@ string gen_stars(double x) {
 
 const boost::math::normal_distribution<double> standard_normal_distribution;
 
-template <class T> void correlation_report(const std::vector<T> &x, std::ostream &out, size_t width=12, size_t prec=5)
+template <class T> void correlation_report(const vector<T> &x, ostream &out, size_t width=12, size_t prec=5)
 {
   double rho = cor_rank(x);
   size_t n = x.size();
   double z = cor_fisher_z(rho, n);
   double t = cor_student_t(rho, n);
-  // out << "Rank correlation: rho = " << rho << " z = " << z << " t = " << t << std::endl;
+  // out << "Rank correlation: rho = " << rho << " z = " << z << " t = " << t << endl;
   // using namespace boost::math;
   const boost::math::students_t_distribution<> students_t_dist(n-2);
   double p_norm = 0, p_t = 0;
@@ -212,7 +212,7 @@ template <class T> void correlation_report(const std::vector<T> &x, std::ostream
     << setw(width) << fixed << right << setprecision(2) << t
     << setw(width) << fixed << right << setprecision(2) << log(p_t)
     << setw(4) << right << gen_stars(p_t)
-    << std::endl;
+    << endl;
   out.unsetf(ios_base::fixed);
   out.precision(prev_prec);
 }
@@ -268,7 +268,7 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
         size_t absent_mask = 0;
         // TODO EVALUATION
         double ric = hmm.rank_information(dataset, present_mask, absent_mask);
-        out << "RIC = " << ric << std::endl;
+        out << "RIC = " << ric << endl;
       }
 
   for(size_t i = 0; i < dataset.sequences.size(); i++) {
@@ -339,7 +339,7 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
       << setw(4) << right << ""
       << setw(width) << right << "t"
       << setw(width) << right << "log P(t)"
-      << setw(4) << right << "" << std::endl;
+      << setw(4) << right << "" << endl;
     // TODO: write out the motif name
     for(size_t group_idx = 0; group_idx < number_motifs; group_idx++) {
       out << setw(30) << left << "Posterior decoded site";
@@ -476,11 +476,11 @@ void evaluate_hmm(const HMM &hmm,
       my_task.measure = Measure::ClassificationPosterior;
       // TODO EVALUATION
       // TODO consider using compute_score instead of compute_score_all_motifs
-      summary_out << "class log posterior = " << hmm.compute_score_all_motifs(collection, my_task.measure, options.weighting) << std::endl;
+      summary_out << "class log posterior = " << hmm.compute_score_all_motifs(collection, my_task.measure, options.weighting) << endl;
       my_task.measure = Measure::ClassificationLikelihood;
       // TODO EVALUATION
       // TODO consider using compute_score instead of compute_score_all_motifs
-      summary_out << "class log likelihood = " << hmm.compute_score_all_motifs(collection, my_task.measure, options.weighting) << std::endl;
+      summary_out << "class log likelihood = " << hmm.compute_score_all_motifs(collection, my_task.measure, options.weighting) << endl;
     }
 
     for(auto &contrast: collection) {

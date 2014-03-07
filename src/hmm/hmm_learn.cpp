@@ -32,10 +32,12 @@
 #include "../aux.hpp"
 #include "hmm.hpp"
 
+using namespace std;
+
 #define DO_PARALLEL 1
 
-std::string line_search_status(int status) {
-  std::string msg;
+string line_search_status(int status) {
+  string msg;
   switch(status) {
     case 0:
       msg = "IMPROPER INPUT PARAMETERS.";
@@ -77,7 +79,7 @@ void HMM::train_background(const Data::Collection &collection, const Options::HM
   bg_hmm.reestimation(collection, task, options);
 
   if(options.verbosity >= Verbosity::debug)
-    std::cout << "Resulting model = " << bg_hmm << std::endl << std::endl;
+    cout << "Resulting model = " << bg_hmm << endl << endl;
 
   for(size_t i = 0; i < bg_hmm.transition.size1(); i++)
     for(size_t j = 0; j < bg_hmm.transition.size2(); j++)
@@ -87,19 +89,19 @@ void HMM::train_background(const Data::Collection &collection, const Options::HM
       emission(i,j) = bg_hmm.emission(i,j);
 
   if(transition.size1() > bg_hmm.transition.size1()) {
-    std::cout << "In train_background(); this should not be called after motifs are already present." << std::endl;
+    cout << "In train_background(); this should not be called after motifs are already present." << endl;
     assert(0);
     exit(-1);
   }
 
   if(options.verbosity >= Verbosity::debug)
-    std::cout << *this << std::endl;
+    cout << *this << endl;
 }
 
 void HMM::initialize_bg_with_bw(const Data::Collection &collection, const Options::HMM &options)
 {
   if(options.verbosity >= Verbosity::info)
-    std::cout << "Initializing background with Baum-Welch algorithm." << std::endl;
+    cout << "Initializing background with Baum-Welch algorithm." << endl;
 
   Options::HMM bg_options = options;
   if(options.verbosity == Verbosity::info)
@@ -110,17 +112,17 @@ void HMM::initialize_bg_with_bw(const Data::Collection &collection, const Option
   double time = timer.tock();
 
   if(options.timing_information)
-    std::cerr << "Background learning: " << time << " micro-seconds" << std::endl;
+    cerr << "Background learning: " << time << " micro-seconds" << endl;
 }
 
 double HMM::train(const Data::Collection &collection, const Training::Tasks &tasks, const Options::HMM &options)
 {
   if(options.verbosity >= Verbosity::verbose)
-    std::cout << "Model to be evaluated = " << *this << std::endl;
+    cout << "Model to be evaluated = " << *this << endl;
   double delta = 0;
   if(tasks.empty()) {
     if(options.verbosity >= Verbosity::info)
-      std::cout << "Not performing training because no training tasks were specified." << std::endl;
+      cout << "Not performing training because no training tasks were specified." << endl;
   } else {
     bool any_found = false;
     for(auto &group: groups)
@@ -130,14 +132,14 @@ double HMM::train(const Data::Collection &collection, const Training::Tasks &tas
         }
     if(not any_found) {
       if(options.verbosity >= Verbosity::info)
-        std::cout << "Skipping training because no motifs specified in the tasks have corresponding states in the HMM." << std::endl;
+        cout << "Skipping training because no motifs specified in the tasks have corresponding states in the HMM." << endl;
     } else {
       if(options.verbosity >= Verbosity::info)
-        std::cout << "Performing training." << std::endl;
+        cout << "Performing training." << endl;
       Timer learning_timer;
 
       if(options.verbosity >= Verbosity::verbose)
-        std::cout << "Registering data sets for class based HMMs." << std::endl;
+        cout << "Registering data sets for class based HMMs." << endl;
 
       for(auto &contrast: collection)
         for(auto &dataset: contrast)
@@ -145,22 +147,22 @@ double HMM::train(const Data::Collection &collection, const Training::Tasks &tas
 
       delta = train_inner(collection, tasks, options);
       if(options.verbosity >= Verbosity::verbose)
-        std::cout << std::endl << "The parameters changed by an L1-norm of " << delta << std::endl;
+        cout << endl << "The parameters changed by an L1-norm of " << delta << endl;
 
       double time = learning_timer.tock();
       if(options.timing_information)
-        std::cerr << "Learning: " << time << " micro-seconds" << std::endl;
+        cerr << "Learning: " << time << " micro-seconds" << endl;
 
       if(options.verbosity >= Verbosity::debug)
-        std::cout << "HMM after training:" << std::endl
-          << *this << std::endl;
+        cout << "HMM after training:" << endl
+          << *this << endl;
 
-      std::string store_to = options.label + ".hmm";
+      string store_to = options.label + ".hmm";
 
       if(options.verbosity >= Verbosity::info)
-        std::cout << std::endl << "Parameters stored in " << store_to << std::endl;
+        cout << endl << "Parameters stored in " << store_to << endl;
 
-      std::ofstream os(store_to.c_str());
+      ofstream os(store_to.c_str());
       serialize(os, options.exec_info);
     }
   }
@@ -178,17 +180,17 @@ double HMM::train_inner(const Data::Collection &collection, const Training::Task
       Training::Task task = tasks[0]; // TODO make it work with multiple tasks
       auto sampling_results = mcmc(collection, task, options);
       if(options.verbosity >= Verbosity::info)
-        std::cout << "Sampling done. Got " << sampling_results.size() << " results." << std::endl;
-      double max = -std::numeric_limits<double>::infinity();
+        cout << "Sampling done. Got " << sampling_results.size() << " results." << endl;
+      double max = -numeric_limits<double>::infinity();
       for(auto y : sampling_results)
         for(auto x : y) {
           if(options.verbosity >= Verbosity::verbose)
-            std::cout << "Checking if we have a new maximum: " << x.second << std::endl;
+            cout << "Checking if we have a new maximum: " << x.second << endl;
           if(x.second > max) {
             *this = x.first;
             max = x.second;
             if(options.verbosity >= Verbosity::info)
-              std::cout << "Found new maximum: " << max << std::endl;
+              cout << "Found new maximum: " << max << endl;
           }
         }
     } else
@@ -208,7 +210,7 @@ double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Collection 
       if(dataset.motifs.find("control") == dataset.motifs.end())
         log_likel += BaumWelchIteration(T, E, dataset, targets, options);
   if(verbosity >= Verbosity::debug)
-    std::cout << "Done BaumWelchIteration(Collection) log_likel = " << log_likel << std::endl;
+    cout << "Done BaumWelchIteration(Collection) log_likel = " << log_likel << endl;
   return(log_likel);
 }
 
@@ -220,7 +222,7 @@ double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Set &datase
   for(size_t j = 0; j < dataset.sequences.size(); j++)
     log_likel += BaumWelchIteration(T, E, dataset.sequences[j], targets);
   if(verbosity >= Verbosity::debug)
-    std::cout << "Done BaumWelchIteration(Seqs) log_likel = " << log_likel << std::endl;
+    cout << "Done BaumWelchIteration(Seqs) log_likel = " << log_likel << endl;
   return(log_likel);
 }
 
@@ -282,7 +284,7 @@ double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Seq &s, con
 
   double log_likel = log_likelihood_from_scale(scale);
   if(verbosity >= Verbosity::debug)
-    std::cerr << "log_likel = " << log_likel << std::endl;
+    cerr << "log_likel = " << log_likel << endl;
 
   if(not targets.transition.empty()) {
     matrix_t t = zero_matrix(n_states, n_states);
@@ -307,7 +309,7 @@ double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Seq &s, con
       t(pre,start_state) += f(L,pre) * transition(pre,start_state) * b(L+1,start_state);
 
     if(verbosity >= Verbosity::debug)
-      std::cerr << "t = " << t << std::endl;
+      cerr << "t = " << t << endl;
 
 #pragma omp critical (update_T)
     T += t;
@@ -324,13 +326,13 @@ double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Seq &s, con
     }
 
     if(verbosity >= Verbosity::debug)
-      std::cerr << "e = " << e << std::endl;
+      cerr << "e = " << e << endl;
 
 #pragma omp critical (update_E)
     E += e;
   }
   if(verbosity >= Verbosity::debug)
-    std::cout << "Done BaumWelchIteration(Seq) log_likel = " << log_likel << std::endl;
+    cout << "Done BaumWelchIteration(Seq) log_likel = " << log_likel << endl;
   return(log_likel);
 }
 
@@ -387,9 +389,9 @@ void HMM::reestimation(const Data::Collection &collection, const Training::Task 
 
 double HMM::reestimationIteration(const Data::Collection &collection, const Training::Task &task, const Options::HMM &options)
 {
-  double log_likel = -std::numeric_limits<double>::infinity();
+  double log_likel = -numeric_limits<double>::infinity();
   if(store_intermediate)
-    serialize(std::cerr, ExecutionInformation());
+    serialize(cerr, ExecutionInformation());
   matrix_t T, E;
   if(not task.targets.transition.empty())
     T = zero_matrix(n_states, n_states);
@@ -410,7 +412,7 @@ double HMM::reestimationIteration(const Data::Collection &collection, const Trai
   M_Step(T, E, task.targets, options);
 
   if(verbosity >= Verbosity::verbose)
-    std::cout << "Done HMM::reestimationIteration log_likel = " << log_likel << std::endl;
+    cout << "Done HMM::reestimationIteration log_likel = " << log_likel << endl;
   return(log_likel);
 };
 
@@ -418,9 +420,9 @@ void HMM::M_Step(const matrix_t &T_, const matrix_t &E_, const Training::Targets
 {
   if(verbosity >= Verbosity::verbose) {
     if(not targets.transition.empty())
-      std::cerr << "Before normalization: New transitions = " << T_ << std::endl;
+      cerr << "Before normalization: New transitions = " << T_ << endl;
     if(not targets.emission.empty())
-      std::cerr << "Before normalization: New emissions = " << E_ << std::endl;
+      cerr << "Before normalization: New emissions = " << E_ << endl;
   }
 
   matrix_t T, E;
@@ -458,9 +460,9 @@ void HMM::M_Step(const matrix_t &T_, const matrix_t &E_, const Training::Targets
 
   if(verbosity >= Verbosity::verbose) {
     if(not targets.transition.empty())
-      std::cerr << "New transitions = " << transition << std::endl;
+      cerr << "New transitions = " << transition << endl;
     if(not targets.emission.empty())
-      std::cerr << "New emissions = " << emission << std::endl;
+      cerr << "New emissions = " << emission << endl;
   }
 }
 
@@ -470,11 +472,11 @@ Gradient HMM::compute_gradient(const Data::Collection &collection,
     bool weighting) const
 {
   if(verbosity >= Verbosity::verbose) {
-    std::cerr << "HMM::compute_gradient(Data::Collection)" << std::endl
+    cerr << "HMM::compute_gradient(Data::Collection)" << endl
       << "Task = " << task.motif_name << ":";
     for(auto &expr: task.contrast_expression)
-      std::cerr << expr;
-    std::cerr << ":" << task.measure << std::endl;
+      cerr << expr;
+    cerr << ":" << task.measure << endl;
   }
   Gradient gradient;
   if(not task.targets.transition.empty() and gradient.transition.size1() == 0)
@@ -500,7 +502,7 @@ Gradient HMM::compute_gradient(const Data::Collection &collection,
       if(not task.targets.emission.empty())
         gradient.emission += g.emission * expr.sign * (weighting ? w : 1.0);
       if(verbosity >= Verbosity::verbose)
-        std::cerr << "contrast = " << expr.contrast << " score = " << s << std::endl;
+        cerr << "contrast = " << expr.contrast << " score = " << s << endl;
       score += expr.sign * s * (weighting ? w : 1.0);
     }
   }
@@ -512,7 +514,7 @@ Gradient HMM::compute_gradient(const Data::Collection &collection,
       gradient.emission /= W;
   }
   if(verbosity >= Verbosity::verbose)
-    std::cerr << "HMM::compute_gradient::end score = " << score << std::endl;
+    cerr << "HMM::compute_gradient::end score = " << score << endl;
   return(gradient);
 }
 
@@ -521,7 +523,7 @@ Gradient HMM::compute_gradient(const Data::Contrast &contrast,
     const Training::Task &task) const
 {
   if(verbosity >= Verbosity::verbose)
-    std::cerr << "HMM::compute_gradient(Data::Contrast, task)" << std::endl;
+    cerr << "HMM::compute_gradient(Data::Contrast, task)" << endl;
   // ObjectiveFunction objFunc = objFunc_for_training(task.method);
   Gradient gradient;
   score = 0;
@@ -529,7 +531,7 @@ Gradient HMM::compute_gradient(const Data::Contrast &contrast,
     if(is_motif_group(group_idx))
       score += compute_gradient(contrast, gradient, task, group_idx);
   if(verbosity >= Verbosity::verbose)
-    std::cerr << "HMM::compute_gradient(Data::Contrast, task)::end" << std::endl;
+    cerr << "HMM::compute_gradient(Data::Contrast, task)::end" << endl;
   return(gradient);
 }
 
@@ -539,7 +541,7 @@ double HMM::compute_gradient(const Data::Contrast &contrast,
     bitmask_t present) const
 {
   if(verbosity >= Verbosity::verbose)
-    std::cerr << "HMM::compute_gradient(Data::Contrast, task, present)" << std::endl;
+    cerr << "HMM::compute_gradient(Data::Contrast, task, present)" << endl;
   double score = 0;
   switch(task.measure) {
     case Measure::MutualInformation:
@@ -565,14 +567,14 @@ double HMM::compute_gradient(const Data::Contrast &contrast,
       score = class_likelihood_gradient(contrast, task, present, gradient);
       break;
     default:
-      std::cout << "Calculation of " << measure2string(task.measure) << " gradient is currently not implemented." << std::endl;
+      cout << "Calculation of " << measure2string(task.measure) << " gradient is currently not implemented." << endl;
       exit(-1);
   }
 
   if(verbosity >= Verbosity::verbose)
-    std::cout << "Gradient calculation yielded a score of " << score << "." << std::endl;
+    cout << "Gradient calculation yielded a score of " << score << "." << endl;
   if(verbosity >= Verbosity::verbose)
-    std::cerr << "HMM::compute_gradient(Data::Contrast, task, present)::end" << std::endl;
+    cerr << "HMM::compute_gradient(Data::Contrast, task, present)::end" << endl;
 
   return(score);
 }
@@ -586,32 +588,32 @@ void HMM::iterative_training(const Data::Collection &collection,
   Training::State ts(tasks.size());
 
   if(verbosity >= Verbosity::info) {
-    std::cout << std::endl << "Iteration                                      " << iteration << std::endl;
+    cout << endl << "Iteration                                      " << iteration << endl;
     for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
       if(is_motif_group(group_idx))
-        std::cout << "Motif consensus                                " << groups[group_idx].name << ":" << get_group_consensus(group_idx) << std::endl;
+        cout << "Motif consensus                                " << groups[group_idx].name << ":" << get_group_consensus(group_idx) << endl;
   }
 
   while((iteration++ < options.termination.max_iter or options.termination.max_iter == 0 )
       and perform_training_iteration(collection, tasks, options, ts))
     if(verbosity >= Verbosity::info) {
-      std::cout << std::endl << "Iteration                                      " << iteration << std::endl;
-      // std::cout << "Gradient learning, relative score difference   " << relative_score_difference << std::endl;
+      cout << endl << "Iteration                                      " << iteration << endl;
+      // cout << "Gradient learning, relative score difference   " << relative_score_difference << endl;
       for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
         if(is_motif_group(group_idx))
-      std::cout << "Motif consensus                                " << groups[group_idx].name << ":" << get_group_consensus(group_idx) << std::endl;
+      cout << "Motif consensus                                " << groups[group_idx].name << ":" << get_group_consensus(group_idx) << endl;
     }
 
   if(verbosity >= Verbosity::info) {
-    std::cout << std::endl << "Finished after " << iteration << " iterations." << std::endl
+    cout << endl << "Finished after " << iteration << " iterations." << endl
       << "Final score" << (tasks.size() > 1 ? "s" : "") << " = ";
     for(size_t i = 0; i < tasks.size(); i++)
-      std::cout << " " << to_string(tasks[i]) << "=" << *ts.scores[i].rbegin();
-    std::cout << std::endl;
+      cout << " " << to_string(tasks[i]) << "=" << *ts.scores[i].rbegin();
+    cout << endl;
     for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
       if(is_motif_group(group_idx))
-        std::cout << " " << groups[group_idx].name << ":" << get_group_consensus(group_idx);
-    std::cout << std::endl;
+        cout << " " << groups[group_idx].name << ":" << get_group_consensus(group_idx);
+    cout << endl;
   }
 }
 
@@ -624,20 +626,20 @@ bool HMM::perform_training_iteration(const Data::Collection &collection,
 
   size_t task_idx = 0;
   for(auto task: tasks) {
-    double score = -std::numeric_limits<double>::infinity();
+    double score = -numeric_limits<double>::infinity();
     if(task.measure != Measure::Undefined) {
       if(store_intermediate)
-        serialize(std::cerr, ExecutionInformation());
+        serialize(cerr, ExecutionInformation());
 
       if(verbosity >= Verbosity::verbose)
-        std::cerr << "Current parameters: " << *this << std::endl;
+        cerr << "Current parameters: " << *this << endl;
 
       // collect the states whose parameters are subject to this task
       Training::Range task_targets(task.targets.transition.size() + task.targets.emission.size());
       copy(begin(task.targets.transition), end(task.targets.transition), begin(task_targets));
       copy(begin(task.targets.emission), end(task.targets.emission), begin(task_targets));
       sort(begin(task_targets), end(task_targets));
-      task_targets.resize(std::distance(begin(task_targets), unique(begin(task_targets), end(task_targets))));
+      task_targets.resize(distance(begin(task_targets), unique(begin(task_targets), end(task_targets))));
 
       // check if the task states are reachable
       if(find(begin(task_targets), end(task_targets), start_state) == end(task_targets)) {
@@ -650,7 +652,7 @@ bool HMM::perform_training_iteration(const Data::Collection &collection,
               z += transition(i,j);
         if(z == 0) {
           if(verbosity >= Verbosity::info)
-            std::cout << "None of the task states are reachable from the non-task states; skipping task." << std::endl;
+            cout << "None of the task states are reachable from the non-task states; skipping task." << endl;
           continue;
         }
       }
@@ -673,7 +675,7 @@ bool HMM::perform_training_iteration(const Data::Collection &collection,
   }
 
   if(store_intermediate)
-    serialize(std::cerr, ExecutionInformation());
+    serialize(cerr, ExecutionInformation());
 
   return(not done);
 }
@@ -684,10 +686,10 @@ bool HMM::reestimate_class_parameters(const Data::Collection &collection,
     double &score)
 {
   if(verbosity >= Verbosity::debug)
-    std::cout << "HMM::reestimate_class_parameters(Data::Collection, ...)" << std::endl;
+    cout << "HMM::reestimate_class_parameters(Data::Collection, ...)" << endl;
 
-  std::unordered_map<std::string, double> class_counts;
-  std::unordered_map<std::string, std::map<size_t,double>> motif_counts;
+  unordered_map<string, double> class_counts;
+  unordered_map<string, map<size_t,double>> motif_counts;
   for(auto &contrast: collection)
     for(auto &dataset: contrast)
       class_counts[dataset.sha1] += dataset.set_size;
@@ -713,13 +715,13 @@ bool HMM::reestimate_class_parameters(const Data::Collection &collection,
             if(task.measure == Measure::ClassificationLikelihood)
               x += res.log_likelihood;
             if(verbosity >= Verbosity::debug)
-              std::cout << "Sequence " << dataset.sequences[i].definition << " p = " << p << " class log likelihood = " << x << " exp -> " << exp(x) << std::endl;
+              cout << "Sequence " << dataset.sequences[i].definition << " p = " << p << " class log likelihood = " << x << " exp -> " << exp(x) << endl;
             motif_count += p;
             l += x;
           }
           motif_counts[dataset.sha1][group_idx] += motif_count;
           if(verbosity >= Verbosity::debug)
-            std::cout << "Data::Set " << dataset.path << " l = " << l << std::endl;
+            cout << "Data::Set " << dataset.path << " l = " << l << endl;
         }
     }
 
@@ -738,7 +740,7 @@ bool HMM::reestimate_class_parameters(const Data::Collection &collection,
   // update and compute L1 norm of update
   if(options.learn_class_prior) {
     if(verbosity >= Verbosity::debug)
-      std::cout << "Updating class prior." << std::endl;
+      cout << "Updating class prior." << endl;
     for(auto &x: registered_datasets) {
       diff += fabs(x.second.class_prior - class_counts[x.first]);
       x.second.class_prior = class_counts[x.first];
@@ -746,7 +748,7 @@ bool HMM::reestimate_class_parameters(const Data::Collection &collection,
   }
   if(options.learn_conditional_motif_prior) {
     if(verbosity >= Verbosity::debug)
-      std::cout << "Updating conditional motif priors." << std::endl;
+      cout << "Updating conditional motif priors." << endl;
     for(auto &x: registered_datasets)
       for(auto &y: motif_counts[x.first]) {
         diff += fabs(x.second.motif_prior[y.first] - y.second);
@@ -755,9 +757,9 @@ bool HMM::reestimate_class_parameters(const Data::Collection &collection,
   }
 
   if(verbosity >= Verbosity::info) {
-    std::cout << "Re-estimation, L1 norm of class params change  " << diff << std::endl;
+    cout << "Re-estimation, L1 norm of class params change  " << diff << endl;
     if(diff < options.termination.gamma_tolerance)
-      std::cout << "L1 norm change criterion                       OK" << std::endl;
+      cout << "L1 norm change criterion                       OK" << endl;
   }
 
   if(diff < options.termination.gamma_tolerance)
@@ -780,14 +782,14 @@ bool HMM::perform_training_iteration_reestimation(const Data::Collection &collec
   double delta = - (new_score - score) / new_score;
 
   if(verbosity >= Verbosity::info) {
-    std::cout << "Re-estimation, L1 norm of parameter change     " << gamma << std::endl;
+    cout << "Re-estimation, L1 norm of parameter change     " << gamma << endl;
     if(gamma < options.termination.gamma_tolerance)
-      std::cout << "L1 norm change criterion                       OK" << std::endl;
+      cout << "L1 norm change criterion                       OK" << endl;
 
     if(verbosity >= Verbosity::debug or gamma < options.termination.gamma_tolerance) {
-      std::cout << "Re-estimation, relative score difference       " << delta << std::endl;
+      cout << "Re-estimation, relative score difference       " << delta << endl;
       if(delta < options.termination.delta_tolerance)
-        std::cout << "Relative score criterion                       OK" << std::endl;
+        cout << "Relative score criterion                       OK" << endl;
     }
   }
 
@@ -799,10 +801,10 @@ bool HMM::perform_training_iteration_reestimation(const Data::Collection &collec
   return(done);
 }
 
-std::string consensus(const matrix_t &m, const Training::Range &states, double threshold=0)
+string consensus(const matrix_t &m, const Training::Range &states, double threshold=0)
 {
-  const std::string iupac = "-acmgrsvtwyhkdbn";
-  std::string consensus = "";
+  const string iupac = "-acmgrsvtwyhkdbn";
+  string consensus = "";
   for(auto &i: states) {
     char present = 0;
     for(size_t j = 0; j < 4; j++)
@@ -820,48 +822,48 @@ bool HMM::perform_training_iteration_gradient(const Data::Collection &collection
     double &score)
 {
   if(verbosity >= Verbosity::verbose)
-    std::cerr <<  "HMM::perform_training_iteration_gradient" << std::endl;
+    cerr <<  "HMM::perform_training_iteration_gradient" << endl;
 
   double past_score = score;
   bool done = false;
 
   if(store_intermediate)
-    serialize(std::cerr, ExecutionInformation());
+    serialize(cerr, ExecutionInformation());
 
   if(verbosity >= Verbosity::verbose)
-    std::cerr << "Current parameters: " << *this << std::endl;
+    cerr << "Current parameters: " << *this << endl;
 
   Timer timer;
   double previous_score;
   Gradient gradient = compute_gradient(collection, previous_score, task, options.weighting);
   double gradient_comp_time = timer.tock();
   if(options.timing_information)
-    std::cerr << "Gradient computation time: " << gradient_comp_time << " micro-seconds" << std::endl;
+    cerr << "Gradient computation time: " << gradient_comp_time << " micro-seconds" << endl;
 
   if(verbosity >= Verbosity::info)
     for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
       if(groups[group_idx].name == task.motif_name)
         if(is_motif_group(group_idx))
-          std::cout << "Motif gradient                                 " << groups[group_idx].name << ":" << consensus(gradient.emission, groups[group_idx].states) << std::endl;
+          cout << "Motif gradient                                 " << groups[group_idx].name << ":" << consensus(gradient.emission, groups[group_idx].states) << endl;
 
   if(verbosity >= Verbosity::verbose)
-    std::cout << "Past score = " << past_score << std::endl
-      << "Previous score = " << previous_score << std::endl;
+    cout << "Past score = " << past_score << endl
+      << "Previous score = " << previous_score << endl;
   if(verbosity >= Verbosity::verbose)
-    std::cout << "The transition gradient is : " << gradient.transition << std::endl
-      << "The emission gradient is : " << gradient.emission << std::endl;
+    cout << "The transition gradient is : " << gradient.transition << endl
+      << "The emission gradient is : " << gradient.emission << endl;
 
   double gradient_norm = sqrt(scalar_product(gradient, gradient));
   if(verbosity >= Verbosity::verbose)
-    std::cout << "Gradient norm = " << gradient_norm << std::endl;
+    cout << "Gradient norm = " << gradient_norm << endl;
 
   double max_abs_gradient_component = 0;
   for(size_t i = 0; i < gradient.emission.size1(); i++)
     for(size_t j = 0; j < gradient.emission.size2(); j++)
-      max_abs_gradient_component = std::max<double>(max_abs_gradient_component, fabs(gradient.emission(i,j)));
+      max_abs_gradient_component = max<double>(max_abs_gradient_component, fabs(gradient.emission(i,j)));
   for(size_t i = 0; i < gradient.transition.size1(); i++)
     for(size_t j = 0; j < gradient.transition.size2(); j++)
-      max_abs_gradient_component = std::max<double>(max_abs_gradient_component, fabs(gradient.transition(i,j)));
+      max_abs_gradient_component = max<double>(max_abs_gradient_component, fabs(gradient.transition(i,j)));
 
   double new_score = previous_score;
   HMM candidate = *this;
@@ -872,32 +874,32 @@ bool HMM::perform_training_iteration_gradient(const Data::Collection &collection
   // const double min_gradient = 1e-15;
   if(previous_score < min_score and gradient_norm < min_gradient) {
     if(verbosity >= Verbosity::info)
-      std::cout << "Skipping line search. Score = " << previous_score << " Gradient norm = " << gradient_norm << std::endl;
+      cout << "Skipping line search. Score = " << previous_score << " Gradient norm = " << gradient_norm << endl;
   } else if(max_abs_gradient_component == 0) {
     if(verbosity >= Verbosity::info)
-      std::cout << "Skipping line search. Maximal absolute gradient component is zero." << std::endl;
+      cout << "Skipping line search. Maximal absolute gradient component is zero." << endl;
   } else if(gradient_norm == 0) {
     if(verbosity >= Verbosity::info)
-      std::cout << "Skipping line search. Gradient norm is zero." << std::endl;
+      cout << "Skipping line search. Gradient norm is zero." << endl;
   } else {
     int info;
-    std::pair<double, HMM> res = line_search_more_thuente(collection, gradient, previous_score, info, task, options);
+    pair<double, HMM> res = line_search_more_thuente(collection, gradient, previous_score, info, task, options);
     if(info != 1)
-      std::cout << "Line search exit status: " << info << " - " << line_search_status(info) << std::endl;
+      cout << "Line search exit status: " << info << " - " << line_search_status(info) << endl;
 
     new_score = res.first;
     candidate = res.second;
 
     if(info != 1 and verbosity >= Verbosity::verbose) {
-      std::cout << "Candidate emission = " << candidate.emission << std::endl;
-      std::cout << "Candidate transition = " << candidate.transition << std::endl;
-      std::cout << "Candidate emission gradient = " << gradient.emission << std::endl;
-      std::cout << "Candidate transition gradient = " << gradient.transition << std::endl;
+      cout << "Candidate emission = " << candidate.emission << endl;
+      cout << "Candidate transition = " << candidate.transition << endl;
+      cout << "Candidate emission gradient = " << gradient.emission << endl;
+      cout << "Candidate transition gradient = " << gradient.transition << endl;
     }
   }
 
   if(verbosity >= Verbosity::info)
-    std::cout << "Score                                          " << new_score << std::endl;
+    cout << "Score                                          " << new_score << endl;
 
   // TODO reconsider building n-step stopping criteria
   // if(options.training_type == Training::Type::hybrid and options.termination.past == 1)
@@ -912,36 +914,36 @@ bool HMM::perform_training_iteration_gradient(const Data::Collection &collection
   log_transform(b);
   for(size_t i = 0; i < a.size1(); i++)
     for(size_t j = 0; j < a.size2(); j++)
-      if(isinf(a(i,j)) != 0)
+      if(std::isinf(a(i,j)))
         a(i,j) = 0;
   for(size_t i = 0; i < b.size1(); i++)
     for(size_t j = 0; j < b.size2(); j++)
-      if(isinf(b(i,j)) != 0)
+      if(std::isinf(b(i,j)))
         b(i,j) = 0;
 
   double xnorm = norml2(a) + norml2(b);
   double gnorm = norml2(gradient.emission) + norml2(gradient.transition);
 
   if(verbosity >= Verbosity::info)
-    std::cout << "Gradient learning, relative score difference   " << relative_score_difference << std::endl;
+    cout << "Gradient learning, relative score difference   " << relative_score_difference << endl;
   if(verbosity >= Verbosity::verbose) {
-    std::cout << "Score difference = " << score_difference  << std::endl;
-    std::cout << "Gradient norm = " << gnorm << std::endl;
-    std::cout << "Parameter norm = " << xnorm << std::endl;
+    cout << "Score difference = " << score_difference  << endl;
+    cout << "Gradient norm = " << gnorm << endl;
+    cout << "Parameter norm = " << xnorm << endl;
   }
 
   if(score_difference < 0) {
-    std::cout << "Warning: negative score difference during gradient learning iteration! Discarding gradient iteration." << std::endl;
+    cout << "Warning: negative score difference during gradient learning iteration! Discarding gradient iteration." << endl;
     done = true;
   }
 
   if(not done) {
     bool rel_score_criterion = relative_score_difference < options.termination.delta_tolerance;
-    bool grad_norm_criterion = gnorm < options.termination.epsilon_tolerance * std::max<double>(1, xnorm);
+    bool grad_norm_criterion = gnorm < options.termination.epsilon_tolerance * max<double>(1, xnorm);
     if(rel_score_criterion)
-      std::cout << "Relative score criterion                       OK" << std::endl;
+      cout << "Relative score criterion                       OK" << endl;
     if(grad_norm_criterion)
-      std::cout << "Gradient norm criterion                        OK" << std::endl;
+      cout << "Gradient norm criterion                        OK" << endl;
     done = rel_score_criterion or grad_norm_criterion;
     score = new_score;
     *this = candidate;

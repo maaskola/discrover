@@ -46,7 +46,7 @@ HMM::pair_posterior_t &operator+=(HMM::pair_posterior_t &one, const HMM::pair_po
   return(one);
 }
 
-std::ostream &operator<<(std::ostream &os, const HMM::pair_posterior_t &p)
+ostream &operator<<(ostream &os, const HMM::pair_posterior_t &p)
 {
   os << "logL = " << p.log_likelihood
     << " A = " << p.posterior_first

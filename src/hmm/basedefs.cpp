@@ -11,7 +11,7 @@
 
 using namespace std;
 
-vector<string> get_paths(const std::vector<Specification::Set> &specs)
+vector<string> get_paths(const vector<Specification::Set> &specs)
 {
   vector<string> paths;
   for(auto &s: specs)
@@ -26,7 +26,7 @@ void prepare_cross_validation(const Data::Contrast &contrast, Data::Contrast &tr
   else {
     for(auto &dataset: contrast) {
       if(verbosity >= Verbosity::verbose)
-        std::cerr << "Splitting " << dataset.path << " into training and test data." << std::endl;
+        cerr << "Splitting " << dataset.path << " into training and test data." << endl;
       Data::Set training, test;
 
       training.sha1 = dataset.sha1;
@@ -54,8 +54,8 @@ void prepare_cross_validation(const Data::Contrast &contrast, Data::Contrast &tr
         }
       }
       if(verbosity >= Verbosity::verbose) {
-        std::cerr << "Training data set size of " << dataset.path << " = " << training.set_size << std::endl;
-        std::cerr << "Test data set size of " << dataset.path << " = " << test.set_size << std::endl;
+        cerr << "Training data set size of " << dataset.path << " = " << training.set_size << endl;
+        cerr << "Test data set size of " << dataset.path << " = " << test.set_size << endl;
       }
 
       training_data.sets.push_back(training);

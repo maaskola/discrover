@@ -29,6 +29,8 @@
 
 #include "hmm.hpp"
 
+using namespace std;
+
 void HMM::finalize_initialization()
 {
   initialize_ranges();
@@ -49,28 +51,28 @@ void HMM::initialize_ranges()
       emitting_range.push_back(i);
   }
   if(verbosity >= Verbosity::debug) {
-    std::cout << "all_range =";
+    cout << "all_range =";
     for(auto x: all_range)
-      std::cout << " " << x;
-    std::cout << std::endl;
-    std::cout << "constitutive_range =";
+      cout << " " << x;
+    cout << endl;
+    cout << "constitutive_range =";
     for(auto x: constitutive_range)
-      std::cout << " " << x;
-    std::cout << std::endl;
-    std::cout << "emitting_range =";
+      cout << " " << x;
+    cout << endl;
+    cout << "emitting_range =";
     for(auto x: emitting_range)
-      std::cout << " " << x;
-    std::cout << std::endl;
+      cout << " " << x;
+    cout << endl;
   }
 }
 
 void HMM::initialize_pred_succ()
 {
-  pred = std::vector<std::list<size_t>>();
-  succ = std::vector<std::list<size_t>>();
+  pred = vector<list<size_t>>();
+  succ = vector<list<size_t>>();
   for(size_t i = 0; i < n_states; i++) {
-    pred.push_back(std::list<size_t>());
-    succ.push_back(std::list<size_t>());
+    pred.push_back(list<size_t>());
+    succ.push_back(list<size_t>());
   }
   for(size_t i = 0; i < n_states; i++)
     for(size_t j = 0; j < n_states; j++)
@@ -118,11 +120,11 @@ void HMM::initialize_transitions_to_and_from_chain(size_t w, double l, double la
   const double z = (1 - lambda / (l - w + 1)) / (l - w * lambda);
 
   if(verbosity >= Verbosity::debug)
-    std::cout << "l = " << l << std::endl
-      << "w = " << w << std::endl
-      << "x = " << x << std::endl
-      << "y = " << y << std::endl
-      << "z = " << z << std::endl;
+    cout << "l = " << l << endl
+      << "w = " << w << endl
+      << "x = " << x << endl
+      << "y = " << y << endl
+      << "z = " << z << endl;
 
   // initialize transitions from the start state
   transition(start_state,start_state) = 0; // sequences are at least one position long
@@ -149,8 +151,8 @@ void HMM::initialize_transitions_to_and_from_chain(size_t w, double l, double la
 void HMM::register_dataset(const Data::Set &dataset, double class_prior, double motif_p1, double motif_p2)
 {
   if(verbosity >= Verbosity::verbose)
-    std::cout << "register_data_set(dataset.path=" << dataset.path << ( dataset.is_shuffle ? " shuffle" : " ") << ", sha1=" << dataset.sha1 << ", class_prior=" << class_prior << ")" << std::endl;
-  RegisteredDataSet reg_data({dataset, class_prior, std::map<size_t, double>()});
+    cout << "register_data_set(dataset.path=" << dataset.path << ( dataset.is_shuffle ? " shuffle" : " ") << ", sha1=" << dataset.sha1 << ", class_prior=" << class_prior << ")" << endl;
+  RegisteredDataSet reg_data({dataset, class_prior, map<size_t, double>()});
   for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
     if(is_motif_group(group_idx)) {
       double val = motif_p2;
@@ -158,7 +160,7 @@ void HMM::register_dataset(const Data::Set &dataset, double class_prior, double 
         val = motif_p1;
       reg_data.motif_prior[group_idx] = val;
       if(verbosity >= Verbosity::verbose)
-        std::cout << "Registering conditional motif prior " << val << " of group " << group_idx << ": " << groups[group_idx].name << " for data set " << dataset.path << " with sha1 " << dataset.sha1 << std::endl;
+        cout << "Registering conditional motif prior " << val << " of group " << group_idx << ": " << groups[group_idx].name << " for data set " << dataset.path << " with sha1 " << dataset.sha1 << endl;
     }
   registered_datasets[dataset.sha1] = reg_data;
 }

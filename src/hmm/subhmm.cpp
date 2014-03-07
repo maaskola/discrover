@@ -16,7 +16,7 @@ SubHMM::SubHMM(const HMM &hmm, const Training::Range &states) : HMM(hmm, false),
   initialize_ranges();
   initialize_pred_succ();
   if(verbosity >= Verbosity::debug)
-    std::cout << "Constructed SubHMM" << std::endl;
+    cout << "Constructed SubHMM" << endl;
 }
 
 Training::Range SubHMM::map_down(const Training::Range &range) const

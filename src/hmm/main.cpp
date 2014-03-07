@@ -541,13 +541,13 @@ int main(int argc, const char** argv)
   fixup_seeding_options(options);
 
   if(options.termination.past == 0) {
-    std::cout << "Error: the value of --past must be a number greater than 0." << std::endl;
+    cout << "Error: the value of --past must be a number greater than 0." << endl;
   }
 
   if(options.termination.max_iter == 0 and options.sampling.do_sampling) {
     options.termination.max_iter = 1000;
-    std::cout << "Note: did not specify the number of iterations to perform (--maxiter)." << std::endl
-      << "We will now do " << options.termination.max_iter << " iterations." << std::endl;
+    cout << "Note: did not specify the number of iterations to perform (--maxiter)." << endl
+      << "We will now do " << options.termination.max_iter << " iterations." << endl;
   }
 
   bool any_named = false;
@@ -562,39 +562,39 @@ int main(int argc, const char** argv)
         x.motifs.insert(s.name);
 
   if(options.load_paths.empty() and options.motif_specifications.empty()) {
-    std::cout << "Error: you must either specify at least one of:" << std::endl
-      << "1. a path from which to load HMM parameter (--load)" << std::endl
-      << "2. one or more motifs (--motif)" << std::endl
+    cout << "Error: you must either specify at least one of:" << endl
+      << "1. a path from which to load HMM parameter (--load)" << endl
+      << "2. one or more motifs (--motif)" << endl
       << default_error_msg << endl;
     return(-1);
   }
 
   if(not options.long_names) {
     if(not options.seeding.only_best) {
-      std::cout << "Warning: you did not specify --best seed selection, but did not specify --longnames." << std::endl
-        << "Adding option --longnames." << std::endl;
+      cout << "Warning: you did not specify --best seed selection, but did not specify --longnames." << endl
+        << "Adding option --longnames." << endl;
       options.long_names = true;
     } else if(options.wiggle > 0) {
-      std::cout << "Warning: you specified wiggle variants, but did not specify --longnames." << std::endl
-        << "Adding option --longnames." << std::endl;
+      cout << "Warning: you specified wiggle variants, but did not specify --longnames." << endl
+        << "Adding option --longnames." << endl;
       options.long_names = true;
     }
   }
 
 
   if(options.line_search.eta <= options.line_search.mu) {
-    std::cout << "Error: the Moré-Thuente η parameter must be larger than the µ parameter." << std::endl;
+    cout << "Error: the Moré-Thuente η parameter must be larger than the µ parameter." << endl;
     exit(-1);
   }
 
 
   // initialize RNG
   if(options.verbosity >= Verbosity::info)
-    std::cout << "Initializing random number generator with salt " << options.random_salt << "." << std::endl;
-  std::mt19937 rng;
+    cout << "Initializing random number generator with salt " << options.random_salt << "." << endl;
+  mt19937 rng;
   rng.seed(options.random_salt);
 
-  std::uniform_int_distribution<size_t> r_unif;
+  uniform_int_distribution<size_t> r_unif;
 
   Fasta::EntropySource::seed(r_unif(rng));
   MCMC::EntropySource::seed(r_unif(rng));
