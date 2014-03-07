@@ -320,33 +320,8 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
       } else {
         bool ok = true;
 
-        // cout << "Non-augmented model: " << hmm << endl;
         vector<size_t> absent_groups;
         while(ok and not learned_models.empty()) {
-
-          // mode == 0:
-          //   do not mask occurrences of previously identified motifs;
-          //   add candidate motif to current model
-          //   score composite model consisting of candidate motif and previously identified motifs on unmasked data
-          // mode == 1:
-          //   mask occurrences of previously identified motifs;
-          //   score candidate motif as single motif model on masked data
-          // mode == 2:
-          //   mask occurrences of previously identified motifs;
-          //   add candidate motif to current model
-          //   score composite model consisting of candidate motif and previously identified motifs on masked data
-          // const size_t mode = 2;
-          // const bool do_mask = false;
-
-          // auto masked_training_data = training_data;
-          // if(mode == 1 or mode == 2) {
-          //   if(do_mask) {
-          //     // TODO only do this when motifs have already been learned
-          //     cout << "Masking earlier motifs" << endl;
-          //     masked_training_data.mask(hmm.compute_mask(masked_training_data));
-          //   }
-          // }
-
           auto data = training_data;
 
           size_t best_index = 0;
@@ -363,25 +338,18 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             string seed = learned.first;
             auto learned_model = learned.second;
 
-            auto model = learned_model;
-            // if(mode == 0 or mode == 2) {
-            if(true) {
-              model = hmm;
-              model.add_motifs(learned_model, false);
-              // model.add_motifs(learned_model, true);
+            auto model = hmm;
+            model.add_motifs(learned_model, false);
 
-              // TODO adapt transition probabilities?
-              // TODO or do complete relearning?
-            }
-            // } else
-            //   model = learned_model;
+            // TODO adapt transition probabilities?
+            // TODO or do complete relearning?
 
+            // motif_len, n, and df are needed for MICO p-value computation
+            const size_t motif_len = seed.size();
+            const double n = data.set_size; // TODO fix this with regards to pseudo counts and exact reference to the relevant contrast
             double df = 0;
             for(auto &contrast: data)
               df += (contrast.sets.size() - 1); // TODO only use the relevant contrasts for this motif
-
-            size_t motif_len = seed.size();
-            double n = data.set_size; // TODO fix this with regards to pseudo counts and exact reference to the relevant contrast
 
             vector<size_t> groups_to_score = {model.get_ngroups() - 1}; // only add the most recently added group
 
@@ -393,7 +361,6 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             else {
               if(absent_groups.empty()) {
                 score = model.compute_score(data, Measures::Continuous::Measure::MutualInformation, options.weighting, groups_to_score, vector<size_t>());
-                // score = model.compute_score(data, Measures::Continuous::Measure::MutualInformation, options.weighting, groups_to_score, absent_groups);
                 cout << "mi = " << score << endl;
               } else {
                 cout << "Scoring residual information - motifs:" << endl;
@@ -443,7 +410,6 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
               cout << "score = " << score << endl;
             }
 
-            // cout << "Augmented model: " << model;
             cout << "Score of the model augmented by " << seed << " has a score of " << score << endl << endl;
             if(not (use_mico_pvalue and drop_below_mico_pvalue_threshold) or score >= p_mico_threshold) {
               if(score > best_score) {
@@ -464,16 +430,10 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             cout << "We did not find an improved model." << endl;
             ok = false;
           } else {
-            // if(mode == 0 or mode == 2)
-            if(true)
-              hmm = best_model;
+            hmm = best_model;
 
             if(options.verbosity >= Verbosity::info)
               cout << "Accepting seed " << best_seed << " with score " << best_score << endl;
-
-            // if(mode == 1)
-            if(false)
-              hmm.add_motifs(best_model, false);
 
             hmm_options options_(options);
             if(options.long_names)
