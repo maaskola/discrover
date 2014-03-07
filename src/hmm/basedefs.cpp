@@ -89,9 +89,3 @@ void prepare_cross_validation(const Data::Collection &collection, Data::Collecti
 }
 
 
-namespace Training {
-  State::State(size_t n) : center(-9), scores(n)
-  {
-  }
-}
-

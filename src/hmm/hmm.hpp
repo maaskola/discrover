@@ -69,6 +69,7 @@
 #include <unordered_map>
 #include <bitset>
 #include "association.hpp"
+#include "results.hpp"
 #include "hmm_options.hpp"
 #include "../verbosity.hpp"
 
