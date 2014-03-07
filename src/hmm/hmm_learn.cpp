@@ -604,8 +604,8 @@ void HMM::iterative_training(const Data::Collection &collection,
   if(verbosity >= Verbosity::info) {
     std::cout << std::endl << "Finished after " << iteration << " iterations." << std::endl
       << "Final score" << (tasks.size() > 1 ? "s" : "") << " = ";
-    for(auto scores: ts.scores)
-      std::cout << " " << *scores.rbegin();
+    for(size_t i = 0; i < tasks.size(); i++)
+      std::cout << " " << to_string(tasks[i]) << "=" << *ts.scores[i].rbegin();
     std::cout << std::endl;
     for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
       if(is_motif_group(group_idx))
