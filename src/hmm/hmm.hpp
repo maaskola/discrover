@@ -159,7 +159,7 @@ class HMM {
     /** The indices of the successors of each state. */
     std::vector<std::list<size_t>> succ;
 
-    Training::Range all_range, constitutive_range, emitting_range;
+    Training::Range all_range, emitting_range;
 
 
     struct RegisteredDataSet {

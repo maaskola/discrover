@@ -41,22 +41,15 @@ void HMM::finalize_initialization()
 void HMM::initialize_ranges()
 {
   all_range = Training::Range();
-  constitutive_range = Training::Range();
   emitting_range = Training::Range();
   for(size_t i = start_state; i < n_states; i++) {
     all_range.push_back(i);
-    if(group_ids[i] == 0) // TODO this could use more information that is available in data structure Group::Kind.
-      constitutive_range.push_back(i);
     if(i != start_state)
       emitting_range.push_back(i);
   }
   if(verbosity >= Verbosity::debug) {
     cout << "all_range =";
     for(auto x: all_range)
-      cout << " " << x;
-    cout << endl;
-    cout << "constitutive_range =";
-    for(auto x: constitutive_range)
       cout << " " << x;
     cout << endl;
     cout << "emitting_range =";

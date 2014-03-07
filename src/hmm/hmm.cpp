@@ -50,7 +50,6 @@ HMM::HMM(const string &path, Verbosity verbosity_, double pseudo_count) :
   pred(),
   succ(),
   all_range(),
-  constitutive_range(),
   emitting_range(),
   registered_datasets()
 {
@@ -87,7 +86,6 @@ HMM::HMM(const HMM &hmm, bool copy_deep) :
   pred(hmm.pred),
   succ(hmm.succ),
   all_range(hmm.all_range),
-  constitutive_range(hmm.constitutive_range),
   emitting_range(hmm.emitting_range),
   registered_datasets(hmm.registered_datasets)
 {
@@ -109,7 +107,6 @@ HMM::HMM(Verbosity verbosity_, double pseudo_count_) :
   pred(),
   succ(),
   all_range(),
-  constitutive_range(),
   emitting_range(),
   registered_datasets()
 {
