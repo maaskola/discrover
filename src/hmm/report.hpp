@@ -36,37 +36,48 @@
 
 using namespace std;
 
-void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast, size_t width, size_t prec);
+namespace Evaluation {
+  void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast, size_t width, size_t prec);
 
-void count_report(ostream &ofs, const matrix_t counts, size_t motif_len, const Data::Contrast &contrast, double pseudo_count, bool limit_logp, const string &name, const string &prefix);
+  void count_report(ostream &ofs, const matrix_t counts, size_t motif_len, const Data::Contrast &contrast, double pseudo_count, bool limit_logp, const string &name, const string &prefix);
 
-void eval_contrast(const HMM &hmm, const Data::Contrast &contrast, ostream &ofs, bool limit_logp, const std::string &tag);
+  void eval_contrast(const HMM &hmm, const Data::Contrast &contrast, ostream &ofs, bool limit_logp, const std::string &tag);
 
-/** Expected and Viterbi counts of occurrences and sites with the motifs as key*/
-struct ResultsCounts {
-  typedef std::map<size_t, size_t> map_t;
-  typedef std::map<size_t, double> float_map_t;
-  float_map_t exp_sites;
-  float_map_t exp_motifs;
-  map_t viterbi_sites;
-  map_t viterbi_motifs;
+  /** Expected and Viterbi counts of occurrences and sites with the motifs as key*/
+  struct ResultsCounts {
+    typedef std::map<size_t, size_t> map_t;
+    typedef std::map<size_t, double> float_map_t;
+    float_map_t exp_sites;
+    float_map_t exp_motifs;
+    map_t viterbi_sites;
+    map_t viterbi_motifs;
+  };
+
+  struct Result {
+    struct Files {
+      std::string summary;
+      std::string viterbi;
+      std::string table;
+    };
+    Files files;
+  };
+
+  /** Evaluate a single data set.
+   * @return expected and Viterbi counts of occurrences and sites of all motifs
+   */
+  ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm_,
+      const Data::Set &dataset,
+      ostream &out,
+      ostream &v_out,
+      ostream &occurrence_out,
+      const Options::HMM &options);
+
+  Result evaluate_hmm(const HMM &hmm_,
+      const Data::Collection &collection,
+      const std::string &tag,
+      const Training::Tasks &tasks,
+      const Options::HMM &options);
 };
-
-/** Evaluate a single data set.
- * @return expected and Viterbi counts of occurrences and sites of all motifs
- */
-ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm_,
-    const Data::Set &dataset,
-    ostream &out,
-    ostream &v_out,
-    ostream &occurrence_out,
-    const Options::HMM &options);
-
-void evaluate_hmm(const HMM &hmm_,
-    const Data::Collection &collection,
-    const std::string &tag,
-    const Training::Tasks &tasks,
-    const Options::HMM &options);
  
 #endif
 
