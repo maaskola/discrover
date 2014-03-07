@@ -435,38 +435,36 @@ void HMM::to_dot(ostream &os, double minimum_transition) const
 };
 
 
-bool HMM::check_consistency_transitions() const
+bool HMM::check_consistency_transitions(double eps) const
 {
   for(size_t k = 0; k < n_states; k++) {
     double p = 0;
     for(size_t l = 0; l < n_states; l++)
       p += transition(k,l);
-    if(fabs(1-p)>1e-6)
+    if(fabs(1-p)>eps)
       return(false);
   }
   return(true);
 }
 
 
-bool HMM::check_consistency_emissions() const
+bool HMM::check_consistency_emissions(double eps) const
 {
-  // TODO: implement this correctly w.r.t. higher order emissions
-  /*
   for(size_t k = 0; k < n_states; k++) {
     double p = 0;
     for(size_t l = 0; l < n_emissions; l++)
       p += emission(k,l);
-    if(fabs(1-p)>1e-6)
+    if(fabs(1-p)>eps)
       return(false);
-  }  */
+  }
   return(true);
 }
 
-bool HMM::check_consistency() const
+bool HMM::check_consistency(double eps) const
 {
   bool ok = true;
-  ok = ok and check_consistency_transitions();
-  ok = ok and check_consistency_emissions();
+  ok = ok and check_consistency_transitions(eps);
+  ok = ok and check_consistency_emissions(eps);
   ok = ok and group_ids.size() == n_states;
   for(auto &m: groups)
     for(auto &state: m.states)

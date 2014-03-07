@@ -502,9 +502,9 @@ class HMM {
 // Consistency checking methods
 // -------------------------------------------------------------------------------------------
 
-    bool check_consistency_transitions() const;
-    bool check_consistency_emissions() const;
-    bool check_consistency() const;
+    bool check_consistency_transitions(double eps=1e-6) const;
+    bool check_consistency_emissions(double eps=1e-6) const;
+    bool check_consistency(double eps=1e-6) const;
 
     void switch_intermediate(bool new_state) { store_intermediate=new_state; };
 
