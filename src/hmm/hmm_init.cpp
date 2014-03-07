@@ -33,30 +33,8 @@ using namespace std;
 
 void HMM::finalize_initialization()
 {
-  initialize_ranges();
   initialize_pred_succ();
   check_consistency();
-}
-
-void HMM::initialize_ranges()
-{
-  all_range = Training::Range();
-  emitting_range = Training::Range();
-  for(size_t i = start_state; i < n_states; i++) {
-    all_range.push_back(i);
-    if(i != start_state)
-      emitting_range.push_back(i);
-  }
-  if(verbosity >= Verbosity::debug) {
-    cout << "all_range =";
-    for(auto x: all_range)
-      cout << " " << x;
-    cout << endl;
-    cout << "emitting_range =";
-    for(auto x: emitting_range)
-      cout << " " << x;
-    cout << endl;
-  }
 }
 
 void HMM::initialize_pred_succ()

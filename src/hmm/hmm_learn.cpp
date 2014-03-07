@@ -74,7 +74,12 @@ void HMM::train_background(const Data::Collection &collection, const Options::HM
 
   Training::Task task;
   task.measure = Measure::Likelihood;
-  task.targets = {bg_hmm.all_range, bg_hmm.emitting_range};
+
+  for(size_t i = bg_hmm.start_state; i < bg_hmm.n_states; i++) {
+    task.targets.transition.push_back(i);
+    if(i != start_state)
+      task.targets.emission.push_back(i);
+  }
 
   bg_hmm.reestimation(collection, task, options);
 

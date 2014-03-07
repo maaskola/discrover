@@ -159,8 +159,6 @@ class HMM {
     /** The indices of the successors of each state. */
     std::vector<std::list<size_t>> succ;
 
-    Training::Range all_range, emitting_range;
-
 
     struct RegisteredDataSet {
       Specification::Set spec;
@@ -188,10 +186,7 @@ class HMM {
     /** Initialize the predecessor and successor data structures */
     void initialize_pred_succ();
 
-    /** Initialize the range data structures */
-    void initialize_ranges();
-
-    /** Initialize the predecessor&successor and range data structures */
+    /** Initialize the predecessor and successor data structures, and check parameter consistency */
     void finalize_initialization();
 
     /**  Check whether the motif is enriched in the desired samples */

@@ -49,8 +49,6 @@ HMM::HMM(const string &path, Verbosity verbosity_, double pseudo_count) :
   emission(),
   pred(),
   succ(),
-  all_range(),
-  emitting_range(),
   registered_datasets()
 {
   if(verbosity >= Verbosity::debug)
@@ -85,8 +83,6 @@ HMM::HMM(const HMM &hmm, bool copy_deep) :
   emission(hmm.emission),
   pred(hmm.pred),
   succ(hmm.succ),
-  all_range(hmm.all_range),
-  emitting_range(hmm.emitting_range),
   registered_datasets(hmm.registered_datasets)
 {
   if(verbosity >= Verbosity::debug)
@@ -106,8 +102,6 @@ HMM::HMM(Verbosity verbosity_, double pseudo_count_) :
   emission(zero_matrix(n_states, n_emissions)),
   pred(),
   succ(),
-  all_range(),
-  emitting_range(),
   registered_datasets()
 {
   if(verbosity >= Verbosity::debug)
