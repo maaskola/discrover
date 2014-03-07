@@ -61,6 +61,7 @@ namespace Measures {
       Likelihood,
       Viterbi,
       MutualInformation,
+      ResidualMutualInformation,
       RankInformation,
       MatthewsCorrelationCoefficient,
       ChiSquare,

@@ -164,6 +164,11 @@ namespace Measures {
         measure = Measure::Likelihood;
       else if(token == "mi" or token == "mico")
         measure = Measure::MutualInformation;
+      // TODO activate?
+      /*
+      else if(token == "residual_mi" or token == "resmi")
+        measure = Measure::ResidualMutualInformation;
+      */
       else if(token == "ri")
         measure = Measure::RankInformation;
       else if(token == "mcc")
@@ -218,6 +223,9 @@ namespace Measures {
           break;
         case Measure::MutualInformation:
           s = "mi";
+          break;
+        case Measure::ResidualMutualInformation:
+          s = "residual_mi";
           break;
         case Measure::RankInformation:
           s = "ri";

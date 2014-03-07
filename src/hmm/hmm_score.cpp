@@ -30,6 +30,7 @@
 #include "../aux.hpp"
 #include "hmm.hpp"
 #include "subhmm.hpp"
+#include "boost/multi_array.hpp"
 
 using namespace std;
 
@@ -90,6 +91,16 @@ double HMM::mutual_information(const Data::Contrast &contrast, const vector<size
   return(mutual_information(contrast, present, absent));
 }
 
+double HMM::residual_mutual_information(const Data::Contrast &contrast, const vector<size_t> &present_groups, const vector<size_t> &absent_groups, const vector<size_t> &previous_groups) const
+{
+  if(verbosity >= Verbosity::debug)
+    cout << "Computing residual mutual information." << endl;
+  bitmask_t present = make_mask(present_groups);
+  bitmask_t absent = make_mask(absent_groups);
+  bitmask_t previous = make_mask(previous_groups);
+  return(residual_mutual_information(contrast, present, absent, previous));
+}
+
 double HMM::rank_information(const Data::Contrast &contrast, const vector<size_t> &present_groups, const vector<size_t> &absent_groups) const
 {
   if(verbosity >= Verbosity::debug)
@@ -147,6 +158,247 @@ double HMM::mutual_information(const Data::Contrast &contrast, bitmask_t present
 //  if(not check_enrichment(contrast, m, group_idx))
 //    mi = -mi;
   return(mi);
+}
+
+/** The conditional mutual information
+ * This is the reduction in the uncertainty of X due to the knowledge of Y when Z is given:
+ * I( X; Y | Z ) = H( X | Z ) - H( X | Y, Z )
+ * Symmetrically, it is also the reduction in the uncertainty of Y due to the knowledge of X when Z is given:
+ * I( X; Y | Z ) = H( Y | Z ) - H( Y | X, Z )
+ *
+ * Here X is the first motif, Y is the contrast, and Z is the second (previous) motif(s)
+ *
+ * See Cover & Thomas 2006 equations (2.60) and (2.61)
+ */
+double conditional_mutual_information(const Data::Contrast &contrast, const HMM::pair_posteriors_t &pair_posteriors, double ps)
+{
+  const size_t X = 2;
+  const size_t Y = contrast.sets.size();
+  const size_t Z = 2;
+
+  typedef boost::multi_array<double, 1> array1_t;
+  typedef array1_t::index index;
+
+  typedef boost::multi_array<double, 2> array2_t;
+  typedef array2_t::index index;
+
+  typedef boost::multi_array<double, 3> array_t;
+  typedef array_t::index index;
+  //
+  // the joint probability of X, Y, and Z
+  array_t p(boost::extents[X][Y][Z]);
+
+ // fill joint probability table with absolute counts
+  for(size_t i = 0; i < contrast.sets.size(); i++) {
+    p[0][i][0] = pair_posteriors[i].posterior_both;
+    p[0][i][1] = pair_posteriors[i].posterior_first - pair_posteriors[i].posterior_both;
+    p[1][i][0] = pair_posteriors[i].posterior_second - pair_posteriors[i].posterior_both;
+    p[1][i][1] = pair_posteriors[i].posterior_none;
+  }
+
+  // add pseudo-count
+  for(size_t x = 0; x < X; x++)
+    for(size_t y = 0; y < Y; y++)
+      for(size_t z = 0; z < Z; z++)
+        p[x][y][z] += ps;
+
+  double marginal = 0;
+  // sum over entries to compute marginal
+  for(size_t x = 0; x < X; x++)
+    for(size_t y = 0; y < Y; y++)
+      for(size_t z = 0; z < Z; z++)
+        marginal += p[x][y][z];
+
+  // normalize joint probability by dividing through marginal
+  for(size_t x = 0; x < X; x++)
+    for(size_t y = 0; y < Y; y++)
+      for(size_t z = 0; z < Z; z++)
+        p[x][y][z] /= marginal;
+
+
+  // the joint marginal probability of X and Z
+  array2_t pxz(boost::extents[X][Z]);
+  // the joint marginal probability of Y and Z
+  array2_t pyz(boost::extents[Y][Z]);
+
+  // compute marginal distribution of X and Z by summing over Y
+  for(size_t x = 0; x < X; x++)
+    for(size_t y = 0; y < Y; y++)
+      for(size_t z = 0; z < Z; z++)
+        pxz[x][z] += p[x][y][z];
+
+  // compute marginal distribution of Y and Z by summing over X
+  for(size_t x = 0; x < X; x++)
+    for(size_t y = 0; y < Y; y++)
+      for(size_t z = 0; z < Z; z++)
+        pyz[y][z] += p[x][y][z];
+
+
+  // the marginal probability of Z
+  array1_t pz(boost::extents[Z]);
+
+  // compute marginal distribution of Z by summing over X and Y
+  for(size_t x = 0; x < X; x++)
+    for(size_t y = 0; y < Y; y++)
+      for(size_t z = 0; z < Z; z++)
+        pz[z] += p[x][y][z];
+
+  double mi = 0;
+  for(size_t x = 0; x < X; x++)
+    for(size_t y = 0; y < Y; y++)
+      for(size_t z = 0; z < Z; z++)
+        mi += p[x][y][z] * log( p[x][y][z] / pxz[x][z] / pyz[y][z] * pz[z]);
+
+  mi /= log(2.0);
+
+  for(size_t z = 0; z < Z; z++) {
+    cout << "conditional_mutual_information z = " << z << " p(x,y,z) =";
+    for(size_t x = 0; x < X; x++)
+      for(size_t y = 0; y < Y; y++)
+        cout << " " << p[x][y][z];
+    cout << endl;
+  }
+
+  cout << "conditional_mutual_information p(x,z) =";
+  for(size_t x = 0; x < X; x++)
+    for(size_t z = 0; z < Z; z++)
+      cout << " " << pxz[x][z];
+  cout << endl;
+
+  cout << "conditional_mutual_information p(y,z) =";
+  for(size_t y = 0; y < Y; y++)
+    for(size_t z = 0; z < Z; z++)
+      cout << " " << pyz[y][z];
+  cout << endl;
+
+  cout << "conditional_mutual_information pz =";
+  for(size_t z = 0; z < Z; z++)
+    cout << " " << pz[z];
+  cout << endl;
+
+  for(size_t z = 0; z < Z; z++) {
+    cout << "conditional_mutual_information z = " << z << " p(x,y|z) =";
+    for(size_t x = 0; x < X; x++)
+      for(size_t y = 0; y < Y; y++)
+        cout << " " << p[x][y][z] / pz[z];
+    cout << endl;
+  }
+
+  cout << "conditional_mutual_information p(x|z) =";
+  for(size_t x = 0; x < X; x++)
+    for(size_t z = 0; z < Z; z++)
+      cout << " " << pxz[x][z] / pz[z];
+  cout << endl;
+
+  cout << "conditional_mutual_information p(y|z) =";
+  for(size_t y = 0; y < Y; y++)
+    for(size_t z = 0; z < Z; z++)
+      cout << " " << pyz[y][z] / pz[z];
+  cout << endl;
+
+
+  return(mi);
+}
+/** The pair mutual information
+ * This is the mutual information of the two motifs
+ */
+double pair_mutual_information(const Data::Contrast &contrast, const HMM::pair_posteriors_t &pair_posteriors, double ps)
+{
+  const size_t X = 2;
+  const size_t Y = 2;
+
+  typedef boost::multi_array<double, 1> array1_t;
+  typedef array1_t::index index;
+
+  typedef boost::multi_array<double, 2> array2_t;
+  typedef array2_t::index index;
+
+  // the joint probability of X and Y
+  array2_t p(boost::extents[X][Y]);
+
+ // fill joint probability table with absolute counts
+  for(size_t i = 0; i < contrast.sets.size(); i++) {
+    p[0][0] += pair_posteriors[i].posterior_both;
+    p[0][1] += pair_posteriors[i].posterior_first - pair_posteriors[i].posterior_both;
+    p[1][0] += pair_posteriors[i].posterior_second - pair_posteriors[i].posterior_both;
+    p[1][1] += pair_posteriors[i].posterior_none;
+  }
+
+  // add pseudo-count
+  for(size_t x = 0; x < X; x++)
+    for(size_t y = 0; y < Y; y++)
+      p[x][y] += ps;
+
+  double marginal = 0;
+  // sum over entries to compute marginal
+  for(size_t x = 0; x < X; x++)
+    for(size_t y = 0; y < Y; y++)
+      marginal += p[x][y];
+
+  // normalize joint probability by dividing through marginal
+  for(size_t x = 0; x < X; x++)
+    for(size_t y = 0; y < Y; y++)
+      p[x][y] /= marginal;
+
+
+  // the marginal probability of X
+  array1_t px(boost::extents[X]);
+  // the marginal probability of Y
+  array1_t py(boost::extents[Y]);
+
+  // compute marginal distribution of X by summing over Y
+  for(size_t x = 0; x < X; x++)
+    for(size_t y = 0; y < Y; y++)
+        px[x] += p[x][y];
+
+  // compute marginal distribution of Y by summing over X
+  for(size_t x = 0; x < X; x++)
+    for(size_t y = 0; y < Y; y++)
+        py[y] += p[x][y];
+
+  cout << "pair_mutual_information joint =";
+  for(size_t x = 0; x < X; x++)
+    for(size_t y = 0; y < Y; y++)
+      cout << " " << p[x][y];
+  cout << endl;
+  cout << "pair_mutual_information px =";
+  for(size_t x = 0; x < X; x++)
+    cout << " " << px[x];
+  cout << endl;
+  cout << "pair_mutual_information py =";
+  for(size_t y = 0; y < Y; y++)
+    cout << " " << py[y];
+  cout << endl;
+
+  double mi = 0;
+  for(size_t x = 0; x < X; x++)
+    for(size_t y = 0; y < Y; y++)
+      mi += p[x][y] * log( p[x][y] / px[x] / py[y] );
+
+  mi /= log(2.0);
+
+  return(mi);
+}
+
+double HMM::residual_mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent, bitmask_t previous) const
+{
+  const double ratio_threshold = 5;
+  if(verbosity >= Verbosity::debug)
+    cout << "HMM::residual_mutual_information(Data::Contrast)" << endl;
+  auto pair_posteriors = pair_posterior_atleast_one(contrast, present, absent, previous);
+  double conditional_mi = conditional_mutual_information(contrast, pair_posteriors, pseudo_count);
+  double pair_mi = pair_mutual_information(contrast, pair_posteriors, pseudo_count);
+  double ratio = conditional_mi / pair_mi;
+  double score = conditional_mi;
+  if(ratio < ratio_threshold)
+    score = -numeric_limits<double>::infinity();
+  // if(verbosity >= Verbosity::debug)
+    cout << "HMM::residual_mutual_information(Data::Contrast)" << endl
+      << "present  = " << present << endl
+      << "absent   = " << absent << endl
+      << "previous = " << absent << endl
+      << "condMI   = " << conditional_mi << " pairMI = " << pair_mi << " ratio = " << ratio << endl;
+  return(score);
 }
 
 double HMM::rank_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const
@@ -504,7 +756,7 @@ double HMM::compute_score_all_motifs(const Data::Collection &collection, const M
   return(compute_score(collection, measure, weighting, all_motifs, vector<size_t>()));
 }
 
-double HMM::compute_score(const Data::Collection &collection, const Measures::Continuous::Measure &measure, bool weighting, const vector<size_t> &present_motifs, const vector<size_t> &absent_motifs) const
+double HMM::compute_score(const Data::Collection &collection, const Measures::Continuous::Measure &measure, bool weighting, const vector<size_t> &present_motifs, const vector<size_t> &absent_motifs, const vector<size_t> &previous_motifs) const
 {
   double score = 0;
   double W = 0;
@@ -520,6 +772,11 @@ double HMM::compute_score(const Data::Collection &collection, const Measures::Co
       }
       if(weighting)
         score /= W;
+      break;
+    case Measure::ResidualMutualInformation:
+      // TODO rather than just summing something better needs to be done
+      for(auto &contrast: collection)
+        score += residual_mutual_information(contrast, present_motifs, absent_motifs, previous_motifs);
       break;
     case Measure::RankInformation:
       for(auto &contrast: collection)
