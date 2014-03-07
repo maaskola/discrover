@@ -120,11 +120,11 @@ void HMM::initialize_bg_with_bw(const Data::Collection &collection, const Option
     cerr << "Background learning: " << time << " micro-seconds" << endl;
 }
 
-double HMM::train(const Data::Collection &collection, const Training::Tasks &tasks, const Options::HMM &options)
+Training::Result HMM::train(const Data::Collection &collection, const Training::Tasks &tasks, const Options::HMM &options)
 {
+  Training::Result result;
   if(options.verbosity >= Verbosity::verbose)
     cout << "Model to be evaluated = " << *this << endl;
-  double delta = 0;
   if(tasks.empty()) {
     if(options.verbosity >= Verbosity::info)
       cout << "Not performing training because no training tasks were specified." << endl;
@@ -150,9 +150,9 @@ double HMM::train(const Data::Collection &collection, const Training::Tasks &tas
         for(auto &dataset: contrast)
           register_dataset(dataset, (1.0*dataset.set_size)/collection.set_size, options.conditional_motif_prior1, options.conditional_motif_prior2);
 
-      delta = train_inner(collection, tasks, options);
+      result = train_inner(collection, tasks, options);
       if(options.verbosity >= Verbosity::verbose)
-        cout << endl << "The parameters changed by an L1-norm of " << delta << endl;
+        cout << endl << "The parameters changed by an L1-norm of " << result.delta << endl;
 
       double time = learning_timer.tock();
       if(options.timing_information)
@@ -162,27 +162,28 @@ double HMM::train(const Data::Collection &collection, const Training::Tasks &tas
         cout << "HMM after training:" << endl
           << *this << endl;
 
-      string store_to = options.label + ".hmm";
+      result.parameter_file = options.label + ".hmm";
 
       if(options.verbosity >= Verbosity::info)
-        cout << endl << "Parameters stored in " << store_to << endl;
+        cout << endl << "Parameters stored in " << result.parameter_file << endl;
 
-      ofstream os(store_to.c_str());
+      ofstream os(result.parameter_file.c_str());
       serialize(os, options.exec_info);
     }
   }
-  return(delta);
+  return(result);
 }
 
-double HMM::train_inner(const Data::Collection &collection, const Training::Tasks &tasks, const Options::HMM &options)
+Training::Result HMM::train_inner(const Data::Collection &collection, const Training::Tasks &tasks, const Options::HMM &options)
 {
+  Training::Result result;
   if(tasks.empty())
-    return(0);
+    return(result);
   else {
     HMM previous(*this);
 
     if(options.sampling.do_sampling) {
-      Training::Task task = tasks[0]; // TODO make it work with multiple tasks
+      Training::Task task = tasks[0]; // TODO make HMM sampling work with multiple tasks
       auto sampling_results = mcmc(collection, task, options);
       if(options.verbosity >= Verbosity::info)
         cout << "Sampling done. Got " << sampling_results.size() << " results." << endl;
@@ -199,14 +200,13 @@ double HMM::train_inner(const Data::Collection &collection, const Training::Task
           }
         }
     } else
-      iterative_training(collection, tasks, options);
-    double delta = norml1(previous.emission - emission) + norml1(previous.transition - transition);
-    return(delta);
+      result.state = iterative_training(collection, tasks, options);
+    result.delta = norml1(previous.emission - emission) + norml1(previous.transition - transition);
+    return(result);
   }
 }
 
 
-// double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Contrast &contrast, const Training::Targets &targets, const Options::HMM &options)
 double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E, const Data::Collection &collection, const Training::Targets &targets, const Options::HMM &options) const
 {
   double log_likel = 0;
@@ -584,13 +584,12 @@ double HMM::compute_gradient(const Data::Contrast &contrast,
   return(score);
 }
 
-void HMM::iterative_training(const Data::Collection &collection,
+Training::State HMM::iterative_training(const Data::Collection &collection,
     const Training::Tasks &tasks,
     const Options::HMM &options)
 {
+  Training::State state(tasks.size());
   size_t iteration = 0;
-
-  Training::State ts(tasks.size());
 
   if(verbosity >= Verbosity::info) {
     cout << endl << "Iteration                                      " << iteration << endl;
@@ -600,7 +599,7 @@ void HMM::iterative_training(const Data::Collection &collection,
   }
 
   while((iteration++ < options.termination.max_iter or options.termination.max_iter == 0 )
-      and perform_training_iteration(collection, tasks, options, ts))
+      and perform_training_iteration(collection, tasks, options, state))
     if(verbosity >= Verbosity::info) {
       cout << endl << "Iteration                                      " << iteration << endl;
       // cout << "Gradient learning, relative score difference   " << relative_score_difference << endl;
@@ -613,19 +612,21 @@ void HMM::iterative_training(const Data::Collection &collection,
     cout << endl << "Finished after " << iteration << " iterations." << endl
       << "Final score" << (tasks.size() > 1 ? "s" : "") << " = ";
     for(size_t i = 0; i < tasks.size(); i++)
-      cout << " " << to_string(tasks[i]) << "=" << *ts.scores[i].rbegin();
+      cout << " " << to_string(tasks[i]) << "=" << *state.scores[i].rbegin();
     cout << endl;
     for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
       if(is_motif_group(group_idx))
         cout << " " << groups[group_idx].name << ":" << get_group_consensus(group_idx);
     cout << endl;
   }
+
+  return(state);
 }
 
 bool HMM::perform_training_iteration(const Data::Collection &collection,
     const Training::Tasks &tasks,
     const Options::HMM &options,
-    Training::State &ts)
+    Training::State &state)
 {
   bool done = true;
 
@@ -662,11 +663,11 @@ bool HMM::perform_training_iteration(const Data::Collection &collection,
         }
       }
 
-      if(options.termination.past <= ts.scores[task_idx].size())
-        score = *(ts.scores[task_idx].rbegin() + options.termination.past - 1);
+      if(options.termination.past <= state.scores[task_idx].size())
+        score = *(state.scores[task_idx].rbegin() + options.termination.past - 1);
 
       if(Training::measure2method(task.measure) == Training::Method::Gradient)
-        done = perform_training_iteration_gradient(collection, task, options, ts.center, score) and done;
+        done = perform_training_iteration_gradient(collection, task, options, state.center, score) and done;
 
       if(Training::measure2method(task.measure) == Training::Method::Reestimation)
         done = perform_training_iteration_reestimation(collection, task, options, score) and done;
@@ -676,7 +677,7 @@ bool HMM::perform_training_iteration(const Data::Collection &collection,
         done = reestimate_class_parameters(collection, task, options, score) and done;
 
     }
-    ts.scores[task_idx++].push_back(score);
+    state.scores[task_idx++].push_back(score);
   }
 
   if(store_intermediate)

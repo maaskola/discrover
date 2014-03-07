@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <boost/lexical_cast.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
@@ -48,9 +49,19 @@ void check_data(const Data::Collection &collection, const Options::HMM &options)
 //  }
 }
 
+struct AnalysisResult {
+  AnalysisResult(HMM model) : training(), training_evaluation(), test_evaluation(), full_evaluation(), model(model) {
+  };
+  Training::Result training;
+  Evaluation::Result training_evaluation;
+  Evaluation::Result test_evaluation;
+  Evaluation::Result full_evaluation;
+  HMM model;
+};
 
-void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const Options::HMM &options, bool do_training, bool relearning_phase=false)
+AnalysisResult train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const Options::HMM &options, bool do_training, bool relearning_phase=false)
 {
+  AnalysisResult result(hmm);
   // Define the learning and evaluation tasks
   Training::Tasks eval_tasks = hmm.define_training_tasks(options);
 
@@ -102,14 +113,16 @@ void train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Coll
     }
 
     if(not learn_tasks.empty())
-      hmm.train(training_data, learn_tasks, options);
+      result.training = hmm.train(training_data, learn_tasks, options);
   }
 
   if(test_data.set_size != 0) {
-    evaluate_hmm(hmm, training_data, "training", eval_tasks, options);
-    evaluate_hmm(hmm, test_data, "Test", eval_tasks, options);
+    result.training_evaluation = Evaluation::evaluate_hmm(hmm, training_data, "training", eval_tasks, options);
+    result.test_evaluation = Evaluation::evaluate_hmm(hmm, test_data, "Test", eval_tasks, options);
   }
-  evaluate_hmm(hmm, all_data, "", eval_tasks, options);
+  result.full_evaluation = Evaluation::evaluate_hmm(hmm, all_data, "", eval_tasks, options);
+  result.model = hmm;
+  return(result);
 }
 
 double calc_expected_seq_size(const Data::Collection &collection)
@@ -148,6 +161,7 @@ vector<string> generate_wiggle_variants(const string &s,  size_t n, Verbosity ve
 
 HMM doit(const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const Options::HMM &options_)
 {
+  vector<AnalysisResult> results;
   // potentially: regardless of the objective function chosen for training, one might use the MICO p-value for selection!
   const bool use_mico_pvalue = true; // whether to use MICO p-value in multiple motif mode
   const bool drop_below_mico_pvalue_threshold = true; // whether to drop models below MICO p-value threshold in multiple motif mode
@@ -211,7 +225,8 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         }) == end(options.motif_specifications)) {
     if(options.verbosity >= Verbosity::info)
       cout << "No automatic seeds are used." << endl;
-    train_evaluate(hmm, all_data, training_data, test_data, options, training_necessary);
+    auto result = train_evaluate(hmm, all_data, training_data, test_data, options, training_necessary);
+    results.push_back(result);
   } else {
     if(options.verbosity >= Verbosity::info)
       cout << "Determining seeds automatically." << endl;
@@ -294,7 +309,8 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
           Options::HMM options_(options);
           if(options_.long_names)
             options_.label += "." + variant;
-          train_evaluate(model, all_data, training_data, test_data, options_, training_necessary);
+          auto result = train_evaluate(model, all_data, training_data, test_data, options_, training_necessary);
+          results.push_back(result);
 
           learned_models.push_back(make_pair(variant, model));
         }
@@ -331,6 +347,8 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         }
       } else {
         bool try_finding_another_motif = true;
+
+        double best_score_for_this_motif = -numeric_limits<double>::infinity();
 
         vector<size_t> absent_groups;
         while(try_finding_another_motif and not learned_models.empty()) {
@@ -446,11 +464,24 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             if(options.long_names)
               options.label += "." + best_seed;
 
-            train_evaluate(hmm, all_data, training_data, test_data, options, training_necessary, true);
+            auto result = train_evaluate(hmm, all_data, training_data, test_data, options, training_necessary, true);
+            results.push_back(result);
 
             absent_groups.push_back(hmm.get_ngroups() - 1);
             learned_models.erase(begin(learned_models) + best_index);
-            try_finding_another_motif = true;
+
+            size_t task_idx = 0; // TODO choose the right task; for now assume it is the first one
+            double current_score = *result.training.state.scores[task_idx].rbegin();
+            if(current_score > best_score_for_this_motif) {
+              if(options.verbosity >= Verbosity::info)
+                cout << "This model improves the best score to " << current_score << endl;
+              best_score_for_this_motif = current_score;
+              try_finding_another_motif = true;
+            } else {
+              if(options.verbosity >= Verbosity::info)
+                cout << "This model does not improve the best score. Stopping training."<< endl;
+              try_finding_another_motif = false;
+            }
           }
 
           if(options.verbosity >= Verbosity::info) {
@@ -482,6 +513,30 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
               cout << " " << mod.first;
             cout << endl;
             cout << "After removal " << learned_models.size() << " remaining." << endl;
+          }
+        }
+
+        // TODO make sure that multiple motifs are accepted as long as the total score is increasing
+        for(auto &result: results) {
+          size_t task_idx = 0; // TODO choose the right task; for now assume it is the first one
+          if(*result.training.state.scores[task_idx].rbegin() == best_score_for_this_motif) {
+            HMM best_model = result.model;
+            // create soft-links for his model
+            string parameter_path = options.label + ".accepted.hmm";
+            string summary_path = options.label + ".accepted.summary";
+            string table_path = options.label + ".accepted.table" + compression2ending(options.output_compression);
+            string viterbi_path = options.label + ".accepted.viterbi" + compression2ending(options.output_compression);
+            boost::filesystem::create_symlink(result.training.parameter_file, parameter_path);
+            boost::filesystem::create_symlink(result.full_evaluation.files.summary, summary_path);
+            boost::filesystem::create_symlink(result.full_evaluation.files.table, table_path);
+            boost::filesystem::create_symlink(result.full_evaluation.files.viterbi, viterbi_path);
+
+            if(options.verbosity >= Verbosity::info)
+              cout << "The results of the accepted model can be found in" << endl
+                << parameter_path << endl
+                << summary_path << endl
+                << table_path << endl
+                << viterbi_path << endl;
           }
         }
       }

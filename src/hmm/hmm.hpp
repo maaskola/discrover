@@ -201,15 +201,15 @@ class HMM {
     void add_motifs(const HMM &hmm, bool only_additional=false);
 
     /** Perform HMM training. */
-    double train(const Data::Collection &col, const Training::Tasks &tasks, const Options::HMM &options);
+    Training::Result train(const Data::Collection &col, const Training::Tasks &tasks, const Options::HMM &options);
     /** Initialize HMM background with the Baum-Welch algorithm. */
     void initialize_bg_with_bw(const Data::Collection &col, const Options::HMM &options);
 
   protected:
-    double train_inner(const Data::Collection &col, const Training::Tasks &tasks, const Options::HMM &options);
+    Training::Result train_inner(const Data::Collection &col, const Training::Tasks &tasks, const Options::HMM &options);
 
     /** Perform iterative HMM training, like re-estimation (expectation maximization) or gradient based. */
-    void iterative_training(const Data::Collection &col, const Training::Tasks &tasks, const Options::HMM &options);
+    Training::State iterative_training(const Data::Collection &col, const Training::Tasks &tasks, const Options::HMM &options);
     /** Perform one iteration of iterative HMM training. */
     bool perform_training_iteration(const Data::Collection &col, const Training::Tasks &tasks, const Options::HMM &options, Training::State &ts);
     /** Perform one iteration of gradient training. */
