@@ -253,7 +253,7 @@ int main(int argc, const char** argv)
     ("iter", po::value<size_t>(&options.termination.max_iter)->default_value(1000), "Maximal number of iterations to perform in training. A value of 0 means no limit, and that the training is only terminated by the tolerance.")
     ("salt", po::value<unsigned int>(&options.random_salt), "Seed for the random number generator.")
     ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
-    ("multiple", po::bool_switch(&options.accept_multiple), "Accept multiple motifs.")
+    ("multiple", po::bool_switch(&options.accept_multiple), "Accept multiple motifs. This can only be used with the objective function MICO.")
     ("relearn", po::value<Options::Relearning>(&options.relearning)->default_value(Options::Relearning::Full, "full"), "When accepting multiple motifs, whether and how to re-learn the model after a new motif is added. Choices: 'none', 'reest', 'full'.")
     ("resratio", po::value<double>(&options.residual_ratio)->default_value(5.0), "Cutoff to use to discard new motifs in multi motif mode. The cutoff is applied on the ratio of conditional mutual information of the new motif and the conditions given the previous motifs. Must be non-negative. High values discard more motifs, and lead to less redundant motifs.")
     ;
@@ -582,9 +582,19 @@ int main(int argc, const char** argv)
     }
   }
 
+  // Ensure that the residual MI ratio cutoff is non-negative
   if(options.residual_ratio < 0) {
     cout << "Warning: negative value provided for residual mutual information ratio cutoff. Using 0 as value." << endl;
     options.residual_ratio = 0;
+  }
+
+  // Ensure that multiple mode is only used with objective function MICO
+  if(options.accept_multiple) {
+    for(auto &obj: options.objectives)
+      if(obj.measure != Measures::Continuous::Measure::MutualInformation) {
+        cout << "Error: multiple motif mode can only be used with the objective function MICO." << endl;
+        exit(-1);
+      }
   }
 
   if(options.line_search.eta <= options.line_search.mu) {
