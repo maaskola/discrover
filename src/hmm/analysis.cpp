@@ -164,7 +164,6 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 {
   vector<AnalysisResult> results;
   // potentially: regardless of the objective function chosen for training, one might use the MICO p-value for selection!
-  const bool use_mico_pvalue = true; // whether to use MICO p-value in multiple motif mode
   const bool drop_below_mico_pvalue_threshold = true; // whether to drop models below MICO p-value threshold in multiple motif mode
   const double p_mico_threshold = -log(0.05); // MICO p-value threshold to drop models in multiple motif mode
 
@@ -351,7 +350,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
         double best_score_for_this_motif = -numeric_limits<double>::infinity();
 
-        vector<size_t> absent_groups;
+        vector<size_t> previous_groups;
         while(try_finding_another_motif and not learned_models.empty()) {
           auto data = training_data;
 
@@ -381,63 +380,58 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             for(auto &contrast: data)
               df += (contrast.sets.size() - 1); // TODO only use the relevant contrasts for this motif
 
-            vector<size_t> groups_to_score = {model.get_ngroups() - 1}; // only add the most recently added group
+            vector<size_t> present_groups = {model.get_ngroups() - 1}; // only add the most recently added group
 
-            double score = -numeric_limits<double>::infinity();
+            double mi;
 
-            if(not use_mico_pvalue)
-              // TODO actually select the specific task - above we do fix all conceivable tasks...
-              score = model.compute_score(data, model.define_training_tasks(options).begin()->measure, options, groups_to_score, absent_groups);
-            else {
-              if(absent_groups.empty()) {
-                score = model.compute_score(data, Measures::Continuous::Measure::MutualInformation, options, groups_to_score, vector<size_t>());
-                cout << "mi = " << score << endl;
-              } else {
-                cout << "Scoring residual information - motifs:" << endl;
+            if(previous_groups.empty()) {
+              mi = model.compute_score(data, Measures::Continuous::Measure::MutualInformation, options, present_groups);
+              cout << "mi = " << mi << endl;
+            } else {
+              cout << "Scoring residual information - motifs:" << endl;
 
-                auto scoring_present_groups = groups_to_score;
-                auto scoring_absent_groups = absent_groups;
-                auto scoring_model = model;
+              auto scoring_present_groups = present_groups;
+              auto scoring_previous_groups = previous_groups;
+              auto scoring_model = model;
 
-                if(options.revcomp) {
-                  if(options.verbosity >= Verbosity::info)
-                    cout << "Adding reverse complementary motifs." << endl;
-
-                  pair<HMM, map<size_t,size_t>> rc = model.add_revcomp_motifs();
-                  scoring_model = rc.first;
-                  map<size_t,size_t> rc_assoc = rc.second;
-
-                  // add reverse-complementary motifs of the present motifs
-                  for(auto x: groups_to_score)
-                    scoring_present_groups.push_back(rc_assoc[x]);
-
-                  // add reverse-complementary motifs of the absent motifs
-                  for(auto x: absent_groups)
-                    scoring_absent_groups.push_back(rc_assoc[x]);
-                }
-
+              if(options.revcomp) {
                 if(options.verbosity >= Verbosity::info)
-                  for(size_t i = 0; i < scoring_model.get_ngroups(); i++)
-                    if(scoring_model.is_motif_group(i))
-                      cout << (find(begin(scoring_present_groups), end(scoring_present_groups), i) != end(scoring_present_groups) ? "+" : "-")
-                        << " " << scoring_model.get_group_consensus(i) << endl;
+                  cout << "Adding reverse complementary motifs." << endl;
 
-                score = scoring_model.compute_score(data, Measures::Continuous::Measure::ConditionalMutualInformation, options, scoring_present_groups, vector<size_t>(), scoring_absent_groups);
+                pair<HMM, map<size_t,size_t>> rc = model.add_revcomp_motifs();
+                scoring_model = rc.first;
+                map<size_t,size_t> rc_assoc = rc.second;
 
-                if(options.verbosity >= Verbosity::info)
-                  cout << "residual mutual information = " << score << endl;
+                // add reverse-complementary motifs of the present motifs
+                for(auto x: present_groups)
+                  scoring_present_groups.push_back(rc_assoc[x]);
+
+                // add reverse-complementary motifs of the previous motifs
+                for(auto x: previous_groups)
+                  scoring_previous_groups.push_back(rc_assoc[x]);
               }
 
-              if(score > -numeric_limits<double>::infinity())
-                score = - corrected_pvalue(score, n, df, motif_len, Verbosity::verbose);
               if(options.verbosity >= Verbosity::info)
-                cout << "score = " << score << endl;
+                for(size_t i = 0; i < scoring_model.get_ngroups(); i++)
+                  if(scoring_model.is_motif_group(i))
+                    cout << (find(begin(scoring_present_groups), end(scoring_present_groups), i) != end(scoring_present_groups) ? "+" : "-")
+                      << " " << scoring_model.get_group_consensus(i) << endl;
+
+              mi = scoring_model.compute_score(data, Measures::Continuous::Measure::ConditionalMutualInformation, options, scoring_present_groups, scoring_previous_groups);
+
+              if(options.verbosity >= Verbosity::info)
+                cout << "residual mutual information = " << mi << endl;
             }
+
+            double score = - corrected_pvalue(mi, n, df, motif_len, Verbosity::verbose);
+
+            if(options.verbosity >= Verbosity::info)
+              cout << "score = " << score << endl;
 
             if(options.verbosity >= Verbosity::info)
               cout << "Score of the model augmented by " << seed << " has a score of " << score << endl << endl;
 
-            if(not (use_mico_pvalue and drop_below_mico_pvalue_threshold) or score >= p_mico_threshold) {
+            if((not drop_below_mico_pvalue_threshold) or score >= p_mico_threshold) {
               if(score > best_score) {
                 cout << "This is the currently best model!" << endl << endl;
                 try_finding_another_motif = true;
@@ -468,7 +462,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             auto result = train_evaluate(hmm, all_data, training_data, test_data, options, training_necessary, true);
             results.push_back(result);
 
-            absent_groups.push_back(hmm.get_ngroups() - 1);
+            previous_groups.push_back(hmm.get_ngroups() - 1);
             learned_models.erase(begin(learned_models) + best_index);
 
             size_t task_idx = 0; // TODO choose the right task; for now assume it is the first one

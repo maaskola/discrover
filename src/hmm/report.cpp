@@ -77,22 +77,20 @@ namespace Evaluation {
     for(size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
       if(hmm.is_motif_group(group_idx)) {
         size_t motif_len = hmm.get_motif_len(group_idx);
-        // TODO FIX ABSENT - done?
-        size_t present_mask = 1 << group_idx;
-        size_t absent_mask = 0;
+        HMM::bitmask_t present_mask = 1 << group_idx;
         // TODO EVALUATION
-        vector_t v = hmm.posterior_atleast_one(contrast, present_mask, absent_mask);
+        vector_t v = hmm.posterior_atleast_one(contrast, present_mask);
         matrix_t counts(v.size(), 2);
         for(size_t i = 0; i < v.size(); i++) {
           counts(i,0) = v(i);
           counts(i,1) = contrast.sets[i].set_size - v(i);
         }
         // TODO EVALUATION
-        double mcc = hmm.matthews_correlation_coefficient(contrast, present_mask, absent_mask); // TODO compute from count table
+        double mcc = hmm.matthews_correlation_coefficient(contrast, present_mask); // TODO compute from count table
         // double llr = calc_log_likelihood_ratio(counts, hmm.pseudo_count);
         // double dips_tscore = hmm.dips_tscore(contrast, feature);
         // TODO EVALUATION
-        double dips_sitescore = hmm.dips_sitescore(contrast, present_mask, absent_mask);
+        double dips_sitescore = hmm.dips_sitescore(contrast, present_mask);
         // double correct_class = hmm.correct_classification(contrast);  // TODO: reactivate
 
         string name = hmm.get_group_name(group_idx);
@@ -106,7 +104,7 @@ namespace Evaluation {
         // ofs << "log P correct classification = " << correct_class << endl; // TODO: reactivate
         // TODO print a table of the likelihoods
         // TODO EVALUATION
-        ofs << tag << "Log likelihood difference = " << hmm.log_likelihood_difference(contrast, present_mask, absent_mask) << endl; // TODO compute from count table
+        ofs << tag << "Log likelihood difference = " << hmm.log_likelihood_difference(contrast, present_mask) << endl; // TODO compute from count table
       }
   }
 
@@ -265,11 +263,9 @@ namespace Evaluation {
     if(options.evaluate.ric)
       for(size_t group_idx = 0; group_idx < n_groups; group_idx++)
         if(hmm.is_motif_group(group_idx)) {
-          // TODO FIX ABSENT - done?
-          size_t present_mask = 1 << group_idx;
-          size_t absent_mask = 0;
+          HMM::bitmask_t present_mask = 1 << group_idx;
           // TODO EVALUATION
-          double ric = hmm.rank_information(dataset, present_mask, absent_mask);
+          double ric = hmm.rank_information(dataset, present_mask);
           out << "RIC = " << ric << endl;
         }
 
@@ -287,11 +283,9 @@ namespace Evaluation {
           if(hmm.is_motif_group(group_idx)) {
             if(first) first = false; else { viterbi_str << "/"; exp_str << "/"; atl_str << "/"; }
 
-            // TODO FIX ABSENT - done?
-            size_t present_mask = 1 << group_idx;
-            size_t absent_mask = 0;
+            HMM::bitmask_t present_mask = 1 << group_idx;
             // TODO EVALUATION
-            double atl = hmm.posterior_atleast_one(dataset.sequences[i], present_mask, absent_mask).posterior;
+            double atl = hmm.posterior_atleast_one(dataset.sequences[i], present_mask).posterior;
             // TODO EVALUATION
             double expected = hmm.expected_posterior(dataset.sequences[i], present_mask);
             size_t n_viterbi = hmm.count_motif(viterbi_path, group_idx);

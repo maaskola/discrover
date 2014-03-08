@@ -277,7 +277,7 @@ class HMM {
     friend std::ostream &operator<<(std::ostream& os, const HMM &hmm);
 
   public:
-    double compute_score(const Data::Collection &col, const Measures::Continuous::Measure &measure, const Options::HMM &options, const std::vector<size_t> &present_motifs, const std::vector<size_t> &absent_motifs, const std::vector<size_t> &previous_motifs=std::vector<size_t>()) const;
+    double compute_score(const Data::Collection &col, const Measures::Continuous::Measure &measure, const Options::HMM &options, const std::vector<size_t> &present_motifs, const std::vector<size_t> &previous_motifs=std::vector<size_t>()) const;
     double compute_score_all_motifs(const Data::Collection &col, const Measures::Continuous::Measure &measure, const Options::HMM &options) const;
 
   protected:
@@ -301,15 +301,15 @@ class HMM {
 
   public:
 
-    vector_t posterior_atleast_one(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const;
+    vector_t posterior_atleast_one(const Data::Contrast &contrast, bitmask_t present) const;
     double viterbi(const Data::Seq &s, StatePath &path) const;
-    posterior_t posterior_atleast_one(const Data::Seq &seq, bitmask_t present, bitmask_t absent) const;
+    posterior_t posterior_atleast_one(const Data::Seq &seq, bitmask_t present) const;
     double expected_posterior(const Data::Seq &seq, bitmask_t present) const;
 
   protected:
 
-    vector_t posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t absent) const;
-    double   sum_posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t absent) const;
+    vector_t posterior_atleast_one(const Data::Set &dataset, bitmask_t present) const;
+    double   sum_posterior_atleast_one(const Data::Set &dataset, bitmask_t present) const;
 
     vector_t expected_posterior(const Data::Contrast &contrast, bitmask_t present) const;
     double   expected_posterior(const Data::Set &dataset, bitmask_t present) const;
@@ -328,18 +328,17 @@ class HMM {
 
   protected:
 
-    pair_posteriors_t pair_posterior_atleast_one(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent, bitmask_t previous) const;
+    pair_posteriors_t pair_posterior_atleast_one(const Data::Contrast &contrast, bitmask_t present, bitmask_t previous) const;
 
-    pair_posteriors_t pair_posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t absent, bitmask_t previous) const;
-    pair_posterior_t sum_pair_posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t absent, bitmask_t previous) const;
+    pair_posteriors_t pair_posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t previous) const;
+    pair_posterior_t sum_pair_posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t previous) const;
 
 // -------------------------------------------------------------------------------------------
 // Generative and discriminative measures
 // -------------------------------------------------------------------------------------------
-// The logic for the present and absent arguments is as follows:
+// The logic for the present arguments is as follows:
 //  at least one of those specified as present has to be present
-//  none of those specified as absent are to be present
-// Furthermore, where present and absent groups are given by vectors, these are vectors of the indices of the respective groups.
+// Furthermore, where present groups are given by vectors, these are vectors of the indices of the respective groups.
 // When they are to be given as masks, then these indices are transformed into bit masks.
 
   public:
@@ -348,47 +347,47 @@ class HMM {
     double log_likelihood(const Data::Contrast &contrast) const;
     double log_likelihood(const Data::Set &s) const;
 
-    double class_likelihood(const Data::Contrast &contrast, const std::vector<size_t> &present_groups,  const std::vector<size_t> &absent_groups, bool compute_posterior) const;
-    double class_likelihood(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent, bool compute_posterior) const;
-    double class_likelihood(const Data::Set &dataset, bitmask_t present, bitmask_t absent, bool compute_posterior) const;
+    double class_likelihood(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, bool compute_posterior) const;
+    double class_likelihood(const Data::Contrast &contrast, bitmask_t present, bool compute_posterior) const;
+    double class_likelihood(const Data::Set &dataset, bitmask_t present, bool compute_posterior) const;
 
     // Discriminative measures, for groups specified by vectors of group indices
     /** The likelihood difference */
-    double log_likelihood_difference(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
+    double log_likelihood_difference(const Data::Contrast &contrast, const std::vector<size_t> &present_groups) const;
     /** The mutual information of condition and motif occurrence */
-    double mutual_information(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
+    double mutual_information(const Data::Contrast &contrast, const std::vector<size_t> &present_groups) const;
     /** The conditional mutual information of condition and motif occurrence, as defined by Elemento et al in the method FIRE */
-    double conditional_mutual_information(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups, const std::vector<size_t> &previous_groups, double residual_ratio_cutoff) const;
+    double conditional_mutual_information(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &previous_groups, double residual_ratio_cutoff) const;
     /** The mutual information of rank and motif occurrence. */
-    double rank_information(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
+    double rank_information(const Data::Contrast &contrast, const std::vector<size_t> &present_groups) const;
     /** The summed Matthew's correlation coefficients of all individual contrasts. */
-    double matthews_correlation_coefficient(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
+    double matthews_correlation_coefficient(const Data::Contrast &contrast, const std::vector<size_t> &present_groups) const;
     /** The summed difference of expected occurrence frequencies. */
     double dips_tscore(const Data::Contrast &contrast, const std::vector<size_t> &present_groups) const;
     /** The summed difference of site occurrence. */
-    double dips_sitescore(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
+    double dips_sitescore(const Data::Contrast &contrast, const std::vector<size_t> &present_groups) const;
 
   // protected:
 
     // Discriminative measures, for groups specified by bitmasks
     /** The likelihood difference */
-    double log_likelihood_difference(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const;
+    double log_likelihood_difference(const Data::Contrast &contrast, bitmask_t present) const;
     /** The mutual information of condition and motif occurrence */
-    double mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const;
+    double mutual_information(const Data::Contrast &contrast, bitmask_t present) const;
     /** The conditional mutual information of condition and motif occurrence, as defined by Elemento et al in the method FIRE */
-    double conditional_mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent, bitmask_t previous, double residual_ratio_cutoff) const;
+    double conditional_mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t previous, double residual_ratio_cutoff) const;
     /** The mutual information of rank and motif occurrence. */
-    double rank_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const;
+    double rank_information(const Data::Contrast &contrast, bitmask_t present) const;
     /** The summed Matthew's correlation coefficients of all individual contrasts. */
-    double matthews_correlation_coefficient(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const;
+    double matthews_correlation_coefficient(const Data::Contrast &contrast, bitmask_t present) const;
     /** The summed difference of expected occurrence frequencies. */
     double dips_tscore(const Data::Contrast &contrast, bitmask_t present) const;
     /** The summed difference of site occurrence. */
-    double dips_sitescore(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const;
+    double dips_sitescore(const Data::Contrast &contrast, bitmask_t present) const;
 
     // Discriminative measures, for individual sets of sequences
     /** The mutual information of rank and motif occurrence. */
-    double rank_information(const Data::Set &dataset, bitmask_t present, bitmask_t absent) const;
+    double rank_information(const Data::Set &dataset, bitmask_t present) const;
 
 // -------------------------------------------------------------------------------------------
 // Expectation-maximization type learning

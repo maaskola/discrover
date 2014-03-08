@@ -712,10 +712,8 @@ bool HMM::reestimate_class_parameters(const Data::Collection &collection,
           double motif_count = 0;
 #pragma omp parallel for schedule(static) reduction(+:l,motif_count) if(DO_PARALLEL)
           for(size_t i = 0; i < dataset.set_size; i++) {
-            // TODO FIX ABSENT
             size_t present_mask = 1 << group_idx;
-            size_t absent_mask = 0;
-            posterior_t res = posterior_atleast_one(dataset.sequences[i], present_mask, absent_mask);
+            posterior_t res = posterior_atleast_one(dataset.sequences[i], present_mask);
             double p = res.posterior;
             double x = log_class_prior + log(p * class_cond / marginal_motif_prior + (1-p) * (1-class_cond) / (1-marginal_motif_prior));
             if(task.measure == Measure::ClassificationLikelihood)
