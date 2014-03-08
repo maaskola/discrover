@@ -251,6 +251,8 @@ double calc_conditional_mutual_information(const Data::Contrast &contrast, const
 
   mi /= log(2.0);
 
+  mi = max<double>(mi, 0);
+
   for(size_t z = 0; z < Z; z++) {
     cout << "conditional_mutual_information z = " << z << " p(x,y,z) =";
     for(size_t x = 0; x < X; x++)
@@ -296,9 +298,9 @@ double calc_conditional_mutual_information(const Data::Contrast &contrast, const
       cout << " " << pyz[y][z] / pz[z];
   cout << endl;
 
-
   return(mi);
 }
+
 /** The pair mutual information
  * This is the mutual information of the two motifs
  */
@@ -376,6 +378,8 @@ double pair_mutual_information(const Data::Contrast &contrast, const HMM::pair_p
       mi += p[x][y] * log( p[x][y] / px[x] / py[y] );
 
   mi /= log(2.0);
+
+  mi = max<double>(mi, 0);
 
   return(mi);
 }
