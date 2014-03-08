@@ -50,18 +50,19 @@ void check_data(const Data::Collection &collection, const Options::HMM &options)
 }
 
 struct AnalysisResult {
-  AnalysisResult(HMM model) : training(), training_evaluation(), test_evaluation(), full_evaluation(), model(model) {
+  AnalysisResult(const HMM &model, const Options::HMM &opts) : training(), training_evaluation(), test_evaluation(), full_evaluation(), model(model), options(opts) {
   };
   Training::Result training;
   Evaluation::Result training_evaluation;
   Evaluation::Result test_evaluation;
   Evaluation::Result full_evaluation;
   HMM model;
+  Options::HMM options;
 };
 
 AnalysisResult train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const Options::HMM &options, bool do_training, bool relearning_phase=false)
 {
-  AnalysisResult result(hmm);
+  AnalysisResult result(hmm, options);
   // Define the learning and evaluation tasks
   Training::Tasks eval_tasks = hmm.define_training_tasks(options);
 
@@ -516,11 +517,12 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
           }
         }
 
-        // TODO make sure that multiple motifs are accepted as long as the total score is increasing
+        // make sure that multiple motifs are accepted as long as the total score is increasing
         for(auto &result: results) {
           size_t task_idx = 0; // TODO choose the right task; for now assume it is the first one
           if(*result.training.state.scores[task_idx].rbegin() == best_score_for_this_motif) {
             HMM best_model = result.model;
+            options = result.options;
             // create soft-links for his model
             string parameter_path = options.label + ".accepted.hmm";
             string summary_path = options.label + ".accepted.summary";
