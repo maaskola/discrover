@@ -116,24 +116,17 @@ double HMM::matthews_correlation_coefficient(const Data::Contrast &contrast, con
   return(matthews_correlation_coefficient(contrast, present));
 }
 
-confusion_matrix reduce(const vector_t &v, HMM::bitmask_t present, const Data::Contrast &contrast, const vector<Group> &groups, bool word_stats) {
+confusion_matrix HMM::reduce(const vector_t &v, HMM::bitmask_t present, const Data::Contrast &contrast, bool word_stats) const
+{
   confusion_matrix m = {0, 0, 0, 0};
-  for(size_t sample_idx = 0; sample_idx < v.size(); sample_idx++) {
-    bool signal = false;
-    for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
-      if((HMM::bitmask_t(1 << group_idx) & present) != 0 and
-          contrast.sets[sample_idx].motifs.find(groups[group_idx].name) != end(contrast.sets[sample_idx].motifs)) {
-        signal = true;
-        break;
-      }
-    if(signal) {
+  for(size_t sample_idx = 0; sample_idx < v.size(); sample_idx++)
+    if(is_present(contrast.sets[sample_idx], present)) {
       m.true_positives += v[sample_idx];
       m.false_negatives += (word_stats ? contrast.sets[sample_idx].seq_size : contrast.sets[sample_idx].set_size) - v[sample_idx];
     } else {
       m.false_positives += v[sample_idx];
       m.true_negatives += (word_stats ? contrast.sets[sample_idx].seq_size : contrast.sets[sample_idx].set_size) - v[sample_idx];
     }
-  }
   return(m);
 }
 
@@ -423,7 +416,7 @@ double HMM::matthews_correlation_coefficient(const Data::Contrast &contrast, bit
 {
   // TODO find out if there's a proper generalization of the MCC to multiple experiments
   vector_t posterior = posterior_atleast_one(contrast, present);
-  confusion_matrix m = reduce(posterior, present, contrast, groups, false) + pseudo_count;
+  confusion_matrix m = reduce(posterior, present, contrast, false) + pseudo_count;
   return(calc_matthews_correlation_coefficient(m));
 }
 
@@ -771,17 +764,20 @@ double HMM::log_likelihood_difference(const Data::Contrast &contrast, const vect
   return(log_likelihood_difference(contrast, make_mask(present_groups)));
 }
 
+bool HMM::is_present(const Data::Set &dataset, bitmask_t present) const
+{
+  for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
+    if((bitmask_t(1 << group_idx) & present) != 0 and
+        dataset.motifs.find(groups[group_idx].name) != end(dataset.motifs))
+      return(true);
+  return(false);
+}
+
 double HMM::log_likelihood_difference(const Data::Contrast &contrast, bitmask_t present) const
 {
   double d = 0;
   for(size_t sample_idx = 0; sample_idx < contrast.sets.size(); sample_idx++) {
-    bool signal = false;
-    for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
-      if((bitmask_t(1 << group_idx) & present) != 0 and
-          contrast.sets[sample_idx].motifs.find(groups[group_idx].name) != end(contrast.sets[sample_idx].motifs)) {
-        signal = true;
-        break;
-      }
+    bool signal = is_present(contrast.sets[sample_idx], present);
     d += (signal ? 1 : -1) * log_likelihood(contrast.sets[sample_idx]);
   }
   return(d);
@@ -795,7 +791,7 @@ double HMM::dips_sitescore(const Data::Contrast &contrast, const vector<size_t> 
 double HMM::dips_sitescore(const Data::Contrast &contrast, bitmask_t present) const
 {
   vector_t posterior = posterior_atleast_one(contrast, present);
-  confusion_matrix m = reduce(posterior, present, contrast, groups, false) + pseudo_count;
+  confusion_matrix m = reduce(posterior, present, contrast, false) + pseudo_count;
   size_t signal_size = m.true_positives + m.false_negatives;
   size_t control_size = m.false_positives + m.true_negatives;
 
@@ -811,7 +807,7 @@ double HMM::dips_tscore(const Data::Contrast &contrast, const vector<size_t> &pr
 double HMM::dips_tscore(const Data::Contrast &contrast, bitmask_t present) const
 {
   vector_t posterior = expected_posterior(contrast, present);
-  confusion_matrix m = reduce(posterior, present, contrast, groups, true) + pseudo_count;
+  confusion_matrix m = reduce(posterior, present, contrast, true) + pseudo_count;
   size_t signal_size = m.true_positives + m.false_negatives;
   size_t control_size = m.false_positives + m.true_negatives;
 

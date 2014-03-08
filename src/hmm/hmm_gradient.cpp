@@ -214,9 +214,7 @@ double HMM::matthews_correlation_coefficient_gradient(const Data::Contrast &cont
 
     double counts = posterior_gradient(contrast.sets[set_idx], task, present, trans_g, emission_g).posterior;
 
-    // TODO BITMASK deactivated
-    //bool signal = contrast.sets[set_idx].motifs.find(groups[group_idx].name) != contrast.sets[set_idx].motifs.end();
-    bool signal = true;
+    bool signal = is_present(contrast.sets[set_idx], present);
     size_t total = contrast.sets[set_idx].set_size;
     total += 2 * pseudo_count; // Add pseudo-count
     counts += pseudo_count; // Add pseudo-count
@@ -294,10 +292,8 @@ double HMM::log_likelihood_difference_gradient(const Data::Contrast &contrast, c
     matrix_t trans_g = zero_matrix(n_states, n_states);
     matrix_t emission_g = zero_matrix(n_states, n_emissions);
     double log_likel = log_likelihood_gradient(contrast.sets[set_idx].sequences, task.targets, trans_g, emission_g);
-    double sign = -1.0;
-    // TODO BITMASK deactivated
-    // if(contrast.sets[set_idx].motifs.find(groups[group_idx].name) != contrast.sets[set_idx].motifs.end())
-    //   sign = 1.0;
+
+    double sign = is_present(contrast.sets[set_idx], present) ? 1.0 : -1.0;
     log_likelihood_difference += sign * log_likel;
 
     if(verbosity >= Verbosity::debug)
@@ -468,10 +464,7 @@ double HMM::site_frequency_difference_gradient(const Data::Contrast &contrast, c
     matrix_t trans_g = zero_matrix(n_states, n_states);
     matrix_t emission_g = zero_matrix(n_states, n_emissions);
     double counts = posterior_gradient(contrast.sets[set_idx], task, present, trans_g, emission_g).posterior;
-    bool signal = false;
-    // TODO BITMASK deactivated
-    // if(contrast.sets[set_idx].motifs.find(groups[group_idx].name) != contrast.sets[set_idx].motifs.end())
-    //   signal = true;
+    bool signal = is_present(contrast.sets[set_idx], present);
     size_t total = contrast.sets[set_idx].set_size + 2 * pseudo_count;
     total += 2 * pseudo_count; // Add pseudo-count
     counts += pseudo_count; // Add pseudo-count

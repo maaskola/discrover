@@ -544,6 +544,8 @@ class HMM {
     void del_column(size_t n);
 
     bool is_motif_state(size_t state) const;
+    bool is_present(const Data::Set &dataset, bitmask_t present) const;
+    confusion_matrix reduce(const vector_t &v, HMM::bitmask_t present, const Data::Contrast &contrast, bool word_stats) const;
   public:
     bool is_motif_group(size_t group_idx) const;
 
