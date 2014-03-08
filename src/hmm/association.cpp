@@ -63,6 +63,7 @@ double calc_mutual_information(const matrix_t &matrix, double pseudo_count, bool
   mi /= log(2.0);
   if(association_verbosity >= Verbosity::debug)
     cout << "mi = " << mi << endl;
+  mi = max<double>(mi, 0);
   if(not correction)
     return(mi);
   double j = mi;
