@@ -166,8 +166,8 @@ namespace Measures {
         measure = Measure::MutualInformation;
       // TODO activate?
       /*
-      else if(token == "residual_mi" or token == "resmi")
-        measure = Measure::ResidualMutualInformation;
+      else if(token == "conditional_mi" or token == "condmi")
+        measure = Measure::ConditionalMutualInformation;
       */
       else if(token == "ri")
         measure = Measure::RankInformation;
@@ -224,8 +224,8 @@ namespace Measures {
         case Measure::MutualInformation:
           s = "mi";
           break;
-        case Measure::ResidualMutualInformation:
-          s = "residual_mi";
+        case Measure::ConditionalMutualInformation:
+          s = "condmi";
           break;
         case Measure::RankInformation:
           s = "ri";

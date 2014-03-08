@@ -422,7 +422,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
                       cout << (find(begin(scoring_present_groups), end(scoring_present_groups), i) != end(scoring_present_groups) ? "+" : "-")
                         << " " << scoring_model.get_group_consensus(i) << endl;
 
-                score = scoring_model.compute_score(data, Measures::Continuous::Measure::ResidualMutualInformation, options.weighting, scoring_present_groups, vector<size_t>(), scoring_absent_groups);
+                score = scoring_model.compute_score(data, Measures::Continuous::Measure::ConditionalMutualInformation, options.weighting, scoring_present_groups, vector<size_t>(), scoring_absent_groups);
 
                 if(options.verbosity >= Verbosity::info)
                   cout << "residual mutual information = " << score << endl;
