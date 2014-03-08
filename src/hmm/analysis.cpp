@@ -331,7 +331,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             auto model = learned.second;
             Training::Tasks tasks = model.define_training_tasks(options);
             // TODO consider using compute_score instead of compute_score_all_motifs
-            double score = model.compute_score_all_motifs(training_data, tasks.begin()->measure, options.weighting);
+            double score = model.compute_score_all_motifs(training_data, tasks.begin()->measure, options);
             if(score > best_score) {
               best_score = score;
               best_seed = seed;
@@ -387,10 +387,10 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
             if(not use_mico_pvalue)
               // TODO actually select the specific task - above we do fix all conceivable tasks...
-              score = model.compute_score(data, model.define_training_tasks(options).begin()->measure, options.weighting, groups_to_score, absent_groups);
+              score = model.compute_score(data, model.define_training_tasks(options).begin()->measure, options, groups_to_score, absent_groups);
             else {
               if(absent_groups.empty()) {
-                score = model.compute_score(data, Measures::Continuous::Measure::MutualInformation, options.weighting, groups_to_score, vector<size_t>());
+                score = model.compute_score(data, Measures::Continuous::Measure::MutualInformation, options, groups_to_score, vector<size_t>());
                 cout << "mi = " << score << endl;
               } else {
                 cout << "Scoring residual information - motifs:" << endl;
@@ -422,7 +422,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
                       cout << (find(begin(scoring_present_groups), end(scoring_present_groups), i) != end(scoring_present_groups) ? "+" : "-")
                         << " " << scoring_model.get_group_consensus(i) << endl;
 
-                score = scoring_model.compute_score(data, Measures::Continuous::Measure::ConditionalMutualInformation, options.weighting, scoring_present_groups, vector<size_t>(), scoring_absent_groups);
+                score = scoring_model.compute_score(data, Measures::Continuous::Measure::ConditionalMutualInformation, options, scoring_present_groups, vector<size_t>(), scoring_absent_groups);
 
                 if(options.verbosity >= Verbosity::info)
                   cout << "residual mutual information = " << score << endl;

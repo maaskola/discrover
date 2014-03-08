@@ -91,14 +91,14 @@ double HMM::mutual_information(const Data::Contrast &contrast, const vector<size
   return(mutual_information(contrast, present, absent));
 }
 
-double HMM::conditional_mutual_information(const Data::Contrast &contrast, const vector<size_t> &present_groups, const vector<size_t> &absent_groups, const vector<size_t> &previous_groups) const
+double HMM::conditional_mutual_information(const Data::Contrast &contrast, const vector<size_t> &present_groups, const vector<size_t> &absent_groups, const vector<size_t> &previous_groups, double residual_ratio_threshold) const
 {
   if(verbosity >= Verbosity::debug)
     cout << "Computing residual mutual information." << endl;
   bitmask_t present = make_mask(present_groups);
   bitmask_t absent = make_mask(absent_groups);
   bitmask_t previous = make_mask(previous_groups);
-  return(conditional_mutual_information(contrast, present, absent, previous));
+  return(conditional_mutual_information(contrast, present, absent, previous, residual_ratio_threshold));
 }
 
 double HMM::rank_information(const Data::Contrast &contrast, const vector<size_t> &present_groups, const vector<size_t> &absent_groups) const
@@ -380,9 +380,8 @@ double pair_mutual_information(const Data::Contrast &contrast, const HMM::pair_p
   return(mi);
 }
 
-double HMM::conditional_mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent, bitmask_t previous) const
+double HMM::conditional_mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent, bitmask_t previous, double residual_ratio_threshold) const
 {
-  const double ratio_threshold = 5;
   if(verbosity >= Verbosity::debug)
     cout << "HMM::conditional_mutual_information(Data::Contrast)" << endl;
   auto pair_posteriors = pair_posterior_atleast_one(contrast, present, absent, previous);
@@ -390,7 +389,7 @@ double HMM::conditional_mutual_information(const Data::Contrast &contrast, bitma
   double pair_mi = pair_mutual_information(contrast, pair_posteriors, pseudo_count);
   double ratio = conditional_mi / pair_mi;
   double score = conditional_mi;
-  if(ratio < ratio_threshold)
+  if(ratio < residual_ratio_threshold)
     score = -numeric_limits<double>::infinity();
   // if(verbosity >= Verbosity::debug)
     cout << "HMM::conditional_mutual_information(Data::Contrast)" << endl
@@ -747,16 +746,16 @@ HMM::posterior_t HMM::posterior_atleast_one(const Data::Seq &seq, bitmask_t pres
   return(res);
 };
 
-double HMM::compute_score_all_motifs(const Data::Collection &collection, const Measures::Continuous::Measure &measure, bool weighting) const
+double HMM::compute_score_all_motifs(const Data::Collection &collection, const Measures::Continuous::Measure &measure, const Options::HMM &options) const
 {
   vector<size_t> all_motifs;
   for(size_t i = 0; i < groups.size(); i++)
     if(groups[i].kind == Group::Kind::Motif)
       all_motifs.push_back(i);
-  return(compute_score(collection, measure, weighting, all_motifs, vector<size_t>()));
+  return(compute_score(collection, measure, options, all_motifs, vector<size_t>()));
 }
 
-double HMM::compute_score(const Data::Collection &collection, const Measures::Continuous::Measure &measure, bool weighting, const vector<size_t> &present_motifs, const vector<size_t> &absent_motifs, const vector<size_t> &previous_motifs) const
+double HMM::compute_score(const Data::Collection &collection, const Measures::Continuous::Measure &measure, const Options::HMM &options, const vector<size_t> &present_motifs, const vector<size_t> &absent_motifs, const vector<size_t> &previous_motifs) const
 {
   double score = 0;
   double W = 0;
@@ -768,15 +767,15 @@ double HMM::compute_score(const Data::Collection &collection, const Measures::Co
     case Measure::MutualInformation:
       for(auto &contrast: collection) {
         W += w = contrast.set_size;
-        score += mutual_information(contrast, present_motifs, absent_motifs) * (weighting ? w : 1);
+        score += mutual_information(contrast, present_motifs, absent_motifs) * (options.weighting ? w : 1);
       }
-      if(weighting)
+      if(options.weighting)
         score /= W;
       break;
     case Measure::ConditionalMutualInformation:
       // TODO rather than just summing something better needs to be done
       for(auto &contrast: collection)
-        score += conditional_mutual_information(contrast, present_motifs, absent_motifs, previous_motifs);
+        score += conditional_mutual_information(contrast, present_motifs, absent_motifs, previous_motifs, options.residual_ratio);
       break;
     case Measure::RankInformation:
       for(auto &contrast: collection)

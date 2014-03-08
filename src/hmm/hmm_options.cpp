@@ -200,6 +200,7 @@ namespace Options {
       << "weighting = " << options.weighting << endl
       << "accept_multiple = " << options.accept_multiple << endl
       << "relearning = " << options.relearning << endl
+      << "residual_ratio = " << options.residual_ratio << endl
       << "output_compression = " << options.output_compression << endl
       << "left_padding = " << options.left_padding << endl
       << "right_padding = " << options.right_padding << endl

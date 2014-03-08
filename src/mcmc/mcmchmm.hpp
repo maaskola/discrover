@@ -70,7 +70,7 @@ namespace MCMC {
 
         double evaluate(const HMM &hmm) const {
           // TODO consider using compute_score instead of compute_score_all_motifs
-          return(hmm.compute_score_all_motifs(collection, task.measure, options.weighting));
+          return(hmm.compute_score_all_motifs(collection, task.measure, options));
         };
     };
 }

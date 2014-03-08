@@ -108,6 +108,7 @@ namespace Options {
     bool weighting;
     bool accept_multiple;
     Relearning relearning;
+    double residual_ratio;
     Compression output_compression;
     size_t left_padding, right_padding;
     bool print_posterior;

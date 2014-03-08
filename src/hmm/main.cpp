@@ -255,6 +255,7 @@ int main(int argc, const char** argv)
     ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
     ("multiple", po::bool_switch(&options.accept_multiple), "Accept multiple motifs.")
     ("relearn", po::value<Options::Relearning>(&options.relearning)->default_value(Options::Relearning::Full, "full"), "When accepting multiple motifs, whether and how to re-learn the model after a new motif is added. Choices: 'none', 'reest', 'full'.")
+    ("resratio", po::value<double>(&options.residual_ratio)->default_value(5.0), "Cutoff to use to discard new motifs in multi motif mode. The cutoff is applied on the ratio of conditional mutual information of the new motif and the conditions given the previous motifs. Must be non-negative. High values discard more motifs, and lead to less redundant motifs.")
     ;
 
   mmie_options.add_options()
@@ -581,6 +582,10 @@ int main(int argc, const char** argv)
     }
   }
 
+  if(options.residual_ratio < 0) {
+    cout << "Warning: negative value provided for residual mutual information ratio cutoff. Using 0 as value." << endl;
+    options.residual_ratio = 0;
+  }
 
   if(options.line_search.eta <= options.line_search.mu) {
     cout << "Error: the Moré-Thuente η parameter must be larger than the µ parameter." << endl;

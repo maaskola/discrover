@@ -277,8 +277,8 @@ class HMM {
     friend std::ostream &operator<<(std::ostream& os, const HMM &hmm);
 
   public:
-    double compute_score(const Data::Collection &col, const Measures::Continuous::Measure &measure, bool weighting, const std::vector<size_t> &present_motifs, const std::vector<size_t> &absent_motifs, const std::vector<size_t> &previous_motifs=std::vector<size_t>()) const;
-    double compute_score_all_motifs(const Data::Collection &col, const Measures::Continuous::Measure &measure, bool weighting) const;
+    double compute_score(const Data::Collection &col, const Measures::Continuous::Measure &measure, const Options::HMM &options, const std::vector<size_t> &present_motifs, const std::vector<size_t> &absent_motifs, const std::vector<size_t> &previous_motifs=std::vector<size_t>()) const;
+    double compute_score_all_motifs(const Data::Collection &col, const Measures::Continuous::Measure &measure, const Options::HMM &options) const;
 
   protected:
     void shift_forward(size_t group_idx, size_t n);
@@ -358,7 +358,7 @@ class HMM {
     /** The mutual information of condition and motif occurrence */
     double mutual_information(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
     /** The conditional mutual information of condition and motif occurrence, as defined by Elemento et al in the method FIRE */
-    double conditional_mutual_information(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups, const std::vector<size_t> &previous_groups) const;
+    double conditional_mutual_information(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups, const std::vector<size_t> &previous_groups, double residual_ratio_cutoff) const;
     /** The mutual information of rank and motif occurrence. */
     double rank_information(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &absent_groups) const;
     /** The summed Matthew's correlation coefficients of all individual contrasts. */
@@ -376,7 +376,7 @@ class HMM {
     /** The mutual information of condition and motif occurrence */
     double mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const;
     /** The conditional mutual information of condition and motif occurrence, as defined by Elemento et al in the method FIRE */
-    double conditional_mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent, bitmask_t previous) const;
+    double conditional_mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent, bitmask_t previous, double residual_ratio_cutoff) const;
     /** The mutual information of rank and motif occurrence. */
     double rank_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t absent) const;
     /** The summed Matthew's correlation coefficients of all individual contrasts. */

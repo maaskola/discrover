@@ -479,11 +479,11 @@ namespace Evaluation {
         my_task.measure = Measure::ClassificationPosterior;
         // TODO EVALUATION
         // TODO consider using compute_score instead of compute_score_all_motifs
-        summary_out << "class log posterior = " << hmm.compute_score_all_motifs(collection, my_task.measure, options.weighting) << endl;
+        summary_out << "class log posterior = " << hmm.compute_score_all_motifs(collection, my_task.measure, options) << endl;
         my_task.measure = Measure::ClassificationLikelihood;
         // TODO EVALUATION
         // TODO consider using compute_score instead of compute_score_all_motifs
-        summary_out << "class log likelihood = " << hmm.compute_score_all_motifs(collection, my_task.measure, options.weighting) << endl;
+        summary_out << "class log likelihood = " << hmm.compute_score_all_motifs(collection, my_task.measure, options) << endl;
       }
 
       for(auto &contrast: collection) {
