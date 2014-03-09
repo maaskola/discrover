@@ -132,16 +132,11 @@ double calc_expected_seq_size(const Data::Collection &collection)
 }
 
 string padding(size_t n, char c='n') {
-  string s;
+  string s = "";
   for(size_t i = 0; i < n; i++)
     s += c;
   return(s);
 }
-
-/* FIXME remove
-string pad(const string &s, size_t l, size_t r, char c='n') {
-  return(padding(l,c) + s + padding(r,c));
-}  */
 
 vector<string> generate_wiggle_variants(const string &s,  size_t n, Verbosity verbosity) {
   if(verbosity >= Verbosity::debug)
