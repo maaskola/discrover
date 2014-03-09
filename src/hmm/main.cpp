@@ -225,6 +225,7 @@ int main(int argc, const char** argv)
     ("alpha", po::value<double>(&options.alpha)->default_value(0.03, "0.03"), "Probability of alternative nucleotides. The nucleotides not included in the IUPAC character will have this probability.")
     ("lambda", po::value<double>(&options.lambda)->default_value(1), "Initial value for prior with which a motif is expected.")
     ("wiggle", po::value<size_t>(&options.wiggle)->default_value(0), "For automatically determined seeds, consider variants shifted up and down by up to the specified number of positions.")
+    ("extend", po::value<size_t>(&options.extend)->default_value(0), "Extend seeds by this many Ns up- and downstream before HMM training.")
     ("padl", po::value<size_t>(&options.left_padding)->default_value(0), "For automatically determined seeds, add Ns upstream of, or to the left of the seed.")
     ("padr", po::value<size_t>(&options.right_padding)->default_value(0), "For automatically determined seeds, add Ns downstream of, or to the right of the seed.")
     ;

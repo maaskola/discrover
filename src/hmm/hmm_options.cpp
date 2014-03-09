@@ -201,6 +201,7 @@ namespace Options {
       << "relearning = " << options.multi_motif.relearning << endl
       << "residual_ratio = " << options.multi_motif.residual_ratio << endl
       << "output_compression = " << options.output_compression << endl
+      << "extend= " << options.extend << endl
       << "left_padding = " << options.left_padding << endl
       << "right_padding = " << options.right_padding << endl
       << "print_posterior = " << options.print_posterior << endl

@@ -114,6 +114,7 @@ namespace Options {
     bool weighting;
     MultiMotif multi_motif;
     Compression output_compression;
+    size_t extend;
     size_t left_padding, right_padding;
     bool print_posterior;
     bool timing_information;

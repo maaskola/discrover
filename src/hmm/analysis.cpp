@@ -301,9 +301,8 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
       // seed and learn HMM parameters independently for each Plasma motif
       for(size_t seed_idx = 0; seed_idx < plasma_results.size(); seed_idx++) {
         string motif = plasma_results[seed_idx].motif;
-        string name = motif_spec.name;
 
-        cout << "Considering candidate motif " << name << ":" << motif << " and training to determine the HMM score." << endl;
+        cout << "Considering candidate motif " << motif_spec.name << ":" << motif << " and training to determine the HMM score." << endl;
 
         plasma_results[seed_idx].score = -numeric_limits<double>::infinity();
 
@@ -311,8 +310,15 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         for(auto variant: generate_wiggle_variants(motif, options.wiggle, options.verbosity)) {
           HMM model(hmm);
           if(options.verbosity >= Verbosity::info and options.wiggle > 0)
-            cout << "Considering wiggle variant " << variant << " of candidate motif " << name << ":" << motif << " and training to determine the HMM score." << endl;
-          model.add_motif(variant, options.alpha, expected_seq_size, options.lambda, name, plasma.options.motif_specifications[plasma_motif_idx].insertions, options.left_padding, options.right_padding);
+            cout << "Considering wiggle variant " << variant << " of candidate motif " << motif_spec.name << ":" << motif << " and training to determine the HMM score." << endl;
+
+          if(options.extend > 0) {
+            if(options.verbosity >= Verbosity::info)
+              cout << "Extending seed by " << options.extend << " nucleotides of N." << endl;
+            variant = padding(options.extend) + variant + padding(options.extend);
+          }
+
+          model.add_motif(variant, options.alpha, expected_seq_size, options.lambda, motif_spec.name, plasma.options.motif_specifications[plasma_motif_idx].insertions, options.left_padding, options.right_padding);
 
           Options::HMM options_(options);
           if(options_.long_names)
