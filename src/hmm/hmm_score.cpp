@@ -36,6 +36,8 @@ using namespace std;
 
 #define DO_PARALLEL 1
 
+const bool verbose_conditional_mico_output = true;
+
 HMM::pair_posterior_t &operator+=(HMM::pair_posterior_t &one, const HMM::pair_posterior_t &two)
 {
   one.log_likelihood += two.log_likelihood;
@@ -141,9 +143,10 @@ double HMM::mutual_information(const Data::Contrast &contrast, bitmask_t present
     m(i,1) = contrast.sets[i].set_size - posterior(i);
   }
   m = m + pseudo_count;
-  cout << "HMM::mutual_information(Data::Contrast)" << endl
-    << "present = " << present << endl
-    << "counts  = " << m << endl;
+  if(verbosity >= Verbosity::debug)
+    cout << "HMM::mutual_information(Data::Contrast)" << endl
+      << "present = " << present << endl
+      << "counts  = " << m << endl;
   double mi = calc_mutual_information(m, 0, true, false, false);
 //  if(not check_enrichment(contrast, m, group_idx))
 //    mi = -mi;
@@ -160,7 +163,7 @@ double HMM::mutual_information(const Data::Contrast &contrast, bitmask_t present
  *
  * See Cover & Thomas 2006 equations (2.60) and (2.61)
  */
-double calc_conditional_mutual_information(const Data::Contrast &contrast, const HMM::pair_posteriors_t &pair_posteriors, double ps)
+double calc_conditional_mutual_information(const Data::Contrast &contrast, const HMM::pair_posteriors_t &pair_posteriors, double ps, Verbosity verbosity)
 {
   const size_t X = 2;
   const size_t Y = contrast.sets.size();
@@ -243,50 +246,52 @@ double calc_conditional_mutual_information(const Data::Contrast &contrast, const
 
   mi = max<double>(mi, 0);
 
-  for(size_t z = 0; z < Z; z++) {
-    cout << "conditional_mutual_information z = " << z << " p(x,y,z) =";
+  if(verbosity >= Verbosity::verbose or (verbose_conditional_mico_output and verbosity >= Verbosity::info)) {
+    for(size_t z = 0; z < Z; z++) {
+      cout << "conditional_mutual_information z = " << z << " p(x,y,z) =";
+      for(size_t x = 0; x < X; x++)
+        for(size_t y = 0; y < Y; y++)
+          cout << " " << p[x][y][z];
+      cout << endl;
+    }
+
+    cout << "conditional_mutual_information p(x,z) =";
     for(size_t x = 0; x < X; x++)
-      for(size_t y = 0; y < Y; y++)
-        cout << " " << p[x][y][z];
+      for(size_t z = 0; z < Z; z++)
+        cout << " " << pxz[x][z];
+    cout << endl;
+
+    cout << "conditional_mutual_information p(y,z) =";
+    for(size_t y = 0; y < Y; y++)
+      for(size_t z = 0; z < Z; z++)
+        cout << " " << pyz[y][z];
+    cout << endl;
+
+    cout << "conditional_mutual_information pz =";
+    for(size_t z = 0; z < Z; z++)
+      cout << " " << pz[z];
+    cout << endl;
+
+    for(size_t z = 0; z < Z; z++) {
+      cout << "conditional_mutual_information z = " << z << " p(x,y|z) =";
+      for(size_t x = 0; x < X; x++)
+        for(size_t y = 0; y < Y; y++)
+          cout << " " << p[x][y][z] / pz[z];
+      cout << endl;
+    }
+
+    cout << "conditional_mutual_information p(x|z) =";
+    for(size_t x = 0; x < X; x++)
+      for(size_t z = 0; z < Z; z++)
+        cout << " " << pxz[x][z] / pz[z];
+    cout << endl;
+
+    cout << "conditional_mutual_information p(y|z) =";
+    for(size_t y = 0; y < Y; y++)
+      for(size_t z = 0; z < Z; z++)
+        cout << " " << pyz[y][z] / pz[z];
     cout << endl;
   }
-
-  cout << "conditional_mutual_information p(x,z) =";
-  for(size_t x = 0; x < X; x++)
-    for(size_t z = 0; z < Z; z++)
-      cout << " " << pxz[x][z];
-  cout << endl;
-
-  cout << "conditional_mutual_information p(y,z) =";
-  for(size_t y = 0; y < Y; y++)
-    for(size_t z = 0; z < Z; z++)
-      cout << " " << pyz[y][z];
-  cout << endl;
-
-  cout << "conditional_mutual_information pz =";
-  for(size_t z = 0; z < Z; z++)
-    cout << " " << pz[z];
-  cout << endl;
-
-  for(size_t z = 0; z < Z; z++) {
-    cout << "conditional_mutual_information z = " << z << " p(x,y|z) =";
-    for(size_t x = 0; x < X; x++)
-      for(size_t y = 0; y < Y; y++)
-        cout << " " << p[x][y][z] / pz[z];
-    cout << endl;
-  }
-
-  cout << "conditional_mutual_information p(x|z) =";
-  for(size_t x = 0; x < X; x++)
-    for(size_t z = 0; z < Z; z++)
-      cout << " " << pxz[x][z] / pz[z];
-  cout << endl;
-
-  cout << "conditional_mutual_information p(y|z) =";
-  for(size_t y = 0; y < Y; y++)
-    for(size_t z = 0; z < Z; z++)
-      cout << " " << pyz[y][z] / pz[z];
-  cout << endl;
 
   return(mi);
 }
@@ -294,7 +299,7 @@ double calc_conditional_mutual_information(const Data::Contrast &contrast, const
 /** The pair mutual information
  * This is the mutual information of the two motifs
  */
-double pair_mutual_information(const Data::Contrast &contrast, const HMM::pair_posteriors_t &pair_posteriors, double ps)
+double pair_mutual_information(const Data::Contrast &contrast, const HMM::pair_posteriors_t &pair_posteriors, double ps, Verbosity verbosity)
 {
   const size_t X = 2;
   const size_t Y = 2;
@@ -348,19 +353,21 @@ double pair_mutual_information(const Data::Contrast &contrast, const HMM::pair_p
     for(size_t y = 0; y < Y; y++)
         py[y] += p[x][y];
 
-  cout << "pair_mutual_information joint =";
-  for(size_t x = 0; x < X; x++)
+  if(verbosity >= Verbosity::verbose or (verbose_conditional_mico_output and verbosity >= Verbosity::info)) {
+    cout << "pair_mutual_information joint =";
+    for(size_t x = 0; x < X; x++)
+      for(size_t y = 0; y < Y; y++)
+        cout << " " << p[x][y];
+    cout << endl;
+    cout << "pair_mutual_information px =";
+    for(size_t x = 0; x < X; x++)
+      cout << " " << px[x];
+    cout << endl;
+    cout << "pair_mutual_information py =";
     for(size_t y = 0; y < Y; y++)
-      cout << " " << p[x][y];
-  cout << endl;
-  cout << "pair_mutual_information px =";
-  for(size_t x = 0; x < X; x++)
-    cout << " " << px[x];
-  cout << endl;
-  cout << "pair_mutual_information py =";
-  for(size_t y = 0; y < Y; y++)
-    cout << " " << py[y];
-  cout << endl;
+      cout << " " << py[y];
+    cout << endl;
+  }
 
   double mi = 0;
   for(size_t x = 0; x < X; x++)
@@ -379,13 +386,13 @@ double HMM::conditional_mutual_information(const Data::Contrast &contrast, bitma
   if(verbosity >= Verbosity::debug)
     cout << "HMM::conditional_mutual_information(Data::Contrast)" << endl;
   auto pair_posteriors = pair_posterior_atleast_one(contrast, present, previous);
-  double conditional_mi = calc_conditional_mutual_information(contrast, pair_posteriors, pseudo_count);
-  double pair_mi = pair_mutual_information(contrast, pair_posteriors, pseudo_count);
+  double conditional_mi = calc_conditional_mutual_information(contrast, pair_posteriors, pseudo_count, verbosity);
+  double pair_mi = pair_mutual_information(contrast, pair_posteriors, pseudo_count, verbosity);
   double ratio = conditional_mi / pair_mi;
   double score = conditional_mi;
   if(ratio < residual_ratio_threshold)
     score = -numeric_limits<double>::infinity();
-  // if(verbosity >= Verbosity::debug)
+  if(verbosity >= Verbosity::verbose or (verbose_conditional_mico_output and verbosity >= Verbosity::info))
     cout << "HMM::conditional_mutual_information(Data::Contrast)" << endl
       << "present  = " << present << endl
       << "previous = " << previous << endl
@@ -621,8 +628,7 @@ HMM::pair_posterior_t HMM::sum_pair_posterior_atleast_one(const Data::Set &datas
   for(auto &x: pair_counts)
     summed_pair_counts += x;
 
-  // if(verbosity >= Verbosity::debug)
-  if(true)
+  if(verbosity >= Verbosity::verbose or (verbose_conditional_mico_output and verbosity >= Verbosity::info))
     cout << "HMM::sum_pair_posterior_atleast_one(Data::Set = " << dataset.path << ")" << endl
       << "present  = " << present << endl
       << "previous = " << previous << endl
