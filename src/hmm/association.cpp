@@ -108,6 +108,8 @@ double calc_g_test(const matrix_t &matrix, double pseudo_count)
 
 double corrected_pvalue(double score, double n, double df, double motif_len, Verbosity verbosity)
 {
+  if(verbosity >= Verbosity::verbose)
+    cout << "corrected_pvalue(mi=" << score << ", n=" << n << ", df=" << df << ", len=" << motif_len << ")" << endl;
   double g = calc_g_test_from_mi(score, n);
   if(verbosity >= Verbosity::verbose)
     cout << "g = " << g << endl;
