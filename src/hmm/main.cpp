@@ -175,6 +175,7 @@ int main(int argc, const char** argv)
   po::options_description init_options("Initialization options", cols);
   po::options_description eval_options("Evaluation options", cols);
   po::options_description advanced_options("Advanced options", cols);
+  po::options_description multi_motif_options("Multiple motif mode options", cols);
   po::options_description mmie_options("MMIE options", cols);
   po::options_description linesearching_options("Line searching options", cols);
   po::options_description sampling_options("Gibbs sampling options", cols);
@@ -252,8 +253,12 @@ int main(int argc, const char** argv)
     ("iter", po::value<size_t>(&options.termination.max_iter)->default_value(1000), "Maximal number of iterations to perform in training. A value of 0 means no limit, and that the training is only terminated by the tolerance.")
     ("salt", po::value<unsigned int>(&options.random_salt), "Seed for the random number generator.")
     ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
-    ("multiple", po::bool_switch(&options.accept_multiple), "Accept multiple motifs. This can only be used with the objective function MICO.")
+    ;
+
+  multi_motif_options.add_options()
+    ("multiple", po::bool_switch(&options.accept_multiple), "Accept multiple motifs as long as the score increases. This can only be used with the objective function MICO.")
     ("relearn", po::value<Options::Relearning>(&options.relearning)->default_value(Options::Relearning::Full, "full"), "When accepting multiple motifs, whether and how to re-learn the model after a new motif is added. Choices: 'none', 'reest', 'full'.")
+    ("resratio", po::value<double>(&options.residual_ratio)->default_value(5.0), "Cutoff to use to discard new motifs in multi motif mode. The cutoff is applied on the ratio of conditional mutual information of the new motif and the conditions given the previous motifs. Must be non-negative. High values discard more motifs, and lead to less redundant motifs.")
     ("resratio", po::value<double>(&options.residual_ratio)->default_value(5.0), "Cutoff to use to discard new motifs in multi motif mode. The cutoff is applied on the ratio of conditional mutual information of the new motif and the conditions given the previous motifs. Must be non-negative. High values discard more motifs, and lead to less redundant motifs.")
     ;
 
@@ -305,6 +310,7 @@ int main(int argc, const char** argv)
     ;
 
   advanced_options
+    .add(multi_motif_options)
     .add(mmie_options)
     .add(sampling_options);
 
