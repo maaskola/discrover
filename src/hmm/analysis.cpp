@@ -16,6 +16,19 @@
 
 using namespace std;
 
+size_t compute_degrees_of_freedom(const Data::Collection &data, const Options::HMM &options, Specification::Motif &motif_spec) {
+  double df = 0;
+  for(auto &contrast: data) {
+    bool found = false;
+    for(auto &set_spec: options.paths)
+      if(set_spec.contrast == contrast.name and set_spec.motifs.find(motif_spec.name) != end(set_spec.motifs))
+       found = true;
+    if(found)
+      df += (contrast.sets.size() - 1);
+  }
+  return(df);
+}
+
 void check_data(const Data::Collection &collection, const Options::HMM &options)
 {
   if(options.verbosity >= Verbosity::info)
@@ -371,9 +384,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             // motif_len, n, and df are needed for MICO p-value computation
             const size_t motif_len = seed.size();
             const double n = data.set_size; // TODO fix this with regards to pseudo counts and exact reference to the relevant contrast
-            double df = 0;
-            for(auto &contrast: data)
-              df += (contrast.sets.size() - 1); // TODO only use the relevant contrasts for this motif
+            size_t df = compute_degrees_of_freedom(data, options, motif_spec);
 
             vector<size_t> present_groups = {model.get_ngroups() - 1}; // only add the most recently added group
 
