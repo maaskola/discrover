@@ -89,7 +89,7 @@ AnalysisResult train_evaluate(HMM &hmm, const Data::Collection &all_data, const 
 
             learn_tasks = Training::Tasks();
             Training::Task task;
-            task.motif_name = "Background";
+            task.motif_name = "Context";
             task.measure = Measure::Likelihood;
             for(auto &contrast_name: contrast_names)
               task.contrast_expression.push_back({+1, contrast_name});

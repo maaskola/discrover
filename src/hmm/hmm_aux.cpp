@@ -639,7 +639,7 @@ Training::Tasks HMM::define_training_tasks(const Options::HMM &options) const
   if(options.bg_learning != Training::Method::None) {
     Training::Task task;
     if(atleast_one_discriminative_task or options.objectives.empty()) {
-      task.motif_name = "Generative parameters";
+      task.motif_name = "Context";
       task.measure = Measure::Likelihood;
     } else {
       task.motif_name = options.objectives[0].motif_name;
