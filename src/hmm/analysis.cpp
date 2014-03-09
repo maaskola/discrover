@@ -343,7 +343,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             string seed = learned.first;
             auto model = learned.second;
             Training::Tasks tasks = model.define_training_tasks(options);
-            // TODO consider using compute_score instead of compute_score_all_motifs
+            // TODO CONSIDER: using compute_score instead of compute_score_all_motifs
             double score = model.compute_score_all_motifs(training_data, tasks.begin()->measure, options);
             if(score > best_score) {
               best_score = score;
@@ -385,11 +385,11 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             auto model = hmm;
             model.add_motifs(learned_model, false);
 
-            // TODO re-learn at this point?
+            // TODO CONSIDER: re-learn at this point?
 
             // motif_len, n, and df are needed for MICO p-value computation
             const size_t motif_len = seed.size();
-            const double n = data.set_size; // TODO fix this with regards to pseudo counts and exact reference to the relevant contrast
+            const double n = data.set_size; // TODO FIX this with regards to pseudo counts and exact reference to the relevant contrast
             size_t df = compute_degrees_of_freedom(data, options, motif_spec);
 
             vector<size_t> present_groups = {model.get_ngroups() - 1}; // only add the most recently added group
@@ -477,7 +477,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             previous_groups.push_back(hmm.get_ngroups() - 1);
             learned_models.erase(begin(learned_models) + best_index);
 
-            size_t task_idx = 0; // TODO choose the right task; for now assume it is the first one
+            size_t task_idx = 0; // TODO FIX choose the right task; for now assume it is the first one
             double current_score = *result.training.state.scores[task_idx].rbegin();
             if(current_score > best_score_for_this_motif) {
               if(options.verbosity >= Verbosity::info)
@@ -525,7 +525,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
         // make sure that multiple motifs are accepted as long as the total score is increasing
         for(auto &result: results) {
-          size_t task_idx = 0; // TODO choose the right task; for now assume it is the first one
+          size_t task_idx = 0; // TODO FIX choose the right task; for now assume it is the first one
           if(*result.training.state.scores[task_idx].rbegin() == best_score_for_this_motif) {
             HMM best_model = result.model;
             options = result.options;
