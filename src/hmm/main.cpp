@@ -256,10 +256,9 @@ int main(int argc, const char** argv)
     ;
 
   multi_motif_options.add_options()
-    ("multiple", po::bool_switch(&options.accept_multiple), "Accept multiple motifs as long as the score increases. This can only be used with the objective function MICO.")
-    ("relearn", po::value<Options::Relearning>(&options.relearning)->default_value(Options::Relearning::Full, "full"), "When accepting multiple motifs, whether and how to re-learn the model after a new motif is added. Choices: 'none', 'reest', 'full'.")
-    ("resratio", po::value<double>(&options.residual_ratio)->default_value(5.0), "Cutoff to use to discard new motifs in multi motif mode. The cutoff is applied on the ratio of conditional mutual information of the new motif and the conditions given the previous motifs. Must be non-negative. High values discard more motifs, and lead to less redundant motifs.")
-    ("resratio", po::value<double>(&options.residual_ratio)->default_value(5.0), "Cutoff to use to discard new motifs in multi motif mode. The cutoff is applied on the ratio of conditional mutual information of the new motif and the conditions given the previous motifs. Must be non-negative. High values discard more motifs, and lead to less redundant motifs.")
+    ("multiple", po::bool_switch(&options.multi_motif.accept_multiple), "Accept multiple motifs as long as the score increases. This can only be used with the objective function MICO.")
+    ("relearn", po::value<Options::MultiMotif::Relearning>(&options.multi_motif.relearning)->default_value(Options::MultiMotif::Relearning::Full, "full"), "When accepting multiple motifs, whether and how to re-learn the model after a new motif is added. Choices: 'none', 'reest', 'full'.")
+    ("resratio", po::value<double>(&options.multi_motif.residual_ratio)->default_value(5.0), "Cutoff to use to discard new motifs in multi motif mode. The cutoff is applied on the ratio of conditional mutual information of the new motif and the conditions given the previous motifs. Must be non-negative. High values discard more motifs, and lead to less redundant motifs.")
     ;
 
   mmie_options.add_options()
@@ -588,13 +587,13 @@ int main(int argc, const char** argv)
   }
 
   // Ensure that the residual MI ratio cutoff is non-negative
-  if(options.residual_ratio < 0) {
+  if(options.multi_motif.residual_ratio < 0) {
     cout << "Warning: negative value provided for residual mutual information ratio cutoff. Using 0 as value." << endl;
-    options.residual_ratio = 0;
+    options.multi_motif.residual_ratio = 0;
   }
 
   // Ensure that multiple mode is only used with objective function MICO
-  if(options.accept_multiple) {
+  if(options.multi_motif.accept_multiple) {
     for(auto &obj: options.objectives)
       if(obj.measure != Measures::Continuous::Measure::MutualInformation) {
         cout << "Error: multiple motif mode can only be used with the objective function MICO." << endl;

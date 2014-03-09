@@ -47,15 +47,6 @@ namespace Options {
   std::string compression2string(Compression compression);
   std::string compression2ending(Compression compression);
 
-  enum class Relearning {
-    None, // Just add, no relearning
-    Reestimation, // Adapt transitions and background emissions
-    Full // Re-train both previous and newly added motifs
-      // TODO: one might want to add the following modes to train only the most recently added motif:
-      //   * using conditional MI
-      //   * using the motif's objective
-  };
-
   struct Sampling {
     bool do_sampling; // whether to perform Gibbs sampling learning
     int min_size;
@@ -89,6 +80,21 @@ namespace Options {
     bool ric;
   };
 
+  struct MultiMotif {
+    enum class Relearning {
+      None, // Just add, no relearning
+      Reestimation, // Adapt transitions and background emissions
+      Full // Re-train both previous and newly added motifs
+        // TODO: one might want to add the following modes to train only the most recently added motif:
+        //   * using conditional MI
+        //   * using the motif's objective
+    };
+
+    bool accept_multiple;
+    Relearning relearning;
+    double residual_ratio;
+  };
+
   struct HMM {
     std::vector<Specification::Set> paths;
     Specification::Motifs motif_specifications;
@@ -106,9 +112,7 @@ namespace Options {
     bool class_model;
     bool revcomp;
     bool weighting;
-    bool accept_multiple;
-    Relearning relearning;
-    double residual_ratio;
+    MultiMotif multi_motif;
     Compression output_compression;
     size_t left_padding, right_padding;
     bool print_posterior;
@@ -143,10 +147,10 @@ namespace Options {
   };
 
   std::istream &operator>>(std::istream &in, Compression &type);
-  std::istream &operator>>(std::istream &is, Relearning &relearning);
+  std::istream &operator>>(std::istream &is, MultiMotif::Relearning &relearning);
 
   std::ostream &operator<<(std::ostream &os, const Compression &type);
-  std::ostream &operator<<(std::ostream &os, const Relearning &relearning);
+  std::ostream &operator<<(std::ostream &os, const MultiMotif::Relearning &relearning);
   std::ostream &operator<<(std::ostream &os, const Verbosity &verbosity);
   std::ostream &operator<<(std::ostream &os, const LineSearch &options);
   std::ostream &operator<<(std::ostream &os, const Termination &options);

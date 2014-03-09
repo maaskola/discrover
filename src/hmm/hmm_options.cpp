@@ -48,16 +48,16 @@ namespace Options {
     return in;
   }
 
-  istream &operator>>(istream &is, Relearning &relearning)
+  istream &operator>>(istream &is, MultiMotif::Relearning &relearning)
   {
     string word;
     is >> word;
     if(word == "none")
-      relearning = Relearning::None;
+      relearning = MultiMotif::Relearning::None;
     else if(word == "reest")
-      relearning = Relearning::Reestimation;
+      relearning = MultiMotif::Relearning::Reestimation;
     else if(word == "full")
-      relearning = Relearning::Full;
+      relearning = MultiMotif::Relearning::Full;
     else {
       cout << "Error: can not parse relearning mode '" << word << "'." << endl;
       exit(-1);
@@ -71,16 +71,16 @@ namespace Options {
     return out;
   }
 
-  ostream &operator<<(ostream &os, const Relearning &relearning)
+  ostream &operator<<(ostream &os, const MultiMotif::Relearning &relearning)
   {
     switch(relearning) {
-      case Relearning::None:
+      case MultiMotif::Relearning::None:
         os << "none";
         break;
-      case Relearning::Reestimation:
+      case MultiMotif::Relearning::Reestimation:
         os << "reest";
         break;
-      case Relearning::Full:
+      case MultiMotif::Relearning::Full:
         os << "full";
         break;
     }
@@ -197,9 +197,9 @@ namespace Options {
       << "class_model = " << options.class_model << endl
       << "revcomp = " << options.revcomp << endl
       << "weighting = " << options.weighting << endl
-      << "accept_multiple = " << options.accept_multiple << endl
-      << "relearning = " << options.relearning << endl
-      << "residual_ratio = " << options.residual_ratio << endl
+      << "accept_multiple = " << options.multi_motif.accept_multiple << endl
+      << "relearning = " << options.multi_motif.relearning << endl
+      << "residual_ratio = " << options.multi_motif.residual_ratio << endl
       << "output_compression = " << options.output_compression << endl
       << "left_padding = " << options.left_padding << endl
       << "right_padding = " << options.right_padding << endl

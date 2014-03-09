@@ -689,7 +689,7 @@ double HMM::compute_score(const Data::Collection &collection, const Measures::Co
     case Measure::ConditionalMutualInformation:
       // TODO rather than just summing something better needs to be done
       for(auto &contrast: collection)
-        score += conditional_mutual_information(contrast, present_motifs, previous_motifs, options.residual_ratio);
+        score += conditional_mutual_information(contrast, present_motifs, previous_motifs, options.multi_motif.residual_ratio);
       break;
     case Measure::RankInformation:
       for(auto &contrast: collection)

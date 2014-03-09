@@ -71,16 +71,16 @@ AnalysisResult train_evaluate(HMM &hmm, const Data::Collection &all_data, const 
     Training::Tasks learn_tasks = hmm.define_training_tasks(options);
 
     if(relearning_phase) {
-      switch(options.relearning) {
-        case Options::Relearning::None:
+      switch(options.multi_motif.relearning) {
+        case Options::MultiMotif::Relearning::None:
           learn_tasks = Training::Tasks();
           break;
-        case Options::Relearning::Full:
+        case Options::MultiMotif::Relearning::Full:
           break;
         // case Relearning::Added:
         // TODO implement
         //   break;
-        case Options::Relearning::Reestimation:
+        case Options::MultiMotif::Relearning::Reestimation:
           {
             set<string> contrast_names;
             for(auto &task: eval_tasks)
@@ -316,7 +316,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
         }
       }
 
-      if(not options.accept_multiple) {
+      if(not options.multi_motif.accept_multiple) {
         if(learned_models.size() == 1)
           hmm = learned_models.begin()->second;
         else {
