@@ -187,7 +187,6 @@ namespace Options {
       // << "plasma_options = " << options.plasma_options << endl // TODO: implement
       << "evaluation_options = " << options.evaluate << endl
       << "n_threads = " << options.n_threads << endl
-      << "bg_order = " << options.bg_order << endl
       << "n_seq = " << options.n_seq << endl
       << "alpha = " << options.alpha << endl
       << "contingency_pseudo_count = " << options.contingency_pseudo_count << endl

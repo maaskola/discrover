@@ -98,7 +98,7 @@ namespace Options {
     Seeding::Options seeding;
     Evaluation evaluate;
     size_t n_threads;
-    size_t bg_order, n_seq;
+    size_t n_seq;
     double alpha;
     double contingency_pseudo_count, emission_pseudo_count, transition_pseudo_count;
     size_t n_simulations;
