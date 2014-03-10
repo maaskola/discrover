@@ -374,8 +374,12 @@ class HMM {
     double log_likelihood_difference(const Data::Contrast &contrast, bitmask_t present) const;
     /** The mutual information of condition and motif occurrence */
     double mutual_information(const Data::Contrast &contrast, bitmask_t present) const;
+    /** The conditional mutual information of condition and motif occurrence, as well as the motif pair mutual information */
+    std::pair<double, double> conditional_and_motif_pair_mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t previous) const;
     /** The conditional mutual information of condition and motif occurrence, as defined by Elemento et al in the method FIRE */
-    double conditional_mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t previous, double residual_ratio_cutoff) const;
+    double conditional_mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t previous) const;
+    /** The motif pair occurrence mutual information */
+    double motif_pair_mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t previous) const;
     /** The mutual information of rank and motif occurrence. */
     double rank_information(const Data::Contrast &contrast, bitmask_t present) const;
     /** The summed Matthew's correlation coefficients of all individual contrasts. */

@@ -168,6 +168,10 @@ namespace Measures {
       /*
       else if(token == "conditional_mi" or token == "condmi")
         measure = Measure::ConditionalMutualInformation;
+      else if(token == "residual_mi_ratio" or token == "resmiratio")
+        measure = Measure::ResidualMutualInformationRatio;
+      else if(token == "pairmi")
+        measure = Measure::PairMutualInformation;
       */
       else if(token == "ri")
         measure = Measure::RankInformation;
@@ -226,6 +230,15 @@ namespace Measures {
           break;
         case Measure::ConditionalMutualInformation:
           s = "condmi";
+          break;
+        case Measure::ThresholdedConditionalMutualInformation:
+          s = "threshcondmi";
+          break;
+        case Measure::PairMutualInformation:
+          s = "pairmi";
+          break;
+        case Measure::ConditionalPairMutualInformationRatio:
+          s = "condmiratio";
           break;
         case Measure::RankInformation:
           s = "ri";

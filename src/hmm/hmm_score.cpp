@@ -381,23 +381,48 @@ double pair_mutual_information(const Data::Contrast &contrast, const HMM::pair_p
   return(mi);
 }
 
-double HMM::conditional_mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t previous, double residual_ratio_threshold) const
+pair<double,double> HMM::conditional_and_motif_pair_mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t previous) const
+{
+  if(verbosity >= Verbosity::debug)
+    cout << "HMM::conditional_and_motif_pair_mutual_information(Data::Contrast)" << endl;
+  auto pair_posteriors = pair_posterior_atleast_one(contrast, present, previous);
+  double conditional_mi = calc_conditional_mutual_information(contrast, pair_posteriors, pseudo_count, verbosity);
+  double pair_mi = pair_mutual_information(contrast, pair_posteriors, pseudo_count, verbosity);
+  if(verbosity >= Verbosity::verbose)
+    cout << "HMM::conditional_and_motif_pair_mutual_information(Data::Contrast)" << endl
+      << "present  = " << present << endl
+      << "previous = " << previous << endl
+      << "condMI   = " << conditional_mi << " pairMI = " << pair_mi << " ratio = " << (conditional_mi / pair_mi) << endl;
+  return(make_pair(conditional_mi, pair_mi));
+}
+
+
+double HMM::conditional_mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t previous) const
 {
   if(verbosity >= Verbosity::debug)
     cout << "HMM::conditional_mutual_information(Data::Contrast)" << endl;
   auto pair_posteriors = pair_posterior_atleast_one(contrast, present, previous);
   double conditional_mi = calc_conditional_mutual_information(contrast, pair_posteriors, pseudo_count, verbosity);
-  double pair_mi = pair_mutual_information(contrast, pair_posteriors, pseudo_count, verbosity);
-  double ratio = conditional_mi / pair_mi;
-  double score = conditional_mi;
-  if(ratio < residual_ratio_threshold)
-    score = -numeric_limits<double>::infinity();
-  if(verbosity >= Verbosity::verbose or (verbose_conditional_mico_output and verbosity >= Verbosity::info))
+  if(verbosity >= Verbosity::verbose)
     cout << "HMM::conditional_mutual_information(Data::Contrast)" << endl
       << "present  = " << present << endl
       << "previous = " << previous << endl
-      << "condMI   = " << conditional_mi << " pairMI = " << pair_mi << " ratio = " << ratio << endl;
-  return(score);
+      << "condMI   = " << conditional_mi << endl;
+  return(conditional_mi);
+}
+
+double HMM::motif_pair_mutual_information(const Data::Contrast &contrast, bitmask_t present, bitmask_t previous) const
+{
+  if(verbosity >= Verbosity::debug)
+    cout << "HMM::motif_pair_mutual_information(Data::Contrast)" << endl;
+  auto pair_posteriors = pair_posterior_atleast_one(contrast, present, previous);
+  double pair_mi = pair_mutual_information(contrast, pair_posteriors, pseudo_count, verbosity);
+  if(verbosity >= Verbosity::verbose)
+    cout << "HMM::conditional_mutual_information(Data::Contrast)" << endl
+      << "present  = " << present << endl
+      << "previous = " << previous << endl
+      << "pairMI = " << pair_mi << endl;
+  return(pair_mi);
 }
 
 double HMM::rank_information(const Data::Contrast &contrast, bitmask_t present) const
@@ -632,7 +657,7 @@ HMM::pair_posterior_t HMM::sum_pair_posterior_atleast_one(const Data::Set &datas
     cout << "HMM::sum_pair_posterior_atleast_one(Data::Set = " << dataset.path << ")" << endl
       << "present  = " << present << endl
       << "previous = " << previous << endl
-      << "m = " << summed_pair_counts << endl;
+      << "counts: " << summed_pair_counts << endl;
   return(summed_pair_counts);
 }
 
@@ -674,6 +699,8 @@ double HMM::compute_score(const Data::Collection &collection, const Measures::Co
   double score = 0;
   double W = 0;
   double w;
+  bitmask_t present = make_mask(present_motifs);
+  bitmask_t previous = make_mask(previous_motifs);
   switch(measure) {
     case Measure::Likelihood:
       score = log_likelihood(collection);
@@ -681,39 +708,75 @@ double HMM::compute_score(const Data::Collection &collection, const Measures::Co
     case Measure::MutualInformation:
       for(auto &contrast: collection) {
         W += w = contrast.set_size;
-        score += mutual_information(contrast, present_motifs) * (options.weighting ? w : 1);
+        score += mutual_information(contrast, present) * (options.weighting ? w : 1);
       }
       if(options.weighting)
         score /= W;
       break;
+    case Measure::ConditionalPairMutualInformationRatio:
+    case Measure::ThresholdedConditionalMutualInformation:
+      {
+        double conditional_mi = 0;
+        double pair_mi = 0;
+        for(auto &contrast: collection) {
+          W += w = contrast.set_size;
+          auto current = conditional_and_motif_pair_mutual_information(contrast, present, previous);
+          conditional_mi += current.first * (options.weighting ? w : 1);
+          pair_mi += current.second * (options.weighting ? w : 1);
+        }
+        if(options.weighting) {
+          conditional_mi /= W;
+          pair_mi /= W;
+        }
+        double ratio = conditional_mi / pair_mi;
+        if(verbosity >= Verbosity::verbose or (verbose_conditional_mico_output and verbosity >= Verbosity::info))
+          cout << "condMI   = " << conditional_mi << " pairMI = " << pair_mi << " ratio = " << ratio << endl;
+        if(measure == Measure::ConditionalPairMutualInformationRatio)
+          return(ratio);
+        score = conditional_mi;
+        if(ratio < options.multi_motif.residual_ratio)
+          score = 0;
+      }
+      break;
     case Measure::ConditionalMutualInformation:
-      // TODO rather than just summing something better needs to be done
-      for(auto &contrast: collection)
-        score += conditional_mutual_information(contrast, present_motifs, previous_motifs, options.multi_motif.residual_ratio);
+      for(auto &contrast: collection) {
+        W += w = contrast.set_size;
+        score += conditional_mutual_information(contrast, present, previous) * (options.weighting ? w : 1);
+      }
+      if(options.weighting)
+        score /= W;
+      break;
+    case Measure::PairMutualInformation:
+      for(auto &contrast: collection) {
+        W += w = contrast.set_size;
+        score += motif_pair_mutual_information(contrast, present, previous) * (options.weighting ? w : 1);
+      }
+      if(options.weighting)
+        score /= W;
       break;
     case Measure::RankInformation:
       for(auto &contrast: collection)
-        score = rank_information(contrast, present_motifs);
+        score = rank_information(contrast, present);
       break;
     case Measure::MatthewsCorrelationCoefficient:
       for(auto &contrast: collection)
-        score += matthews_correlation_coefficient(contrast, present_motifs);
+        score += matthews_correlation_coefficient(contrast, present);
       break;
     case Measure::DeltaFrequency:
       for(auto &contrast: collection)
-        score += dips_sitescore(contrast, present_motifs);
+        score += dips_sitescore(contrast, present);
       break;
     case Measure::LogLikelihoodDifference:
       for(auto &contrast: collection)
-        score += log_likelihood_difference(contrast, present_motifs);
+        score += log_likelihood_difference(contrast, present);
       break;
     case Measure::ClassificationPosterior:
       for(auto &contrast: collection)
-        score += class_likelihood(contrast, present_motifs, true);
+        score += class_likelihood(contrast, present, true);
       break;
     case Measure::ClassificationLikelihood:
       for(auto &contrast: collection)
-        score += class_likelihood(contrast, present_motifs, false);
+        score += class_likelihood(contrast, present, false);
       break;
     default:
       cout << "Score calculation for '" << measure2string(measure) << "' is not implemented." << endl;
