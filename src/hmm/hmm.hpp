@@ -351,22 +351,7 @@ class HMM {
     double class_likelihood(const Data::Contrast &contrast, bitmask_t present, bool compute_posterior) const;
     double class_likelihood(const Data::Set &dataset, bitmask_t present, bool compute_posterior) const;
 
-    // Discriminative measures, for groups specified by vectors of group indices
-    /** The likelihood difference */
-    double log_likelihood_difference(const Data::Contrast &contrast, const std::vector<size_t> &present_groups) const;
-    /** The mutual information of condition and motif occurrence */
-    double mutual_information(const Data::Contrast &contrast, const std::vector<size_t> &present_groups) const;
-    /** The conditional mutual information of condition and motif occurrence, as defined by Elemento et al in the method FIRE */
-    double conditional_mutual_information(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, const std::vector<size_t> &previous_groups, double residual_ratio_cutoff) const;
-    /** The mutual information of rank and motif occurrence. */
-    double rank_information(const Data::Contrast &contrast, const std::vector<size_t> &present_groups) const;
-    /** The summed Matthew's correlation coefficients of all individual contrasts. */
-    double matthews_correlation_coefficient(const Data::Contrast &contrast, const std::vector<size_t> &present_groups) const;
-    /** The summed difference of expected occurrence frequencies. */
-    double dips_tscore(const Data::Contrast &contrast, const std::vector<size_t> &present_groups) const;
-    /** The summed difference of site occurrence. */
-    double dips_sitescore(const Data::Contrast &contrast, const std::vector<size_t> &present_groups) const;
-
+// TODO make protected
   // protected:
 
     // Discriminative measures, for groups specified by bitmasks

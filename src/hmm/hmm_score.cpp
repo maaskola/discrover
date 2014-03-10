@@ -85,39 +85,6 @@ vector<size_t> unpack_mask(const HMM::bitmask_t x) {
   return(v);
 }
 
-double HMM::mutual_information(const Data::Contrast &contrast, const vector<size_t> &present_groups) const
-{
-  if(verbosity >= Verbosity::debug)
-    cout << "Computing mutual information." << endl;
-  bitmask_t present = make_mask(present_groups);
-  return(mutual_information(contrast, present));
-}
-
-double HMM::conditional_mutual_information(const Data::Contrast &contrast, const vector<size_t> &present_groups, const vector<size_t> &previous_groups, double residual_ratio_threshold) const
-{
-  if(verbosity >= Verbosity::debug)
-    cout << "Computing residual mutual information." << endl;
-  bitmask_t present = make_mask(present_groups);
-  bitmask_t previous = make_mask(previous_groups);
-  return(conditional_mutual_information(contrast, present, previous, residual_ratio_threshold));
-}
-
-double HMM::rank_information(const Data::Contrast &contrast, const vector<size_t> &present_groups) const
-{
-  if(verbosity >= Verbosity::debug)
-    cout << "Computing mutual information." << endl;
-  bitmask_t present = make_mask(present_groups);
-  return(rank_information(contrast, present));
-}
-
-double HMM::matthews_correlation_coefficient(const Data::Contrast &contrast, const vector<size_t> &present_groups) const
-{
-  if(verbosity >= Verbosity::debug)
-    cout << "Computing sum of Matthew's correlation coefficient." << endl;
-  bitmask_t present = make_mask(present_groups);
-  return(matthews_correlation_coefficient(contrast, present));
-}
-
 confusion_matrix HMM::reduce(const vector_t &v, HMM::bitmask_t present, const Data::Contrast &contrast, bool word_stats) const
 {
   confusion_matrix m = {0, 0, 0, 0};
@@ -828,11 +795,6 @@ double HMM::class_likelihood(const Data::Set &dataset, bitmask_t present, bool c
   return(l);
 }
 
-double HMM::log_likelihood_difference(const Data::Contrast &contrast, const vector<size_t> &present_groups) const
-{
-  return(log_likelihood_difference(contrast, make_mask(present_groups)));
-}
-
 bool HMM::is_present(const Data::Set &dataset, bitmask_t present) const
 {
   for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
@@ -852,11 +814,6 @@ double HMM::log_likelihood_difference(const Data::Contrast &contrast, bitmask_t 
   return(d);
 }
 
-double HMM::dips_sitescore(const Data::Contrast &contrast, const vector<size_t> &present_groups) const
-{
-  return(dips_sitescore(contrast, make_mask(present_groups)));
-}
-
 double HMM::dips_sitescore(const Data::Contrast &contrast, bitmask_t present) const
 {
   vector_t posterior = posterior_atleast_one(contrast, present);
@@ -866,11 +823,6 @@ double HMM::dips_sitescore(const Data::Contrast &contrast, bitmask_t present) co
 
   double t = m.true_positives / signal_size - m.false_positives / control_size;
   return(t);
-}
-
-double HMM::dips_tscore(const Data::Contrast &contrast, const vector<size_t> &present_groups) const
-{
-  return(dips_tscore(contrast, make_mask(present_groups)));
 }
 
 double HMM::dips_tscore(const Data::Contrast &contrast, bitmask_t present) const
