@@ -167,6 +167,61 @@ vector<string> generate_wiggle_variants(const string &s,  size_t n, Verbosity ve
   return(variants);
 }
 
+void prepare_scoring_model(HMM &model, vector<size_t> &present_groups, vector<size_t> &previous_groups, const Options::HMM &options)
+{
+  if(options.revcomp) {
+    if(options.verbosity >= Verbosity::info)
+      cout << "Adding reverse complementary motifs." << endl;
+
+    pair<HMM, map<size_t,size_t>> rc = model.add_revcomp_motifs();
+    model = rc.first;
+    map<size_t,size_t> rc_assoc = rc.second;
+
+    // add reverse-complementary motifs of the present motifs
+    auto scoring_present_groups = present_groups;
+    for(auto x: present_groups)
+      scoring_present_groups.push_back(rc_assoc[x]);
+    present_groups = scoring_present_groups;
+
+    // add reverse-complementary motifs of the previous motifs
+    auto scoring_previous_groups = previous_groups;
+    for(auto x: previous_groups)
+      scoring_previous_groups.push_back(rc_assoc[x]);
+    previous_groups = scoring_previous_groups;
+  }
+
+  if(options.verbosity >= Verbosity::info)
+    for(size_t i = 0; i < model.get_ngroups(); i++)
+      if(model.is_motif_group(i))
+        cout << (find(begin(present_groups), end(present_groups), i) != end(present_groups) ? "+" : "-")
+          << " " << model.get_group_consensus(i) << endl;
+}
+
+bool check_pairwise_with_previous_motifs(const HMM &model, const Data::Collection &data, const vector<size_t> &present_groups, const vector<size_t> &previous_groups, const Options::HMM &options)
+{
+  if(previous_groups.size() > 1) {
+    if(options.verbosity >= Verbosity::info)
+      cout << "Filtering motif for redundancy with individual previous motifs:" << endl;
+    for(auto &previous_group: previous_groups) {
+      // TODO: reduce model to only these two motifs?
+      auto scoring_model = model;
+      auto scoring_present_groups = present_groups;
+      vector<size_t> scoring_previous_groups;
+      scoring_previous_groups.push_back(previous_group);
+
+      prepare_scoring_model(scoring_model, scoring_present_groups, scoring_previous_groups, options);
+      double ratio = scoring_model.compute_score(data, Measures::Continuous::Measure::ConditionalPairMutualInformationRatio, options, scoring_present_groups, scoring_previous_groups);
+      if(ratio < options.multi_motif.residual_ratio) {
+        if(options.verbosity >= Verbosity::info)
+          cout << "Motif " << model.get_group_consensus(*present_groups.rbegin()) << " is redundant with previous motif " << model.get_group_consensus(previous_group) << endl;
+        return(false);
+      }
+    }
+  }
+  return(true);
+}
+
+
 
 HMM doit(const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const Options::HMM &options_)
 {
@@ -394,45 +449,27 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
             vector<size_t> present_groups = {model.get_ngroups() - 1}; // only add the most recently added group
 
-            double mi;
+            double mi = 0;
 
             if(previous_groups.empty()) {
               mi = model.compute_score(data, Measures::Continuous::Measure::MutualInformation, options, present_groups);
-              cout << "mi = " << mi << endl;
+              if(options.verbosity >= Verbosity::info)
+                cout << "mi = " << mi << endl;
             } else {
-              cout << "Scoring residual information - motifs:" << endl;
-
-              auto scoring_present_groups = present_groups;
-              auto scoring_previous_groups = previous_groups;
-              auto scoring_model = model;
-
-              if(options.revcomp) {
+              bool pairwise_ok = check_pairwise_with_previous_motifs(model, data, present_groups, previous_groups, options);
+              if(pairwise_ok) {
                 if(options.verbosity >= Verbosity::info)
-                  cout << "Adding reverse complementary motifs." << endl;
+                  cout << "Scoring residual information - motifs:" << endl;
 
-                pair<HMM, map<size_t,size_t>> rc = model.add_revcomp_motifs();
-                scoring_model = rc.first;
-                map<size_t,size_t> rc_assoc = rc.second;
+                auto scoring_model = model;
+                auto scoring_present_groups = present_groups;
+                auto scoring_previous_groups = previous_groups;
+                prepare_scoring_model(scoring_model, scoring_present_groups, scoring_previous_groups, options);
+                mi = scoring_model.compute_score(data, Measures::Continuous::Measure::ThresholdedConditionalMutualInformation, options, scoring_present_groups, scoring_previous_groups);
 
-                // add reverse-complementary motifs of the present motifs
-                for(auto x: present_groups)
-                  scoring_present_groups.push_back(rc_assoc[x]);
-
-                // add reverse-complementary motifs of the previous motifs
-                for(auto x: previous_groups)
-                  scoring_previous_groups.push_back(rc_assoc[x]);
+                if(options.verbosity >= Verbosity::info)
+                  cout << "residual mutual information = " << mi << endl;
               }
-
-              if(options.verbosity >= Verbosity::info)
-                for(size_t i = 0; i < scoring_model.get_ngroups(); i++)
-                  if(scoring_model.is_motif_group(i))
-                    cout << (find(begin(scoring_present_groups), end(scoring_present_groups), i) != end(scoring_present_groups) ? "+" : "-")
-                      << " " << scoring_model.get_group_consensus(i) << endl;
-
-              mi = scoring_model.compute_score(data, Measures::Continuous::Measure::ConditionalMutualInformation, options, scoring_present_groups, scoring_previous_groups);
-
-              if(options.verbosity >= Verbosity::info)
-                cout << "residual mutual information = " << mi << endl;
             }
 
             double score = - corrected_pvalue(mi, n, df, motif_len, Verbosity::verbose);
