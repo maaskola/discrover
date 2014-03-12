@@ -54,7 +54,9 @@ ostream &operator<<(ostream &os, const HMM::pair_posterior_t &p)
     << " A = " << p.posterior_first
     << " B = " << p.posterior_second
     << " AB = " << p.posterior_both
-    << " not(AB) = " << p.posterior_none;
+    << " not(AB) = " << p.posterior_none << endl;
+  os << p.posterior_both << "\t" << p.posterior_first - p.posterior_both << endl
+    << p.posterior_second - p.posterior_both << "\t" << p.posterior_none << endl;
   return(os);
 }
 
@@ -215,24 +217,27 @@ double calc_conditional_mutual_information(const Data::Contrast &contrast, const
 
   if(verbosity >= Verbosity::verbose or (verbose_conditional_mico_output and verbosity >= Verbosity::info)) {
     for(size_t z = 0; z < Z; z++) {
-      cout << "conditional_mutual_information z = " << z << " p(x,y,z) =";
-      for(size_t x = 0; x < X; x++)
+      cout << "conditional_mutual_information p(x,y,z=" << z << "):" << endl;
+      for(size_t x = 0; x < X; x++) {
         for(size_t y = 0; y < Y; y++)
           cout << " " << p[x][y][z];
+        cout << endl;
+      }
+    }
+
+    for(size_t z = 0; z < Z; z++) {
+      cout << "conditional_mutual_information p(x,z=" << z << ") =";
+      for(size_t x = 0; x < X; x++)
+        cout << " " << pxz[x][z];
       cout << endl;
     }
 
-    cout << "conditional_mutual_information p(x,z) =";
-    for(size_t x = 0; x < X; x++)
-      for(size_t z = 0; z < Z; z++)
-        cout << " " << pxz[x][z];
-    cout << endl;
-
-    cout << "conditional_mutual_information p(y,z) =";
-    for(size_t y = 0; y < Y; y++)
-      for(size_t z = 0; z < Z; z++)
+    for(size_t z = 0; z < Z; z++) {
+      cout << "conditional_mutual_information p(y,z=" << z << ") =";
+      for(size_t y = 0; y < Y; y++)
         cout << " " << pyz[y][z];
-    cout << endl;
+      cout << endl;
+    }
 
     cout << "conditional_mutual_information pz =";
     for(size_t z = 0; z < Z; z++)
@@ -240,23 +245,28 @@ double calc_conditional_mutual_information(const Data::Contrast &contrast, const
     cout << endl;
 
     for(size_t z = 0; z < Z; z++) {
-      cout << "conditional_mutual_information z = " << z << " p(x,y|z) =";
-      for(size_t x = 0; x < X; x++)
+      cout << "conditional_mutual_information p(x,y|z=" << z << "):" << endl;
+      for(size_t x = 0; x < X; x++) {
         for(size_t y = 0; y < Y; y++)
           cout << " " << p[x][y][z] / pz[z];
+        cout << endl;
+      }
+    }
+
+    for(size_t z = 0; z < Z; z++) {
+      cout << "conditional_mutual_information p(x|z=" << z << ") =";
+      for(size_t x = 0; x < X; x++)
+        cout << " " << pxz[x][z] / pz[z];
       cout << endl;
     }
 
-    cout << "conditional_mutual_information p(x|z) =";
-    for(size_t x = 0; x < X; x++)
-      for(size_t z = 0; z < Z; z++)
-        cout << " " << pxz[x][z] / pz[z];
-    cout << endl;
-
-    cout << "conditional_mutual_information p(y|z) =";
-    for(size_t y = 0; y < Y; y++)
-      for(size_t z = 0; z < Z; z++)
+    for(size_t z = 0; z < Z; z++) {
+      cout << "conditional_mutual_information p(y|z=" << z << ") =";
+      for(size_t y = 0; y < Y; y++)
         cout << " " << pyz[y][z] / pz[z];
+      cout << endl;
+    }
+    cout << "cond-MICO = " << mi << endl;
     cout << endl;
   }
 
@@ -359,7 +369,7 @@ pair<double,double> HMM::conditional_and_motif_pair_mutual_information(const Dat
     cout << "HMM::conditional_and_motif_pair_mutual_information(Data::Contrast)" << endl
       << "present  = " << present << endl
       << "previous = " << previous << endl
-      << "condMI   = " << conditional_mi << " pairMI = " << pair_mi << " ratio = " << (conditional_mi / pair_mi) << endl;
+      << "condMI = " << conditional_mi << " pairMI = " << pair_mi << " ratio = " << (conditional_mi / pair_mi) << endl;
   return(make_pair(conditional_mi, pair_mi));
 }
 
@@ -374,7 +384,7 @@ double HMM::conditional_mutual_information(const Data::Contrast &contrast, bitma
     cout << "HMM::conditional_mutual_information(Data::Contrast)" << endl
       << "present  = " << present << endl
       << "previous = " << previous << endl
-      << "condMI   = " << conditional_mi << endl;
+      << "condMI = " << conditional_mi << endl;
   return(conditional_mi);
 }
 
@@ -697,7 +707,7 @@ double HMM::compute_score(const Data::Collection &collection, const Measures::Co
         }
         double ratio = conditional_mi / pair_mi;
         if(verbosity >= Verbosity::verbose or (verbose_conditional_mico_output and verbosity >= Verbosity::info))
-          cout << "condMI   = " << conditional_mi << " pairMI = " << pair_mi << " ratio = " << ratio << endl;
+          cout << "condMI = " << conditional_mi << " pairMI = " << pair_mi << " ratio = " << ratio << endl;
         if(measure == Measure::ConditionalPairMutualInformationRatio)
           return(ratio);
         score = conditional_mi;
