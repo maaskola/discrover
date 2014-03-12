@@ -589,6 +589,10 @@ vector_t HMM::posterior_atleast_one(const Data::Set &dataset, bitmask_t present)
   return(vec);
 };
 
+enum class PairPosteriorMode {
+  MutualPresence,
+  Independence
+};
 
 HMM::pair_posteriors_t HMM::pair_posterior_atleast_one(const Data::Set &dataset, bitmask_t present, bitmask_t previous) const
 {
@@ -610,18 +614,34 @@ HMM::pair_posteriors_t HMM::pair_posterior_atleast_one(const Data::Set &dataset,
   SubHMM subhmm_both(*this, complementary_states_mask(present | previous));
 #pragma omp parallel for schedule(static) if(DO_PARALLEL)
   for(size_t i = 0; i < dataset.set_size; i++) {
-    double logp = log_likelihood_from_scale(compute_forward_scale(dataset.sequences[i]));
-    double logp_wo_one = log_likelihood_from_scale(subhmm_one.compute_forward_scale(dataset.sequences[i]));
-    double logp_wo_two = log_likelihood_from_scale(subhmm_two.compute_forward_scale(dataset.sequences[i]));
-    double logp_wo_either = log_likelihood_from_scale(subhmm_both.compute_forward_scale(dataset.sequences[i]));
-    double z_one = 1 - exp(logp_wo_one - logp);
-    double z_two = 1 - exp(logp_wo_two - logp);
-    double z_either = 1 - exp(logp_wo_either - logp);
-    double z_both =  z_one + z_two - z_either;
-    pair_posterior_t p = {logp, z_one, z_two, z_both, 1 - z_either};
-    if(verbosity >= Verbosity::debug)
-      cout << "seq = " << dataset.sequences[i].definition << p << endl;
-    vec[i] = p;
+    const PairPosteriorMode mode = PairPosteriorMode::Independence;
+    if(mode == PairPosteriorMode::MutualPresence) {
+      double logp = log_likelihood_from_scale(compute_forward_scale(dataset.sequences[i]));
+      double logp_wo_one = log_likelihood_from_scale(subhmm_one.compute_forward_scale(dataset.sequences[i]));
+      double logp_wo_two = log_likelihood_from_scale(subhmm_two.compute_forward_scale(dataset.sequences[i]));
+      double logp_wo_either = log_likelihood_from_scale(subhmm_both.compute_forward_scale(dataset.sequences[i]));
+      double z_one = 1 - exp(logp_wo_one - logp);
+      double z_two = 1 - exp(logp_wo_two - logp);
+      double z_either = 1 - exp(logp_wo_either - logp);
+      double z_both =  z_one + z_two - z_either;
+      pair_posterior_t p = {logp, z_one, z_two, z_both, 1 - z_either};
+      if(verbosity >= Verbosity::debug)
+        cout << "seq = " << dataset.sequences[i].definition << " " << p << endl;
+      vec[i] = p;
+    } else if(mode == PairPosteriorMode::Independence) {
+      double logp = log_likelihood_from_scale(compute_forward_scale(dataset.sequences[i]));
+      double logp_wo_one = log_likelihood_from_scale(subhmm_one.compute_forward_scale(dataset.sequences[i]));
+      double logp_wo_two = log_likelihood_from_scale(subhmm_two.compute_forward_scale(dataset.sequences[i]));
+      double logp_wo_either = log_likelihood_from_scale(subhmm_both.compute_forward_scale(dataset.sequences[i]));
+      double z_one = 1 - exp(logp_wo_either - logp_wo_two);
+      double z_two = 1 - exp(logp_wo_either - logp_wo_one);
+      double z_neither = (1 - z_one) * (1 - z_two);
+      double z_both =  z_one * z_two;
+      pair_posterior_t p = {logp, z_one, z_two, z_both, z_neither};
+      if(verbosity >= Verbosity::debug)
+        cout << "seq = " << dataset.sequences[i].definition << " " << p << endl;
+      vec[i] = p;
+    }
   }
 
   if(verbosity >= Verbosity::debug)
