@@ -20,6 +20,45 @@ static const bool drop_below_mico_pvalue_threshold = true; // whether to drop mo
 static const double log_pvalue_threshold = log(0.05); // MICO p-value threshold to drop models in multiple motif mode
 static const Measures::Continuous::Measure filtering_measure = Measures::Continuous::Measure::ThresholdedConditionalMutualInformation;
 
+void recreate_symlink(const string &source, const string &target) {
+  using namespace boost::filesystem;
+  if(exists(target)) {
+    cout << "Warning: file " << target << " exists. Deleting." << endl;
+    remove(target);
+  }
+  create_symlink(absolute(source), target);
+}
+
+struct AnalysisResult {
+  AnalysisResult(const HMM &model, const Options::HMM &opts) : training(), training_evaluation(), test_evaluation(), full_evaluation(), model(model), options(opts) {
+  };
+  Training::Result training;
+  Evaluation::Result training_evaluation;
+  Evaluation::Result test_evaluation;
+  Evaluation::Result full_evaluation;
+  HMM model;
+  Options::HMM options;
+  void create_symlinks() const {
+    // create soft-links for his model
+    string parameter_path = options.label + ".accepted.hmm";
+    string summary_path = options.label + ".accepted.summary";
+    string table_path = options.label + ".accepted.table" + compression2ending(options.output_compression);
+    string viterbi_path = options.label + ".accepted.viterbi" + compression2ending(options.output_compression);
+
+    recreate_symlink(training.parameter_file, parameter_path);
+    recreate_symlink(full_evaluation.files.summary, summary_path);
+    recreate_symlink(full_evaluation.files.table, table_path);
+    recreate_symlink(full_evaluation.files.viterbi, viterbi_path);
+
+    if(options.verbosity >= Verbosity::info)
+      cout << "The results of the accepted model can be found in" << endl
+        << parameter_path << endl
+        << summary_path << endl
+        << table_path << endl
+        << viterbi_path << endl;
+  }
+};
+
 size_t compute_degrees_of_freedom(const Data::Collection &data, const Options::HMM &options, Specification::Motif &motif_spec) {
   double df = 0;
   for(auto &contrast: data) {
@@ -65,17 +104,6 @@ void check_data(const Data::Collection &collection, const Options::HMM &options)
 //    }
 //  }
 }
-
-struct AnalysisResult {
-  AnalysisResult(const HMM &model, const Options::HMM &opts) : training(), training_evaluation(), test_evaluation(), full_evaluation(), model(model), options(opts) {
-  };
-  Training::Result training;
-  Evaluation::Result training_evaluation;
-  Evaluation::Result test_evaluation;
-  Evaluation::Result full_evaluation;
-  HMM model;
-  Options::HMM options;
-};
 
 AnalysisResult train_evaluate(HMM &hmm, const Data::Collection &all_data, const Data::Collection &training_data, const Data::Collection &test_data, const Options::HMM &options, bool do_training, bool relearning_phase=false)
 {
@@ -598,22 +626,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
           if(*result.training.state.scores[task_idx].rbegin() == best_score_for_this_motif) {
             HMM best_model = result.model;
             options = result.options;
-            // create soft-links for his model
-            string parameter_path = options.label + ".accepted.hmm";
-            string summary_path = options.label + ".accepted.summary";
-            string table_path = options.label + ".accepted.table" + compression2ending(options.output_compression);
-            string viterbi_path = options.label + ".accepted.viterbi" + compression2ending(options.output_compression);
-            boost::filesystem::create_symlink(result.training.parameter_file, parameter_path);
-            boost::filesystem::create_symlink(result.full_evaluation.files.summary, summary_path);
-            boost::filesystem::create_symlink(result.full_evaluation.files.table, table_path);
-            boost::filesystem::create_symlink(result.full_evaluation.files.viterbi, viterbi_path);
-
-            if(options.verbosity >= Verbosity::info)
-              cout << "The results of the accepted model can be found in" << endl
-                << parameter_path << endl
-                << summary_path << endl
-                << table_path << endl
-                << viterbi_path << endl;
+            result.create_symlinks();
           }
         }
       }
