@@ -37,6 +37,7 @@ using namespace std;
 #define DO_PARALLEL 1
 
 const bool verbose_conditional_mico_output = true;
+const bool use_conditional_pair_mi = true;
 
 HMM::pair_posterior_t &operator+=(HMM::pair_posterior_t &one, const HMM::pair_posterior_t &two)
 {
@@ -132,11 +133,20 @@ double HMM::mutual_information(const Data::Contrast &contrast, bitmask_t present
  *
  * See Cover & Thomas 2006 equations (2.60) and (2.61)
  */
-double calc_conditional_mutual_information(const Data::Contrast &contrast, const HMM::pair_posteriors_t &pair_posteriors, double ps, Verbosity verbosity)
+double calc_conditional_mutual_information(const Data::Contrast &contrast, const HMM::pair_posteriors_t &pair_posteriors, double ps, Verbosity verbosity, size_t mode=0)
 {
   const size_t X = 2;
-  const size_t Y = contrast.sets.size();
-  const size_t Z = 2;
+  size_t Y = contrast.sets.size();
+  size_t Z = 2;
+  if(mode == 0)
+    if(verbosity >= Verbosity::verbose or (verbose_conditional_mico_output and verbosity >= Verbosity::info))
+      cout << "Conditional mutual information of X=new motif, and Y=contrast, given Z=previous motifs" << endl;
+  if(mode != 0) {
+    if(verbosity >= Verbosity::verbose or (verbose_conditional_mico_output and verbosity >= Verbosity::info))
+      cout << "Conditional mutual information of X=new motif, and Y=previous motifs, given Z=contrast" << endl;
+    Y = 2;
+    Z = contrast.sets.size();
+  }
 
   typedef boost::multi_array<double, 1> array1_t;
   typedef array1_t::index index;
@@ -150,13 +160,23 @@ double calc_conditional_mutual_information(const Data::Contrast &contrast, const
   // the joint probability of X, Y, and Z
   array_t p(boost::extents[X][Y][Z]);
 
- // fill joint probability table with absolute counts
-  for(size_t i = 0; i < contrast.sets.size(); i++) {
-    p[0][i][0] = pair_posteriors[i].posterior_both;
-    p[0][i][1] = pair_posteriors[i].posterior_first - pair_posteriors[i].posterior_both;
-    p[1][i][0] = pair_posteriors[i].posterior_second - pair_posteriors[i].posterior_both;
-    p[1][i][1] = pair_posteriors[i].posterior_none;
-  }
+  if(mode == 0)
+    // fill joint probability table with absolute counts
+    for(size_t i = 0; i < contrast.sets.size(); i++) {
+      p[0][i][0] = pair_posteriors[i].posterior_both;
+      p[0][i][1] = pair_posteriors[i].posterior_first - pair_posteriors[i].posterior_both;
+      p[1][i][0] = pair_posteriors[i].posterior_second - pair_posteriors[i].posterior_both;
+      p[1][i][1] = pair_posteriors[i].posterior_none;
+    }
+  else
+    // fill joint probability table with absolute counts
+    for(size_t i = 0; i < contrast.sets.size(); i++) {
+      p[0][0][i] = pair_posteriors[i].posterior_both;
+      p[0][1][i] = pair_posteriors[i].posterior_first - pair_posteriors[i].posterior_both;
+      p[1][0][i] = pair_posteriors[i].posterior_second - pair_posteriors[i].posterior_both;
+      p[1][1][i] = pair_posteriors[i].posterior_none;
+    }
+
 
   // add pseudo-count
   for(size_t x = 0; x < X; x++)
@@ -364,7 +384,11 @@ pair<double,double> HMM::conditional_and_motif_pair_mutual_information(const Dat
     cout << "HMM::conditional_and_motif_pair_mutual_information(Data::Contrast)" << endl;
   auto pair_posteriors = pair_posterior_atleast_one(contrast, present, previous);
   double conditional_mi = calc_conditional_mutual_information(contrast, pair_posteriors, pseudo_count, verbosity);
-  double pair_mi = pair_mutual_information(contrast, pair_posteriors, pseudo_count, verbosity);
+  double pair_mi;
+  if(use_conditional_pair_mi)
+    pair_mi = calc_conditional_mutual_information(contrast, pair_posteriors, pseudo_count, verbosity, 1);
+  else
+    pair_mi = pair_mutual_information(contrast, pair_posteriors, pseudo_count, verbosity);
   if(verbosity >= Verbosity::verbose)
     cout << "HMM::conditional_and_motif_pair_mutual_information(Data::Contrast)" << endl
       << "present  = " << present << endl
@@ -393,7 +417,11 @@ double HMM::motif_pair_mutual_information(const Data::Contrast &contrast, bitmas
   if(verbosity >= Verbosity::debug)
     cout << "HMM::motif_pair_mutual_information(Data::Contrast)" << endl;
   auto pair_posteriors = pair_posterior_atleast_one(contrast, present, previous);
-  double pair_mi = pair_mutual_information(contrast, pair_posteriors, pseudo_count, verbosity);
+  double pair_mi;
+  if(use_conditional_pair_mi)
+    pair_mi = calc_conditional_mutual_information(contrast, pair_posteriors, pseudo_count, verbosity, 1);
+  else
+    pair_mi = pair_mutual_information(contrast, pair_posteriors, pseudo_count, verbosity);
   if(verbosity >= Verbosity::verbose)
     cout << "HMM::conditional_mutual_information(Data::Contrast)" << endl
       << "present  = " << present << endl
