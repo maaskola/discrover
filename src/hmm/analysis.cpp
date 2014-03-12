@@ -16,6 +16,10 @@
 
 using namespace std;
 
+static const bool drop_below_mico_pvalue_threshold = true; // whether to drop models below MICO p-value threshold in multiple motif mode
+static const double log_pvalue_threshold = log(0.05); // MICO p-value threshold to drop models in multiple motif mode
+static const Measures::Continuous::Measure filtering_measure = Measures::Continuous::Measure::ThresholdedConditionalMutualInformation;
+
 size_t compute_degrees_of_freedom(const Data::Collection &data, const Options::HMM &options, Specification::Motif &motif_spec) {
   double df = 0;
   for(auto &contrast: data) {
@@ -197,21 +201,42 @@ void prepare_scoring_model(HMM &model, vector<size_t> &present_groups, vector<si
           << " " << model.get_group_consensus(i) << endl;
 }
 
-bool check_pairwise_with_previous_motifs(const HMM &model, const Data::Collection &data, const vector<size_t> &present_groups, const vector<size_t> &previous_groups, const Options::HMM &options)
+bool check_pairwise_with_previous_motifs(const HMM &model, const Data::Collection &data, const vector<size_t> &present_groups, const vector<size_t> &previous_groups, const Options::HMM &options, size_t n, size_t df, size_t motif_len, Measures::Continuous::Measure measure)
 {
   if(previous_groups.size() > 1) {
     if(options.verbosity >= Verbosity::info)
-      cout << "Filtering motif for redundancy with individual previous motifs:" << endl;
+      cout << "Filtering motif for redundancy with all individual previous motifs:" << endl;
     for(auto &previous_group: previous_groups) {
+      bool ok = true;
+
       // TODO: reduce model to only these two motifs?
       auto scoring_model = model;
       auto scoring_present_groups = present_groups;
       vector<size_t> scoring_previous_groups;
       scoring_previous_groups.push_back(previous_group);
-
       prepare_scoring_model(scoring_model, scoring_present_groups, scoring_previous_groups, options);
-      double ratio = scoring_model.compute_score(data, Measures::Continuous::Measure::ConditionalPairMutualInformationRatio, options, scoring_present_groups, scoring_previous_groups);
-      if(ratio < options.multi_motif.residual_ratio) {
+      double score = scoring_model.compute_score(data, measure, options, scoring_present_groups, scoring_previous_groups);
+      switch(measure) {
+        case Measures::Continuous::Measure::ConditionalPairMutualInformationRatio:
+          ok = score >= options.multi_motif.residual_ratio;
+          break;
+        case Measures::Continuous::Measure::ConditionalMutualInformation:
+        case Measures::Continuous::Measure::ThresholdedConditionalMutualInformation:
+          {
+            if(options.verbosity >= Verbosity::info)
+              cout << "conditional MICO = " << score << endl;
+            double log_pvalue = corrected_pvalue(score, n, df, motif_len, Verbosity::verbose);
+            if(options.verbosity >= Verbosity::info)
+              cout << "log p-value of conditional MICO = " << log_pvalue << endl;
+            ok = log_pvalue <= log_pvalue_threshold;
+          }
+          break;
+        default:
+          cout << "Error: measure " << measure << " is not implemented for filtering in multiple motif mode." << endl;
+          exit(-1);
+      }
+
+      if(not ok) {
         if(options.verbosity >= Verbosity::info)
           cout << "Motif " << model.get_group_consensus(*present_groups.rbegin()) << " is redundant with previous motif " << model.get_group_consensus(previous_group) << endl;
         return(false);
@@ -227,8 +252,6 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 {
   vector<AnalysisResult> results;
   // potentially: regardless of the objective function chosen for training, one might use the MICO p-value for selection!
-  const bool drop_below_mico_pvalue_threshold = true; // whether to drop models below MICO p-value threshold in multiple motif mode
-  const double p_mico_threshold = -log(0.05); // MICO p-value threshold to drop models in multiple motif mode
 
   Options::HMM options = options_;
 
@@ -427,7 +450,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
           auto best_model = hmm;
           string best_seed = "";
           bool updated = false;
-          double best_score = -numeric_limits<double>::infinity();
+          double best_log_pvalue = 0;
 
           size_t index = 0;
 
@@ -450,47 +473,56 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             vector<size_t> present_groups = {model.get_ngroups() - 1}; // only add the most recently added group
 
             double mi = 0;
+            double pairwise_ok = true;
 
             if(previous_groups.empty()) {
               mi = model.compute_score(data, Measures::Continuous::Measure::MutualInformation, options, present_groups);
               if(options.verbosity >= Verbosity::info)
                 cout << "mi = " << mi << endl;
             } else {
-              bool pairwise_ok = check_pairwise_with_previous_motifs(model, data, present_groups, previous_groups, options);
+              pairwise_ok = check_pairwise_with_previous_motifs(model, data, present_groups, previous_groups, options, n, df, motif_len, filtering_measure);
               if(pairwise_ok) {
                 if(options.verbosity >= Verbosity::info)
-                  cout << "Scoring residual information - motifs:" << endl;
+                  cout << "Scoring residual information against the disjunction of all previous motifs:" << endl;
 
                 auto scoring_model = model;
                 auto scoring_present_groups = present_groups;
                 auto scoring_previous_groups = previous_groups;
                 prepare_scoring_model(scoring_model, scoring_present_groups, scoring_previous_groups, options);
-                mi = scoring_model.compute_score(data, Measures::Continuous::Measure::ThresholdedConditionalMutualInformation, options, scoring_present_groups, scoring_previous_groups);
+                switch(filtering_measure) {
+                  case Measures::Continuous::Measure::ConditionalMutualInformation:
+                  case Measures::Continuous::Measure::ThresholdedConditionalMutualInformation:
+                    mi = scoring_model.compute_score(data, filtering_measure, options, scoring_present_groups, scoring_previous_groups);
+                    break;
+                  default:
+                    cout << "Error: measure " << filtering_measure << " is not implemented for filtering in multiple motif mode." << endl;
+                    exit(-1);
+                }
 
                 if(options.verbosity >= Verbosity::info)
                   cout << "residual mutual information = " << mi << endl;
               }
             }
 
-            double score = - corrected_pvalue(mi, n, df, motif_len, Verbosity::verbose);
+            if(pairwise_ok) {
+              double log_pvalue = corrected_pvalue(mi, n, df, motif_len, Verbosity::verbose);
 
-            if(options.verbosity >= Verbosity::info)
-              cout << "score = " << score << endl;
+              if(options.verbosity >= Verbosity::info)
+                cout << "Score of the model augmented by " << seed << " has a log p-value of " << log_pvalue << endl << endl;
 
-            if(options.verbosity >= Verbosity::info)
-              cout << "Score of the model augmented by " << seed << " has a score of " << score << endl << endl;
-
-            if((not drop_below_mico_pvalue_threshold) or score >= p_mico_threshold) {
-              if(score > best_score) {
-                cout << "This is the currently best model!" << endl << endl;
-                try_finding_another_motif = true;
-                updated = true;
-                best_model = model;
-                best_seed = seed;
-                best_score = score;
-                best_index = index;
-              }
-            } else
+              if((not drop_below_mico_pvalue_threshold) or log_pvalue <= log_pvalue_threshold) {
+                if(log_pvalue < best_log_pvalue) {
+                  cout << "This is the currently best model!" << endl << endl;
+                  try_finding_another_motif = true;
+                  updated = true;
+                  best_model = model;
+                  best_seed = seed;
+                  best_log_pvalue = log_pvalue;
+                  best_index = index;
+                }
+              } else
+                below_threshold.push_back(seed);
+            } else if(drop_below_mico_pvalue_threshold)
               below_threshold.push_back(seed);
             index++;
           }
@@ -502,7 +534,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             hmm = best_model;
 
             if(options.verbosity >= Verbosity::info)
-              cout << "Accepting seed " << best_seed << " with score " << best_score << endl;
+              cout << "Accepting seed " << best_seed << " with log p-value " << best_log_pvalue << endl;
 
             Options::HMM options_(options);
             if(options.long_names)
