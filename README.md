@@ -11,12 +11,12 @@ See the file [COPYING](COPYING) for detailed conditions of distribution.
 
 
 
-This software packages also contains code coming from an R library:
-Mathlib : A C Library of Special Functions
-Copyright (C) 2005-6 Morten Welinder <terra@gnome.org>
-Copyright (C) 2005-10 The R Foundation
-Copyright (C) 2006-10 The R Core Development Team
-Mathlib is free software and distributed under the GNU GPL version 2.
+This software packages also contains code coming from an R library:<br>
+Mathlib : A C Library of Special Functions<br>
+Copyright (C) 2005-6 Morten Welinder <terra@gnome.org><br>
+Copyright (C) 2005-10 The R Foundation<br>
+Copyright (C) 2006-10 The R Core Development Team<br>
+Mathlib is free software and distributed under the GNU GPL version 2.<br>
 This software package uses routines from Mathlib to compute Chi-Square distribution probabilities by means of the incomplete Gamma function.
 
 
