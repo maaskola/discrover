@@ -203,6 +203,20 @@ namespace Data {
         sets_t sets;
         std::string name;
 
+        // TODO add compression
+        std::vector<std::string> save_shuffle_sequences(const std::string &stem, size_t &idx) const {
+          std::vector<std::string> paths;
+          for(auto dataset: sets)
+            if(dataset.is_shuffle) {
+              std::string path = stem + "_shuffle" + boost::lexical_cast<std::string>(idx++) + ".fa";
+              paths.push_back(path);
+              std::ofstream ofs(path.c_str());
+              for(auto &seq: dataset)
+                ofs << seq << std::endl;
+            }
+          return(paths);
+        };
+
         RemovalReport mask(const Data::mask_t &mask) {
           RemovalReport report;
           for(auto &dataset: sets) {
@@ -290,6 +304,15 @@ namespace Data {
           });
           return(iter);
         }
+
+        std::vector<std::string> save_shuffle_sequences(const std::string &path) const {
+          std::vector<std::string> paths;
+          size_t idx = 0;
+          for(auto &contrast: contrasts)
+            for(auto &x: contrast.save_shuffle_sequences(path, idx))
+              paths.push_back(x);
+          return(paths);
+        };
 
         RemovalReport mask(const Data::mask_t &mask) {
           RemovalReport report;

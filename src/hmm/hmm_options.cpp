@@ -183,6 +183,7 @@ namespace Options {
       << "motif_specifications = " << options.motif_specifications << endl
       << "load_paths = " << options.load_paths << endl
       << "label = " << options.label << endl
+      << "save_shuffle_sequences = " << options.save_shuffle_sequences << endl
       << "seeds = " << options.seeds << endl
       // << "plasma_options = " << options.plasma_options << endl // TODO: implement
       << "evaluation_options = " << options.evaluate << endl

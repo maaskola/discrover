@@ -100,6 +100,7 @@ namespace Options {
     Specification::Motifs motif_specifications;
     std::vector<std::string> load_paths;
     std::string label;
+    bool save_shuffle_sequences;
     std::vector<std::string> seeds;
     Seeding::Options seeding;
     Evaluation evaluate;

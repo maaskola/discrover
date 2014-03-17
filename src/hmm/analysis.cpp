@@ -663,6 +663,12 @@ void perform_analysis(Options::HMM &options)
     cout << "Loading sequences." << endl;
 
   Data::Collection collection(options.paths, options.revcomp, options.n_seq);
+  if(options.save_shuffle_sequences) {
+    auto paths = collection.save_shuffle_sequences(options.label);
+    if(options.verbosity >= Verbosity::info)
+      for(auto &path: paths)
+        cout << "Saving generated shuffle sequences to " << path << "." << endl;
+  }
 
   check_data(collection, options);
 
