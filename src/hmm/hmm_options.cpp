@@ -169,10 +169,10 @@ namespace Options {
 
   ostream &operator<<(ostream &os, const Evaluation &eval_info)
   {
-    os << "Evaluate, perform RIC analysis:\t" << endl << eval_info.ric << endl;
-    os << "Evaluate, print Viterbi path:\t" << endl << eval_info.viterbi_path << endl;
-    os << "Evaluate, print occurrence table:\t" << endl << eval_info.occurrence_table << endl;
-    os << "Evaluate, print summary:\t" << endl << eval_info.summary << endl;
+    os << "Evaluate, perform RIC analysis:\t" << endl << eval_info.perform_ric << endl;
+    os << "Evaluate, skip Viterbi path:\t" << endl << eval_info.skip_viterbi_path << endl;
+    os << "Evaluate, skip occurrence table:\t" << endl << eval_info.skip_occurrence_table << endl;
+    os << "Evaluate, skip summary:\t" << endl << eval_info.skip_summary << endl;
     return(os);
   }
 
@@ -213,8 +213,8 @@ namespace Options {
       << "wiggle = " << options.wiggle << endl
       << "line_search = " << options.line_search << endl
       << "random_salt = " << options.random_salt << endl
-      << "learn_class_prior = " << options.learn_class_prior << endl
-      << "learn_conditional_motif_prior = " << options.learn_conditional_motif_prior << endl
+      << "dont_learn_class_prior = " << options.dont_learn_class_prior << endl
+      << "dont_learn_conditional_motif_prior = " << options.dont_learn_conditional_motif_prior << endl
       << "class_prior = " << options.class_prior << endl
       << "conditional_motif_prior1 = " << options.conditional_motif_prior1 << endl
       << "conditional_motif_prior2 = " << options.conditional_motif_prior2 << endl

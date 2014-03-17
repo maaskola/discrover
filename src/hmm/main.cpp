@@ -232,10 +232,10 @@ int main(int argc, const char** argv)
 
   eval_options.add_options()
     ("posterior", po::bool_switch(&options.print_posterior), "During evaluation also print out the motif posterior probability.")
-    ("no-summary", po::bool_switch(&options.evaluate.summary)->default_value(true), "Do not print summary information.")
-    ("no-viterbi", po::bool_switch(&options.evaluate.viterbi_path)->default_value(true), "Do not print the Viterbi path.")
-    ("no-occ-table", po::bool_switch(&options.evaluate.occurrence_table)->default_value(true), "Do not print the occurrence table.")
-    ("ric", po::bool_switch(&options.evaluate.ric), "Perform a rank information coefficient analysis.")
+    ("nosummary", po::bool_switch(&options.evaluate.skip_summary), "Do not print summary information.")
+    ("noviterbi", po::bool_switch(&options.evaluate.skip_viterbi_path), "Do not print the Viterbi path.")
+    ("notable", po::bool_switch(&options.evaluate.skip_occurrence_table), "Do not print the occurrence table.")
+    ("ric", po::bool_switch(&options.evaluate.perform_ric), "Perform a rank information coefficient analysis.")
     ;
 
 
@@ -263,8 +263,8 @@ int main(int argc, const char** argv)
     ;
 
   mmie_options.add_options()
-    ("no-classp", po::bool_switch(&options.learn_class_prior)->default_value(true), "When performing MMIE, do not learn the class prior.")
-    ("no-motifp", po::bool_switch(&options.learn_conditional_motif_prior)->default_value(true), "When performing MMIE, do not learn the conditional motif prior.")
+    ("noclassp", po::bool_switch(&options.dont_learn_class_prior), "When performing MMIE, do not learn the class prior.")
+    ("nomotifp", po::bool_switch(&options.dont_learn_conditional_motif_prior), "When performing MMIE, do not learn the conditional motif prior.")
     ("classp", po::value<double>(&options.class_prior)->default_value(0.5), "When performing MMIE, use this as initial class prior.")
     ("motifp1", po::value<double>(&options.conditional_motif_prior1)->default_value(0.6, "0.6"), "When performing MMIE, use this as initial conditional motif prior for the signal class.")
     ("motifp2", po::value<double>(&options.conditional_motif_prior2)->default_value(0.03, "0.03"), "When performing MMIE, use this as initial conditional motif prior for the control class.")

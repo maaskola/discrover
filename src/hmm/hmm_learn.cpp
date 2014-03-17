@@ -673,7 +673,7 @@ bool HMM::perform_training_iteration(const Data::Collection &collection,
         done = perform_training_iteration_reestimation(collection, task, options, score) and done;
 
       if((task.measure == Measure::ClassificationPosterior or task.measure == Measure::ClassificationLikelihood)
-          and (options.learn_class_prior or options.learn_conditional_motif_prior))
+          and (not (options.dont_learn_class_prior and options.dont_learn_conditional_motif_prior)))
         done = reestimate_class_parameters(collection, task, options, score) and done;
 
     }
@@ -742,7 +742,7 @@ bool HMM::reestimate_class_parameters(const Data::Collection &collection,
   score = l;
 
   // update and compute L1 norm of update
-  if(options.learn_class_prior) {
+  if(not options.dont_learn_class_prior) {
     if(verbosity >= Verbosity::debug)
       cout << "Updating class prior." << endl;
     for(auto &x: registered_datasets) {
@@ -750,7 +750,7 @@ bool HMM::reestimate_class_parameters(const Data::Collection &collection,
       x.second.class_prior = class_counts[x.first];
     }
   }
-  if(options.learn_conditional_motif_prior) {
+  if(not options.dont_learn_conditional_motif_prior) {
     if(verbosity >= Verbosity::debug)
       cout << "Updating conditional motif priors." << endl;
     for(auto &x: registered_datasets)

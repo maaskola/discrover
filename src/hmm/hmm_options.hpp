@@ -74,10 +74,10 @@ namespace Options {
   };
 
   struct Evaluation {
-    bool occurrence_table;
-    bool summary;
-    bool viterbi_path;
-    bool ric;
+    bool skip_occurrence_table;
+    bool skip_summary;
+    bool skip_viterbi_path;
+    bool perform_ric;
   };
 
   struct MultiMotif {
@@ -126,8 +126,8 @@ namespace Options {
     LineSearch line_search;
     unsigned int random_salt; // seed for the random number generator
 
-    bool learn_class_prior;
-    bool learn_conditional_motif_prior;
+    bool dont_learn_class_prior;
+    bool dont_learn_conditional_motif_prior;
     double class_prior;
     double conditional_motif_prior1, conditional_motif_prior2;
 
