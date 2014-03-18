@@ -233,7 +233,7 @@ namespace Evaluation {
     map<size_t,size_t> n_viterbi_sites;
     map<size_t,size_t> n_viterbi_motifs;
 
-    if(options.evaluate.summary) {
+    if(not options.evaluate.skip_summary) {
       // TODO EVALUATION
       double log_likelihood = hmm.log_likelihood(dataset);
       // out << endl << "Summary of " << dataset.path << endl;
@@ -243,7 +243,7 @@ namespace Evaluation {
       //      out << "Akaike information criterion AIC = " << 2 * hmm.non_zero_parameters(hmm.gen_training_targets(options)) - 2 * log_likelihood << endl;
     }
 
-    if(options.evaluate.viterbi_path)
+    if(not options.evaluate.skip_viterbi_path)
       v_out << "# " << dataset.path << " details following" << endl;
 
     const size_t n_groups = hmm.get_ngroups();
@@ -260,7 +260,7 @@ namespace Evaluation {
       vit_counts[group_idx] = vector<double>(n);
     }
 
-    if(options.evaluate.ric)
+    if(options.evaluate.perform_ric)
       for(size_t group_idx = 0; group_idx < n_groups; group_idx++)
         if(hmm.is_motif_group(group_idx)) {
           HMM::bitmask_t present_mask = 1 << group_idx;
@@ -274,7 +274,7 @@ namespace Evaluation {
       // TODO EVALUATION
       double lp = hmm.viterbi(dataset.sequences[i], viterbi_path);
 
-      if(options.evaluate.viterbi_path or options.evaluate.summary) {
+      if(not (options.evaluate.skip_viterbi_path and options.evaluate.skip_summary)) {
         stringstream viterbi_str, exp_str, atl_str;
 
         bool first = true;
@@ -298,7 +298,7 @@ namespace Evaluation {
             n_viterbi_sites[group_idx] += (n_viterbi > 0 ? 1 : 0);
             n_viterbi_motifs[group_idx] += n_viterbi;
 
-            if(options.evaluate.viterbi_path) {
+            if(not options.evaluate.skip_viterbi_path) {
               viterbi_str << n_viterbi;
               exp_str << expected;
               atl_str << atl;
@@ -306,7 +306,7 @@ namespace Evaluation {
 
             motif_idx++;
           }
-        if(options.evaluate.viterbi_path) {
+        if(not options.evaluate.skip_viterbi_path) {
           v_out << ">" << dataset.sequences[i].definition << endl;
           v_out << "V-sites = " << viterbi_str.str() << " E-sites = " << exp_str.str() << " P(#sites>=1) = " << atl_str.str() << " Viterbi log-p = " << lp << endl;
           v_out << dataset.sequences[i].sequence << endl;
@@ -322,12 +322,12 @@ namespace Evaluation {
       //      v_out << endl;
       //    }
 
-      if(options.evaluate.occurrence_table)
+      if(not options.evaluate.skip_occurrence_table)
         // print to motif occurrence table
         hmm.print_occurrence_table(dataset.path, dataset.sequences[i], viterbi_path, occurrence_out);
     }
 
-    if(options.evaluate.summary) {
+    if(not options.evaluate.skip_summary) {
       out << setw(30) << left << "Rank analysis";
       out << setw(width) << right << "Rho"
         << setw(width) << right << "Z"
@@ -401,7 +401,7 @@ namespace Evaluation {
     ofstream summary_out, occurrence_file, viterbi_file;
     summary_out.open(result.files.summary.c_str());
 
-    if(options.evaluate.summary) {
+    if(not options.evaluate.skip_summary) {
       size_t col0_w = 10, col1_w = 10, col2_w = 10;
       for(size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
         if(hmm.is_motif_group(group_idx)) { // do not output information about non-motif groups
@@ -467,7 +467,7 @@ namespace Evaluation {
 
 
       // TODO reactivate!
-      if(false && options.evaluate.summary) {
+      if(false && not options.evaluate.skip_summary) {
         summary_out << endl;
         Training::Task my_task;
         my_task.measure = Measure::ClassificationPosterior;
@@ -487,7 +487,7 @@ namespace Evaluation {
           counts.push_back(c);
         }
 
-        if(options.evaluate.summary) {
+        if(not options.evaluate.skip_summary) {
           set<size_t> idxs;
           for(auto &a: counts)
             for(auto &b: a.exp_sites)
