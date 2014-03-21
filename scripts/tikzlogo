@@ -9,6 +9,8 @@ require 'ostruct'
 require 'pp'
 require 'tempfile'
 
+$alpha = 0.03
+
 options = OpenStruct.new
 options.small = false
 options.color = :default
@@ -24,11 +26,19 @@ options.background = false
 options.dna = false
 options.simplematrix = false
 options.verbose = false
+options.iupac = []
+options.absent = $alpha
 
 OptionParser.new do |opts|
   opts.banner = "Usage: tikzlogo.rb [options]"
 
  # Optional argument with keyword completion.
+  opts.on("-i", "--iupac [STRING]", "Create a logo for the IUPAC regular expression motif given by the string.") do |v|
+    options.iupac << v
+  end
+  opts.on("--absent [FLOAT]", "When creating logos for IUPAC strings, assume that 'absent' nucleotides have this frequency. Default = #{$alpha}") do |v|
+    options.absent = v.to_f
+  end
   opts.on("--order [TYPE]", [:alpha, :freq, :auto],
           "Select order (alpha, freq, auto)") do |t|
     options.order = t
@@ -386,6 +396,44 @@ end
 
 $node_width = 0.75 * factor
 $node_height = 1.0 * factor
+
+def make_matrix(iupac, alpha)
+  nucls = "acgt".split("")
+  m = []
+  iupac.downcase.split("").each{|x|
+    col = [0.0, 0.0, 0.0, 0.0]
+    present = $iupac2present[x]
+    n = present.length
+    p = (1 - alpha * (4 - n)) / n
+    q = alpha
+    nucls.each_with_index{|y, idx|
+      if present.include?(y)
+        col[idx] = p
+      else
+        col[idx] = q
+      end
+    }
+    m << col
+  }
+  m
+end
+
+options.iupac.each_with_index{|motif, index|
+  path = "motif_%02d" % index
+  directions = [["forward", false]]
+  directions << ["backward", true] if options.revcomp or options.dna
+  directions.each{|direction, revcomp|
+    out_path = path + ".#{direction}.tex"
+    f = File.open(out_path, "w")
+    f.puts $tikz_header
+    e_matrix = make_matrix(motif, options.absent)
+    gen_tex(e_matrix, f, !options.freqlogo, options.background, [$node_width] * e_matrix.length, $node_height, options.order, ! options.dna, ! options.noaxis, revcomp, options.verbose)
+
+    f.puts $tikz_footer
+    f.close
+    tex_paths << out_path
+  }
+}
 
 ARGV.each{|path|
   directions = [["forward", false]]
