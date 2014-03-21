@@ -383,8 +383,10 @@ if options.small
     factor = 0.25
   end
 end
-node_width = 0.75 * factor
-node_height = 1.0 * factor
+
+$node_width = 0.75 * factor
+$node_height = 1.0 * factor
+
 ARGV.each{|path|
   directions = [["forward", false]]
   directions << ["backward", true] if options.revcomp or options.dna
@@ -394,7 +396,7 @@ ARGV.each{|path|
   f.puts $tikz_header
   if options.simplematrix
     e_matrix = read_matrix(path)
-    gen_tex(e_matrix, f, !options.freqlogo, options.background, [node_width] * e_matrix.length, node_height, options.order, ! options.dna, ! options.noaxis, revcomp, options.verbose)
+    gen_tex(e_matrix, f, !options.freqlogo, options.background, [$node_width] * e_matrix.length, $node_height, options.order, ! options.dna, ! options.noaxis, revcomp, options.verbose)
   else
     File.open(path){|g|
       hmm = HMM::Parameters.new(g, options.verbose)
@@ -411,7 +413,7 @@ ARGV.each{|path|
           e_matrix << hmm.emission[x]
         }
 
-        widths = [node_width] * e_matrix.length
+        widths = [$node_width] * e_matrix.length
 
         # fix widths of insert states
         topo_order.each_with_index{|x,idx|
@@ -431,11 +433,11 @@ ARGV.each{|path|
           cumul += x
           v << cumul
         }
-        v.each_with_index{|x,idx| widths[idx] = node_width * x / cumul }
+        v.each_with_index{|x,idx| widths[idx] = $node_width * x / cumul }
 
         # fix widths of final states
         final = hmm.final_states(motif)
-        cumul = node_width
+        cumul = $node_width
         v = []
         final.each{|state|
           v << cumul
@@ -448,7 +450,7 @@ ARGV.each{|path|
 
         f.puts $tikz_newpage unless first
         first = false
-        gen_tex(e_matrix, f, !options.freqlogo, options.background, widths, node_height, options.order, ! options.dna, ! options.noaxis, revcomp, options.verbose)
+        gen_tex(e_matrix, f, !options.freqlogo, options.background, widths, $node_height, options.order, ! options.dna, ! options.noaxis, revcomp, options.verbose)
       }
     }
   end
