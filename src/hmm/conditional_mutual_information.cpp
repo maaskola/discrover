@@ -26,7 +26,9 @@
  *
  * =====================================================================================
  */
+
 #include "conditional_mutual_information.hpp"
+#include <boost/multi_array.hpp>
 
 using namespace std;
 

@@ -32,6 +32,8 @@
 
 #include "hmm.hpp"
 
+const bool verbose_conditional_mico_output = true;
+
 enum class conditionalMI {
   motif_and_condition_given_previous_motifs,
   motif_and_previous_motifs_given_condition
