@@ -28,7 +28,8 @@ def boostify(x)
   y
 end
 
-$present2iupac = {"a" => "a",
+$present2iupac = {
+  "a" => "a",
   "c" => "c",
   "g" => "g",
   "t" => "t",
@@ -44,6 +45,25 @@ $present2iupac = {"a" => "a",
   "agt" => "d",
   "cgt" => "b",
   "acgt" => "n"
+}
+
+$iupac2present = {
+  "a" => "a",
+  "c" => "c",
+  "g" => "g",
+  "t" => "t",
+  "u" => "u",
+  "m" => "ac",
+  "k" => "gt",
+  "r" => "ag",
+  "y" => "ct",
+  "w" => "at",
+  "s" => "cg",
+  "v" => "acg",
+  "h" => "act",
+  "d" => "agt",
+  "b" => "cgt",
+  "n" => "acgt"
 }
 
 def consensus_pos(x, threshold=0.1)
