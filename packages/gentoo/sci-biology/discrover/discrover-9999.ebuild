@@ -14,20 +14,15 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE="dreme doc +rmathlib tcmalloc"
 
-DEPEND="
-	dev-libs/boost
-	rmathlib? ( dev-lang/R )
-	dreme? ( sci-biology/meme )
-	tcmalloc? ( dev-util/google-perftools )
-	doc? ( virtual/latex-base )
-"
 RDEPEND="
 	dev-libs/boost
 	rmathlib? ( dev-lang/R )
 	dreme? ( sci-biology/meme )
 	tcmalloc? ( dev-util/google-perftools )
 "
-
+DEPEND="${RDEPEND}
+	doc? ( virtual/latex-base )
+"
 src_configure() {
 	local mycmakeargs=(
 		$(cmake-utils_use_with rmathlib RMATHLIB)
