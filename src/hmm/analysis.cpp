@@ -23,8 +23,12 @@ static const Measures::Continuous::Measure filtering_measure = Measures::Continu
 void recreate_symlink(const string &source, const string &target) {
   using namespace boost::filesystem;
   if(exists(target)) {
-    cout << "Warning: file " << target << " exists. Deleting." << endl;
-    remove(target);
+    if(is_symlink(target))
+      remove(target);
+    else {
+      cout << "Error: file " << target << " exists and is not a symlink. File will not be overwritten; aborting." << endl;
+      exit(-1);
+    }
   }
   create_symlink(absolute(source), target);
 }
