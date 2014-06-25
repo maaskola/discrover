@@ -35,15 +35,40 @@ bool iupac_included(char r, char q)
     return(true);
   switch(r) {
     case 'a':
-      return(q=='w' or q=='m' or q=='r' or q=='d' or q=='h' or q=='v' or q=='n');
+      switch(q) {
+        case 'w': case 'm': case 'r': case 'd': case 'h': case 'v': case 'n':
+          return true;
+        default:
+          return false;
+      }
     case 'c':
-      return(q=='s' or q=='m' or q=='y' or q=='b' or q=='h' or q=='v' or q=='n');
+      switch(q) {
+        case 's': case 'm': case 'y': case 'b': case 'h': case 'v': case 'n':
+          return true;
+        default:
+          return false;
+      }
     case 'g':
-      return(q=='s' or q=='k' or q=='r' or q=='b' or q=='d' or q=='v' or q=='n');
+      switch(q) {
+        case 's': case 'k': case 'r': case 'b': case 'd': case 'v': case 'n':
+          return true;
+        default:
+          return false;
+      }
     case 't':
-      return(q=='u' or q=='w' or q=='k' or q=='y' or q=='b' or q=='d' or q=='h' or q=='n');
+      switch(q) {
+        case 'u': case 'w': case 'k': case 'y': case 'b': case 'd': case 'h': case 'n':
+          return true;
+        default:
+          return false;
+      }
     case 'u':
-      return(q=='t' or q=='w' or q=='k' or q=='y' or q=='b' or q=='d' or q=='h' or q=='n');
+      switch(q) {
+        case 't': case 'w': case 'k': case 'y': case 'b': case 'd': case 'h': case 'n':
+          return true;
+        default:
+          return false;
+      }
     default:
       return(false);
   }
