@@ -375,21 +375,18 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
     if(options.verbosity >= Verbosity::debug)
       cout << "motif_specs.size() = " << plasma.options.motif_specifications.size() << endl;
-    size_t plasma_motif_idx = 0;
 
     // determine matching Plasma objectives
     plasma.options.objectives = Training::corresponding_objectives(options.objectives, options.use_mi_to_seed);
 
     // while there are motif specifications left
-    while(plasma_motif_idx < plasma.options.motif_specifications.size()) {
+    for(auto motif_spec: options.motif_specifications) {
 
       if(hmm.get_nmotifs() > 0) {
         cout << "Masking plasma data collection." << endl;
         plasma.collection.mask(hmm.compute_mask(training_data));
       }
 
-      // consider the next motif specification
-      auto motif_spec = options.motif_specifications[plasma_motif_idx];
       auto plasma_objective = Seeding::objective_for_motif(plasma.options.objectives, motif_spec);
 
       if(options.verbosity >= Verbosity::info) {
@@ -427,7 +424,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
             variant = padding(options.extend) + variant + padding(options.extend);
           }
 
-          model.add_motif(variant, options.alpha, expected_seq_size, options.lambda, motif_spec.name, plasma.options.motif_specifications[plasma_motif_idx].insertions, options.left_padding, options.right_padding);
+          model.add_motif(variant, options.alpha, expected_seq_size, options.lambda, motif_spec.name, motif_spec.insertions, options.left_padding, options.right_padding);
 
           Options::HMM options_(options);
           if(options_.long_names)
@@ -633,8 +630,6 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
           }
         }
       }
-
-      plasma_motif_idx++;
     }
   }
   return(hmm);
