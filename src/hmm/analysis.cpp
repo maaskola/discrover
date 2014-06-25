@@ -321,6 +321,8 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
   if(options.verbosity >= Verbosity::info)
     cout << "The average sequence size is " << expected_seq_size << "nt." << endl;
 
+  bool run_plasma = false;
+
   for(auto &spec: options.motif_specifications)
     switch(spec.kind) {
       case Specification::Motif::Kind::File:
@@ -335,12 +337,11 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
       case Specification::Motif::Kind::Plasma:
         options.seeding.motif_specifications.push_back(spec);
         training_necessary = true;
+        run_plasma = true;
         break;
     }
 
-  if(find_if(begin(options.motif_specifications), end(options.motif_specifications), [](const Specification::Motif &motif) {
-        return(motif.kind == Specification::Motif::Kind::Plasma);
-        }) == end(options.motif_specifications)) {
+  if(not run_plasma) {
     if(options.verbosity >= Verbosity::info)
       cout << "No automatic seeds are used." << endl;
     auto result = train_evaluate(hmm, all_data, training_data, test_data, options, training_necessary);
