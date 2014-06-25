@@ -264,7 +264,7 @@ int main(int argc, const char** argv) {
 
   size_t n = options.motif_specifications.size();
   for(auto &motif: options.motif_specifications) {
-    for(auto &r:  plasma.find(motif, options.objectives, false))
+    for(auto &r: plasma.find_motifs(motif, Seeding::objective_for_motif(options.objectives, motif.name), false))
       results.push_back(r);
     if(--n > 0)
       plasma.apply_mask(results);

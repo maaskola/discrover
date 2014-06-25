@@ -187,16 +187,16 @@ namespace Seeding {
     return(os);
   }
 
-  ostream &operator<<(ostream &out, const Objectives &objectives) {
-    bool first = true;
-    for(auto &objective: objectives) {
-      if(first)
-        first = false;
-      else
-        out << " ";
-      out << Specification::to_string(objective);
-    }
+  ostream &operator<<(ostream &out, const Objective &objective) {
+    out << Specification::to_string(objective);
     return(out);
+  }
+
+  Objective objective_for_motif(const Objectives &objectives, const string &name) {
+    for(auto objective: objectives)
+      if(objective.motif_name == name)
+        return(objective);
+    throw("bla");
   }
 }
 

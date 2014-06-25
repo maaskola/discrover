@@ -47,7 +47,7 @@ namespace Seeding {
     public:
       Plasma(const Options &options);
       Plasma(const Collection &collection_, const Options &opt);
-      Results find(const Specification::Motif &motif, const Objectives &objectives, bool doreport=true) const;
+      Results find_motifs(const Specification::Motif &motif, const Objective &objective, bool doreport=true) const;
       void apply_mask(const Results &results);
     private:
       Results find_seeds(size_t length, const Objective &objective, Algorithm algorithm);

@@ -814,57 +814,56 @@ namespace Seeding {
   };
 
 
-  Results Plasma::find(const Specification::Motif &motif_spec, const Objectives &objectives, bool doreport) const {
+  Results Plasma::find_motifs(const Specification::Motif &motif_spec, const Objective &objective, bool doreport) const {
     if(options.verbosity >= Verbosity::debug)
-      cout << "motif_spec = " << motif_spec << " objectives = " << objectives << endl;
-    for(auto &objective: objectives)
-      if(objective.motif_name == motif_spec.name) {
+      cout << "motif_spec = " << motif_spec << " objective = " << objective << endl;
+    if(objective.motif_name != motif_spec.name) {
+      cout << "Error: no objective found for motif specification: " << motif_spec.name << ":" << motif_spec.specification << endl;
+      exit(-1);
+    }
 
-        Results results;
-        if(motif_spec.kind == Specification::Motif::Kind::Seed) {
-          Result result(objective);
-          result.motif = motif_spec.specification;
-          result.counts = count_motif(collection, motif_spec.specification, options);
-          result.log_p = -compute_score(collection, result.counts, options, objective, result.motif.length(), motif_degeneracy(result.motif), Measures::Discrete::Measure::CorrectedLogpGtest);
-          result.score = compute_score(collection, result.counts, options, objective, result.motif.length(), motif_degeneracy(result.motif));
-          results.push_back(result);
+    Results results;
+    if(motif_spec.kind == Specification::Motif::Kind::Seed) {
+      Result result(objective);
+      result.motif = motif_spec.specification;
+      result.counts = count_motif(collection, motif_spec.specification, options);
+      result.log_p = -compute_score(collection, result.counts, options, objective, result.motif.length(), motif_degeneracy(result.motif), Measures::Discrete::Measure::CorrectedLogpGtest);
+      result.score = compute_score(collection, result.counts, options, objective, result.motif.length(), motif_degeneracy(result.motif));
+      results.push_back(result);
 
-          return(results);
-        }
+      return(results);
+    }
 
-        if(options.verbosity >= Verbosity::verbose) {
-          cout << "IUPAC regular expression motif finding with libPlasma" << endl;
-          cout << "objective.measure = '" << objective.measure << "' objective.motif = '" << objective.motif_name << "' contrast expr = '";
-          for(auto &expr: objective.contrast_expression)
-            cout << expr;
-          cout << "'" << endl;
-        }
+    if(options.verbosity >= Verbosity::verbose) {
+      cout << "IUPAC regular expression motif finding with libPlasma" << endl;
+      cout << "objective.measure = '" << objective.measure << "' objective.motif = '" << objective.motif_name << "' contrast expr = '";
+      for(auto &expr: objective.contrast_expression)
+        cout << expr;
+      cout << "'" << endl;
+    }
 
-        if(options.verbosity >= Verbosity::debug)
-          cout << "motif_spec = " << motif_spec << " objective = " << to_string(objective) << endl;
+    if(options.verbosity >= Verbosity::debug)
+      cout << "motif_spec = " << motif_spec << " objective = " << to_string(objective) << endl;
 
-        Timer t;
+    Timer t;
 
-        if(not options.only_best)
-          for(auto &result: find_all(motif_spec, objective)) {
-            results.push_back(result);
-            if(doreport)
-              report(cout, result, collection, options);
-          }
-        else
-          for(auto &result: find_multiple(motif_spec, objective)) {
-            results.push_back(result);
-            if(doreport)
-              report(cout, result, collection, options);
-          }
-
-        double time = t.tock() * 1e-6;
-        if(options.measure_runtime)
-          cerr << "Processing took " << time << " seconds." << endl;
-        return(results);
+    if(not options.only_best)
+      for(auto &result: find_all(motif_spec, objective)) {
+        results.push_back(result);
+        if(doreport)
+          report(cout, result, collection, options);
       }
-    cout << "Error: no objective found for motif specification: " << motif_spec.name << ":" << motif_spec.specification << endl;
-    exit(-1);
+    else
+      for(auto &result: find_multiple(motif_spec, objective)) {
+        results.push_back(result);
+        if(doreport)
+          report(cout, result, collection, options);
+      }
+
+    double time = t.tock() * 1e-6;
+    if(options.measure_runtime)
+      cerr << "Processing took " << time << " seconds." << endl;
+    return(results);
   }
 
   void Plasma::apply_mask(const string &motif) {

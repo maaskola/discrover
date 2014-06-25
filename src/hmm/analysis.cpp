@@ -376,6 +376,9 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
       cout << "motif_specs.size() = " << plasma.options.motif_specifications.size() << endl;
     size_t plasma_motif_idx = 0;
 
+    // determine matching Plasma objectives
+    plasma.options.objectives = Training::corresponding_objectives(options.objectives, options.use_mi_to_seed);
+
     // while there are motif specifications left
     while(plasma_motif_idx < plasma.options.motif_specifications.size()) {
 
@@ -386,19 +389,14 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
       // consider the next motif specification
       auto motif_spec = options.motif_specifications[plasma_motif_idx];
+      auto plasma_objective = Seeding::objective_for_motif(plasma.options.objectives, motif_spec.name);
 
-      // determine the matching Plasma objective
-      auto objectives = Training::corresponding_objectives(options.objectives, options.use_mi_to_seed);
-      plasma.options.objectives = objectives;
       if(options.verbosity >= Verbosity::info) {
-        cout << "Determining seed " << motif_spec << " with objective functions";
-        for(auto &obj: objectives)
-          cout << " " << obj;
-        cout << "." << endl;
+        cout << "Determining seed " << motif_spec << " with objective function " << plasma_objective << endl;
       }
 
       // find the next set of seeds with Plasma
-      Seeding::Results plasma_results = plasma.find(motif_spec, objectives);
+      Seeding::Results plasma_results = plasma.find_motifs(motif_spec, plasma_objective);
 
       // if no seeds are found, don't try to find more seeds
       if(plasma_results.empty())
