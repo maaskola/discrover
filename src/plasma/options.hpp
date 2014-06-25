@@ -71,7 +71,7 @@ namespace Seeding {
   typedef Specification::Objective<Measures::Discrete::Measure> Objective;
   typedef std::vector<Objective> Objectives;
 
-  Objective objective_for_motif(const Objectives &objectives, const std::string &name);
+  Objective objective_for_motif(const Objectives &objectives, const Specification::Motif &motif);
 
   std::ostream &operator<<(std::ostream &out, const Objective &objective);
 

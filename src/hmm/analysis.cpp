@@ -389,7 +389,7 @@ HMM doit(const Data::Collection &all_data, const Data::Collection &training_data
 
       // consider the next motif specification
       auto motif_spec = options.motif_specifications[plasma_motif_idx];
-      auto plasma_objective = Seeding::objective_for_motif(plasma.options.objectives, motif_spec.name);
+      auto plasma_objective = Seeding::objective_for_motif(plasma.options.objectives, motif_spec);
 
       if(options.verbosity >= Verbosity::info) {
         cout << "Determining seed " << motif_spec << " with objective function " << plasma_objective << endl;

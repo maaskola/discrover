@@ -192,9 +192,9 @@ namespace Seeding {
     return(out);
   }
 
-  Objective objective_for_motif(const Objectives &objectives, const string &name) {
+  Objective objective_for_motif(const Objectives &objectives, const Specification::Motif &motif) {
     for(auto objective: objectives)
-      if(objective.motif_name == name)
+      if(objective.motif_name == motif.name)
         return(objective);
     throw("bla");
   }
