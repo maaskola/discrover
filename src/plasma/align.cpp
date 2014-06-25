@@ -41,7 +41,9 @@ bool iupac_included(char r, char q)
     case 'g':
       return(q=='s' or q=='k' or q=='r' or q=='b' or q=='d' or q=='v' or q=='n');
     case 't':
-      return(q=='w' or q=='k' or q=='y' or q=='b' or q=='d' or q=='h' or q=='n');
+      return(q=='u' or q=='w' or q=='k' or q=='y' or q=='b' or q=='d' or q=='h' or q=='n');
+    case 'u':
+      return(q=='t' or q=='w' or q=='k' or q=='y' or q=='b' or q=='d' or q=='h' or q=='n');
     default:
       return(false);
   }
