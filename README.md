@@ -28,6 +28,10 @@ This software package uses routines from Mathlib to compute Chi-Square distribut
 The sub-directory doc contains a manual for this package, written in LaTeX.
 A [PDF version](doc/discrover-manual.pdf) of the manual will be generated during the build process of this package.
 
+## Galaxy front-end
+
+There's a module for using Discrover inside the bioinformatics web framework Galaxy in development.
+You can find it [here](https://github.com/maaskola/discrover-galaxy).
 
 
 
