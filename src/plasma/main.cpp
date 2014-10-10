@@ -162,7 +162,7 @@ int main(int argc, const char** argv) {
       "See the file COPYING provided with this software for details of the license.\n" << endl;
     cout << gen_usage_string() << endl;
     cout << desc << "\n";
-    return 1;
+    return EXIT_SUCCESS;
   }
 
 
