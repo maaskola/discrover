@@ -82,6 +82,7 @@ LaTeX is another optional dependency.
 In particular, ```pdflatex``` is used to compile the manual.
 During configuration it is checked if your system has ```pdflatex```.
 If it has, then the manual is built, otherwise building of the manual is skipped.
+
 Note that some LaTeX-packages are used that may not be part of your core LaTeX installation.
 Unfortunately, while our build-system will detect the presence of ```pdflatex```, it is currently not sophisticated enough to figure out if these LaTeX packages are present.
 Thus, if later during compilation you see errors while building the manual, please ensure that you have the requisite LaTeX packages available on your system.
