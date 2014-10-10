@@ -36,20 +36,21 @@ You can find it [here](https://github.com/maaskola/discrover-galaxy).
 
 
 
-## Dependencies
+## Dependencies for building Discrover
 
-This software depends on other software.
+To build Discrover you need to have some software.
 During the configuration phase it is checked whether these packages are found on your system.
-The dependencies are:
+Some functionality of Discrover is enabled if you have certain, optional dependencies.
+The required and optional dependencies include:
 
 
 ### A C++11 supporting compiler
-This software package is written in C++11, so it is necessary to use an up-to-date version of your compiler.
+Discrover is written in C++11, so it is necessary to use an up-to-date version of your compiler.
 The GNU compiler collection supports all necessary features to compile this project as of version 4.6.
 
 
 ### CMake
-We use [CMake](http://www.cmake.org/) to construct Makefiles to build Discrover.
+We use [CMake](http://www.cmake.org/) to construct Makefiles for building Discrover.
 
 
 ### Boost C++ libraries
@@ -74,6 +75,34 @@ If that is the case then we link to it, otherwise code extracted from it is buil
 Optionally, the program DREME from the [MEME suite](http://meme.nbcr.net/meme/) of motif analysis tools can be integrated for seeding of HMM motifs.
 During configuration it is checked if any programs named ```dreme``` or ```meme-dreme``` can be found.
 If that is the case, you will be able to use DREME for motif seeding by specifying ```--algo dreme```.
+
+
+### LaTeX
+LaTeX is another optional dependency.
+In particular, ```pdflatex``` is used to compile the manual.
+During configuration it is checked if your system has ```pdflatex```.
+If it has, then the manual is built, otherwise building of the manual is skipped.
+
+Note that some LaTeX-packages are used that may not be part of your core LaTeX installation.
+Unfortunately, while our build-system will detect the presence of ```pdflatex```, it is currently not sophisticated enough to figure out if these LaTeX packages are present.
+Thus, if later during compilation you see errors while building the manual, please ensure that you have the requisite LaTeX packages available on your system.
+For example, on Debian, they are part of the ```texlive-latex-extra``` package.
+Similarly, on Gentoo, they are part of the ```dev-texlive/texlive-latexextra``` package.
+
+
+## Installing build-time dependencies
+Note that the above-given list of dependencies is required only for BUILDING, not for running.
+On Debian, you can install all necessary and optional software to build Discrover with the following command:
+
+```sh
+apt-get install cmake g++ texlive libboost-all-dev ctags texlive-latex-extra
+```
+
+Similarly, on Gentoo you can use:
+
+```sh
+emerge -av dev-util/cmake sys-devel/g++ dev-libs/boost dev-util/ctags dev-texlive/texlive-latexextra
+```
 
 
 
