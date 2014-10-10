@@ -21,7 +21,7 @@ RDEPEND="
 	tcmalloc? ( dev-util/google-perftools )
 "
 DEPEND="${RDEPEND}
-	doc? ( virtual/latex-base )
+	doc? ( dev-texlive/texlive-latex dev-texlive/texlive-latexextra )
 "
 src_configure() {
 	local mycmakeargs=(
