@@ -4,7 +4,7 @@
 %
 \documentclass[a4paper]{article}
 
-\usepackage{hyperref,verbatimbox,url}
+\usepackage{hyperref,verbatimbox,verbatim,url}
 \usepackage[numbers]{natbib}
 
 \newcommand{\plasma}[0]{\texttt{plasma}}
@@ -255,17 +255,13 @@ If additionally the switch \verb|-v| or its long variant \verb|--verbose| is giv
 \subsection{Command line help of \plasma{}}
 \label{appendix:plasma-cli-help}
 {\small
-\begin{verbatim}
-@PLASMA_CLI_HELP_OUTPUT@
-\end{verbatim}
+\verbatiminput{plasma-cli-help.txt}
 }
 
 \subsection{Command line help of \discrover{}}
 \label{appendix:discrover-cli-help}
 {\small
-\begin{verbatim}
-@DISCROVER_CLI_HELP_OUTPUT@
-\end{verbatim}
+\verbatiminput{discrover-cli-help.txt}
 }
 
 
