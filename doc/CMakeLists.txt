@@ -1,29 +1,34 @@
 INCLUDE(UseLATEX)
 
-ADD_LATEX_DOCUMENT(manual.tex
-  CONFIGURE manual.tex
-  BIBFILES documentation.bib
-  # IMAGE_DIRS images
-  DEFAULT_PDF
-)
+IF(${PDFLATEX_COMPILER} EQUAL "PDFLATEX_COMPILER-NOTFOUND")
+  MESSAGE(ERROR "PDFlatex compiler not found! Manual will not be compiled.")
+ELSE()
+  MESSAGE(STATUS "Found pdflatex: ${PDFLATEX_COMPILER}")
+  ADD_LATEX_DOCUMENT(manual.tex
+    CONFIGURE manual.tex
+    BIBFILES documentation.bib
+    # IMAGE_DIRS images
+    DEFAULT_PDF
+  )
 
-ADD_CUSTOM_COMMAND(TARGET pdf POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy
-  ${CMAKE_CURRENT_BINARY_DIR}/manual.pdf
-  ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME}-manual.pdf
-)
+  ADD_CUSTOM_COMMAND(TARGET pdf POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_BINARY_DIR}/manual.pdf
+    ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME}-manual.pdf
+  )
 
-INSTALL(FILES ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME}-manual.pdf
-  DESTINATION "${CMAKE_INSTALL_PREFIX}/share/doc/${PROJECT_NAME}"
-)
+  INSTALL(FILES ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME}-manual.pdf
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/share/doc/${PROJECT_NAME}"
+  )
 
-get_property(PLASMA_BINARY_PATH TARGET plasma-bin PROPERTY LOCATION)
-get_property(DISCROVER_BINARY_PATH TARGET discrover-bin PROPERTY LOCATION)
+  GET_PROPERTY(PLASMA_BINARY_PATH TARGET plasma-bin PROPERTY LOCATION)
+  GET_PROPERTY(DISCROVER_BINARY_PATH TARGET discrover-bin PROPERTY LOCATION)
 
-ADD_CUSTOM_TARGET(GenCLIHelp
-  COMMAND ${PLASMA_BINARY_PATH} -h > plasma-cli-help.txt
-  COMMAND ${DISCROVER_BINARY_PATH} -h > discrover-cli-help.txt
-  DEPENDS plasma-bin discrover-bin
-)
+  ADD_CUSTOM_TARGET(GenCLIHelp
+    COMMAND ${PLASMA_BINARY_PATH} -h > plasma-cli-help.txt
+    COMMAND ${DISCROVER_BINARY_PATH} -h > discrover-cli-help.txt
+    DEPENDS plasma-bin discrover-bin
+  )
 
-ADD_DEPENDENCIES(pdf GenCLIHelp)
+  ADD_DEPENDENCIES(pdf GenCLIHelp)
+ENDIF()
