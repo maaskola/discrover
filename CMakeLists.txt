@@ -90,6 +90,7 @@ IF(Boost_FOUND)
 ENDIF()
 
 FIND_PACKAGE(OpenMP)
+FIND_PACKAGE(Ctags)
 
 IF(NOT(DEFINED WITH_TCMALLOC) OR WITH_TCMALLOC)
   FIND_PACKAGE(LibGooglePerfTools)
@@ -134,10 +135,13 @@ get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 git_describe(GIT_DESCRIPTION)
 git_branch(GIT_BRANCH)
 
-ADD_CUSTOM_TARGET(ctags ALL
-    COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q src/
-    COMMENT "Creating Ctags."
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} )
+
+IF(CTAGS_FOUND)
+  ADD_CUSTOM_TARGET(ctags ALL
+      COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q src/
+      COMMENT "Creating Ctags."
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} )
+ENDIF()
 
 ADD_SUBDIRECTORY(src build)
 ADD_SUBDIRECTORY(scripts)
