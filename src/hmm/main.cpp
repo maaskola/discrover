@@ -449,7 +449,7 @@ int main(int argc, const char** argv)
         cout << hidden_options << endl;
         break;
     }
-    return 1;
+    return EXIT_SUCCESS;
   }
 
   try {
