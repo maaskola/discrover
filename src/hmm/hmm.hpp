@@ -426,7 +426,7 @@ class HMM {
     /** Compute the gradient of the desired objective function */
     Gradient compute_gradient(const Data::Collection &col, double &score, const Training::Task &task, bool weighting) const;
     Gradient compute_gradient(const Data::Contrast &contrast, double &score, const Training::Task &task) const;
-    double compute_gradient(const Data::Contrast &contrast, Gradient &gradient, const Training::Task &task, bitmask_t present) const;
+    double compute_gradient(const Data::Contrast &contrast, Gradient &gradient, const Training::Task &task) const;
 
 
 // -------------------------------------------------------------------------------------------

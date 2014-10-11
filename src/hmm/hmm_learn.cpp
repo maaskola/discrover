@@ -491,15 +491,11 @@ Gradient HMM::compute_gradient(const Data::Collection &collection,
 
   score = 0;
   double W = 0;
-  bitmask_t present = 0;
-  for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
-    if(task.motif_name == groups[group_idx].name)
-      present[group_idx] = 1;
   for(auto &expr: task.contrast_expression) {
     auto iter = collection.find(expr.contrast);
     if(iter != end(collection)) {
       Gradient g;
-      double s = compute_gradient(*iter, g, task, present);
+      double s = compute_gradient(*iter, g, task);
       double w = iter->set_size;
       W += w;
       if(not task.targets.transition.empty())
@@ -534,7 +530,7 @@ Gradient HMM::compute_gradient(const Data::Contrast &contrast,
   score = 0;
   for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
     if(is_motif_group(group_idx))
-      score += compute_gradient(contrast, gradient, task, group_idx);
+      score += compute_gradient(contrast, gradient, task);
   if(verbosity >= Verbosity::verbose)
     cerr << "HMM::compute_gradient(Data::Contrast, task)::end" << endl;
   return(gradient);
@@ -542,9 +538,10 @@ Gradient HMM::compute_gradient(const Data::Contrast &contrast,
 
 double HMM::compute_gradient(const Data::Contrast &contrast,
     Gradient &gradient,
-    const Training::Task &task,
-    bitmask_t present) const
+    const Training::Task &task) const
 {
+  bitmask_t present = compute_bitmask(task);
+
   if(verbosity >= Verbosity::verbose)
     cerr << "HMM::compute_gradient(Data::Contrast, task, present)" << endl;
   double score = 0;
