@@ -339,7 +339,7 @@ double HMM::class_likelihood_gradient(const Data::Contrast &contrast, const Trai
 /** Compute the probability of correct classification, also known as class
  * likelihood, or maximum mutual information estimation (MMIE). This routine
  * actually only computes the transition and emission probability gradient, the
- * class parameters are reestimated with another routine. */
+ * class parameters are re-estimated with another routine. */
 double HMM::class_likelihood_gradient(const Data::Set &dataset, const Training::Task &task, bitmask_t present, Gradient &g) const
 {
   if(verbosity >= Verbosity::verbose)
@@ -359,11 +359,11 @@ double HMM::class_likelihood_gradient(const Data::Set &dataset, const Training::
       << "current_class_prior = " << current_class_prior << endl
       << "log_class_prior = " << log_class_prior << endl;
 
-  double l = 0;
-  vector<matrix_t> t_g, e_g;
+  double l = 0; // log-likelihood
+  vector<matrix_t> t_g, e_g; // thread-local storage for gradients of transition and emission probabilities
 #pragma omp parallel shared(g, t_g, e_g) if(DO_PARALLEL)
   {
-    // Initialize storage for thread intermediate results
+    // Initialize storage for thread-intermediate results
 #pragma omp single
     {
       size_t n_threads = omp_get_num_threads();
