@@ -532,6 +532,7 @@ class HMM {
     void del_columns(size_t n, std::mt19937 &rng);
     void del_column(size_t n);
 
+    bitmask_t compute_bitmask(const Training::Task &task) const;
     bool is_motif_state(size_t state) const;
     bool is_present(const Data::Set &dataset, bitmask_t present) const;
     confusion_matrix reduce(const vector_t &v, HMM::bitmask_t present, const Data::Contrast &contrast, bool word_stats) const;

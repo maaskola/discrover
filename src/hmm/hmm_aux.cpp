@@ -73,6 +73,15 @@ double HMM::get_class_motif_prior(const string &sha1, size_t group_idx) const
   return(x->second);
 }
 
+HMM::bitmask_t HMM::compute_bitmask(const Training::Task &task) const
+{
+  bitmask_t present = 0;
+  for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
+    if(task.motif_name == groups[group_idx].name)
+      present[group_idx] = 1;
+  return(present);
+}
+
 double HMM::get_class_prior(const string &sha1) const
 {
   if(verbosity >= Verbosity::debug)
