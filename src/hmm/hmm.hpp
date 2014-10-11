@@ -347,7 +347,6 @@ class HMM {
     double log_likelihood(const Data::Contrast &contrast) const;
     double log_likelihood(const Data::Set &s) const;
 
-    double class_likelihood(const Data::Contrast &contrast, const std::vector<size_t> &present_groups, bool compute_posterior) const;
     double class_likelihood(const Data::Contrast &contrast, bitmask_t present, bool compute_posterior) const;
     double class_likelihood(const Data::Set &dataset, bitmask_t present, bool compute_posterior) const;
 

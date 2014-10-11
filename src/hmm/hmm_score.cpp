@@ -554,11 +554,6 @@ double HMM::compute_score(const Data::Collection &collection, const Measures::Co
   return(score);
 }
 
-double HMM::class_likelihood(const Data::Contrast &contrast, const vector<size_t> &present_groups, bool compute_posterior) const
-{
-  return(class_likelihood(contrast, make_mask(present_groups), compute_posterior));
-}
-
 double HMM::class_likelihood(const Data::Contrast &contrast, bitmask_t present, bool compute_posterior) const
 {
   double l = 0;
