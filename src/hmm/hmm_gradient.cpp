@@ -363,7 +363,7 @@ double HMM::class_likelihood_gradient(const Data::Set &dataset, const Training::
   vector<matrix_t> t_g, e_g;
 #pragma omp parallel shared(g, t_g, e_g) if(DO_PARALLEL)
   {
-    // Initalize storage for thread intermediate results
+    // Initialize storage for thread intermediate results
 #pragma omp single
     {
       size_t n_threads = omp_get_num_threads();
