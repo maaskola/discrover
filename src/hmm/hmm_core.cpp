@@ -146,8 +146,7 @@ matrix_t HMM::compute_forward_scaled(const Data::Seq &s, vector_t &scale) const
         if(emission_i_t > 0) {
           for(auto pre : pred[i])
             m(t+1,i) += m(t,pre) * transition(pre,i);
-          m(t+1,i) *= emission_i_t;
-          scale(t+1) += m(t+1,i);
+          scale(t+1) += m(t+1,i) *= emission_i_t;
         }
       }
       for(size_t i = 0; i < n_states; i++)
