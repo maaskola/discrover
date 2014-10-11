@@ -10,5 +10,5 @@ Vcs-Git: git@github.com:maaskola/discrover
 Vcs-Browser: https://github.com/maaskola/discrover
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Motif finder
+Description: Discrover
   Binding site pattern discovery from nucleic acid sequences by discriminative learning of hidden Markov models
