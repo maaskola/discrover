@@ -1,0 +1,14 @@
+Source: discrover
+Maintainer: Jonas Maaskola <jonas@maaskola.de>
+Section: science
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9)
+Vcs-Git: git@github.com:maaskola/discrover
+Vcs-Browser: https://github.com/maaskola/discrover
+
+Package: discrover
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Discrover
+  Binding site pattern discovery from nucleic acid sequences by discriminative learning of hidden Markov models
