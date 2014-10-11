@@ -154,9 +154,9 @@ class HMM {
     matrix_t emission;
 
     /** The indices of the predecessors of each state. */
-    std::vector<std::list<size_t>> pred;
+    std::vector<std::vector<size_t>> pred;
     /** The indices of the successors of each state. */
-    std::vector<std::list<size_t>> succ;
+    std::vector<std::vector<size_t>> succ;
 
 
     struct RegisteredDataSet {

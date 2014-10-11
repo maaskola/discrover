@@ -39,11 +39,11 @@ void HMM::finalize_initialization()
 
 void HMM::initialize_pred_succ()
 {
-  pred = vector<list<size_t>>();
-  succ = vector<list<size_t>>();
+  pred = vector<vector<size_t>>();
+  succ = vector<vector<size_t>>();
   for(size_t i = 0; i < n_states; i++) {
-    pred.push_back(list<size_t>());
-    succ.push_back(list<size_t>());
+    pred.push_back(vector<size_t>());
+    succ.push_back(vector<size_t>());
   }
   for(size_t i = 0; i < n_states; i++)
     for(size_t j = 0; j < n_states; j++)
