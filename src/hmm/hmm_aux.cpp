@@ -86,14 +86,16 @@ double HMM::get_class_prior(const string &sha1) const
 {
   if(verbosity >= Verbosity::debug)
     cout << "get_class_prior(sha1=" << sha1 << ")" << endl;
+
   auto cparms = registered_datasets.find(sha1);
   if(cparms == end(registered_datasets)) {
     cout << "Error: failed trying to access class parameters of path with sha1: " << sha1 << "." << endl;
     throw("Could not find registered data set.");
   }
+  double x = cparms->second.class_prior;
   if(verbosity >= Verbosity::verbose)
-    cout << "get_class_prior(sha1=" << sha1 << ") = " << cparms->second.class_prior << endl;
-  return(cparms->second.class_prior);
+    cout << "get_class_prior(sha1=" << sha1 << ") = " << x << endl;
+  return(x);
 }
 
 void HMM::shift_forward(size_t group_idx, size_t n) {
