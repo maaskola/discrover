@@ -401,14 +401,15 @@ double HMM::class_likelihood_gradient(const Data::Set &dataset, const Training::
       if(verbosity >= Verbosity::verbose)
         cout << "Sequence " << dataset.sequences[i].definition << " p = " << p << " class log likelihood = " << x << " exp -> " << exp(x) << endl;
       double term_a = class_cond / marginal_motif_prior - 1;
-      double term_c = exp(-x) * current_class_prior / (1 - marginal_motif_prior);
+      double term_b = exp(-x) * current_class_prior / (1 - marginal_motif_prior);
+      double term_c = term_a * term_b;
 
       // \del \log P(C|X) = P(C) / (P(C|X) * (1 - P(m))) * (P(m|C)/P(m) - 1) * \del P(m|X)
 
       if(not task.targets.transition.empty())
-        t_g[thread_idx] += term_c * t * term_a;
+        t_g[thread_idx] += term_c * t;
       if(not task.targets.emission.empty())
-        e_g[thread_idx] += term_c * e * term_a;
+        e_g[thread_idx] += term_c * e;
 
       if(task.measure == Measure::ClassificationLikelihood) {
         if(not task.targets.transition.empty()) {
