@@ -5,11 +5,11 @@
 ADD_DEFINITIONS(-Wall -I ${Boost_INCLUDE_DIR} -funroll-loops -mtune=native)
 
 #build a shared library
-ADD_LIBRARY(stats SHARED pgamma.cpp chisq.cpp)
+ADD_LIBRARY(discroverstats SHARED pgamma.cpp chisq.cpp)
 
-TARGET_LINK_LIBRARIES(stats m)
+TARGET_LINK_LIBRARIES(discroverstats m)
 
-INSTALL(TARGETS stats
+INSTALL(TARGETS discroverstats
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib/static
     DESTINATION "${CMAKE_INSTALL_PREFIX}"

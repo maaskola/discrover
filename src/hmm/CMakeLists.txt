@@ -26,12 +26,12 @@ IF(LIBR_FOUND AND LIBR_MATHLIB_LIBRARY)
   TARGET_LINK_LIBRARIES(discrover m ${LIBR_LIBRARIES})
 ELSE()
   SUBDIRS(../stats)
-  TARGET_LINK_LIBRARIES(discrover stats)
+  TARGET_LINK_LIBRARIES(discrover discroverstats)
 ENDIF()
 
 TARGET_LINK_LIBRARIES(discrover-bin
   discrover
-  plasma
+  discroverplasma
   -L${Boost_LIBRARY_DIRS}
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
   ${Boost_DATE_TIME_LIBRARY})
