@@ -344,13 +344,10 @@ double HMM::class_likelihood_gradient(const Data::Set &dataset, const Training::
 {
   if(verbosity >= Verbosity::verbose)
     cout << "HMM::class_likelihood_gradient(Data::Set, Feature)" << endl;
-  // TODO reactivate
-  cout << "Error: class_likelihood_gradient is currently not implemented." << endl;
-  exit(-1);
-  /*
-  const double marginal_motif_prior = compute_marginal_motif_prior(group_idx);
-  const double class_cond = get_class_motif_prior(dataset.sha1, group_idx);
-  const double current_class_prior = get_class_prior(dataset.sha1);
+  // TODO check correctness of re-implemented code
+  const double marginal_motif_prior = registration.compute_marginal_motif_prior(present);
+  const double class_cond = registration.get_class_motif_prior(dataset.sha1, present);
+  const double current_class_prior = registration.get_class_prior(dataset.sha1);
   const double log_class_prior = log(current_class_prior);
 
   if(verbosity >= Verbosity::verbose)
@@ -376,7 +373,6 @@ double HMM::class_likelihood_gradient(const Data::Set &dataset, const Training::
 #pragma omp for schedule(static) reduction(+:l)
     for(size_t i = 0; i < dataset.set_size; i++) {
       int thread_idx = omp_get_thread_num();
-      */
 
       /* c                     Class 1
        * not C                 Class 2
@@ -389,9 +385,8 @@ double HMM::class_likelihood_gradient(const Data::Set &dataset, const Training::
        * exp(-x)               1 / P(C|X)
        */
 
-      /*
       matrix_t t, e;
-      posterior_gradient_t res = posterior_gradient(dataset.sequences[i], task, group_idx, t, e);
+      posterior_gradient_t res = posterior_gradient(dataset.sequences[i], task, present, t, e);
       double p = res.posterior;
       double x = 0;
       if(log_class_prior != 0)
@@ -443,7 +438,6 @@ double HMM::class_likelihood_gradient(const Data::Set &dataset, const Training::
     cout << "Data::Set " << dataset.path << " l = " << l << endl;
 
   return(l);
-  */
 }
 
 double HMM::site_frequency_difference_gradient(const Data::Contrast &contrast, const Training::Task &task, bitmask_t present, Gradient &g) const

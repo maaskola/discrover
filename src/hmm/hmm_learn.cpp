@@ -148,7 +148,9 @@ Training::Result HMM::train(const Data::Collection &collection, const Training::
 
       for(auto &contrast: collection)
         for(auto &dataset: contrast)
-          register_dataset(dataset, (1.0*dataset.set_size)/collection.set_size, options.conditional_motif_prior1, options.conditional_motif_prior2);
+          registration.add_dataset(dataset, (1.0*dataset.set_size)/collection.set_size);
+      for(auto &task: tasks)
+        registration.add_bitmask(task.motif_name, compute_bitmask(task), options.conditional_motif_prior1, options.conditional_motif_prior2);
 
       result = train_inner(collection, tasks, options);
       if(options.verbosity >= Verbosity::verbose)
@@ -691,48 +693,46 @@ bool HMM::reestimate_class_parameters(const Data::Collection &collection,
   if(verbosity >= Verbosity::debug)
     cout << "HMM::reestimate_class_parameters(Data::Collection, ...)" << endl;
 
+  bitmask_t present = compute_bitmask(task);
+
   unordered_map<string, double> class_counts;
-  unordered_map<string, map<size_t,double>> motif_counts;
+  unordered_map<string, double> motif_counts;
   for(auto &contrast: collection)
     for(auto &dataset: contrast)
       class_counts[dataset.sha1] += dataset.set_size;
 
   double l = 0;
-  for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
-    if(groups[group_idx].kind == Group::Kind::Motif) {
-      const double marginal_motif_prior = compute_marginal_motif_prior(group_idx);
-      for(auto &contrast: collection)
-        for(auto &dataset: contrast) {
-          const double class_cond = get_class_motif_prior(dataset.sha1, group_idx);
-          const double log_class_prior = log(get_class_prior(dataset.sha1));
+  const double marginal_motif_prior = registration.compute_marginal_motif_prior(present);
+  for(auto &contrast: collection)
+    for(auto &dataset: contrast) {
+      const double class_cond = registration.get_class_motif_prior(dataset.sha1, present);
+      const double log_class_prior = log(registration.get_class_prior(dataset.sha1));
 
-          double motif_count = 0;
+      double motif_count = 0;
 #pragma omp parallel for schedule(static) reduction(+:l,motif_count) if(DO_PARALLEL)
-          for(size_t i = 0; i < dataset.set_size; i++) {
-            size_t present_mask = 1 << group_idx;
-            posterior_t res = posterior_atleast_one(dataset.sequences[i], present_mask);
-            double p = res.posterior;
-            double x = log_class_prior + log(p * class_cond / marginal_motif_prior + (1-p) * (1-class_cond) / (1-marginal_motif_prior));
-            if(task.measure == Measure::ClassificationLikelihood)
-              x += res.log_likelihood;
-            if(verbosity >= Verbosity::debug)
-              cout << "Sequence " << dataset.sequences[i].definition << " p = " << p << " class log likelihood = " << x << " exp -> " << exp(x) << endl;
-            motif_count += p;
-            l += x;
-          }
-          motif_counts[dataset.sha1][group_idx] += motif_count;
-          if(verbosity >= Verbosity::debug)
-            cout << "Data::Set " << dataset.path << " l = " << l << endl;
-        }
+      for(size_t i = 0; i < dataset.set_size; i++) {
+        posterior_t res = posterior_atleast_one(dataset.sequences[i], present);
+        double p = res.posterior;
+        double x = log_class_prior + log(p * class_cond / marginal_motif_prior + (1-p) * (1-class_cond) / (1-marginal_motif_prior));
+        if(task.measure == Measure::ClassificationLikelihood)
+          x += res.log_likelihood;
+        if(verbosity >= Verbosity::debug)
+          cout << "Sequence " << dataset.sequences[i].definition << " p = " << p << " class log likelihood = " << x << " exp -> " << exp(x) << endl;
+        motif_count += p;
+        l += x;
+      }
+      motif_counts[dataset.sha1] += motif_count;
+      if(verbosity >= Verbosity::debug)
+        cout << "Data::Set " << dataset.path << " l = " << l << endl;
     }
 
   // add pseudo counts
   double class_z = 0;
   for(auto &x: class_counts) class_z += x.second += 2;
-  for(auto &x: motif_counts) for(auto &y: x.second) y.second++;
+  for(auto &x: motif_counts) x.second++;
 
   // reestimate
-  for(auto &x: motif_counts) for(auto &y: x.second) y.second /= class_counts[x.first];
+  for(auto &x: motif_counts) x.second /= class_counts[x.first];
   for(auto &x: class_counts) x.second /= class_z;
 
   double diff = 0;
@@ -742,7 +742,7 @@ bool HMM::reestimate_class_parameters(const Data::Collection &collection,
   if(not options.dont_learn_class_prior) {
     if(verbosity >= Verbosity::debug)
       cout << "Updating class prior." << endl;
-    for(auto &x: registered_datasets) {
+    for(auto &x: registration.datasets) {
       diff += fabs(x.second.class_prior - class_counts[x.first]);
       x.second.class_prior = class_counts[x.first];
     }
@@ -750,11 +750,10 @@ bool HMM::reestimate_class_parameters(const Data::Collection &collection,
   if(not options.dont_learn_conditional_motif_prior) {
     if(verbosity >= Verbosity::debug)
       cout << "Updating conditional motif priors." << endl;
-    for(auto &x: registered_datasets)
-      for(auto &y: motif_counts[x.first]) {
-        diff += fabs(x.second.motif_prior[y.first] - y.second);
-        x.second.motif_prior[y.first] = y.second;
-      }
+    for(auto &x: registration.datasets) {
+      diff += fabs(x.second.motif_prior[present] - motif_counts[x.first]);
+      x.second.motif_prior[present] = motif_counts[x.first];
+    }
   }
 
   if(verbosity >= Verbosity::info) {

@@ -60,34 +60,7 @@ ostream &operator<<(ostream &os, const HMM::pair_posterior_t &p)
   return(os);
 }
 
-HMM::bitmask_t make_mask(const vector<size_t> &v) {
-  HMM::bitmask_t x = 0;
-  for(auto y: v) {
-    if(y > HMM::max_motifs) {
-      cout << "Error: trying to construct mask for too many motifs! The offending index was: " << y << ", and there may only be " << HMM::max_motifs << " motifs in this version." << endl;
-      exit(-1);
-    }
-    // TODO implement in terms of set() or operator[] methods
-    x |= 1 << y;
-  }
-  return(x);
-}
-
-vector<size_t> unpack_mask(const HMM::bitmask_t x) {
-  vector<size_t> v;
-  size_t z = 0;
-  HMM::bitmask_t y = 1;
-  while(x.to_ullong() >= y.to_ullong()) {
-    if((x & y) != 0)
-      v.push_back(z);
-    // TODO implement in terms of test() or operator[] methods
-    y = y << 1;
-    z++;
-  }
-  return(v);
-}
-
-confusion_matrix HMM::reduce(const vector_t &v, HMM::bitmask_t present, const Data::Contrast &contrast, bool word_stats) const
+confusion_matrix HMM::reduce(const vector_t &v, bitmask_t present, const Data::Contrast &contrast, bool word_stats) const
 {
   confusion_matrix m = {0, 0, 0, 0};
   for(size_t sample_idx = 0; sample_idx < v.size(); sample_idx++)
@@ -568,12 +541,12 @@ double HMM::class_likelihood(const Data::Contrast &contrast, bitmask_t present, 
 double HMM::class_likelihood(const Data::Set &dataset, bitmask_t present, bool compute_posterior) const
 {
   // TODO FIX BITMASK MMIE
-  // const double marginal_motif_prior = compute_marginal_motif_prior(group_idx);
-  const double marginal_motif_prior  = 0.5;
+  const double marginal_motif_prior = registration.compute_marginal_motif_prior(present);
+  // const double marginal_motif_prior  = 0.5;
   // TODO FIX BITMASK MMIE
-  // const double class_cond = get_class_motif_prior(dataset.sha1, group_idx);
-  const double class_cond = 0.2;
-  const double log_class_prior = log(get_class_prior(dataset.sha1));
+  const double class_cond = registration.get_class_motif_prior(dataset.sha1, present);
+  // const double class_cond = 0.2;
+  const double log_class_prior = log(registration.get_class_prior(dataset.sha1));
 
   double l = 0;
 #pragma omp parallel for schedule(static) reduction(+:l) if(DO_PARALLEL)

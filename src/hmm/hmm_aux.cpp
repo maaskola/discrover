@@ -35,67 +35,13 @@
 
 using namespace std;
 
-double HMM::RegisteredDataSet::get_motif_prior(size_t group_idx) const {
-  auto x = motif_prior.find(group_idx);
-  if(x == end(motif_prior))
-    throw("Error: could not find motif prior for motif group.");
-  else
-    return(x->second);
-}
-
-double HMM::compute_marginal_motif_prior(size_t group_idx) const
-{
-  if(verbosity >= Verbosity::debug)
-    cout << "compute_marginal_motif_prior(group_idx=" << group_idx << ")" << endl;
-  double marginal_motif_prior = 0;
-  for(auto &x: registered_datasets)
-    marginal_motif_prior += x.second.class_prior * x.second.get_motif_prior(group_idx);
-  return(marginal_motif_prior);
-}
-
-double HMM::get_class_motif_prior(const string &sha1, size_t group_idx) const
-{
-  if(verbosity >= Verbosity::debug)
-    cout << "get_class_motif_prior(sha1=" << sha1 << ", group_idx=" << group_idx << ")" << endl;
-
-  auto cparms = registered_datasets.find(sha1);
-  if(cparms == end(registered_datasets)) {
-    cout << "Error: failed trying to access class parameters of path with sha1: " << sha1 << "." << endl;
-    throw("Could not find registered data set.");
-  }
-  auto x = cparms->second.motif_prior.find(group_idx);
-  if(x == end(cparms->second.motif_prior)) {
-    cout << "Error: failed trying to access class conditional motif prior parameters of path with sha1: " << sha1 << " for the motif with index " << group_idx << "." << endl;
-    throw("Could not find conditional motif prior for registered data set.");
-  }
-  if(verbosity >= Verbosity::verbose)
-    cout << "get_class_motif_prior(sha1=" << sha1 << ", group_idx=" << group_idx << ") = " << x->second << endl;
-  return(x->second);
-}
-
-HMM::bitmask_t HMM::compute_bitmask(const Training::Task &task) const
+bitmask_t HMM::compute_bitmask(const Training::Task &task) const
 {
   bitmask_t present = 0;
   for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
     if(task.motif_name == groups[group_idx].name)
       present[group_idx] = 1;
   return(present);
-}
-
-double HMM::get_class_prior(const string &sha1) const
-{
-  if(verbosity >= Verbosity::debug)
-    cout << "get_class_prior(sha1=" << sha1 << ")" << endl;
-
-  auto cparms = registered_datasets.find(sha1);
-  if(cparms == end(registered_datasets)) {
-    cout << "Error: failed trying to access class parameters of path with sha1: " << sha1 << "." << endl;
-    throw("Could not find registered data set.");
-  }
-  double x = cparms->second.class_prior;
-  if(verbosity >= Verbosity::verbose)
-    cout << "get_class_prior(sha1=" << sha1 << ") = " << x << endl;
-  return(x);
 }
 
 void HMM::shift_forward(size_t group_idx, size_t n) {
@@ -131,10 +77,11 @@ void HMM::serialize(ostream &os, const ExecutionInformation &exec_info, size_t f
       os << "# Run on " << exec_info.datetime << endl;
       os << "# Run in " << exec_info.directory << endl;
       os << "# Command = " << exec_info.cmdline << endl;
-      for(auto &x: registered_datasets) {
+      for(auto &x: registration.datasets) {
         os << "Dataset " << x.second.spec.path << " " << x.first << " class = " << x.second.class_prior << " motif = ";
         for(auto &y: x.second.motif_prior)
-          os << " " << y.first << "/" << y.second;
+          if(y.first != 0)
+            os << " " << y.first << "/" << y.second;
         os << endl;
       }
       os << n_states << " states" << endl;

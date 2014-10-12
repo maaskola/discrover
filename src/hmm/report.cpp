@@ -77,7 +77,7 @@ namespace Evaluation {
     for(size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
       if(hmm.is_motif_group(group_idx)) {
         size_t motif_len = hmm.get_motif_len(group_idx);
-        HMM::bitmask_t present_mask = 1 << group_idx;
+        bitmask_t present_mask = 1 << group_idx;
         // TODO EVALUATION
         vector_t v = hmm.posterior_atleast_one(contrast, present_mask);
         matrix_t counts(v.size(), 2);
@@ -263,7 +263,7 @@ namespace Evaluation {
     if(options.evaluate.perform_ric)
       for(size_t group_idx = 0; group_idx < n_groups; group_idx++)
         if(hmm.is_motif_group(group_idx)) {
-          HMM::bitmask_t present_mask = 1 << group_idx;
+          bitmask_t present_mask = 1 << group_idx;
           // TODO EVALUATION
           double ric = hmm.rank_information(dataset, present_mask);
           out << "RIC = " << ric << endl;
@@ -283,7 +283,7 @@ namespace Evaluation {
           if(hmm.is_motif_group(group_idx)) {
             if(first) first = false; else { viterbi_str << "/"; exp_str << "/"; atl_str << "/"; }
 
-            HMM::bitmask_t present_mask = 1 << group_idx;
+            bitmask_t present_mask = 1 << group_idx;
             // TODO EVALUATION
             double atl = hmm.posterior_atleast_one(dataset.sequences[i], present_mask).posterior;
             // TODO EVALUATION

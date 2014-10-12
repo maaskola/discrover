@@ -67,10 +67,11 @@
 #include <boost/container/flat_map.hpp>
 #include <list>
 #include <unordered_map>
-#include <bitset>
 #include "association.hpp"
 #include "results.hpp"
 #include "hmm_options.hpp"
+#include "bitmask.hpp"
+#include "registration.hpp"
 #include "../verbosity.hpp"
 
 
@@ -121,8 +122,6 @@ class HMM {
     typedef std::unordered_map<std::string, std::vector<size_t>> mask_sub_t;
     typedef std::unordered_map<std::string, mask_sub_t> mask_t;
     typedef boost::numeric::ublas::vector<size_t> StatePath;
-    const static size_t max_motifs = 32;
-    typedef std::bitset<max_motifs> bitmask_t;
 
   protected:
     /** The number of emissions. */
@@ -158,17 +157,7 @@ class HMM {
     /** The indices of the successors of each state. */
     std::vector<std::vector<size_t>> succ;
 
-
-    struct RegisteredDataSet {
-      Specification::Set spec;
-      double class_prior;
-      std::map<size_t, double> motif_prior; // the key is supposed to be the group index of the motif
-      double get_motif_prior(size_t group_idx) const;
-    };
-    std::unordered_map<std::string, RegisteredDataSet> registered_datasets; // the keys are SHA1 hashes of the file contents
-    double compute_marginal_motif_prior(size_t group_idx) const;
-    double get_class_motif_prior(const std::string &sha1, size_t group_idx) const;
-    double get_class_prior(const std::string &sha1) const;
+    Registration registration;
 
 // -------------------------------------------------------------------------------------------
 // Initialization routines
@@ -275,6 +264,7 @@ class HMM {
     size_t non_zero_parameters(const Training::Targets &targets) const;
 
     friend std::ostream &operator<<(std::ostream& os, const HMM &hmm);
+    friend struct Registration;
 
   public:
     double compute_score(const Data::Collection &col, const Measures::Continuous::Measure &measure, const Options::HMM &options, const std::vector<size_t> &present_motifs, const std::vector<size_t> &previous_motifs=std::vector<size_t>()) const;
@@ -534,7 +524,7 @@ class HMM {
     bitmask_t compute_bitmask(const Training::Task &task) const;
     bool is_motif_state(size_t state) const;
     bool is_present(const Data::Set &dataset, bitmask_t present) const;
-    confusion_matrix reduce(const vector_t &v, HMM::bitmask_t present, const Data::Contrast &contrast, bool word_stats) const;
+    confusion_matrix reduce(const vector_t &v, bitmask_t present, const Data::Contrast &contrast, bool word_stats) const;
   public:
     bool is_motif_group(size_t group_idx) const;
 
@@ -542,7 +532,6 @@ class HMM {
     void print_occurrence_table(const std::string &file, const Data::Seq &seq, const StatePath &path, std::ostream &out) const;
 
   protected:
-    void register_dataset(const Data::Set &dataset, double class_prior, double motif_p1, double motif_p2);
     Training::Range complementary_states(size_t group_idx) const;
     Training::Range complementary_states_mask(bitmask_t present) const;
 };

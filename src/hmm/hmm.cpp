@@ -49,7 +49,7 @@ HMM::HMM(const string &path, Verbosity verbosity_, double pseudo_count) :
   emission(),
   pred(),
   succ(),
-  registered_datasets()
+  registration()
 {
   if(verbosity >= Verbosity::debug)
     cout << "Called HMM constructor 1." << endl;
@@ -83,7 +83,7 @@ HMM::HMM(const HMM &hmm, bool copy_deep) :
   emission(hmm.emission),
   pred(hmm.pred),
   succ(hmm.succ),
-  registered_datasets(hmm.registered_datasets)
+  registration(hmm.registration)
 {
   if(verbosity >= Verbosity::debug)
     cout << "Called HMM constructor 2." << endl;
@@ -102,7 +102,7 @@ HMM::HMM(Verbosity verbosity_, double pseudo_count_) :
   emission(zero_matrix(n_states, n_emissions)),
   pred(),
   succ(),
-  registered_datasets()
+  registration()
 {
   if(verbosity >= Verbosity::debug)
     cout << "Called HMM constructor 3." << endl;
