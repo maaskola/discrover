@@ -39,26 +39,26 @@ int main(int argc, const char **argv)
 
   vector_t coeff = polyfit(x, y, k, Verbosity::info);
   double mq = quadratic_extremum(x, y, Verbosity::info);
-  std::pair<double,double> mc = cubic_extrema(x, y, Verbosity::info);
+  pair<double,double> mc = cubic_extrema(x, y, Verbosity::info);
 
-  std::cout << "x =";
+  cout << "x =";
   for(auto &u: x)
-    std::cout << " " << u;
-  std::cout << std::endl;
+    cout << " " << u;
+  cout << endl;
 
-  std::cout << "y =";
+  cout << "y =";
   for(auto &u: y)
-    std::cout << " " << u;
-  std::cout << std::endl;
+    cout << " " << u;
+  cout << endl;
 
-  std::cout << "alpha = ";
+  cout << "alpha = ";
   for(auto &u: coeff)
-    std::cout << " " << u;
-  std::cout << std::endl;
+    cout << " " << u;
+  cout << endl;
 
-  std::cout << "The inferred minimum of the quadratic is at " << mq << std::endl;
-  std::cout << "The inferred minimum of the cubic is at " << mc.first << std::endl;
-  std::cout << "The inferred maximum of the cubic is at " << mc.second << std::endl;
+  cout << "The inferred minimum of the quadratic is at " << mq << endl;
+  cout << "The inferred minimum of the cubic is at " << mc.first << endl;
+  cout << "The inferred maximum of the cubic is at " << mc.second << endl;
   
   return EXIT_SUCCESS;
 }

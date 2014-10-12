@@ -1,12 +1,15 @@
 # build a shared library
 ADD_LIBRARY(discrover SHARED association.cpp ../aux.cpp basedefs.cpp
+  analysis.cpp bitmask.cpp
+  conditional_mutual_information.cpp
   ../executioninformation.cpp ../random_seed.cpp
   hmm.cpp hmm_core.cpp hmm_init.cpp hmm_learn.cpp hmm_linesearch.cpp
   hmm_aux.cpp hmm_gradient.cpp hmm_mcmc.cpp hmm_score.cpp hmm_options.cpp 
-  ../matrix.cpp ../mcmc/montecarlo.cpp polyfit.cpp report.cpp sequence.cpp ../sha1.cpp
-  subhmm.cpp trainingmode.cpp ../terminal.cpp ../timer.cpp)
+  ../matrix.cpp ../mcmc/montecarlo.cpp polyfit.cpp registration.cpp report.cpp results.cpp
+  sequence.cpp ../sha1.cpp subhmm.cpp trainingmode.cpp ../terminal.cpp
+  ../timer.cpp)
 
-ADD_EXECUTABLE(discrover-bin main.cpp analysis.cpp
+ADD_EXECUTABLE(discrover-bin main.cpp
   "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA1.cpp")
 
 # ADD_EXECUTABLE(mcmc mcmc/montecarlo.cpp) # this is a test program for the Gibbs sampling code

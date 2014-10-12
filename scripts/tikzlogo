@@ -9,6 +9,8 @@ require 'ostruct'
 require 'pp'
 require 'tempfile'
 
+$alpha = 0.03
+
 options = OpenStruct.new
 options.small = false
 options.color = :default
@@ -24,11 +26,19 @@ options.background = false
 options.dna = false
 options.simplematrix = false
 options.verbose = false
+options.iupac = []
+options.absent = $alpha
 
 OptionParser.new do |opts|
   opts.banner = "Usage: tikzlogo.rb [options]"
 
  # Optional argument with keyword completion.
+  opts.on("-i", "--iupac [STRING]", "Create a logo for the IUPAC regular expression motif given by the string.") do |v|
+    options.iupac << v
+  end
+  opts.on("--absent [FLOAT]", "When creating logos for IUPAC strings, assume that 'absent' nucleotides have this frequency. Default = #{$alpha}") do |v|
+    options.absent = v.to_f
+  end
   opts.on("--order [TYPE]", [:alpha, :freq, :auto],
           "Select order (alpha, freq, auto)") do |t|
     options.order = t
@@ -383,8 +393,48 @@ if options.small
     factor = 0.25
   end
 end
-node_width = 0.75 * factor
-node_height = 1.0 * factor
+
+$node_width = 0.75 * factor
+$node_height = 1.0 * factor
+
+def make_matrix(iupac, alpha)
+  nucls = "acgt".split("")
+  m = []
+  iupac.downcase.split("").each{|x|
+    col = [0.0, 0.0, 0.0, 0.0]
+    present = $iupac2present[x]
+    n = present.length
+    p = (1 - alpha * (4 - n)) / n
+    q = alpha
+    nucls.each_with_index{|y, idx|
+      if present.include?(y)
+        col[idx] = p
+      else
+        col[idx] = q
+      end
+    }
+    m << col
+  }
+  m
+end
+
+options.iupac.each_with_index{|motif, index|
+  path = "motif_%02d" % index
+  directions = [["forward", false]]
+  directions << ["backward", true] if options.revcomp or options.dna
+  directions.each{|direction, revcomp|
+    out_path = path + ".#{direction}.tex"
+    f = File.open(out_path, "w")
+    f.puts $tikz_header
+    e_matrix = make_matrix(motif, options.absent)
+    gen_tex(e_matrix, f, !options.freqlogo, options.background, [$node_width] * e_matrix.length, $node_height, options.order, ! options.dna, ! options.noaxis, revcomp, options.verbose)
+
+    f.puts $tikz_footer
+    f.close
+    tex_paths << out_path
+  }
+}
+
 ARGV.each{|path|
   directions = [["forward", false]]
   directions << ["backward", true] if options.revcomp or options.dna
@@ -394,21 +444,24 @@ ARGV.each{|path|
   f.puts $tikz_header
   if options.simplematrix
     e_matrix = read_matrix(path)
-    gen_tex(e_matrix, f, !options.freqlogo, options.background, [node_width] * e_matrix.length, node_height, options.order, ! options.dna, ! options.noaxis, revcomp, options.verbose)
+    gen_tex(e_matrix, f, !options.freqlogo, options.background, [$node_width] * e_matrix.length, $node_height, options.order, ! options.dna, ! options.noaxis, revcomp, options.verbose)
   else
     File.open(path){|g|
       hmm = HMM::Parameters.new(g, options.verbose)
       first = true
-      hmm.motifs.each{|name,range|
+      hmm.motifs.each{|motif|
+        # $stderr.puts "Treating motif #{motif}: #{motif.name} #{motif.states.to_s}"
+        name = motif.name
+        range = motif.states
         next if name == "Constitutive" or name == "Special" or name =~ /Background/
 
         e_matrix = []
-        topo_order = hmm.topological_order(name)
+        topo_order = hmm.topological_order(motif)
         topo_order.each{|x|
           e_matrix << hmm.emission[x]
         }
 
-        widths = [node_width] * e_matrix.length
+        widths = [$node_width] * e_matrix.length
 
         # fix widths of insert states
         topo_order.each_with_index{|x,idx|
@@ -418,20 +471,21 @@ ARGV.each{|path|
           end
         }
         # fix widths of initial states
-        initial = hmm.initial_states(name)
+        initial = hmm.initial_states(motif)
         v = []
         cumul = 0.0
+        bg = hmm.motifs.find{|x| x.name == "Background" }
         initial.each{|i|
           x = 0
-          hmm.motifs["Background"].each{|b| x += hmm.transition[b][i] }
+          bg.states.each{|b| x += hmm.transition[b][i] }
           cumul += x
           v << cumul
         }
-        v.each_with_index{|x,idx| widths[idx] = node_width * x / cumul }
+        v.each_with_index{|x,idx| widths[idx] = $node_width * x / cumul }
 
         # fix widths of final states
-        final = hmm.final_states(name)
-        cumul = node_width
+        final = hmm.final_states(motif)
+        cumul = $node_width
         v = []
         final.each{|state|
           v << cumul
@@ -444,7 +498,7 @@ ARGV.each{|path|
 
         f.puts $tikz_newpage unless first
         first = false
-        gen_tex(e_matrix, f, !options.freqlogo, options.background, widths, node_height, options.order, ! options.dna, ! options.noaxis, revcomp, options.verbose)
+        gen_tex(e_matrix, f, !options.freqlogo, options.background, widths, $node_height, options.order, ! options.dna, ! options.noaxis, revcomp, options.verbose)
       }
     }
   end

@@ -47,11 +47,11 @@ template <class X> X max3(const X &a, const X& b, const X&c) {
 double update(double current, double step)
 {
   double x = logit(current); //log(current) - log(1 - current);
-  // std::cout << "setting: current " << current << " x = " << x << " e(x) = " << (exp(x) / (exp(x)+1)) << std::endl;
+  // cout << "setting: current " << current << " x = " << x << " e(x) = " << (exp(x) / (exp(x)+1)) << endl;
   double y = x + step;
   double z = exp(y);
   double u = z / (1 + z);
-  // std::cout << "setting: u = " << u << std::endl;
+  // cout << "setting: u = " << u << endl;
   // return(current);
   return(u);
 }
@@ -194,12 +194,12 @@ Gradient normalize(const Gradient &gradient)
  *                  TOLERANCES MAY BE TOO SMALL.
  *
  **/
-pair<double, HMM> HMM::line_search_more_thuente(const Data::Collection &data,
+pair<double, HMM> HMM::line_search_more_thuente(const Data::Collection &collection,
     const Gradient &initial_gradient_,
     double initial_score,
     int &info,
     const Training::Task &task,
-    const hmm_options &options) const
+    const Options::HMM &options) const
 {
   const Verbosity verbo = verbosity;
   // const Verbosity verbo = Verbosity::verbose;
@@ -334,7 +334,7 @@ pair<double, HMM> HMM::line_search_more_thuente(const Data::Collection &data,
     nfev++;
     double f;
     HMM trial_hmm = build_trial_model(initial_gradient, stp, task);
-    Gradient trial_gradient = trial_hmm.compute_gradient(data, f, task);
+    Gradient trial_gradient = trial_hmm.compute_gradient(collection, f, task, options.weighting);
     if(verbo >= Verbosity::verbose)
       cout << "Function and gradient evaluation!" << endl;
 

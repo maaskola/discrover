@@ -212,8 +212,10 @@ namespace Fasta {
     if(n_seq > 0 and sequences.size() > n_seq) // TODO: improve efficiency by only reading in n_seq sequences
       sequences.resize(n_seq);
     if(shuffled)
-      for(auto &s: sequences)
+      for(auto &s: sequences) {
+        s.definition = "Shuffle of " + s.definition;
         s.sequence = dinucleotideShuffle(s.sequence, r_unif(EntropySource::shuffling_rng));
+      }
   };
 
   void read_fasta(const string &path, vector<IEntry> &isequences, bool revcomp, size_t n_seq, bool shuffled) {

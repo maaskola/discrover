@@ -37,12 +37,12 @@ namespace Seeding {
     revcomp(false),
     strict(false),
     pseudo_count(1),
+    weighting(false),
     n_seq(0),
     word_stats(false),
     measure_runtime(false),
-    n_motifs(1),
     occurrence_filter(OccurrenceFilter::RemoveSequences),
-    keep_all(false),
+    only_best(false),
     verbosity(Verbosity::info),
     dump_viterbi(false),
     no_enrichment_filter(false),
@@ -187,16 +187,16 @@ namespace Seeding {
     return(os);
   }
 
-  ostream &operator<<(ostream &out, const Objectives &objectives) {
-    bool first = true;
-    for(auto &objective: objectives) {
-      if(first)
-        first = false;
-      else
-        out << " ";
-      out << Specification::to_string(objective);
-    }
+  ostream &operator<<(ostream &out, const Objective &objective) {
+    out << Specification::to_string(objective);
     return(out);
+  }
+
+  Objective objective_for_motif(const Objectives &objectives, const Specification::Motif &motif) {
+    for(auto objective: objectives)
+      if(objective.motif_name == motif.name)
+        return(objective);
+    throw("bla");
   }
 }
 

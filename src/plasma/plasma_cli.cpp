@@ -45,10 +45,16 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
   po::options_description desc(name, cols);
   if(include_all)
     desc.add_options()
-      ("fasta,f", po::value<vector<Specification::DataSet>>(&options.paths)->required(), "FASTA file(s) with nucleic acid sequences.")
-      ("motif,m", po::value<vector<Specification::Motif>>(&options.motif_specifications)->required(), "Motif specification. May be given multiple times, and can be specified in multiple ways:\n"
+      ("fasta,f", po::value<vector<Specification::Set>>(&options.paths)->required(), "FASTA file(s) with nucleic acid sequences.")
+      ("motif,m", po::value<vector<Specification::Motif>>(&options.motif_specifications)->required(), "Motif specification. "
+       "May be given multiple times, and can be specified in multiple ways:\n"
        "1. \tUsing the IUPAC code for nucleic acids.\n"
-       "2. \tA length specification. Motifs of the indicated lengths are sought. A length specification is a comma separated list of length ranges, where a length range is either a single length, or an expression of the form 'x-y' to indicate lengths x up to y.\n"
+       "2. \tA length specification. "
+       "Motifs of the indicated lengths are sought. "
+       "A length specification is a comma separated list of length ranges, "
+       "where a length range is either a single length, or an expression of the form 'x-y' to indicate lengths x up to y. "
+       "A length specification also allows to specify a multiplicity separated by an 'x'. "
+       "Thus examples are '8' for just length 8, '5-7' for lengths 5, 6, and 7, '5-8x2' for two motifs of lengths 5 to 8, '5-8,10x3' for three motifs of lengths 5, 6, 7, 8, and 10.\n"
        "Regardless of the way the motif is specified, it may be given a name. The syntax is [NAME:]MOTIFSPEC.")
       ("score,s", po::value<Seeding::Objectives>(&options.objectives)->default_value(Seeding::Objectives(1,Seeding::Objective("mi")), "mi"), "Which objective function to evaluate. TODO: documentation needs updating to reflect more advanced options for this argument. Available are 'signal_freq', 'control_freq', 'mi', 'mcc', 'delta_freq', 'gtest', 'gtest_logp', 'gtest_logp_raw'.")
       ("revcomp,r", po::bool_switch(&options.revcomp), "Also consider the reverse complements of the sequences.")
@@ -69,19 +75,19 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
 
   desc.add_options()
     (form_switch(prefix, "algo", allow_short).c_str(), po::value<Seeding::Algorithm>(&options.algorithm)->default_value(Seeding::Algorithm::Plasma, "plasma"), "Which algorithm to use for seeding. Available are 'plasma', 'fire', 'mcmc', and 'all'. Multiple algorithms can be used by separating them by comma.")
-    (form_switch(prefix, "nmotif", allow_short).c_str(), po::value<size_t>(&options.n_motifs)->default_value(1), "How many motifs to determine.")
     (form_switch(prefix, "any", false).c_str(), po::bool_switch(&options.no_enrichment_filter), "Whether to allow motifs enriched in the opposite direction.")
     (form_switch(prefix, "filter", false).c_str(), po::value<Seeding::OccurrenceFilter>(&options.occurrence_filter)->default_value(Seeding::OccurrenceFilter::MaskOccurrences, "mask"), "How to filter motif occurrences upon identifying a motif. Available are 'remove' and 'mask'.")
     (form_switch(prefix, "cand", allow_short).c_str(), po::value<size_t>(&options.plasma.max_candidates)->default_value(100), "How many candidates to maintain.")
     (form_switch(prefix, "deg", allow_short).c_str(), po::value<vector<size_t>>(&options.plasma.degeneracies), "Which degrees of degeneracy to consider. May be given multiple times. A sequence of length N has a maximal degeneracy of 3*N. Unlimited if unspecified.")
     (form_switch(prefix, "rdeg", false).c_str(), po::value<double>(&options.plasma.rel_degeneracy)->default_value(1), "Limit relative degeneracy. 1 corresponds to full degeneracy, and 0 to no degeneracy. For a sequence of length N the degeneracy is maximally 3*N. Thus for a motif of length 8 a maximal relative degeneracy of 0.2 allows (rounded down) 4 degrees of degeneracy.")
     (form_switch(prefix, "generalize", allow_short).c_str(), po::bool_switch(&options.plasma.per_degeneracy), "Whether to report the best motifs at each level of degeneracy. Default is to report only the best motif across all levels of degeneracy. In addition, the best motifs of levels of degeneracy given by --deg will be reported.")
-    (form_switch(prefix, "keepall", false).c_str(), po::bool_switch(&options.keep_all), "Whether to report for each motif specification the best result for each length. Default is to report only the single best motif for each motif specification.")
+    (form_switch(prefix, "best", false).c_str(), po::bool_switch(&options.only_best), "Whether to report only the single best motif for each motif specification.  Default is to report for each motif specification the best result for each length.")
     (form_switch(prefix, "strict", false).c_str(), po::bool_switch(&options.strict), "Do not allow insignificant seeds.")
     (form_switch(prefix, "fix_mspace", false).c_str(), po::bool_switch(&options.fixed_motif_space_mode), "Deactivate dynamic motif space mode. Influences how the multiple-testing correction for the log-p value of the G-test is calculated.")
     ;
   if(include_all)
     desc.add_options()
+      ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
       ("pcount,p", po::value<double>(&options.pseudo_count)->default_value(1), "The number of pseudo counts to add to each cell of contingency tables.")
       ("word,w", po::bool_switch(&options.word_stats), "Perform nucleotide level statistics instead of on sequence level.")
       ("time,t", po::bool_switch(&options.measure_runtime), "Report running times.")

@@ -54,7 +54,7 @@ namespace Data {
 
   namespace Basic {
     template <typename X>
-      struct Set : public Specification::DataSet {
+      struct Set : public Specification::Set {
 
         // typedefs
 
@@ -66,13 +66,13 @@ namespace Data {
         // constructors
 
         Set() :
-          Specification::DataSet(),
+          Specification::Set(),
           seq_size(0),
           set_size(0),
           sequences()
         { };
-        Set(const Specification::DataSet &s, bool revcomp=false, size_t n_seq=0) :
-          Specification::DataSet(s),
+        Set(const Specification::Set &s, bool revcomp=false, size_t n_seq=0) :
+          Specification::Set(s),
           seq_size(0),
           set_size(0),
           sequences()
@@ -87,7 +87,7 @@ namespace Data {
         };
         template <typename Y>
           Set(const Set<Y> &set) :
-            Specification::DataSet(set),
+            Specification::Set(set),
             seq_size(0),
             set_size(set.set_size),
             sequences(),
@@ -125,7 +125,7 @@ namespace Data {
           return(report);
         }
 
-        RemovalReport drop_sequences(const std::unordered_set<std::string> &ids) {
+        RemovalReport drop_sequences(const mask_sub_t &mask) {
           const bool noisy_output = false;
 
           RemovalReport report;
@@ -136,7 +136,7 @@ namespace Data {
               std::cerr << "idx = " << idx << std::endl;
               std::cerr << "Checking " << path << " " << iter->definition << " for dropping" << std::endl;
             }
-            if(ids.find(iter->definition) != end(ids)) {
+            if(mask.find(iter->definition) != end(mask)) {
               if(noisy_output)
                 std::cerr << "Dropping!" << std::endl;
               report.sequences++;
@@ -157,7 +157,7 @@ namespace Data {
       };
 
     template <typename X>
-      struct Series {
+      struct Contrast {
 
         // typedefs
 
@@ -169,8 +169,8 @@ namespace Data {
 
         // constructors
 
-        Series() : seq_size(0), set_size(0), sets(), name() { };
-        Series(const std::string &name_, const Specification::DataSets &specs, bool revcomp=false, size_t n_seq=0) :
+        Contrast() : seq_size(0), set_size(0), sets(), name() { };
+        Contrast(const std::string &name_, const Specification::Sets &specs, bool revcomp=false, size_t n_seq=0) :
           seq_size(0),
           set_size(0),
           sets(),
@@ -184,13 +184,13 @@ namespace Data {
           }
         };
         template <typename Y>
-          Series(const Series<Y> &series) :
+          Contrast(const Contrast<Y> &contrast) :
             seq_size(0),
-            set_size(series.set_size),
+            set_size(contrast.set_size),
             sets(),
-            name(series.name)
+            name(contrast.name)
         {
-          for(auto &x: series.sets) {
+          for(auto &x: contrast.sets) {
             set_t s(x);
             seq_size += s.seq_size;
             sets.push_back(s);
@@ -203,22 +203,36 @@ namespace Data {
         sets_t sets;
         std::string name;
 
+        // TODO add compression
+        std::vector<std::string> save_shuffle_sequences(const std::string &stem, size_t &idx) const {
+          std::vector<std::string> paths;
+          for(auto dataset: sets)
+            if(dataset.is_shuffle) {
+              std::string path = stem + "_shuffle" + boost::lexical_cast<std::string>(idx++) + ".fa";
+              paths.push_back(path);
+              std::ofstream ofs(path.c_str());
+              for(auto &seq: dataset)
+                ofs << seq << std::endl;
+            }
+          return(paths);
+        };
+
         RemovalReport mask(const Data::mask_t &mask) {
           RemovalReport report;
-          for(auto &data_set: sets) {
-            auto iter = mask.find(data_set.path);
+          for(auto &dataset: sets) {
+            auto iter = mask.find(dataset.path);
             if(iter != end(mask))
-              report += data_set.mask(iter->second);
+              report += dataset.mask(iter->second);
           }
           return(report);
         }
 
-        RemovalReport drop_sequences(std::map<std::string, std::unordered_set<std::string>> &ids) {
+        RemovalReport drop_sequences(const Data::mask_t &mask) {
           RemovalReport report;
-          for(auto &data_set: sets) {
-            auto iter = ids.find(data_set.path);
-            if(iter != end(ids))
-              report += data_set.drop_sequences(iter->second);
+          for(auto &dataset: sets) {
+            auto iter = mask.find(dataset.path);
+            if(iter != end(mask))
+              report += dataset.drop_sequences(iter->second);
           }
           return(report);
         }
@@ -229,31 +243,31 @@ namespace Data {
 
         // typedefs
 
-        typedef X series_t;
-        typedef typename series_t::set_t set_t;
+        typedef X contrast_t;
+        typedef typename contrast_t::set_t set_t;
         typedef typename set_t::seq_t seq_t;
-        typedef std::vector<series_t> serieses_t;
-        typedef typename serieses_t::iterator iterator;
-        typedef typename serieses_t::const_iterator const_iterator;
+        typedef std::vector<contrast_t> contrasts_t;
+        typedef typename contrasts_t::iterator iterator;
+        typedef typename contrasts_t::const_iterator const_iterator;
 
         // constructors
 
         Collection() :
           seq_size(0),
           set_size(0),
-          series()
+          contrasts()
         { };
-        Collection(const Specification::DataSets &specs, bool revcomp=false, size_t n_seq=0) :
+        Collection(const Specification::Sets &specs, bool revcomp=false, size_t n_seq=0) :
           seq_size(0),
           set_size(0),
-          series()
+          contrasts()
         {
-          std::map<std::string,Specification::DataSets> map;
+          std::map<std::string,Specification::Sets> map;
           for(auto &spec: specs)
-            map[spec.series].push_back(spec);
+            map[spec.contrast].push_back(spec);
           for(auto &iter: map)
-            series.push_back(series_t(iter.first, iter.second, revcomp, n_seq));
-          for(auto &s: series) {
+            contrasts.push_back(contrast_t(iter.first, iter.second, revcomp, n_seq));
+          for(auto &s: contrasts) {
             seq_size += s.seq_size;
             set_size += s.set_size;
           }
@@ -262,46 +276,55 @@ namespace Data {
           Collection(const Collection<Y> &coll) :
             seq_size(0),
             set_size(coll.set_size),
-            series()
+            contrasts()
         {
-          for(auto &x: coll.series) {
-            series_t s(x);
+          for(auto &x: coll.contrasts) {
+            contrast_t s(x);
             seq_size += s.seq_size;
-            series.push_back(s);
+            contrasts.push_back(s);
           }
         };
 
         // member variables
 
         size_t seq_size, set_size;
-        serieses_t series;
+        contrasts_t contrasts;
 
         // methods
 
         iterator find(const std::string& s) {
-          iterator iter = std::find_if(begin(series), end(series), [&s](const series_t &ser) {
-            return(ser.name == s);
+          iterator iter = std::find_if(begin(contrasts), end(contrasts), [&s](const contrast_t &contrast) {
+            return(contrast.name == s);
           });
           return(iter);
         }
         const_iterator find(const std::string& s) const {
-          const_iterator iter = std::find_if(begin(series), end(series), [&s](const series_t &ser) {
-            return(ser.name == s);
+          const_iterator iter = std::find_if(begin(contrasts), end(contrasts), [&s](const contrast_t &contrast) {
+            return(contrast.name == s);
           });
           return(iter);
         }
 
+        std::vector<std::string> save_shuffle_sequences(const std::string &path) const {
+          std::vector<std::string> paths;
+          size_t idx = 0;
+          for(auto &contrast: contrasts)
+            for(auto &x: contrast.save_shuffle_sequences(path, idx))
+              paths.push_back(x);
+          return(paths);
+        };
+
         RemovalReport mask(const Data::mask_t &mask) {
           RemovalReport report;
-          for(auto &data_series: series)
-            report += data_series.mask(mask);
+          for(auto &contrast: contrasts)
+            report += contrast.mask(mask);
           return(report);
         }
 
-        RemovalReport drop_sequences(std::map<std::string, std::unordered_set<std::string>> &ids) {
+        RemovalReport drop_sequences(const Data::mask_t &mask) {
           RemovalReport report;
-          for(auto &data_series: series)
-            report += data_series.drop_sequences(ids);
+          for(auto &contrast: contrasts)
+            report += contrast.drop_sequences(mask);
           return(report);
         }
       };
@@ -311,35 +334,35 @@ namespace Data {
     template <typename X> typename Set<X>::const_iterator begin(const Set<X> &set) { return(begin(set.sequences)); }
     template <typename X> typename Set<X>::const_iterator end(const Set<X> &set) { return(end(set.sequences)); }
 
-    template <typename X> typename Series<X>::iterator begin(Series<X> &series) { return(begin(series.sets)); }
-    template <typename X> typename Series<X>::iterator end(Series<X> &series) { return(end(series.sets)); }
-    template <typename X> typename Series<X>::const_iterator begin(const Series<X> &series) { return(begin(series.sets)); }
-    template <typename X> typename Series<X>::const_iterator end(const Series<X> &series) { return(end(series.sets)); }
+    template <typename X> typename Contrast<X>::iterator begin(Contrast<X> &contrast) { return(begin(contrast.sets)); }
+    template <typename X> typename Contrast<X>::iterator end(Contrast<X> &contrast) { return(end(contrast.sets)); }
+    template <typename X> typename Contrast<X>::const_iterator begin(const Contrast<X> &contrast) { return(begin(contrast.sets)); }
+    template <typename X> typename Contrast<X>::const_iterator end(const Contrast<X> &contrast) { return(end(contrast.sets)); }
 
-    template <typename X> typename Collection<X>::iterator begin(Collection<X> &collection) { return(begin(collection.series)); }
-    template <typename X> typename Collection<X>::iterator end(Collection<X> &collection) { return(end(collection.series)); }
-    template <typename X> typename Collection<X>::const_iterator begin(const Collection<X> &collection) { return(begin(collection.series)); }
-    template <typename X> typename Collection<X>::const_iterator end(const Collection<X> &collection) { return(end(collection.series)); }
+    template <typename X> typename Collection<X>::iterator begin(Collection<X> &collection) { return(begin(collection.contrasts)); }
+    template <typename X> typename Collection<X>::iterator end(Collection<X> &collection) { return(end(collection.contrasts)); }
+    template <typename X> typename Collection<X>::const_iterator begin(const Collection<X> &collection) { return(begin(collection.contrasts)); }
+    template <typename X> typename Collection<X>::const_iterator end(const Collection<X> &collection) { return(end(collection.contrasts)); }
   }
 }
 
 namespace Seeding {
 
-  struct DataSet : public Data::Basic::Set<Fasta::Entry> {
-    DataSet();
-    DataSet(const Specification::DataSet &s, bool revcomp=false, size_t n_seq=0);
-    template <typename X> DataSet(const Data::Basic::Set<X> &s) : Data::Basic::Set<Fasta::Entry>(s) { };
+  struct Set : public Data::Basic::Set<Fasta::Entry> {
+    Set();
+    Set(const Specification::Set &s, bool revcomp=false, size_t n_seq=0);
+    template <typename X> Set(const Data::Basic::Set<X> &s) : Data::Basic::Set<Fasta::Entry>(s) { };
   };
 
-  struct DataSeries : public Data::Basic::Series<DataSet> {
-    DataSeries();
-    DataSeries(const std::string &name, const Specification::DataSets &s, bool revcomp=false, size_t n_seq=0);
-    template <typename X> DataSeries(const Data::Basic::Series<X> &s) : Data::Basic::Series<DataSet>(s) { };
+  struct Contrast : public Data::Basic::Contrast<Set> {
+    Contrast();
+    Contrast(const std::string &name, const Specification::Sets &s, bool revcomp=false, size_t n_seq=0);
+    template <typename X> Contrast(const Data::Basic::Contrast<X> &s) : Data::Basic::Contrast<Set>(s) { };
   };
 
-  struct DataCollection: public Data::Basic::Collection<DataSeries> {
-    DataCollection(const Specification::DataSets &s, bool revcomp=false, size_t n_seq=0);
-    template <typename X> DataCollection(const Data::Basic::Collection<X> &c) : Data::Basic::Collection<DataSeries>(c) { };
+  struct Collection: public Data::Basic::Collection<Contrast> {
+    Collection(const Specification::Sets &s, bool revcomp=false, size_t n_seq=0);
+    template <typename X> Collection(const Data::Basic::Collection<X> &c) : Data::Basic::Collection<Contrast>(c) { };
   };
 };
 

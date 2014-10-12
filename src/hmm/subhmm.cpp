@@ -13,10 +13,9 @@ SubHMM::SubHMM(const HMM &hmm, const Training::Range &states) : HMM(hmm, false),
   for(int i = last_state; i >= 0; i--)
     if(find(lift.begin(), lift.end(), i) == lift.end())
       del_column(i);
-  initialize_ranges();
   initialize_pred_succ();
   if(verbosity >= Verbosity::debug)
-    std::cout << "Constructed SubHMM" << std::endl;
+    cout << "Constructed SubHMM" << endl;
 }
 
 Training::Range SubHMM::map_down(const Training::Range &range) const

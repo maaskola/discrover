@@ -71,7 +71,9 @@ namespace Seeding {
   typedef Specification::Objective<Measures::Discrete::Measure> Objective;
   typedef std::vector<Objective> Objectives;
 
-  std::ostream &operator<<(std::ostream &out, const Objectives &objectives);
+  Objective objective_for_motif(const Objectives &objectives, const Specification::Motif &motif);
+
+  std::ostream &operator<<(std::ostream &out, const Objective &objective);
 
   struct Options {
     struct FIRE {
@@ -99,7 +101,7 @@ namespace Seeding {
 
     Options();
 
-    Specification::DataSets paths;
+    Specification::Sets paths;
     Specification::Motifs motif_specifications;
     Objectives objectives;
 
@@ -113,12 +115,12 @@ namespace Seeding {
     bool revcomp;
     bool strict;
     double pseudo_count;
+    bool weighting;
     size_t n_seq;
     bool word_stats;
     bool measure_runtime;
-    size_t n_motifs;
     OccurrenceFilter occurrence_filter;
-    bool keep_all;
+    bool only_best;
     Verbosity verbosity;
     bool dump_viterbi;
     bool no_enrichment_filter;

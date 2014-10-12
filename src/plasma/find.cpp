@@ -56,7 +56,7 @@ namespace Seeding {
       needs_rebuilding = true;
   }
 
-  Plasma::Plasma(const DataCollection &collection_, const Options &opt) : options(opt), collection(collection_), index_ready(false), needs_rebuilding(false) {
+  Plasma::Plasma(const Collection &collection_, const Options &opt) : options(opt), collection(collection_), index_ready(false), needs_rebuilding(false) {
     if(options.verbosity >= Verbosity::verbose)
       cerr << "Data loaded - constructor 2." << endl;
 
@@ -76,7 +76,7 @@ namespace Seeding {
       needs_rebuilding = true;
   }
 
-  void report(ostream &os, const Objective &objective, const string &motif, const DataCollection &collection, const Options &options) {
+  void report(ostream &os, const Objective &objective, const string &motif, const Collection &collection, const Options &options) {
     Result result(objective);
     result.motif = motif;
     result.counts = count_motif(collection, motif, options);
@@ -85,7 +85,7 @@ namespace Seeding {
     report(os, result, collection, options);
   }
 
-  void report(ostream &os, const Result &res, const DataCollection &collection, const Options &options) {
+  void report(ostream &os, const Result &res, const Collection &collection, const Options &options) {
     // TODO make more comprehensive
     // TODO add word counts
     // TODO print PWM of occurrences
@@ -116,11 +116,11 @@ namespace Seeding {
     os << "Uncorrected log-P(G-test)         " << -compute_score(collection, res, options, Measures::Discrete::Measure::LogpGtest) << endl;
     os << "Corrected log-P(G-test)           " << x << (x > 0 ? "      WARNING: greater zero!" : "") << endl;
     size_t i = 0;
-    for(auto &series: collection)
-      for(auto &set: series) {
+    for(auto &contrast: collection)
+      for(auto &dataset: contrast) {
         double x = res.counts[i++];
-        double z = options.word_stats ? set.seq_size : set.set_size;
-        os << "Occurrence statistics             " << set.path << " " << x << " / " << z << " = " << (x/z) << endl;
+        double z = options.word_stats ? dataset.seq_size : dataset.set_size;
+        os << "Occurrence statistics             " << dataset.path << " " << x << " / " << z << " = " << (x/z) << endl;
       }
     if(options.dump_viterbi) {
       string viterbi_output = options.label + ".viterbi";
@@ -382,9 +382,9 @@ namespace Seeding {
   Results Plasma::find_external_dreme(size_t length, const Objective &objective, size_t max_degeneracy, const set<size_t> &degeneracies) const {
     Results results;
     vector<string> paths;
-    for(auto &series: collection)
-      for(auto &set: series)
-        paths.push_back(set.path);
+    for(auto &contrast: collection)
+      for(auto &dataset: contrast)
+        paths.push_back(dataset.path);
     if(paths.size() > 2) {
       cerr << "Error: when using the external DREME program to find seeds no more than two FASTA files may be used." << endl;
       exit(-1);
@@ -726,11 +726,11 @@ namespace Seeding {
    * For each length the most discriminative one is found, its occurrences are
    * masked and the procedure is repeated n_motifs times for each length.
    */
-  Results Plasma::find_all(const Specification::Motif &motif, const Objective &objective, size_t n_motifs) const {
+  Results Plasma::find_all(const Specification::Motif &motif, const Objective &objective) const {
     Results results;
     for(auto length: motif.lengths) {
       Plasma plasma(*this);
-      for(size_t i = 0; i < n_motifs; i++) {
+      for(size_t i = 0; i < motif.multiplicity; i++) {
         Results new_results;
         for(auto &result: plasma.find_seeds(length, objective, options.algorithm)) {
           if(options.verbosity >= Verbosity::verbose)
@@ -760,7 +760,7 @@ namespace Seeding {
 
         for(auto &result: new_results) {
           results.push_back(result);
-          if(i != options.n_motifs - 1)
+          if(i != motif.multiplicity - 1)
             plasma.apply_mask(result);
         }
       }
@@ -771,10 +771,10 @@ namespace Seeding {
   /** Finds the most discriminative motif over all included lengths.
    * Occurrences are masked and the procedure is repeated n_motifs times.
    */
-  Results Plasma::find_multiple(const Specification::Motif &motif, const Objective &objective, size_t n_motifs) const {
+  Results Plasma::find_multiple(const Specification::Motif &motif, const Objective &objective) const {
     Plasma plasma(*this);
     Results results;
-    for(size_t i = 0; i < n_motifs; i++) {
+    for(size_t i = 0; i < motif.multiplicity; i++) {
       Results new_results;
       for(auto length: motif.lengths) {
         for(auto &result: plasma.find_seeds(length, objective, options.algorithm)) {
@@ -807,64 +807,63 @@ namespace Seeding {
       Result result = *begin(new_results);
       results.push_back(result);
       // Mask if necessary
-      if(i != options.n_motifs - 1)
+      if(i != motif.multiplicity - 1)
         plasma.apply_mask(result);
     }
     return(results);
   };
 
 
-  Results Plasma::find(const Specification::Motif &motif_spec, const Objectives &objectives, bool doreport) const {
+  Results Plasma::find_motifs(const Specification::Motif &motif_spec, const Objective &objective, bool doreport) const {
     if(options.verbosity >= Verbosity::debug)
-      cout << "motif_spec = " << motif_spec << " objectives = " << objectives << endl;
-    for(auto &objective: objectives)
-      if(objective.motif_name == motif_spec.name) {
+      cout << "motif_spec = " << motif_spec << " objective = " << objective << endl;
+    if(objective.motif_name != motif_spec.name) {
+      cout << "Error: no objective found for motif specification: " << motif_spec.name << ":" << motif_spec.specification << endl;
+      exit(-1);
+    }
 
-        Results results;
-        if(motif_spec.kind == Specification::Motif::Kind::Seed) {
-          Result result(objective);
-          result.motif = motif_spec.specification;
-          result.counts = count_motif(collection, motif_spec.specification, options);
-          result.log_p = -compute_score(collection, result.counts, options, objective, result.motif.length(), motif_degeneracy(result.motif), Measures::Discrete::Measure::CorrectedLogpGtest);
-          result.score = compute_score(collection, result.counts, options, objective, result.motif.length(), motif_degeneracy(result.motif));
-          results.push_back(result);
+    Results results;
+    if(motif_spec.kind == Specification::Motif::Kind::Seed) {
+      Result result(objective);
+      result.motif = motif_spec.specification;
+      result.counts = count_motif(collection, motif_spec.specification, options);
+      result.log_p = -compute_score(collection, result.counts, options, objective, result.motif.length(), motif_degeneracy(result.motif), Measures::Discrete::Measure::CorrectedLogpGtest);
+      result.score = compute_score(collection, result.counts, options, objective, result.motif.length(), motif_degeneracy(result.motif));
+      results.push_back(result);
 
-          return(results);
-        }
+      return(results);
+    }
 
-        if(options.verbosity >= Verbosity::verbose) {
-          cout << "IUPAC regular expression motif finding with libPlasma" << endl;
-          cout << "objective.measure = '" << objective.measure << "' objective.motif = '" << objective.motif_name << "' series expr = '";
-          for(auto &expr: objective.series_expression)
-            cout << expr;
-          cout << "'" << endl;
-        }
+    if(options.verbosity >= Verbosity::verbose) {
+      cout << "IUPAC regular expression motif finding with libPlasma" << endl;
+      cout << "objective.measure = '" << objective.measure << "' objective.motif = '" << objective.motif_name << "' contrast expr = '";
+      for(auto &expr: objective.contrast_expression)
+        cout << expr;
+      cout << "'" << endl;
+    }
 
-        if(options.verbosity >= Verbosity::debug)
-          cout << "motif_spec = " << motif_spec << " objective = " << to_string(objective) << endl;
+    if(options.verbosity >= Verbosity::debug)
+      cout << "motif_spec = " << motif_spec << " objective = " << to_string(objective) << endl;
 
-        Timer t;
+    Timer t;
 
-        if(options.keep_all)
-          for(auto &result: find_all(motif_spec, objective, options.n_motifs)) {
-            results.push_back(result);
-            if(doreport)
-              report(cout, result, collection, options);
-          }
-        else
-          for(auto &result: find_multiple(motif_spec, objective, options.n_motifs)) {
-            results.push_back(result);
-            if(doreport)
-              report(cout, result, collection, options);
-          }
-
-        double time = t.tock() * 1e-6;
-        if(options.measure_runtime)
-          cerr << "Processing took " << time << " seconds." << endl;
-        return(results);
+    if(not options.only_best)
+      for(auto &result: find_all(motif_spec, objective)) {
+        results.push_back(result);
+        if(doreport)
+          report(cout, result, collection, options);
       }
-    cout << "Error: no objective found for motif specification: " << motif_spec.name << ":" << motif_spec.specification << endl;
-    exit(-1);
+    else
+      for(auto &result: find_multiple(motif_spec, objective)) {
+        results.push_back(result);
+        if(doreport)
+          report(cout, result, collection, options);
+      }
+
+    double time = t.tock() * 1e-6;
+    if(options.measure_runtime)
+      cerr << "Processing took " << time << " seconds." << endl;
+    return(results);
   }
 
   void Plasma::apply_mask(const string &motif) {
@@ -895,9 +894,9 @@ namespace Seeding {
     t.detach();
   }
 
-  void viterbi_dump(const string &motif, const DataSet &data_set, ostream &out, const Options &options) {
-    out << "# " << data_set.path << " details following" << endl;
-    for(auto &seq: data_set) {
+  void viterbi_dump(const string &motif, const Set &dataset, ostream &out, const Options &options) {
+    out << "# " << dataset.path << " details following" << endl;
+    for(auto &seq: dataset) {
       size_t n_sites = 0;
       auto match_iter = begin(seq.sequence);
       while((match_iter = search(match_iter, end(seq.sequence), begin(motif), end(motif), iupac_included)) != end(seq.sequence)) {
@@ -933,10 +932,10 @@ namespace Seeding {
 
 
 
-  void viterbi_dump(const string &motif, const DataCollection &collection, ostream &out, const Options &options) {
-    for(auto &series: collection)
-      for(auto &set: series)
-        viterbi_dump(motif, set, out, options);
+  void viterbi_dump(const string &motif, const Collection &collection, ostream &out, const Options &options) {
+    for(auto &contrast: collection)
+      for(auto &dataset: contrast)
+        viterbi_dump(motif, dataset, out, options);
   }
 
 }

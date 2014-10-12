@@ -35,13 +35,40 @@ bool iupac_included(char r, char q)
     return(true);
   switch(r) {
     case 'a':
-      return(q=='w' or q=='m' or q=='r' or q=='d' or q=='h' or q=='v' or q=='n');
+      switch(q) {
+        case 'w': case 'm': case 'r': case 'd': case 'h': case 'v': case 'n':
+          return true;
+        default:
+          return false;
+      }
     case 'c':
-      return(q=='s' or q=='m' or q=='y' or q=='b' or q=='h' or q=='v' or q=='n');
+      switch(q) {
+        case 's': case 'm': case 'y': case 'b': case 'h': case 'v': case 'n':
+          return true;
+        default:
+          return false;
+      }
     case 'g':
-      return(q=='s' or q=='k' or q=='r' or q=='b' or q=='d' or q=='v' or q=='n');
+      switch(q) {
+        case 's': case 'k': case 'r': case 'b': case 'd': case 'v': case 'n':
+          return true;
+        default:
+          return false;
+      }
     case 't':
-      return(q=='w' or q=='k' or q=='y' or q=='b' or q=='d' or q=='h' or q=='n');
+      switch(q) {
+        case 'u': case 'w': case 'k': case 'y': case 'b': case 'd': case 'h': case 'n':
+          return true;
+        default:
+          return false;
+      }
+    case 'u':
+      switch(q) {
+        case 't': case 'w': case 'k': case 'y': case 'b': case 'd': case 'h': case 'n':
+          return true;
+        default:
+          return false;
+      }
     default:
       return(false);
   }
@@ -189,12 +216,12 @@ string read_fasta_with_boundaries(const vector<string> &paths, vector<size_t> &p
   return(s);
 }
 
-string collapse_data_series(const Seeding::DataSeries &data_series, vector<size_t> &pos2seq, vector<size_t> &seq2set) {
+string collapse_contrast(const Seeding::Contrast &contrast, vector<size_t> &pos2seq, vector<size_t> &seq2set) {
   string s;
   size_t set_idx = 0;
   size_t seq_idx = 0;
-  for(auto &data_set: data_series) {
-    for(auto &seq: data_set) {
+  for(auto &dataset: contrast) {
+    for(auto &seq: dataset) {
       s += seq.sequence + "$";
       for(size_t i = 0; i < seq.sequence.size() + 1; i++)
         pos2seq.push_back(seq_idx);
@@ -206,24 +233,24 @@ string collapse_data_series(const Seeding::DataSeries &data_series, vector<size_
   return(s);
 }
 
-string collapse_data_collection(const Seeding::DataCollection &collection, vector<size_t> &pos2seq, vector<size_t> &seq2set, vector<size_t> &set2series) {
+string collapse_collection(const Seeding::Collection &collection, vector<size_t> &pos2seq, vector<size_t> &seq2set, vector<size_t> &set2contrast) {
   string s;
   size_t seq_idx = 0;
   size_t set_idx = 0;
-  size_t series_idx = 0;
-  for(auto &series: collection) {
-    for(auto &set: series) {
-      for(auto &seq: set) {
+  size_t contrast_idx = 0;
+  for(auto &contrast: collection) {
+    for(auto &dataset: contrast) {
+      for(auto &seq: dataset) {
         s += seq.sequence + "$";
         for(size_t i = 0; i < seq.sequence.size() + 1; i++)
           pos2seq.push_back(seq_idx);
         seq2set.push_back(set_idx);
         seq_idx++;
       }
-      set2series.push_back(series_idx);
+      set2contrast.push_back(contrast_idx);
       set_idx++;
     }
-    series_idx++;
+    contrast_idx++;
   }
   return(s);
 }

@@ -1,5 +1,5 @@
 /* =====================================================================================
- * Copyright (c) 2011, Jonas Maaskola
+ * Copyright (c) 2013, Jonas Maaskola
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,36 +16,40 @@
  *
  * =====================================================================================
  *
- *       Filename:  basedefs.hpp
+ *       Filename:  results.hpp
  *
- *    Description:  Basic classes and type definitions for sets of sequence sets
+ *    Description:  Data structures to store Discrover results
  *
- *        Created:  Thu Aug 4 22:12:31 2011 +0200
+ *        Created:  Thu Mar 07 20:30:35 2014 +0200
  *
  *         Author:  Jonas Maaskola (JM), jonas@maaskola.de
  *
  * =====================================================================================
  */
 
-#ifndef BASEDEFS_HPP
-#define BASEDEFS_HPP
+#ifndef HMM_RESULTS_HPP
+#define HMM_RESULTS_HPP
 
+#include <cstddef>
+#include <vector>
 #include <string>
-#include "../plasma/data.hpp"
-#include "trainingmode.hpp"
-#include "sequence.hpp"
 
-namespace Data {
-  typedef Fasta::IEntry Seq;
-  typedef Basic::Set<Seq> Set;
-  typedef Basic::Contrast<Set> Contrast;
-  typedef Basic::Collection<Contrast> Collection;
+namespace Training {
 
-  typedef std::vector<Seq> Seqs;
+  struct State {
+    State(size_t n=0);
+    int center;
+    std::vector<std::vector<double>> scores;
+  };
+
+  struct Result {
+    Result();
+    State state;
+    double delta;
+    std::string parameter_file;
+    // bool success; // TODO add a flag to indicate training success
+  };
 }
 
-void prepare_cross_validation(const Data::Collection &col, Data::Collection &training_data, Data::Collection &test_data, double cross_validation_freq, Verbosity verbosity);
-void prepare_cross_validation(const Data::Contrast &contrast, Data::Contrast &training_data, Data::Contrast &test_data, double cross_validation_freq, Verbosity verbosity);
-
-#endif
+#endif   /* ----- #ifndef RESULTS_HPP  ----- */
 

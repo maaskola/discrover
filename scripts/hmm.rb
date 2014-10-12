@@ -28,7 +28,62 @@ def boostify(x)
   y
 end
 
+$present2iupac = {
+  "a" => "a",
+  "c" => "c",
+  "g" => "g",
+  "t" => "t",
+  "u" => "u",
+  "ac" => "m",
+  "gt" => "k",
+  "ag" => "r",
+  "ct" => "y",
+  "at" => "w",
+  "cg" => "s",
+  "acg" => "v",
+  "act" => "h",
+  "agt" => "d",
+  "cgt" => "b",
+  "acgt" => "n"
+}
+
+$iupac2present = {
+  "a" => "a",
+  "c" => "c",
+  "g" => "g",
+  "t" => "t",
+  "u" => "u",
+  "m" => "ac",
+  "k" => "gt",
+  "r" => "ag",
+  "y" => "ct",
+  "w" => "at",
+  "s" => "cg",
+  "v" => "acg",
+  "h" => "act",
+  "d" => "agt",
+  "b" => "cgt",
+  "n" => "acgt"
+}
+
+def consensus_pos(x, threshold=0.1)
+  present = []
+  "acgt".split("").each_with_index{|y, idx| present << y if x[idx] > threshold}
+  $present2iupac[present.join("")]
+end
+
+def consensus(x, threshold=0.1)
+  x.map{|y| consensus_pos(y, threshold)}.join("")
+end
+
 module HMM
+  class MotifStates
+    attr_accessor :name, :states
+    def initialize(name, states)
+      @name = name
+      @states = states
+    end
+  end
   class Parameters
     attr_accessor :transition, :emission, :first_state, :n_states, :n_emissions, :alpha, :beta, :version, :command, :time, :working_dir, :hmm_version, :plasma_version, :motifs, :classes, :order
     def initialize(f, verbose=false)
@@ -111,15 +166,15 @@ module HMM
               $stderr.puts "last_state = #{@last_state}" if verbose
             end
 
-            @motifs = {}
-            @motifs["all"] = (first_state..last_state).to_a
+            @motifs = []
+            @motifs << MotifStates.new("all", (first_state..last_state).to_a)
 
           when 4..6 then
-            @motifs = {}
+            @motifs = []
             while line =~ /Motif "(.*)" (.*)/
               name = $1
               states = $2.split(" ").map{|i| i.to_i }
-              @motifs[name] = states
+              @motifs << MotifStates.new(name, states)
               line = f.gets.strip
             end
             if line =~ /State class (.*)/
@@ -131,11 +186,11 @@ module HMM
             if line =~ /State order (.*)/
               @order = $1.split(" ").map{|x| x.to_i}
             else
-              raise "Format conflict in line: #{line}"
+              raise "Format conflict in line: #{line}" unless line =~ /Transition matrix/
             end
           end
 
-          line = f.gets.strip
+          line = f.gets.strip unless line =~ /Transition matrix/
           raise "Format conflict in line: #{line}" if line != "Transition matrix"
           @transition = []
           @n_states.times{|i|
@@ -198,6 +253,8 @@ module HMM
           idx += 1
         end
 
+        puts "Error: IC calculation is outdated."
+        exit(-1)
         @motifs[motif].each{|i|
           4.times{|j|
             p = @emission[i][j]
@@ -245,9 +302,13 @@ module HMM
     # Determine a topological order of the states of a motif.
     # If no motif is specified, use the first one.
     # Ignore transitions from set of final states to the set of initial ones.
-    def topological_order(motif=nil)
-      motif = @motifs.keys[0] if motif.nil?
-      states = @motifs[motif]
+    def topological_order(motif)
+      if motif.nil?
+        puts "Error: topological order needs a motif."
+        exit(-1)
+      end
+      # motif = @motifs.keys[0] if motif.nil?
+      states = motif.states
       initial = initial_states(motif)
       final = final_states(motif)
       reach = reachable_states(states, initial, final)
@@ -260,6 +321,8 @@ module HMM
           1
         end
       }
+      # $stderr.puts "topo order = #{states}"
+      states
     end
 
     def reachable_from_state(state)
@@ -279,20 +342,22 @@ module HMM
     end
 
     def initial_states(motif)
-      reachable_from_bg = reachable_from_states(@motifs["Background"])
+      bg = @motifs.find{|x| x.name == "Background" }
+      reachable_from_bg = reachable_from_states(bg.states)
       initial = []
-      @motifs[motif].each{|state|
+      motif.states.each{|state|
         initial << state if reachable_from_bg.include?(state)
       }
-      # puts "initial states of #{motif} = #{initial.join(",")}"
+      # $stderr.puts "initial states of #{motif}: #{motif.name} = #{initial.to_s}"
       initial
     end
 
     def final_states(motif)
       final = []
-      @motifs[motif].each{|state|
+      bg = @motifs.find{|x| x.name == "Background" }
+      motif.states.each{|state|
         included = false
-        @motifs["Background"].each{|bg_state|
+        bg.states.each{|bg_state|
           if @transition[state][bg_state] > 0
             included = true
             break

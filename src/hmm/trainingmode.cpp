@@ -1,9 +1,11 @@
 #include "trainingmode.hpp"
 
+using namespace std;
+
 namespace Training {
-  std::istream& operator>>(std::istream& in, Method& method)
+  istream& operator>>(istream& in, Method& method)
   {
-    std::string token;
+    string token;
     in >> token;
     if(token == "none" or token == "fixed" or token == "fix")
       method = Method::None;
@@ -12,7 +14,7 @@ namespace Training {
     else if(token == "gradient" or token == "discriminative" or token == "disc")
       method = Method::Gradient;
     else {
-      std::cout << "Training method '" << token << "' not implemented. See -h or --help for help." << std::endl;
+      cout << "Training method '" << token << "' not implemented. See -h or --help for help." << endl;
       exit(-1);
     }
     return(in);
@@ -29,9 +31,9 @@ namespace Training {
   }
 
 
-  std::string method2string(Method method)
+  string method2string(Method method)
   {
-    std::string s;
+    string s;
     switch(method) {
       case Method::None:
         s = "none";
@@ -46,7 +48,7 @@ namespace Training {
     return(s);
   }
 
-  std::ostream& operator<<(std::ostream& out, Method method)
+  ostream& operator<<(ostream& out, Method method)
   {
     out << method2string(method);
     return(out);
@@ -56,7 +58,7 @@ namespace Training {
   Seeding::Objective corresponding_objective(const Objective &x, bool use_mi_to_seed) {
     Seeding::Objective y;
     y.motif_name = x.motif_name;
-    y.series_expression = x.series_expression;
+    y.contrast_expression = x.contrast_expression;
     if(use_mi_to_seed)
       y.measure = Measures::Discrete::Measure::MutualInformation;
     else

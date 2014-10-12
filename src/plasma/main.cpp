@@ -238,7 +238,7 @@ int main(int argc, const char** argv) {
     cout << "objectives:"; for(auto &x: options.objectives) cout << " " << x; cout << endl;
   }
 
-  Specification::harmonize(options.motif_specifications, options.paths, options.objectives);
+  Specification::harmonize(options.motif_specifications, options.paths, options.objectives, false);
 
   if(options.verbosity >= Verbosity::verbose) {
     cout << "motif_specifications:"; for(auto &x: options.motif_specifications) cout << " " << x; cout << endl;
@@ -258,13 +258,13 @@ int main(int argc, const char** argv) {
   MCMC::EntropySource::seed(r_unif(rng));
 
   Seeding::Plasma plasma(options);
-  Seeding::DataCollection ds = plasma.collection;
+  Seeding::Collection ds = plasma.collection;
   typedef Seeding::Result res_t;
   vector<res_t> results;
 
   size_t n = options.motif_specifications.size();
   for(auto &motif: options.motif_specifications) {
-    for(auto &r:  plasma.find(motif, options.objectives, false))
+    for(auto &r: plasma.find_motifs(motif, Seeding::objective_for_motif(options.objectives, motif), false))
       results.push_back(r);
     if(--n > 0)
       plasma.apply_mask(results);
@@ -274,7 +274,7 @@ int main(int argc, const char** argv) {
     report(cout, results[0], ds, options);
   else {
     sort(begin(results), end(results), [](const res_t &a, const res_t &b) { return(a.log_p <= b.log_p); });
-    Seeding::DataCollection original_ds = ds;
+    Seeding::Collection original_ds = ds;
     Seeding::Options opts = options;
     opts.occurrence_filter = Seeding::OccurrenceFilter::RemoveSequences;
     for(auto &r: results) {

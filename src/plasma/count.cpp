@@ -25,12 +25,12 @@ using namespace std;
 
 namespace Seeding {
 
-  hash_map_t get_word_counts(const DataCollection &collection, size_t length, const Options &options) {
+  hash_map_t get_word_counts(const Collection &collection, size_t length, const Options &options) {
     Timer t;
 
     size_t n_samples = 0;
-    for(auto &series: collection)
-      n_samples += series.sets.size();
+    for(auto &contrast: collection)
+      n_samples += contrast.sets.size();
 
     if(options.verbosity >= Verbosity::debug)
       cout << "Getting word counts for " << n_samples << " samples." << endl;
@@ -41,9 +41,9 @@ namespace Seeding {
       x = 0;
 
     size_t idx = 0;
-    for(auto &series: collection)
-      for(auto &set: series)
-        add_counts(set, length, counts, idx++, default_stats, options);
+    for(auto &contrast: collection)
+      for(auto &dataset: contrast)
+        add_counts(dataset, length, counts, idx++, default_stats, options);
 
     double time = t.tock() * 1e-6;
     if(options.measure_runtime)
@@ -80,14 +80,14 @@ namespace Seeding {
   }
 
   /*
-  count_vector_t count_motif(const DataSeries &data_series, const string &motif, const Options &options) {
-    count_vector_t stats(data_series.sets.size());
+  count_vector_t count_motif(const Contrast &contrast, const string &motif, const Options &options) {
+    count_vector_t stats(contrast.sets.size());
     for(auto &x: stats)
       x = 0;
 
     size_t idx = 0;
-    for(auto &data_set: data_series) {
-      for(auto &seq: data_set)
+    for(auto &dataset: contrast) {
+      for(auto &seq: dataset)
         stats(idx) += count_motif(seq.sequence, motif, options);
       idx++;
     }
@@ -95,18 +95,18 @@ namespace Seeding {
   }
   */
 
-  count_vector_t count_motif(const DataCollection &collection, const string &motif, const Options &options) {
+  count_vector_t count_motif(const Collection &collection, const string &motif, const Options &options) {
     size_t n_samples = 0;
-    for(auto &series: collection)
-      n_samples += series.sets.size();
+    for(auto &contrast: collection)
+      n_samples += contrast.sets.size();
     count_vector_t stats(n_samples);
     for(auto &x: stats)
       x = 0;
 
     size_t idx = 0;
-    for(auto &series: collection)
-      for(auto &set: series) {
-        for(auto &seq: set)
+    for(auto &contrast: collection)
+      for(auto &dataset: contrast) {
+        for(auto &seq: dataset)
           stats(idx) += count_motif(seq.sequence, motif, options);
         idx++;
       }
@@ -164,8 +164,8 @@ namespace Seeding {
     }
   }
 
-  void add_counts(const DataSet &data, size_t len, hash_map_t &counts, size_t idx, const count_vector_t &default_stats, const Options &options) {
-    for(auto &seq: data)
+  void add_counts(const Set &dataset, size_t len, hash_map_t &counts, size_t idx, const count_vector_t &default_stats, const Options &options) {
+    for(auto &seq: dataset)
       add_counts(seq.sequence, len, counts, idx, default_stats, options);
   }
 }

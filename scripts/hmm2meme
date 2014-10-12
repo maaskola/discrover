@@ -1,0 +1,77 @@
+#!/usr/bin/env ruby
+
+$script_dir = File.dirname(__FILE__)
+$: << $script_dir
+require 'hmm.rb'
+
+$header = <<HERE
+MEME version 4.4
+
+ALPHABET= ACGT
+
+strands: + -
+
+Background letter frequencies (from web form):
+A 0.25000 C 0.25000 G 0.25000 T 0.25000 
+HERE
+
+$motif_header = <<HERE
+
+MOTIF IUPAC
+
+letter-probability matrix: alength= 4 w= LENGTH nsites= 20 E= 0
+HERE
+
+
+example = <<HERE
+MEME version 4.4
+
+ALPHABET= ACGT
+
+strands: + -
+
+Background letter frequencies (from web form):
+A 0.25000 C 0.25000 G 0.25000 T 0.25000 
+
+MOTIF DDVNMWVYRVYGCC 
+
+letter-probability matrix: alength= 4 w= 14 nsites= 20 E= 0
+  0.329365	  0.011905	  0.329365	  0.329365	
+  0.329365	  0.011905	  0.329365	  0.329365	
+  0.329365	  0.329365	  0.329365	  0.011905	
+  0.250000	  0.250000	  0.250000	  0.250000	
+  0.488095	  0.488095	  0.011905	  0.011905	
+  0.488095	  0.011905	  0.011905	  0.488095	
+  0.329365	  0.329365	  0.329365	  0.011905	
+  0.011905	  0.488095	  0.011905	  0.488095	
+  0.488095	  0.011905	  0.488095	  0.011905	
+  0.329365	  0.329365	  0.329365	  0.011905	
+  0.011905	  0.488095	  0.011905	  0.488095	
+  0.011905	  0.011905	  0.964286	  0.011905	
+  0.011905	  0.964286	  0.011905	  0.011905	
+  0.011905	  0.964286	  0.011905	  0.011905	
+HERE
+
+def to_meme(path, out_dir)
+  hmm = HMM::Parameters.new(File.open(path))
+
+  puts $header
+  hmm.motifs.each{|motif|
+    next if motif.name =~ /Special/
+    next if motif.name =~ /Background/
+    # puts motif.states
+    emissions = []
+    motif.states.each{|state|
+      emissions << hmm.emission[state]
+    }
+    iupac = consensus(emissions)
+    puts $motif_header.gsub(/IUPAC/, iupac).gsub(/LENGTH/, emissions.length.to_s)
+    puts emissions.map{|x| x.join("\t")}.join("\n")
+  }
+end
+
+out_dir = "./"
+ARGV.each{|path|
+  to_meme(path, out_dir)
+}
+

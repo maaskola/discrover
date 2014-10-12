@@ -37,9 +37,9 @@ namespace MCMC {
   template <>
     class Generator<HMM> {
       private:
-        hmm_options options;
+        Options::HMM options;
       public:
-        Generator(const hmm_options &opt, size_t w) :
+        Generator(const Options::HMM &opt, size_t w) :
           options(opt)
         {
           if(options.sampling.min_size == -1)
@@ -54,19 +54,23 @@ namespace MCMC {
   template <>
     class Evaluator<HMM> {
       private:
-        Data::Collection data;
+        Data::Collection collection;
         Training::Task task;
         Training::State ts;
+        Options::HMM options;
       public:
-        Evaluator(const Data::Collection &data_,
-            const Training::Task &obj) :
-          data(data_),
+        Evaluator(const Data::Collection &col,
+            const Training::Task &obj,
+            const Options::HMM &opt) :
+          collection(col),
           task(obj),
-          ts(1) { // TODO make this work with multiple tasks
+          ts(1), // TODO make this work with multiple tasks
+          options(opt) {
           };
 
         double evaluate(const HMM &hmm) const {
-          return(hmm.compute_score(data, task));
+          // TODO consider using compute_score instead of compute_score_all_motifs
+          return(hmm.compute_score_all_motifs(collection, task.measure, options));
         };
     };
 }

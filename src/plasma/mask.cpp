@@ -30,24 +30,24 @@
 using namespace std;
 
 namespace Seeding {
-  void remove_seqs_with_motif(const string &motif, DataSet &data_set, const Options &options) {
+  void remove_seqs_with_motif(const string &motif, Set &dataset, const Options &options) {
     vector<size_t> to_be_deleted;
 
-    auto iter = begin(data_set.sequences);
-    while(iter != end(data_set.sequences)) {
+    auto iter = begin(dataset.sequences);
+    while(iter != end(dataset.sequences)) {
       if(search(begin(iter->sequence), end(iter->sequence), begin(motif), end(motif), iupac_included) != end(iter->sequence))
-        to_be_deleted.push_back(distance(begin(data_set.sequences), iter));
+        to_be_deleted.push_back(distance(begin(dataset.sequences), iter));
       iter++;
     }
     if(options.verbosity >= Verbosity::verbose)
       cout << "Removing " << to_be_deleted.size() << " sequences that contain the motif." << endl;
     reverse(begin(to_be_deleted), end(to_be_deleted));
     for(auto &x: to_be_deleted) {
-      data_set.set_size -= 1;
-      data_set.seq_size -= data_set.sequences[x].sequence.size();
+      dataset.set_size -= 1;
+      dataset.seq_size -= dataset.sequences[x].sequence.size();
       if(options.verbosity >= Verbosity::debug)
-        cout << "removing sequence " << x << " " << data_set.sequences[x].definition << " " << data_set.sequences[x].sequence << endl; //" " << data_set.sequences[x] << endl;
-      data_set.sequences.erase(begin(data_set.sequences) + x);
+        cout << "removing sequence " << x << " " << dataset.sequences[x].definition << " " << dataset.sequences[x].sequence << endl; //" " << dataset.sequences[x] << endl;
+      dataset.sequences.erase(begin(dataset.sequences) + x);
     }
   }
 
@@ -81,35 +81,35 @@ namespace Seeding {
     return(mask_motif_occurrences(motif, seq.sequence, options, mask_symbol));
   };
 
-  void mask_motif_occurrences(const string &motif, DataSet &data_set, const Options &options) {
-    for(auto &seq: data_set) {
+  void mask_motif_occurrences(const string &motif, Set &dataset, const Options &options) {
+    for(auto &seq: dataset) {
       mask_motif_occurrences(motif, seq, options, 'n');
     }
   }
 
-  void mask_motif_occurrences(const string &motif, DataSeries &data_series, const Options &options) {
-    for(auto &data_set: data_series)
-      mask_motif_occurrences(motif, data_set, options);
+  void mask_motif_occurrences(const string &motif, Contrast &contrast, const Options &options) {
+    for(auto &dataset: contrast)
+      mask_motif_occurrences(motif, dataset, options);
   }
 
-  void remove_seqs_with_motif(const string &motif, DataSeries &data_series, const Options &options) {
-    for(auto &data_set: data_series)
-      remove_seqs_with_motif(motif, data_set, options);
+  void remove_seqs_with_motif(const string &motif, Contrast &contrast, const Options &options) {
+    for(auto &dataset: contrast)
+      remove_seqs_with_motif(motif, dataset, options);
   }
 
-  void apply_mask(DataCollection &d, const string &motif, const Options &options) {
+  void apply_mask(Collection &d, const string &motif, const Options &options) {
     switch(options.occurrence_filter) {
       case OccurrenceFilter::RemoveSequences:
         if(options.verbosity >= Verbosity::verbose)
           cout << "Removing sequences with " << motif << " occurrences." << endl;
-        for(auto &series: d)
-          remove_seqs_with_motif(motif, series, options);
+        for(auto &contrast: d)
+          remove_seqs_with_motif(motif, contrast, options);
         break;
       case OccurrenceFilter::MaskOccurrences:
         if(options.verbosity >= Verbosity::verbose)
           cout << "Masking " << motif << " occurrences." << endl;
-        for(auto &series: d)
-          mask_motif_occurrences(motif, series, options);
+        for(auto &contrast: d)
+          mask_motif_occurrences(motif, contrast, options);
         break;
     }
   }

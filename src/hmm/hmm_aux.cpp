@@ -35,56 +35,13 @@
 
 using namespace std;
 
-double HMM::RegisteredDataSet::get_motif_prior(size_t group_idx) const {
-  auto x = motif_prior.find(group_idx);
-  if(x == end(motif_prior))
-    throw("Error: could not find motif prior for motif group.");
-  else
-    return(x->second);
-}
-
-double HMM::compute_marginal_motif_prior(size_t group_idx) const
+bitmask_t HMM::compute_bitmask(const Training::Task &task) const
 {
-  if(verbosity >= Verbosity::debug)
-    std::cout << "compute_marginal_motif_prior(group_idx=" << group_idx << ")" << std::endl;
-  double marginal_motif_prior = 0;
-  for(auto &x: registered_datasets)
-    marginal_motif_prior += x.second.class_prior * x.second.get_motif_prior(group_idx);
-  return(marginal_motif_prior);
-}
-
-double HMM::get_class_motif_prior(const std::string &sha1, size_t group_idx) const
-{
-  if(verbosity >= Verbosity::debug)
-    std::cout << "get_class_motif_prior(sha1=" << sha1 << ", group_idx=" << group_idx << ")" << std::endl;
-
-  auto cparms = registered_datasets.find(sha1);
-  if(cparms == end(registered_datasets)) {
-    std::cout << "Error: failed trying to access class parameters of path with sha1: " << sha1 << "." << std::endl;
-    throw("Could not find registered data set.");
-  }
-  auto x = cparms->second.motif_prior.find(group_idx);
-  if(x == end(cparms->second.motif_prior)) {
-    std::cout << "Error: failed trying to access class conditional motif prior parameters of path with sha1: " << sha1 << " for the motif with index " << group_idx << "." << std::endl;
-    throw("Could not find conditional motif prior for registered data set.");
-  }
-  if(verbosity >= Verbosity::verbose)
-    std::cout << "get_class_motif_prior(sha1=" << sha1 << ", group_idx=" << group_idx << ") = " << x->second << std::endl;
-  return(x->second);
-}
-
-double HMM::get_class_prior(const std::string &sha1) const
-{
-  if(verbosity >= Verbosity::debug)
-    std::cout << "get_class_prior(sha1=" << sha1 << ")" << std::endl;
-  auto cparms = registered_datasets.find(sha1);
-  if(cparms == end(registered_datasets)) {
-    std::cout << "Error: failed trying to access class parameters of path with sha1: " << sha1 << "." << std::endl;
-    throw("Could not find registered data set.");
-  }
-  if(verbosity >= Verbosity::verbose)
-    std::cout << "get_class_prior(sha1=" << sha1 << ") = " << cparms->second.class_prior << std::endl;
-  return(cparms->second.class_prior);
+  bitmask_t present = 0;
+  for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
+    if(task.motif_name == groups[group_idx].name)
+      present[group_idx] = 1;
+  return(present);
 }
 
 void HMM::shift_forward(size_t group_idx, size_t n) {
@@ -113,17 +70,19 @@ void HMM::serialize(ostream &os, const ExecutionInformation &exec_info, size_t f
   const string emission_matrix_string = "Emission matrix";
   const size_t output_precision = 15;
   switch(format_version) {
+    // TODO bump version because no order is stored?
     case 6:
       os << param_format_string << format_version << endl;
       os << "# " << exec_info.program_name << " " << exec_info.hmm_version << " [" << GIT_BRANCH << " branch]" << endl;
       os << "# Run on " << exec_info.datetime << endl;
       os << "# Run in " << exec_info.directory << endl;
       os << "# Command = " << exec_info.cmdline << endl;
-      for(auto &x: registered_datasets) {
+      for(auto &x: registration.datasets) {
         os << "Dataset " << x.second.spec.path << " " << x.first << " class = " << x.second.class_prior << " motif = ";
         for(auto &y: x.second.motif_prior)
-          os << " " << y.first << "/" << y.second;
-        os << std::endl;
+          if(y.first != 0)
+            os << " " << y.first << "/" << y.second;
+        os << endl;
       }
       os << n_states << " states" << endl;
       os << n_emissions << " emissions" << endl;
@@ -136,10 +95,6 @@ void HMM::serialize(ostream &os, const ExecutionInformation &exec_info, size_t f
       os << "State class";
       for(auto &motif: group_ids)
         os << " " << motif;
-      os << endl;
-      os << "State order";
-      for(auto &o: order)
-        os << " " << o;
       os << endl;
       os << transition_matrix_string << endl;
       os.precision(output_precision);
@@ -168,7 +123,6 @@ void HMM::deserialize(istream &is)
 {
   groups = vector<Group>();
   group_ids = vector<size_t>();
-  order = vector<size_t>();
 
   const string param_format_string = "# HMM parameter format version ";
   string line;
@@ -186,28 +140,42 @@ void HMM::deserialize(istream &is)
       const string key_b = "Motif_prior[0] ";
       const string key_c = "Motif_prior[1] ";
       // TODO parse information regarding registered data sets
-      // if(line.substr(0, key_a.size()) == key_a)
-      //   class_prior = atof(line.substr(key_a.size()).c_str());
-      // else
-      //   cout << "Error trying to parse HMM parameters: class prior could not be parsed: '" << line << "'." << endl;
-      safeGetline(is, line);
-      // TODO parse information regarding registered data sets
-      // if(line.substr(0, key_b.size()) == key_b)
-      //   motif_prior[0] = atof(line.substr(key_b.size()).c_str());
-      // else
-      //   cout << "Error trying to parse HMM parameters: first conditional motif prior could not be parsed: '" << line << "'." << endl;
-      safeGetline(is, line);
-      // TODO parse information regarding registered data sets
-      // if(line.substr(0, key_c.size()) == key_c)
-      //   motif_prior[1] = atof(line.substr(key_c.size()).c_str());
-      // else
-      //   cout << "Error trying to parse HMM parameters: second conditional motif prior could not be parsed: '" << line << "'." << endl;
-      safeGetline(is, line);
+      while(line.find(" states") == string::npos)
+        safeGetline(is, line);
+      if(false) {
+        // if(line.substr(0, key_a.size()) == key_a)
+        //   class_prior = atof(line.substr(key_a.size()).c_str());
+        // else
+        //   cout << "Error trying to parse HMM parameters: class prior could not be parsed: '" << line << "'." << endl;
+        safeGetline(is, line);
+        // TODO parse information regarding registered data sets
+        // if(line.substr(0, key_b.size()) == key_b)
+        //   motif_prior[0] = atof(line.substr(key_b.size()).c_str());
+        // else
+        //   cout << "Error trying to parse HMM parameters: first conditional motif prior could not be parsed: '" << line << "'." << endl;
+        safeGetline(is, line);
+        // TODO parse information regarding registered data sets
+        // if(line.substr(0, key_c.size()) == key_c)
+        //   motif_prior[1] = atof(line.substr(key_c.size()).c_str());
+        // else
+        //   cout << "Error trying to parse HMM parameters: second conditional motif prior could not be parsed: '" << line << "'." << endl;
+        safeGetline(is, line);
+      }
     }
 
+    if(verbosity >= Verbosity::debug)
+      cerr << "n_states line = " << line << endl;
     n_states = atoi(line.c_str());
+    if(verbosity >= Verbosity::debug)
+      cerr << "n_states = " << n_states << endl;
     safeGetline(is, line);
-    n_emissions = atoi(line.c_str());
+    if(verbosity >= Verbosity::debug)
+      cerr << "line = " << line << endl;
+    size_t n_emis = atoi(line.c_str());
+    if(n_emis != n_emissions) {
+      cout << "Error: this version only works with " << n_emissions << " emissions, while the .hmm file specifies " << n_emis << "." << endl;
+      exit(-1);
+    }
 
     if(verbosity >= Verbosity::debug)
       cout << "n_states = " << n_states << " n_emissions " << n_emissions << endl;
@@ -268,22 +236,25 @@ void HMM::deserialize(istream &is)
     }
 
     safeGetline(is, line);
-    if(line.substr(0, 11) != "State order") {
-      cout << "Error loading HMM parameters: expected \"State order\" but found instead: \"" << line << "\"." << endl;
-      exit(-1);
-    }
+    if(line.substr(0, 11) == "State order") {
+      cout << "Found a state order line; checking that all orders are zero, and ignoring." << endl;
 
-    line = line.substr(12);
-    while(line != "") {
-      size_t start = line.find(" ");
-      if(start > 0) {
-        size_t o = atoi(line.substr(0,start).c_str());
-        order.push_back(o);
+      line = line.substr(12);
+      while(line != "") {
+        size_t start = line.find(" ");
+        if(start > 0) {
+          size_t o = atoi(line.substr(0,start).c_str());
+          if(o != 0) {
+            cout << "Error: Found a non-zero state order. This version version only works for zeroth order." << endl;
+            exit(-1);
+          }
+        }
+        if(start == string::npos)
+          break;
+        else
+          line = line.substr(start+1);
       }
-      if(start == string::npos)
-        break;
-      else
-        line = line.substr(start+1);
+      safeGetline(is,line);
     }
 
 
@@ -292,7 +263,10 @@ void HMM::deserialize(istream &is)
     transition.resize(n_states, n_states);
     emission.resize(n_states, n_emissions);
 
-    safeGetline(is,line);
+    if(line != "Transition matrix") {
+      cout << "Error: expecting line \"Transition matrix\", but got instead \"" << line << "\"." << endl;
+      exit(-1);
+    }
     for(size_t i = 0; i < n_states; i++) {
       size_t tmp;
       is >> tmp;
@@ -301,6 +275,10 @@ void HMM::deserialize(istream &is)
     }
     safeGetline(is,line);
     safeGetline(is,line);
+    if(line != "Emission matrix") {
+      cout << "Error: expecting line \"Emission matrix\", but got instead \"" << line << "\"." << endl;
+      exit(-1);
+    }
     for(size_t i = 0; i < n_states; i++) {
       size_t tmp;
       is >> tmp;
@@ -308,7 +286,6 @@ void HMM::deserialize(istream &is)
         is >> emission(i,j);
     }
   } else {
-//    first_state = atoi(line.c_str());
     is >> transition;
     is >> emission;
     last_state = transition.size1() - 1;
@@ -318,36 +295,63 @@ void HMM::deserialize(istream &is)
     exit(-1);
   }
 
-  initialize_order_offsets();
   finalize_initialization();
 };
 
 
-string HMM::path2string(const HMM::StatePath &path) const
+string HMM::path2string_state(const HMM::StatePath &path) const
 {
+  const char start_symb = '^';
+  const char bg_symb = '0';
   string p;
   for(size_t j = 0; j < path.size(); j++)
     switch(path[j]) {
       case start_state:
-        p += "^";
+        p += start_symb;
+        break;
+      case bg_state:
+        p += bg_symb;
         break;
       default:
-        if(path[j] < first_state)
-          p += "0";
-        else {
-          char c = path[j] - first_state + 'A';
-          if(c > 'Z')
-            c = c - 'A' + 'a';
+        char x = path[j] - first_state;
+        char c = x + 'A';
+        if(x > 'Z') {
+          c = x - ('Z' - 'A' + 1) + 'a';
           if(c > 'z') {
             cout << "Error: state index is too large" << endl;
             c = '*';
           }
-          p += c;
         }
+        p += c;
         break;
     };
   return(p);
 };
+
+string HMM::path2string_group(const HMM::StatePath &path) const
+{
+  const char start_symb = '^';
+  const char bg_symb = '-';
+  char first_symb = '0';
+  if(groups.size() - 2 > 10)
+    first_symb = 'A';
+  string p;
+  for(size_t j = 0; j < path.size(); j++)
+    switch(path[j]) {
+      case start_state:
+        p += start_symb;
+        break;
+      case bg_state:
+        p += bg_symb;
+        break;
+      default:
+        char c = first_symb + (group_ids[path[j]] - 2);
+        p += c;
+        break;
+    };
+  return(p);
+};
+
 
 
 void HMM::to_dot(ostream &os, double minimum_transition) const
@@ -389,46 +393,41 @@ void HMM::to_dot(ostream &os, double minimum_transition) const
 };
 
 
-bool HMM::check_consistency_transitions() const
+bool HMM::check_consistency_transitions(double eps) const
 {
   for(size_t k = 0; k < n_states; k++) {
     double p = 0;
     for(size_t l = 0; l < n_states; l++)
       p += transition(k,l);
-    if(fabs(1-p)>1e-6)
+    if(fabs(1-p)>eps)
       return(false);
   }
   return(true);
 }
 
 
-bool HMM::check_consistency_emissions() const
+bool HMM::check_consistency_emissions(double eps) const
 {
-  // TODO: implement this correctly w.r.t. higher order emissions
-  /*
   for(size_t k = 0; k < n_states; k++) {
     double p = 0;
     for(size_t l = 0; l < n_emissions; l++)
       p += emission(k,l);
-    if(fabs(1-p)>1e-6)
+    if(fabs(1-p)>eps)
       return(false);
-  }  */
+  }
   return(true);
 }
 
-bool HMM::check_consistency() const
+bool HMM::check_consistency(double eps) const
 {
   bool ok = true;
-  ok = ok and check_consistency_transitions();
-  ok = ok and check_consistency_emissions();
-  ok = ok and (group_ids.size() == order.size() and group_ids.size() == n_states);
+  ok = ok and check_consistency_transitions(eps);
+  ok = ok and check_consistency_emissions(eps);
+  ok = ok and group_ids.size() == n_states;
   for(auto &m: groups)
     for(auto &state: m.states)
       if(state > n_states)
         ok = false;
-  for(auto &o: order)
-    if(o > max_order)
-      ok = false;
   for(auto &d: group_ids)
     if(d > groups.size())
       ok = false;
@@ -489,82 +488,6 @@ void HMM::set_motif_emissions(const matrix_t &e, size_t first_padded, size_t n_i
   }
 }
 
-// NOTE: this assumes that the alphabet has size 4, which is okay for nucleic acids, but not for amino acids
-void HMM::update_history(History &history, size_t obs) const
-{
-  if(verbosity >= Verbosity::everything)
-    cout << "obs = " << obs << endl
-      << "history = " << history.observation << endl
-      << "history length = " << history.length << endl
-      << "alphabet_size = " << alphabet_size << endl
-      << "max_order  = " << max_order  << endl
-      << "history * alphabet_size = " << history.observation * alphabet_size << endl
-      << "history << 2 = " << (history.observation << 2) << endl
-      << "ipow(alphabet_size, max_order + 1) = " << ipow(alphabet_size, max_order + 1) << endl
-      << "(1 << (2 * (max_order + 1))) = " << (1 << (2 * (max_order + 1))) << endl;
-  if(obs == empty_symbol) {
-    history.observation = 0;
-    history.length = 0;
-  } else {
-    history.observation = ((history.observation << 2)         // left shift one position
-        + obs)                                                // add the new observation
-      % (1 << (2 * (max_order + 1)));                         // truncate to max_order position
-    history.length++;
-    history.length = min<size_t>(history.length, max_order + 1);
-  }
-  if(verbosity >= Verbosity::everything)
-    cout << "new history = " << history.observation << " length = " << history.length << endl;
-}
-
-// NOTE: this assumes that the alphabet has size 4, which is okay for nucleic acids, but not for amino acids
-void HMM::update_history_front(History &history, size_t obs) const
-{
-  if(verbosity >= Verbosity::everything)
-    cout << "adding obs = " << obs << endl
-      << "prev history = " << history.observation << endl
-      << "prev history length = " << history.length<< endl
-      << "alphabet_size = " << alphabet_size << endl
-      << "max_order  = " << max_order  << endl
-      << "history / alphabet_size = " << history.observation / alphabet_size << endl
-      << "history >> 2 = " << (history.observation >> 2) << endl;
-  if(obs == empty_symbol) {
-    if(history.length > 0) {
-      history.observation = history.observation >> 2;
-      history.length--;
-    }
-  } else {
-    history.observation = (obs << (2 * max_order))    // left shift obs to the most significant position
-      + (history.observation >> 2);                   // add the previous history, right-shifted one position
-    history.length++;
-    history.length = min<size_t>(history.length, max_order + 1);
-  }
-  if(verbosity >= Verbosity::everything)
-    cout << "new history = " << history.observation << endl;
-}
-
-void HMM::initialize_order_offsets()
-{
-  max_order = 0;
-  for(auto &o: order)
-    if(o > max_order)
-      max_order = o;
-
-  order_offset.resize(max_order);
-  double n = 0;
-  for(size_t i = 0; i < max_order; i++)
-    order_offset[i] = n += ipow(alphabet_size, max_order - i + 1);
-  if(verbosity >= Verbosity::debug) {
-    cout << "order =";
-    for(auto o: order)
-      cout << " " << o;
-    cout << endl;
-    cout << "order_offset =";
-    for(auto o: order_offset)
-      cout << " " << o;
-    cout << endl;
-  }
-}
-
 void HMM::normalize_transition(matrix_t &m) const
 {
   for(size_t k = 0; k < m.size1(); k++) {
@@ -583,36 +506,17 @@ void HMM::normalize_transition(matrix_t &m) const
 void HMM::normalize_emission(matrix_t &m) const
 {
   for(size_t k = bg_state; k < m.size1(); k++) {
-    size_t offset = 0;
     if(verbosity >= Verbosity::debug)
-      cout << "k = " << k << endl
-        << "order[" << k << "] = " << order[k] << endl;
-    for(int i = order[k]; i >= 0; i--) {
-      size_t begin = offset;
-      offset += ipow(alphabet_size, i+1);
-      size_t end = offset;
-
-      if(verbosity >= Verbosity::debug)
-        cout << "Doing all emissions in " << begin << " to " << end << endl;
-      size_t x = begin;
-      while(x < end) {
-        size_t y = x + alphabet_size;
-        if(verbosity >= Verbosity::debug)
-          cout << "Doing emission " << x << " to " << y << endl;
-
-        double z = 0;
-        for(size_t b = x; b < y; b++)
-          z += m(k,b);
-        if(z > 0)
-          for(size_t b = x; b < y; b++)
-            m(k,b) = m(k,b) / z;
-        else
-          for(size_t b = x; b < y; b++)
-            m(k,b) = 0;
-
-        x = y;
-      }
-    }
+      cout << "k = " << k << endl;
+    double z = 0;
+    for(size_t b = 0; b < n_emissions; b++)
+      z += m(k,b);
+    if(z > 0)
+      for(size_t b = 0; b < n_emissions; b++)
+        m(k,b) /= z;
+    else
+      for(size_t b = 0; b < n_emissions; b++)
+        m(k,b) = 0;
   }
 
   // enforce emissions of start state
@@ -620,7 +524,7 @@ void HMM::normalize_emission(matrix_t &m) const
     m(start_state,b) = 0;
 }
 
-Training::Tasks HMM::define_training_tasks(const hmm_options &options) const
+Training::Tasks HMM::define_training_tasks(const Options::HMM &options) const
 {
   Training::Tasks tasks;
 
@@ -634,25 +538,33 @@ Training::Tasks HMM::define_training_tasks(const hmm_options &options) const
     Training::Task task;
     task.motif_name = objective.motif_name;
     task.measure = objective.measure;
-    task.series_expression = objective.series_expression;
+    task.contrast_expression = objective.contrast_expression;
+    bool found = false;
     for(auto &group: groups) {
       if(group.name == objective.motif_name) {
+        found = true;
         copy(begin(group.states), end(group.states), back_inserter(task.targets.emission));
         if(do_transition)
           copy(begin(group.states), end(group.states), back_inserter(task.targets.transition));
       }
     }
-    tasks.push_back(task);
 
-    if(options.verbosity >= Verbosity::verbose) {
-      cout << "Generated primary training targets." << endl << "Emissions:";
-      for(auto e: task.targets.emission)
-        cout << " " << e;
-      cout << endl;
-      cout << "Transitions:";
-      for(auto t: task.targets.transition)
-        cout << " " << t;
-      cout << endl;
+    if(not found) {
+      if(options.verbosity >= Verbosity::verbose)
+        cout << "Skipping discriminative training task for motif " << task.motif_name << " because it is not represented in the HMM." << endl;
+    } else {
+      tasks.push_back(task);
+
+      if(options.verbosity >= Verbosity::verbose) {
+        cout << "Generated primary training targets." << endl << "Emissions:";
+        for(auto e: task.targets.emission)
+          cout << " " << e;
+        cout << endl;
+        cout << "Transitions:";
+        for(auto t: task.targets.transition)
+          cout << " " << t;
+        cout << endl;
+      }
     }
   }
 
@@ -675,25 +587,25 @@ Training::Tasks HMM::define_training_tasks(const hmm_options &options) const
     }
   }
 
-  // get all series names
-  set<string> series_names;
+  // get all contrast names
+  set<string> contrast_names;
   for(auto &task: tasks)
     for(auto &expr: task)
-      series_names.insert(expr.series);
+      contrast_names.insert(expr.contrast);
 
   // And then the generative part
   if(options.bg_learning != Training::Method::None) {
     Training::Task task;
-    if(atleast_one_discriminative_task) {
-      task.motif_name = "Generative parameters";
+    if(atleast_one_discriminative_task or options.objectives.empty()) {
+      task.motif_name = "Context";
       task.measure = Measure::Likelihood;
     } else {
       task.motif_name = options.objectives[0].motif_name;
       task.measure = options.objectives[0].measure;
     }
 
-    for(auto &series_name: series_names)
-      task.series_expression.push_back({+1, series_name});
+    for(auto &contrast_name: contrast_names)
+      task.contrast_expression.push_back({+1, contrast_name});
     for(size_t i = 0; i < n_states; i++) {
       if(e_states.find(i) == end(e_states))
         if(i > start_state)
@@ -736,7 +648,7 @@ size_t HMM::non_zero_parameters(const Training::Targets &training_targets) const
 
 size_t HMM::n_parameters() const
 {
-  size_t n = (n_states * (n_states - 1)) + (n_states * (3 * ipow(alphabet_size, max_order)));
+  size_t n = n_states * (n_states - 1) + n_states * (n_emissions - 1 );
   if(verbosity >= Verbosity::verbose)
     cout << "n_parameters = " << n << endl;
   return(n);
@@ -764,15 +676,15 @@ bool HMM::is_motif_state(size_t state_idx) const
   return(is_motif_group(group_ids[state_idx]));
 }
 
-HMM::mask_t HMM::compute_mask(const Data::Collection &data) const
+HMM::mask_t HMM::compute_mask(const Data::Collection &collection) const
 {
   if(verbosity >= Verbosity::debug)
-    cout << "HMM::compute-mask(Data::Series)" << endl;
+    cout << "HMM::compute-mask(Data::Collection)" << endl;
   HMM::mask_t mask;
-  for(auto &series: data)
-    for(auto &data_set: series) {
+  for(auto &contrast: collection)
+    for(auto &dataset: contrast) {
       mask_sub_t m;
-      for(auto &seq: data_set) {
+      for(auto &seq: dataset) {
         vector<size_t> v;
         HMM::StatePath path;
         viterbi(seq, path);
@@ -781,14 +693,13 @@ HMM::mask_t HMM::compute_mask(const Data::Collection &data) const
           if(state >= first_state)
             v.push_back(idx); // TODO: check: should I insert idx - 1 instead?
                               // -> No; but there was an issue with reverse complements; fixed in src/plasma/data.cpp DataSet::mask by pos = 2 * n - pos where n is the sequence length
-
           idx++;
         }
         if(not v.empty())
           m[seq.definition] = v;
       }
       if(not m.empty())
-        mask[data_set.path] = m;
+        mask[dataset.path] = m;
     }
   return(mask);
 }
@@ -799,6 +710,24 @@ Training::Range HMM::complementary_states(size_t group_idx) const
   for(size_t i = start_state; i < n_states; i++)
     if(not is_motif_state(i) or group_ids[i] != group_idx)
       range.push_back(i);
+  if(verbosity >= Verbosity::debug) {
+    cout << "Complementary states =";
+    for(auto &x: range)
+      cout << " " << x;
+    cout << endl;
+  }
+  return(range);
+}
+
+Training::Range HMM::complementary_states_mask(bitmask_t present_mask) const
+{
+  Training::Range range;
+  for(size_t i = start_state; i < n_states; i++)
+    range.push_back(i);
+  auto in_mask = [&] (size_t state) {
+    return((present_mask & bitmask_t(1 << group_ids[state])) != 0);
+  };
+  range.erase(remove_if(begin(range), end(range), in_mask), end(range));
   if(verbosity >= Verbosity::debug) {
     cout << "Complementary states =";
     for(auto &x: range)
@@ -827,6 +756,11 @@ string HMM::get_group_name(size_t idx) const
   return(groups[idx].name);
 }
 
+size_t HMM::get_nstates() const
+{
+  return(n_states);
+}
+
 size_t HMM::get_ngroups() const
 {
   return(groups.size());
@@ -852,3 +786,78 @@ size_t HMM::get_motif_len(size_t motif_idx) const
   return(len);
 }
 
+void HMM::print_occurrence_table_header(ostream &out) const
+{
+  out << "file\tseq\tpos\tmotifidx\tmotifname\tmotif\tstrand\tforwardpos\tcenterdist" << endl;
+}
+
+void HMM::print_occurrence_table(const string &file_path, const Data::Seq &seq, const StatePath &path, ostream &out) const
+{
+  size_t seqlen = seq.sequence.size();
+  size_t midpoint = seqlen / 2;
+  bool revcomp = false;
+  // reverse-complementary sequences look like this: xxx$xxx
+  // so their length is 2n + 1, and the middle nucleotide is $
+  if(seqlen % 2 == 1 and seq.sequence[midpoint] == '$')
+    revcomp = true;
+
+  double center;
+  if(revcomp)
+    center = (midpoint - 1) / 2.0;
+  else
+    center = (seqlen - 1) / 2.0;
+
+  for(size_t pos = 0; pos < path.size(); pos++)
+    for(size_t group_idx = 0; group_idx < groups.size(); group_idx++)
+      if(is_motif_group(group_idx) and
+          path[pos] == groups[group_idx].states[0]) {
+        size_t end = pos + 1;
+        while(end != path.size() and path[end] > path[pos])
+          end++;
+        string motif = seq.sequence.substr(pos, end-pos);
+
+        bool strand = (not revcomp) or (pos < midpoint);
+        // forward_pos is the position relative to the forward strand
+        long forward_pos = pos;
+        if(strand == false)
+          forward_pos = seqlen - end;
+        double rel_pos = forward_pos - center;
+        double motif_center_pos = rel_pos + (end - pos - 1) / 2.0;
+        out << file_path
+          << "\t" << seq.definition
+          << "\t" << pos
+          << "\t" << group_idx
+          << "\t" << groups[group_idx].name
+          << "\t" << motif
+          << "\t" << (strand ? "+" : "-")
+          << "\t" << forward_pos
+          << "\t" << motif_center_pos << endl;
+      }
+}
+
+pair<HMM, map<size_t, size_t>> HMM::add_revcomp_motifs() const
+{
+  HMM rc = *this;
+  // reverse complement motifs
+  for(size_t i = 0; i < groups.size(); i++)
+    if(groups[i].kind == Group::Kind::Motif)
+      for(size_t j = 0; j < groups[i].states.size(); j++)
+        for(size_t k = 0; k < n_emissions; k++)
+          rc.emission(groups[i].states[j], k) = emission(groups[i].states[groups[i].states.size() - j - 1], n_emissions - k - 1);
+
+  for(size_t i = 0; i < first_state; i++) {
+    rc.transition(start_state, start_state) += rc.transition(start_state, i) /= 2;
+    rc.transition(bg_state, bg_state) += rc.transition(bg_state, i) /= 2;
+  }
+
+  HMM hmm = *this;
+  hmm.add_motifs(rc);
+
+  map<size_t,size_t> assoc;
+  size_t idx = 0;
+  for(size_t i = 0; i < groups.size(); i++)
+    if(groups[i].kind == Group::Kind::Motif)
+      assoc[i] = groups.size() + idx++;
+
+  return(make_pair(hmm, assoc));
+}

@@ -32,7 +32,7 @@
 
 #include "hmm.hpp"
 
-int perform_analysis(hmm_options &options);
+int perform_analysis(Options::HMM &options);
 
 #endif
 

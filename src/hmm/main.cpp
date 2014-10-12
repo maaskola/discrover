@@ -120,7 +120,7 @@ Measures::Discrete::Measure measure2iupac_objective(const Measure measure) {
   }
 }
 
-void fixup_seeding_options(hmm_options &options) {
+void fixup_seeding_options(Options::HMM &options) {
 // TODO REACTIVATE if(set_objective)
 // TODO REACTIVATE    options.seeding.objective = {measure2iupac_objective(options.measure);
   // options.seeding.objective = Seeding::Objective::corrected_logp_gtest;
@@ -129,6 +129,7 @@ void fixup_seeding_options(hmm_options &options) {
   options.seeding.paths = options.paths;
   options.seeding.n_threads = options.n_threads;
   options.seeding.n_seq = options.n_seq;
+  options.seeding.weighting = options.weighting;
   // options.seeding.verbosity = Verbosity::info;
   options.seeding.verbosity = options.verbosity;
   options.seeding.revcomp = options.revcomp;
@@ -150,7 +151,7 @@ int main(int argc, const char** argv)
 
   namespace po = boost::program_options;
 
-  hmm_options options;
+  Options::HMM options;
   options.exec_info = generate_exec_info(argv[0], GIT_DESCRIPTION, cmdline(argc, argv));
   options.class_model = false;
   options.random_salt = generate_rng_seed();
@@ -174,6 +175,7 @@ int main(int argc, const char** argv)
   po::options_description init_options("Initialization options", cols);
   po::options_description eval_options("Evaluation options", cols);
   po::options_description advanced_options("Advanced options", cols);
+  po::options_description multi_motif_options("Multiple motif mode options", cols);
   po::options_description mmie_options("MMIE options", cols);
   po::options_description linesearching_options("Line searching options", cols);
   po::options_description sampling_options("Gibbs sampling options", cols);
@@ -191,12 +193,18 @@ int main(int argc, const char** argv)
     ;
 
   basic_options.add_options()
-    ("fasta,f", po::value<vector<Specification::DataSet>>(&options.paths)->required(), "Path to FASTA file with sequences. May be given multiple times. The path may be prepended by a comma separated list of names of motifs enriched in the file, with the syntax [NAMES:[SERIES:]]PATH, where NAMES is NAME[,NAMES] is a set of motif names, and SERIES is the name of a series this data set belongs to. Also see the example above. Note that you should prepend the path with a double colon if the path contains at least one colon.")
-   ("motif,m", po::value<vector<Specification::Motif>>(&options.motif_specifications), "Motif specification. May be given multiple times, and can be specified in multiple ways:\n"
-        "1. \tUsing the IUPAC code for nucleic acids.\n"
-        "2. \tA length specification. Motifs of the indicated lengths are sought. A length specification is a comma separated list of length ranges, where a length range is either a single length, or an expression of the form 'x-y' to indicate lengths x up to y.\n"
-        "3. \tBy specifying the path to a file with a PWM.\n"
-        "Regardless of the way a motif is specified, it may be given a name, and an insertions string. The syntax is [NAME:[INSERT:]]MOTIFSPEC. If MOTIFSPEC is a path and contains at least one colon please just prepend two colons. The insertions string is a comma separated list of positions after which to add an insertion state. Positions are 1 indexed, and must be greater 1 and less than the motif length.")
+    ("fasta,f", po::value<vector<Specification::Set>>(&options.paths)->required(), "Path to FASTA file with sequences. May be given multiple times. The path may be prepended by a comma separated list of names of motifs enriched in the file, with the syntax [NAMES:[CONTRAST:]]PATH, where NAMES is NAME[,NAMES] is a set of motif names, and CONTRAST is the name of a contrast this data set belongs to. Also see the example above. Note that you should prepend the path with a double colon if the path contains at least one colon.")
+    ("motif,m", po::value<vector<Specification::Motif>>(&options.motif_specifications),
+     "Motif specification. May be given multiple times, and can be specified in multiple ways:\n"
+     "1. \tUsing the IUPAC code for nucleic acids.\n"
+     "2. \tA length specification. "
+     "Motifs of the indicated lengths are sought. "
+     "A length specification is a comma separated list of length ranges, "
+     "where a length range is either a single length, or an expression of the form 'x-y' to indicate lengths x up to y. "
+     "A length specification also allows to specify a multiplicity separated by an 'x'. "
+     "Thus examples are '8' for just length 8, '5-7' for lengths 5, 6, and 7, '5-8x2' for two motifs of lengths 5 to 8, '5-8,10x3' for three motifs of lengths 5, 6, 7, 8, and 10.\n"
+     "3. \tBy specifying the path to a file with a PWM.\n"
+     "Regardless of the way a motif is specified, it may be given a name, and an insertions string. The syntax is [NAME:[INSERT:]]MOTIFSPEC. If MOTIFSPEC is a path and contains at least one colon please just prepend two colons. The insertions string is a comma separated list of positions after which to add an insertion state. Positions are 1 indexed, and must be greater 1 and less than the motif length.")
    ;
   basic_options_optional.add_options()
     ("score", po::value<Training::Objectives>(&options.objectives)->default_value(Training::Objectives(1,Training::Objective("mi")), "mi"), "The significance measure. May be one of\n"
@@ -216,18 +224,18 @@ int main(int argc, const char** argv)
     ("load,l", po::value<vector<string>>(&options.load_paths), "Load HMM parameters from a .hmm file produced by an earlier run. Can be specified multiple times; then the first parameter file will be loaded, and motifs of the following parameter files are added.")
     ("alpha", po::value<double>(&options.alpha)->default_value(0.03, "0.03"), "Probability of alternative nucleotides. The nucleotides not included in the IUPAC character will have this probability.")
     ("lambda", po::value<double>(&options.lambda)->default_value(1), "Initial value for prior with which a motif is expected.")
-    ("bgorder", po::value<size_t>(&options.bg_order)->default_value(0), "Order of the background model.")
     ("wiggle", po::value<size_t>(&options.wiggle)->default_value(0), "For automatically determined seeds, consider variants shifted up and down by up to the specified number of positions.")
+    ("extend", po::value<size_t>(&options.extend)->default_value(0), "Extend seeds by this many Ns up- and downstream before HMM training.")
     ("padl", po::value<size_t>(&options.left_padding)->default_value(0), "For automatically determined seeds, add Ns upstream of, or to the left of the seed.")
     ("padr", po::value<size_t>(&options.right_padding)->default_value(0), "For automatically determined seeds, add Ns downstream of, or to the right of the seed.")
     ;
 
   eval_options.add_options()
     ("posterior", po::bool_switch(&options.print_posterior), "During evaluation also print out the motif posterior probability.")
-    ("no-summary", po::bool_switch(&options.evaluate.summary)->default_value(true), "Do not print summary information.")
-    ("no-viterbi", po::bool_switch(&options.evaluate.viterbi_path)->default_value(true), "Do not print the Viterbi path.")
-    ("no-occ-table", po::bool_switch(&options.evaluate.occurrence_table)->default_value(true), "Do not print the occurrence table.")
-    ("ric", po::bool_switch(&options.evaluate.ric), "Perform a rank information coefficient analysis.")
+    ("nosummary", po::bool_switch(&options.evaluate.skip_summary), "Do not print summary information.")
+    ("noviterbi", po::bool_switch(&options.evaluate.skip_viterbi_path), "Do not print the Viterbi path.")
+    ("notable", po::bool_switch(&options.evaluate.skip_occurrence_table), "Do not print the occurrence table.")
+    ("ric", po::bool_switch(&options.evaluate.perform_ric), "Perform a rank information coefficient analysis.")
     ;
 
 
@@ -245,11 +253,18 @@ int main(int argc, const char** argv)
     ("nseq", po::value<size_t>(&options.n_seq)->default_value(0), "Only consider the top sequences of each FASTA file. Specify 0 to indicate all.")
     ("iter", po::value<size_t>(&options.termination.max_iter)->default_value(1000), "Maximal number of iterations to perform in training. A value of 0 means no limit, and that the training is only terminated by the tolerance.")
     ("salt", po::value<unsigned int>(&options.random_salt), "Seed for the random number generator.")
+    ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
+    ;
+
+  multi_motif_options.add_options()
+    ("multiple", po::bool_switch(&options.multi_motif.accept_multiple), "Accept multiple motifs as long as the score increases. This can only be used with the objective function MICO.")
+    ("relearn", po::value<Options::MultiMotif::Relearning>(&options.multi_motif.relearning)->default_value(Options::MultiMotif::Relearning::Full, "full"), "When accepting multiple motifs, whether and how to re-learn the model after a new motif is added. Choices: 'none', 'reest', 'full'.")
+    ("resratio", po::value<double>(&options.multi_motif.residual_ratio)->default_value(5.0), "Cutoff to use to discard new motifs in multi motif mode. The cutoff is applied on the ratio of conditional mutual information of the new motif and the conditions given the previous motifs. Must be non-negative. High values discard more motifs, and lead to less redundant motifs.")
     ;
 
   mmie_options.add_options()
-    ("no-classp", po::bool_switch(&options.learn_class_prior)->default_value(true), "When performing MMIE, do not learn the class prior.")
-    ("no-motifp", po::bool_switch(&options.learn_conditional_motif_prior)->default_value(true), "When performing MMIE, do not learn the conditional motif prior.")
+    ("noclassp", po::bool_switch(&options.dont_learn_class_prior), "When performing MMIE, do not learn the class prior.")
+    ("nomotifp", po::bool_switch(&options.dont_learn_conditional_motif_prior), "When performing MMIE, do not learn the conditional motif prior.")
     ("classp", po::value<double>(&options.class_prior)->default_value(0.5), "When performing MMIE, use this as initial class prior.")
     ("motifp1", po::value<double>(&options.conditional_motif_prior1)->default_value(0.6, "0.6"), "When performing MMIE, use this as initial conditional motif prior for the signal class.")
     ("motifp2", po::value<double>(&options.conditional_motif_prior2)->default_value(0.03, "0.03"), "When performing MMIE, use this as initial conditional motif prior for the control class.")
@@ -282,12 +297,12 @@ int main(int argc, const char** argv)
     ;
 
   hidden_options.add_options()
+    ("nosave", po::bool_switch(&options.dont_save_shuffle_sequences), "Do not save generated shuffle sequences.")
     ("bg_learn", po::value<Training::Method>(&options.bg_learning)->default_value(Training::Method::Reestimation, "em"), "How to learn the background. Available are 'fixed', 'em', 'gradient', where the 'em' uses re-estimation to maximize the likelihood contribution of the background parameters, while 'gradient' uses the discriminative objective function.")
-    ("multi", po::value<Training::Simultaneity>(&options.simultaneity)->default_value(Training::Simultaneity::Simultaneous,"sim"), "Wether to add and train automatically determined motifs sequentially or simultaneously. Available are 'seq', 'sim'.")
     ("pscnt", po::value<double>(&options.contingency_pseudo_count)->default_value(1.0, "1"), "The pseudo count to be added to the contingency tables in the discriminative algorithms.")
     ("pscntE", po::value<double>(&options.emission_pseudo_count)->default_value(1.0, "1"), "The pseudo count to be added to the expected emission probabilities before normalization in the Baum-Welch algorithm.")
     ("pscntT", po::value<double>(&options.transition_pseudo_count)->default_value(0.0, "0"), "The pseudo count to be added to the expected transition probabilities before normalization in the Baum-Welch algorithm.")
-    ("compress", po::value<Compression>(&options.output_compression)->default_value(Compression::gzip, "gz"), "Compression method to use for larger output files. Available are: 'none', 'gz' or 'gzip', 'bz2' or 'bzip2'.") // TODO make the code conditional on the presence of zlib
+    ("compress", po::value<Options::Compression>(&options.output_compression)->default_value(Options::Compression::gzip, "gz"), "Compression method to use for larger output files. Available are: 'none', 'gz' or 'gzip', 'bz2' or 'bzip2'.") // TODO make the code conditional on the presence of zlib
     ("miseeding", po::bool_switch(&options.use_mi_to_seed), "Disregard automatic seeding choice and use MICO for seeding.")
     ("absthresh", po::bool_switch(&options.termination.absolute_improvement), "Whether improvement should be gauged by absolute value. Default is relative to the current score.")
     ("intermediate", po::bool_switch(&options.store_intermediate), "Write out intermediate parameters during training.")
@@ -296,6 +311,7 @@ int main(int argc, const char** argv)
     ;
 
   advanced_options
+    .add(multi_motif_options)
     .add(mmie_options)
     .add(sampling_options);
 
@@ -495,7 +511,7 @@ int main(int argc, const char** argv)
   }
 
   // check and harmonize specified motifs, paths, and objectives
-  Specification::harmonize(options.motif_specifications, options.paths, options.objectives);
+  Specification::harmonize(options.motif_specifications, options.paths, options.objectives, false);
 
   // print information about specified motifs, paths, and objectives
   if(options.verbosity >= Verbosity::debug) {
@@ -531,28 +547,14 @@ int main(int argc, const char** argv)
   // Initialize the plasma options
   fixup_seeding_options(options);
 
-  // When using the Plasma option --keepall
-  if(options.seeding.keep_all)
-    // HMMs are initialized and independently optimized for each Plasma seed
-    options.model_choice = ModelChoice::HMMScore;
-  else
-    // HMMs are sequentially initialized and optimized for each Plasma seed
-    options.model_choice = ModelChoice::SeedScore;
-
   if(options.termination.past == 0) {
-    std::cout << "Error: the value of --past must be a number greater than 0." << std::endl;
-  }
-
-  if(options.simultaneity == Training::Simultaneity::Simultaneous and options.wiggle != 0 and options.model_choice == ModelChoice::SeedScore) {
-    std::cout << "Warning: option --wiggle deactivated due to simultaneous motif seeding based on seed scores." << std::endl;
-    std::cout << "If you want to use wiggle variants please use --keepall." << std::endl;
-    options.wiggle = 0;
+    cout << "Error: the value of --past must be a number greater than 0." << endl;
   }
 
   if(options.termination.max_iter == 0 and options.sampling.do_sampling) {
     options.termination.max_iter = 1000;
-    std::cout << "Note: did not specify the number of iterations to perform (--maxiter)." << std::endl
-      << "We will now do " << options.termination.max_iter << " iterations." << std::endl;
+    cout << "Note: did not specify the number of iterations to perform (--maxiter)." << endl
+      << "We will now do " << options.termination.max_iter << " iterations." << endl;
   }
 
   bool any_named = false;
@@ -567,33 +569,53 @@ int main(int argc, const char** argv)
         x.motifs.insert(s.name);
 
   if(options.load_paths.empty() and options.motif_specifications.empty()) {
-    std::cout << "Error: you must either specify at least one of:" << std::endl
-      << "1. a path from which to load HMM parameter (--load)" << std::endl
-      << "2. one or more motifs (--motif)" << std::endl
+    cout << "Error: you must either specify at least one of:" << endl
+      << "1. a path from which to load HMM parameter (--load)" << endl
+      << "2. one or more motifs (--motif)" << endl
       << default_error_msg << endl;
     return(-1);
   }
 
-  if(not options.long_names)
-    if(options.seeding.keep_all or options.wiggle > 0) {
-      std::cout << "Warning: you specified HMM score seed selection and / or wiggle variants, but did not specify --longnames." << std::endl
-        << "Adding option --longnames." << std::endl;
+  if(not options.long_names) {
+    if(not options.seeding.only_best) {
+      cout << "Warning: you did not specify --best seed selection, but did not specify --longnames." << endl
+        << "Adding option --longnames." << endl;
+      options.long_names = true;
+    } else if(options.wiggle > 0) {
+      cout << "Warning: you specified wiggle variants, but did not specify --longnames." << endl
+        << "Adding option --longnames." << endl;
       options.long_names = true;
     }
+  }
+
+  // Ensure that the residual MI ratio cutoff is non-negative
+  if(options.multi_motif.residual_ratio < 0) {
+    cout << "Warning: negative value provided for residual mutual information ratio cutoff. Using 0 as value." << endl;
+    options.multi_motif.residual_ratio = 0;
+  }
+
+  // Ensure that multiple mode is only used with objective function MICO
+  if(options.multi_motif.accept_multiple) {
+    for(auto &obj: options.objectives)
+      if(obj.measure != Measures::Continuous::Measure::MutualInformation) {
+        cout << "Error: multiple motif mode can only be used with the objective function MICO." << endl;
+        exit(-1);
+      }
+  }
 
   if(options.line_search.eta <= options.line_search.mu) {
-    std::cout << "Error: the Moré-Thuente η parameter must be larger than the µ parameter." << std::endl;
+    cout << "Error: the Moré-Thuente η parameter must be larger than the µ parameter." << endl;
     exit(-1);
   }
 
 
   // initialize RNG
   if(options.verbosity >= Verbosity::info)
-    std::cout << "Initializing random number generator with salt " << options.random_salt << "." << std::endl;
-  std::mt19937 rng;
+    cout << "Initializing random number generator with salt " << options.random_salt << "." << endl;
+  mt19937 rng;
   rng.seed(options.random_salt);
 
-  std::uniform_int_distribution<size_t> r_unif;
+  uniform_int_distribution<size_t> r_unif;
 
   Fasta::EntropySource::seed(r_unif(rng));
   MCMC::EntropySource::seed(r_unif(rng));

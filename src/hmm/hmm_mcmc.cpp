@@ -31,30 +31,32 @@
 #include "../mcmc/mcmchmm.hpp"
 #include <random>
 
-std::uniform_int_distribution<size_t> r_binary(0,1);
-std::uniform_real_distribution<double> r_unif(0, 1);
+using namespace std;
 
-void HMM::modify_column(std::mt19937 &rng)
+uniform_int_distribution<size_t> r_binary(0,1);
+uniform_real_distribution<double> r_unif(0, 1);
+
+void HMM::modify_column(mt19937 &rng)
 {
-  std::uniform_int_distribution<size_t> r_state(first_state, last_state);
+  uniform_int_distribution<size_t> r_state(first_state, last_state);
   size_t col = r_state(rng);
 
-  std::uniform_int_distribution<size_t> r_nucl(0, alphabet_size - 1);
+  uniform_int_distribution<size_t> r_nucl(0, n_emissions - 1);
   size_t i = r_nucl(rng);
   size_t j = r_nucl(rng);
   while(i == j)
     j = r_nucl(rng);
   if(verbosity >= Verbosity::verbose)
-    std::cout << "Modifying emissions " << i << " and " << j << " in column " << col << std::endl;
+    cout << "Modifying emissions " << i << " and " << j << " in column " << col << endl;
   double rel_amount = r_unif(rng);
   double amount = emission(col,i) * rel_amount;
   emission(col,i) -= amount;
   emission(col,j) += amount;
 }
 
-void HMM::modify_transition(std::mt19937 &rng, double eps)
+void HMM::modify_transition(mt19937 &rng, double eps)
 {
-  std::uniform_int_distribution<size_t> r_state(0, n_states - 1);
+  uniform_int_distribution<size_t> r_state(0, n_states - 1);
   size_t col = r_state(rng);
   size_t cnt = 0;
   for(size_t i = 0; i < n_states; i++)
@@ -65,8 +67,8 @@ void HMM::modify_transition(std::mt19937 &rng, double eps)
     for(size_t i = 0; i < n_states; i++)
       cnt += (transition(col,i) > 0 ? 1 : 0);
   }
-  std::uniform_int_distribution<size_t> r_cnt(0, cnt-1);
-  std::vector<size_t> present;
+  uniform_int_distribution<size_t> r_cnt(0, cnt-1);
+  vector<size_t> present;
   for(size_t i = 0; i < n_states; i++)
     if(transition(col,i) > 0)
       present.push_back(i);
@@ -75,12 +77,12 @@ void HMM::modify_transition(std::mt19937 &rng, double eps)
   while(i == j)
     j = r_cnt(rng);
   if(verbosity >= Verbosity::verbose)
-    std::cout << "Modifying transitions " << present[i] << " and " << present[j] << " in column " << col << std::endl;
+    cout << "Modifying transitions " << present[i] << " and " << present[j] << " in column " << col << endl;
   double rel_amount = r_unif(rng);
   double amount = transition(col,present[i]) * rel_amount;
   transition(col,present[i]) -= amount;
   transition(col,present[j]) += amount - eps;
-  transition(col,present[i]) = std::max<double>(eps,transition(col,present[i]));
+  transition(col,present[i]) = max<double>(eps,transition(col,present[i]));
   double z = 0;
   for(size_t i = 0; i < n_states; i++)
     z += transition(col,i);
@@ -88,17 +90,17 @@ void HMM::modify_transition(std::mt19937 &rng, double eps)
     transition(col,i) /= z;
 }
 
-HMM HMM::random_variant(const hmm_options &options, std::mt19937 &rng) const
+HMM HMM::random_variant(const Options::HMM &options, mt19937 &rng) const
 {
   HMM candidate(*this);
   unsigned n_cols = n_states - first_state;
-  int n_ins = std::max<int>(0,std::min<int>(options.sampling.n_indels, options.sampling.max_size - n_cols));
-  int n_del = std::max<int>(0,std::min<int>(options.sampling.n_indels, int(n_cols) - std::max<int>(0,options.sampling.min_size)));
+  int n_ins = max<int>(0,min<int>(options.sampling.n_indels, options.sampling.max_size - n_cols));
+  int n_del = max<int>(0,min<int>(options.sampling.n_indels, int(n_cols) - max<int>(0,options.sampling.min_size)));
 
-  std::uniform_int_distribution<size_t> r_operation(0, 5);
-  std::uniform_int_distribution<size_t> r_ins(1, n_ins);
-  std::uniform_int_distribution<size_t> r_del(1, n_del);
-  std::uniform_int_distribution<size_t> r_shift(1, options.sampling.n_shift);
+  uniform_int_distribution<size_t> r_operation(0, 5);
+  uniform_int_distribution<size_t> r_ins(1, n_ins);
+  uniform_int_distribution<size_t> r_del(1, n_del);
+  uniform_int_distribution<size_t> r_shift(1, options.sampling.n_shift);
 
   size_t operation = r_operation(rng);
   while((operation >= 5 and options.bg_learning == Training::Method::None) or
@@ -106,7 +108,7 @@ HMM HMM::random_variant(const hmm_options &options, std::mt19937 &rng) const
       (operation == 2 and n_ins <= 0) or (operation == 3 and n_del <= 0) or (operation == 4 and options.sampling.n_shift == 0))
     operation = r_operation(rng);
   if(verbosity > Verbosity::info)
-    std::cout << "operation =  " << operation << std::endl;
+    cout << "operation =  " << operation << endl;
   switch(operation) {
     case 0: // modify a column
       candidate.modify_column(rng);
@@ -134,20 +136,20 @@ HMM HMM::random_variant(const hmm_options &options, std::mt19937 &rng) const
       break;
   }
   if(options.verbosity >= Verbosity::verbose)
-    std::cout << "Generated: " << candidate << std::endl;
+    cout << "Generated: " << candidate << endl;
   return(candidate);
 }
  
 
-void HMM::swap_columns(std::mt19937 &rng)
+void HMM::swap_columns(mt19937 &rng)
 {
-  std::uniform_int_distribution<size_t> r_state(first_state, last_state);
+  uniform_int_distribution<size_t> r_state(first_state, last_state);
   size_t i = r_state(rng);
   size_t j = r_state(rng);
   while(i == j)
     j = r_state(rng);
   if(verbosity >= Verbosity::verbose)
-    std::cout << "Swapping columns " << i << " and " << j << std::endl;
+    cout << "Swapping columns " << i << " and " << j << endl;
   for(size_t k = 0; k < n_emissions; k++) {
     double temp = emission(i,k);
     emission(i,k) = emission(j,k);
@@ -155,7 +157,7 @@ void HMM::swap_columns(std::mt19937 &rng)
   }
 }
  
-void HMM::add_column(size_t n, const std::vector<double> &e)
+void HMM::add_column(size_t n, const vector<double> &e)
 {
   n_states += 1;
   last_state += 1;
@@ -188,19 +190,18 @@ void HMM::add_column(size_t n, const std::vector<double> &e)
   transition = new_transition;
 
   group_ids.insert(group_ids.begin() + n, 1); // TODO make this compatible with the next motif_idx semantics
-  order.insert(order.begin() + n, *order.rbegin());
 }
 
 
-void HMM::add_columns(size_t n, std::mt19937 &rng)
+void HMM::add_columns(size_t n, mt19937 &rng)
 {
   size_t pos = r_binary(rng);
   if(verbosity >= Verbosity::verbose)
-    std::cout << "Adding " << n << " columns at the " << (pos == 0 ? "beginning" : "end") << "." << std::endl;
+    cout << "Adding " << n << " columns at the " << (pos == 0 ? "beginning" : "end") << "." << endl;
   for(size_t j = 0; j < n; j++) {
     size_t n = n_emissions;
-    std::vector<double> e(n+1, 0); // FIXME: why + 1 ?
-    for(size_t i = 0; i < alphabet_size; i++)
+    vector<double> e(n+1, 0); // FIXME: why + 1 ?
+    for(size_t i = 0; i < n_emissions; i++)
       e[i] = r_unif(rng);
 
     if(pos == 0)
@@ -241,10 +242,9 @@ void HMM::del_column(size_t n)
   transition = new_transition;
 
   group_ids.erase(group_ids.begin()+n);
-  order.erase(order.begin()+n);
 
   for(auto &group: groups) {
-    auto iter = std::find(group.states.begin(), group.states.end(), n);
+    auto iter = find(group.states.begin(), group.states.end(), n);
     if(iter != group.states.end()) {
       group.states.erase(iter);
       break; // states are assumed to be part of only one group
@@ -254,11 +254,11 @@ void HMM::del_column(size_t n)
   // TODO: purge empty groups?
 }
 
-void HMM::del_columns(size_t n, std::mt19937 &rng)
+void HMM::del_columns(size_t n, mt19937 &rng)
 {
   size_t i = r_binary(rng);
   if(verbosity >= Verbosity::verbose)
-    std::cout << "Deleting " << n << " columns at the " << (i == 0 ? "beginning" : "end") << "." << std::endl;
+    cout << "Deleting " << n << " columns at the " << (i == 0 ? "beginning" : "end") << "." << endl;
   for(size_t j = 0; j < n; j++)
     if(i == 0)
       del_column(first_state);
@@ -267,16 +267,16 @@ void HMM::del_columns(size_t n, std::mt19937 &rng)
   finalize_initialization();
 }
 
-std::vector<std::list<std::pair<HMM, double>>> HMM::mcmc(const Data::Collection &data,
+vector<list<pair<HMM, double>>> HMM::mcmc(const Data::Collection &collection,
     const Training::Task &task,
-    const hmm_options &options)
+    const Options::HMM &options)
 {
   double temperature = options.sampling.temperature;
-  MCMC::Evaluator<HMM> eval(data, task);
+  MCMC::Evaluator<HMM> eval(collection, task, options);
   MCMC::Generator<HMM> gen(options, n_states-first_state);
   MCMC::MonteCarlo<HMM> mcmc(gen, eval, verbosity);
-  std::vector<double> temperatures;
-  std::vector<HMM> init;
+  vector<double> temperatures;
+  vector<HMM> init;
   for(size_t i = 0; i < options.sampling.n_parallel; i++) {
     init.push_back(*this);
     temperatures.push_back(temperature);

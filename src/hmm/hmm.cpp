@@ -35,8 +35,9 @@
 const size_t HMM::start_state;
 const size_t HMM::bg_state;
 
-HMM::HMM(const std::string &path, Verbosity verbosity_, double pseudo_count) :
-  n_emissions(alphabet_size),
+using namespace std;
+
+HMM::HMM(const string &path, Verbosity verbosity_, double pseudo_count) :
   verbosity(verbosity_),
   store_intermediate(false),
   last_state(0),
@@ -44,41 +45,33 @@ HMM::HMM(const std::string &path, Verbosity verbosity_, double pseudo_count) :
   pseudo_count(pseudo_count),
   groups(),
   group_ids(),
-  order(),
-  order_offset(),
-  max_order(0),
   transition(),
   emission(),
   pred(),
   succ(),
-  all_range(),
-  constitutive_range(),
-  emitting_range(),
-  registered_datasets()
+  registration()
 {
   if(verbosity >= Verbosity::debug)
-    std::cout << "Called HMM constructor 1." << std::endl;
+    cout << "Called HMM constructor 1." << endl;
   if(not boost::filesystem::exists(path)) {
-    std::cout << "Error: HMM parameter file " << path << " does not exist. Aborting." << std::endl;
+    cout << "Error: HMM parameter file " << path << " does not exist. Aborting." << endl;
     exit(-1);
   }
-  std::ifstream ifs(path.c_str());
+  ifstream ifs(path.c_str());
   if(not ifs.good()) {
-    std::cout << "Error: can't read from parameter file " << path << ". Aborting." << std::endl;
+    cout << "Error: can't read from parameter file " << path << ". Aborting." << endl;
     exit(-1);
   }
   try {
     deserialize(ifs);
   } catch (...) {
-    std::cout << "Error during loading parameters from parameter file " << path << ". Aborting." << std::endl;
+    cout << "Error during loading parameters from parameter file " << path << ". Aborting." << endl;
     exit(-1);
   }
-  initialize_order_offsets();
   finalize_initialization();
 };
 
 HMM::HMM(const HMM &hmm, bool copy_deep) :
-  n_emissions(hmm.n_emissions),
   verbosity(hmm.verbosity),
   store_intermediate(hmm.store_intermediate),
   last_state(hmm.last_state),
@@ -86,34 +79,18 @@ HMM::HMM(const HMM &hmm, bool copy_deep) :
   pseudo_count(hmm.pseudo_count),
   groups(hmm.groups),
   group_ids(hmm.group_ids),
-  order(hmm.order),
-  order_offset(hmm.order_offset),
-  max_order(hmm.max_order),
   transition(hmm.transition),
   emission(hmm.emission),
   pred(hmm.pred),
   succ(hmm.succ),
-  all_range(hmm.all_range),
-  constitutive_range(hmm.constitutive_range),
-  emitting_range(hmm.emitting_range),
-  registered_datasets(hmm.registered_datasets)
+  registration(hmm.registration)
 {
   if(verbosity >= Verbosity::debug)
-    std::cout << "Called HMM constructor 2." << std::endl;
-  initialize_order_offsets();
+    cout << "Called HMM constructor 2." << endl;
   finalize_initialization();
 };
 
-size_t calc_num_emissions(size_t asize, size_t order)
-{
-  size_t x = 0;
-  for(size_t i = 1; i <= order+1; i++)
-    x += ipow(asize, i);
-  return(x);
-}
-
-HMM::HMM(size_t bg_order, Verbosity verbosity_, double pseudo_count_) :
-  n_emissions(calc_num_emissions(alphabet_size, bg_order)),
+HMM::HMM(Verbosity verbosity_, double pseudo_count_) :
   verbosity(verbosity_),
   store_intermediate(false),
   last_state(1),
@@ -121,21 +98,14 @@ HMM::HMM(size_t bg_order, Verbosity verbosity_, double pseudo_count_) :
   pseudo_count(pseudo_count_),
   groups(),
   group_ids(),
-  order(std::vector<size_t>(n_states, 0)),
-  order_offset(std::vector<size_t>(n_states)),
-  max_order(bg_order),
   transition(zero_matrix(n_states, n_states)),
   emission(zero_matrix(n_states, n_emissions)),
   pred(),
   succ(),
-  all_range(),
-  constitutive_range(),
-  emitting_range(),
-  registered_datasets()
+  registration()
 {
   if(verbosity >= Verbosity::debug)
-    std::cout << "Called HMM constructor 3." << std::endl
-      << "bg_order = " << bg_order << std::endl;
+    cout << "Called HMM constructor 3." << endl;
   Group special({Group::Kind::Special, "Special", {start_state}});
   groups.push_back(special);
   group_ids.push_back(0);
@@ -143,24 +113,22 @@ HMM::HMM(size_t bg_order, Verbosity verbosity_, double pseudo_count_) :
   Group background({Group::Kind::Background, "Background", {bg_state}});
   groups.push_back(background);
   group_ids.push_back(1);
-  order[bg_state] = bg_order; // for the start and end state
-  initialize_order_offsets();
   initialize_transitions();
   initialize_bg_transitions();
 
-  initialize_emissions(bg_order);
+  initialize_emissions();
 
   normalize_emission(emission);
   normalize_transition(transition);
   finalize_initialization();
   if(verbosity >= Verbosity::debug)
-    std::cout << "Constructed HMM: " << *this << std::endl;
+    cout << "Constructed HMM: " << *this << endl;
 };
 
-size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda, const std::string &name, std::vector<size_t> insertions, size_t pad_left, size_t pad_right)
+size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda, const string &name, vector<size_t> insertions, size_t pad_left, size_t pad_right)
 {
   if(verbosity >= Verbosity::verbose)
-    std::cout << "Adding motif " << name << ": " << e << std::endl;
+    cout << "Adding motif " << name << ": " << e << endl;
 
   const size_t n_insertions = insertions.size();
   const size_t n_core_states = e.size1();
@@ -205,9 +173,6 @@ size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda, cons
     for(size_t j = 0; j < previous.transition.size2(); j++)
       transition(i,j) = previous.transition(i,j);
 
-  for(size_t i = 0; i < n_total; i++)
-    order.push_back(0); // TODO: make configurable
-
   set_motif_emissions(e, first_padded, n_insertions, pad_left, pad_right);
 
   initialize_transitions_to_and_from_chain(n_core_states, exp_seq_len, lambda, first_padded, last_core, pad_left, pad_right);
@@ -220,22 +185,21 @@ size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda, cons
   normalize_emission(emission);
 
   if(verbosity >= Verbosity::verbose) {
-    std::cout << "Insertions:";
+    cout << "Insertions:";
     for(auto &x: insertions)
-      std::cout << " " << x;
-    std::cout << std::endl;
+      cout << " " << x;
+    cout << endl;
   }
 
   // Note the user is to specify insertions positions using 1-based indexing
   // Insertions are given by specifying the (1-based) index of the position in the
   // motif AFTER which the insertion is to be placed
   if(n_insertions > 0) {
-    std::sort(begin(insertions), end(insertions));
+    sort(begin(insertions), end(insertions));
     for(auto &i: insertions)
       if(i == 0 or i >= e.size1()) {
         // insertions are currently only allowed between motif states
-        // TODO: generalize
-        std::cout << "Error: insertion positions must be within the motif." << std::endl;
+        cout << "Error: insertion positions must be within the motif." << endl;
         exit(-1);
       }
 
@@ -246,7 +210,7 @@ size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda, cons
     const size_t last_insertion = last_total;
 
     if(verbosity >= Verbosity::debug)
-      std::cout << transition << std::endl;
+      cout << transition << endl;
 
     // set to zero the transition probabilities of insertion states
     for(size_t i = first_insertion; i <= last_insertion; i++)
@@ -254,7 +218,7 @@ size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda, cons
         transition(i,j) = 0;
 
     if(verbosity >= Verbosity::debug)
-      std::cout << transition << std::endl;
+      cout << transition << endl;
 
     // fix transitions of insertions
     for(size_t i = 0; i < n_insertions; i++) {
@@ -265,7 +229,7 @@ size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda, cons
     }
 
     if(verbosity >= Verbosity::debug)
-      std::cout << transition << std::endl;
+      cout << transition << endl;
   }
 
   normalize_transition(transition);
@@ -276,7 +240,7 @@ size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda, cons
   return(motif_idx);
 }
 
-void set_emissions(size_t i, const std::vector<size_t> &these, matrix_t &m, double x)
+void set_emissions(size_t i, const vector<size_t> &these, matrix_t &m, double x)
 {
   double alpha = (1.0 - x * (4-these.size())) / these.size();
   for(size_t j = 0; j < 4; j++)
@@ -293,14 +257,14 @@ void set_emissions(size_t i, const std::vector<size_t> &these, matrix_t &m, doub
     m(i,j) /= z;
 }
 
-size_t HMM::add_motif(const std::string &seq, double alpha, double exp_seq_len, double lambda, const std::string &name, const std::vector<size_t> &insertions, size_t pad_left, size_t pad_right)
+size_t HMM::add_motif(const string &seq, double alpha, double exp_seq_len, double lambda, const string &name, const vector<size_t> &insertions, size_t pad_left, size_t pad_right)
 {
   if(verbosity >= Verbosity::verbose)
-    std::cout << "Adding motif for " << seq << "." << std::endl;
+    cout << "Adding motif for " << seq << "." << endl;
   matrix_t e = zero_matrix(seq.size(), n_emissions);
   for(size_t i = 0; i < seq.size(); i++) {
     char c = tolower(seq[i]);
-    std::vector<size_t> these;
+    vector<size_t> these;
     switch(c) {
       case 'a':
         these = {0};
@@ -349,7 +313,7 @@ size_t HMM::add_motif(const std::string &seq, double alpha, double exp_seq_len, 
         these = {0,1,2,3};
         break;
       default:
-        std::cout << "Error: unknown encoding!" << std::endl;
+        cout << "Error: unknown encoding!" << endl;
         throw("Unknown encoding");
     }
     set_emissions(i, these, e, alpha);
@@ -358,9 +322,17 @@ size_t HMM::add_motif(const std::string &seq, double alpha, double exp_seq_len, 
   return(motif_idx);
 }
 
-void HMM::add_motifs(const HMM &hmm) {
-  for(auto &group: hmm.groups)
-    if(group.kind == Group::Kind::Motif) {
+// when only_additional is used it is assumed that the two HMMs are identical except for the one from which motifs are to be copied has got additional groups
+void HMM::add_motifs(const HMM &hmm, bool only_additional) {
+  auto own_group_iter = begin(groups);
+  size_t idx = 0;
+  for(auto &group: hmm.groups) {
+    if(only_additional and own_group_iter != end(groups)) {
+      cout << "Skip adding motif group " << group.name << endl;
+      own_group_iter++;
+    } else if(group.kind == Group::Kind::Motif) {
+      if(verbosity >= Verbosity::info)
+        cout << "Adding motif group " << group.name << ":" << hmm.get_group_consensus(idx) << endl;
 
       // the number of states in the new group
       size_t n_motif_states = group.states.size();
@@ -394,12 +366,10 @@ void HMM::add_motifs(const HMM &hmm) {
         for(size_t j = 0; j < n_emissions; j++)
           new_emission(n_states + i, j) = hmm.emission(group.states[i], j);
 
-      // collect states and orders of new group
+      // collect states of new group
       size_t group_idx = groups.size();
-      for(size_t i = 0; i < n_motif_states; i++) {
+      for(size_t i = 0; i < n_motif_states; i++)
         group_ids.push_back(group_idx);
-        order.push_back(hmm.order[group.states[i]]);
-      }
 
       // create new group
       Group new_group = group;
@@ -415,6 +385,8 @@ void HMM::add_motifs(const HMM &hmm) {
       emission = new_emission;
       transition = new_transition;
     }
+    idx++;
+  }
   finalize_initialization();
 }
 
