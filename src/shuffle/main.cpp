@@ -5,11 +5,7 @@
  *
  *    Description:  A tool to generate shuffles of sequences
  *
- *        Version:  1.0
  *        Created:  19.11.2013 20:54:24
- *       Revision:  none
- *       Compiler:  gcc
- *
  *         Author:  Jonas Maaskola <jonas@maaskola.de>
  *
  * =====================================================================================

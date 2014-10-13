@@ -5,11 +5,7 @@
  *
  *    Description:  Alignment routines based on suffix arrays
  *
- *        Version:  1.0
  *        Created:  14.08.2012 22:23:44
- *       Revision:  none
- *       Compiler:  gcc
- *
  *         Author:  Jonas Maaskola <jonas@maaskola.de>
  *
  * =====================================================================================

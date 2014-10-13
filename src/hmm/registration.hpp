@@ -5,11 +5,7 @@
  *
  *    Description:  Data structure to store information about motif priors in classes
  *
- *        Version:  1.0
  *        Created:  10/12/2014 08:33:02 AM
- *       Revision:  none
- *       Compiler:  gcc
- *
  *         Author:  Jonas Maaskola <jonas@maaskola.de>
  *
  * =====================================================================================

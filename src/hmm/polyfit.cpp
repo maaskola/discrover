@@ -5,11 +5,7 @@
  *
  *    Description:  Source code to compute fits of polynomial using least squares
  *
- *        Version:  1.0
  *        Created:  09/27/2012 03:32:29 PM
- *       Revision:  none
- *       Compiler:  gcc
- *
  *         Author:  Jonas Maaskola <jonas@maaskola.de>
  *
  * =====================================================================================

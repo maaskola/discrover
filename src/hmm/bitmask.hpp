@@ -5,11 +5,7 @@
  *
  *    Description:  Using bit sets to flag sets of motif indices
  *
- *        Version:  1.0
  *        Created:  10/12/2014 08:34:55 AM
- *       Revision:  none
- *       Compiler:  gcc
- *
  *         Author:  Jonas Maaskola <jonas@maaskola.de>
  *
  * =====================================================================================

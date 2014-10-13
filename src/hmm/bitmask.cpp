@@ -5,11 +5,7 @@
  *
  *    Description:  
  *
- *        Version:  1.0
  *        Created:  10/12/2014 01:57:44 AM
- *       Revision:  none
- *       Compiler:  gcc
- *
  *         Author:  Jonas Maaskola <jonas@maaskola.de>
  *
  * =====================================================================================
