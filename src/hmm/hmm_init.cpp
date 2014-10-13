@@ -22,7 +22,7 @@
  *
  *        Created:  05/11/2012 03:59:10 AM
  *
- *         Author:  Jonas Maaskola (JM), jonas@maaskola.de
+ *         Author:  Jonas Maaskola <jonas@maaskola.de>
  *
  * =====================================================================================
  */
