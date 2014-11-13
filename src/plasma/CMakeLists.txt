@@ -4,7 +4,7 @@
 # build a shared library
 ADD_LIBRARY(discroverplasma SHARED options.cpp measure.cpp align.cpp fasta.cpp specification.cpp find.cpp
   mask.cpp count.cpp results.cpp plasma_cli.cpp score.cpp code.cpp data.cpp motif.cpp
-  ../aux.cpp correction.cpp plasma.cpp plasma_stats.cpp ../random_seed.cpp randomization_test.cpp
+  ../aux.cpp correction.cpp plasma_stats.cpp ../random_seed.cpp randomization_test.cpp
   dreme/dreme.cpp ../sha1.cpp ../timer.cpp ../shuffle/dinucleotide_shuffle.cpp
   ../executioninformation.cpp ../mcmc/montecarlo.cpp
   "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA1.cpp")

@@ -16,6 +16,7 @@
 using namespace std;
 
 namespace Seeding {
+  char* Code = construct_code();
 
   char* construct_code() {
     char* table = new char[128];
