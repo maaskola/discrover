@@ -104,6 +104,14 @@ Similarly, on Gentoo you can use:
 emerge -av dev-vcs/git dev-util/cmake sys-devel/gcc dev-libs/boost dev-util/ctags dev-texlive/texlive-latexextra
 ```
 
+The corresponding command for Arch linux:
+
+```sh
+pacman -S git cmake gcc make boost texlive-most imagemagick
+dev-libs/boost dev-util/ctags dev-texlive/texlive-latexextra
+```
+
+
 
 
 
