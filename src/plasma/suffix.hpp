@@ -61,7 +61,9 @@ std::vector<idx_t> gen_suffix_array_slow(Iter begin, Iter end, Verbosity verbosi
 /** A faster (linear-time) algorithm to construct the suffix array */
 template <class idx_t, class Iter>
 std::vector<idx_t> gen_suffix_array(Iter begin, Iter end, Verbosity verbosity) {
-  idx_t K = *std::max_element(begin, end);
+  idx_t K = 0;
+  if(begin != end)
+    K = *std::max_element(begin, end);
   idx_t n = std::distance(begin, end);
   Timer timer;
 
