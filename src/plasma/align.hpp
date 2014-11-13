@@ -40,8 +40,6 @@
 using symbol_t = uint8_t;
 void add_sequence(std::vector<symbol_t> &s, const std::string &seq);
 
-bool iupac_included(char q, char r);
-
 template <typename T> bool binary_and_not_null(T a, T b) {
   return (a & b) != 0;
 }

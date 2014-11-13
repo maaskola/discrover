@@ -23,53 +23,6 @@
 
 using namespace std;
 
-bool iupac_included(char r, char q)
-{
-  q = tolower(q);
-  r = tolower(r);
-  if(q==r)
-    return(true);
-  switch(r) {
-    case 'a':
-      switch(q) {
-        case 'w': case 'm': case 'r': case 'd': case 'h': case 'v': case 'n':
-          return true;
-        default:
-          return false;
-      }
-    case 'c':
-      switch(q) {
-        case 's': case 'm': case 'y': case 'b': case 'h': case 'v': case 'n':
-          return true;
-        default:
-          return false;
-      }
-    case 'g':
-      switch(q) {
-        case 's': case 'k': case 'r': case 'b': case 'd': case 'v': case 'n':
-          return true;
-        default:
-          return false;
-      }
-    case 't':
-      switch(q) {
-        case 'u': case 'w': case 'k': case 'y': case 'b': case 'd': case 'h': case 'n':
-          return true;
-        default:
-          return false;
-      }
-    case 'u':
-      switch(q) {
-        case 't': case 'w': case 'k': case 'y': case 'b': case 'd': case 'h': case 'n':
-          return true;
-        default:
-          return false;
-      }
-    default:
-      return(false);
-  }
-}
-
 string iupac_reverse_complement(const string &s) {
   string t;
   for(string::const_reverse_iterator iter = s.rbegin(); iter != s.rend(); iter++)

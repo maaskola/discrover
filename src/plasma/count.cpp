@@ -12,7 +12,8 @@
  */
 
 #include "../aux.hpp"
-#include "align.hpp"
+#include "code.hpp"
+#include "data.hpp"
 #include "../timer.hpp"
 #include "count.hpp"
 
