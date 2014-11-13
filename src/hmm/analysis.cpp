@@ -12,7 +12,7 @@
 #include "hmm.hpp"
 #include "report.hpp"
 #include "../timer.hpp"
-#include "../plasma/find.hpp"
+#include "../plasma/plasma.hpp"
 
 using namespace std;
 

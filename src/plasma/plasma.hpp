@@ -16,7 +16,7 @@
  *
  * =====================================================================================
  *
- *       Filename:  find.hpp
+ *       Filename:  plasma.hpp
  *
  *    Description:  Routines to find IUPAC regular expression type motifs
  *

@@ -21,7 +21,7 @@
 #include "align.hpp"
 #include "count.hpp"
 #include "mask.hpp"
-#include "find.hpp"
+#include "plasma.hpp"
 #include "../timer.hpp"
 #include "plasma_cli.hpp"
 #include "../executioninformation.hpp"
