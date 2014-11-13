@@ -4,7 +4,7 @@
 %
 \documentclass[a4paper]{article}
 
-\usepackage{hyperref,verbatimbox,verbatim,url}
+\usepackage{doi,hyperref,verbatimbox,verbatim,url}
 \usepackage[numbers]{natbib}
 
 \newcommand{\plasma}[0]{\texttt{plasma}}
@@ -269,10 +269,8 @@ If additionally the switch \verb|-v| or its long variant \verb|--verbose| is giv
 \nocite{*}
 \phantomsection
 \addcontentsline{toc}{section}{References}
-\bibliographystyle{apalike}
+\bibliographystyle{plainnat}
 \bibliography{documentation}
 
 
 \end{document}
-
-
