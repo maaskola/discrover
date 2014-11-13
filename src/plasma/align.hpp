@@ -124,13 +124,6 @@ class NucleotideIndex {
           for(auto &dataset: contrast)
             paths.push_back(dataset.path);
       };
-    NucleotideIndex(const std::vector<std::string> &paths_, size_t nseq=0) :
-      paths(paths_),
-      pos2seq(),
-      seq2set(),
-      set2contrast(),
-      index(read_fasta_with_boundaries(paths, pos2seq, seq2set, nseq)) {
-      };
     std::vector<size_t> word_hits_by_file(const std::string &query) const {
       std::vector<symbol_t> q;
       add_sequence(q, query);
