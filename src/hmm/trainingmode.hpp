@@ -36,7 +36,7 @@
 #include "../plasma/measure.hpp"
 #include "../plasma/options.hpp"
 
-typedef Measures::Continuous::Measure Measure;
+using Measure = Measures::Continuous::Measure;
 
 namespace Training {
   enum class Method {
@@ -51,7 +51,7 @@ namespace Training {
   Method measure2method(Measure measure);
 
   /** A Range represents a set of state indices */
-  typedef std::vector<size_t> Range;
+  using Range = std::vector<size_t>;
 
   /** Targets represent a set of indices of states whose transition or emission probabilities are to respected */
   struct Targets {
@@ -59,8 +59,8 @@ namespace Training {
     Range emission;
   };
 
-  typedef Specification::Objective<Measure> Objective;
-  typedef std::vector<Objective> Objectives;
+  using Objective = Specification::Objective<Measure>;
+  using Objectives = std::vector<Objective>;
 
   Seeding::Objective corresponding_objective(const Objective &x, bool use_mi_to_seed);
   Seeding::Objectives corresponding_objectives(const Objectives &x, bool use_mi_to_seed);
@@ -69,7 +69,7 @@ namespace Training {
     Targets targets;
   };
 
-  typedef std::vector<Task> Tasks;
+  using Tasks = std::vector<Task>;
 };
 
 #endif

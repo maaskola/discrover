@@ -57,15 +57,15 @@ double calc_conditional_mutual_information(const Data::Contrast &contrast, const
     Z = contrast.sets.size();
   }
 
-  typedef boost::multi_array<double, 1> array1_t;
-  typedef array1_t::index index;
+  using array1_t = boost::multi_array<double, 1>;
+  using index1_t = array1_t::index;
 
-  typedef boost::multi_array<double, 2> array2_t;
-  typedef array2_t::index index;
+  using array2_t = boost::multi_array<double, 2>;
+  using index2_t = array2_t::index;
 
-  typedef boost::multi_array<double, 3> array_t;
-  typedef array_t::index index;
-  //
+  using array_t = boost::multi_array<double, 3>;
+  using index_t = array_t::index;
+
   // the joint probability of X, Y, and Z
   array_t p(boost::extents[X][Y][Z]);
 
@@ -210,11 +210,11 @@ double pair_mutual_information(const Data::Contrast &contrast, const HMM::pair_p
   const size_t X = 2;
   const size_t Y = 2;
 
-  typedef boost::multi_array<double, 1> array1_t;
-  typedef array1_t::index index;
+  using array1_t = boost::multi_array<double, 1>;
+  using index1_t = array1_t::index;
 
-  typedef boost::multi_array<double, 2> array2_t;
-  typedef array2_t::index index;
+  using array2_t = boost::multi_array<double, 2>;
+  using index2_t = array2_t::index;
 
   // the joint probability of X and Y
   array2_t p(boost::extents[X][Y]);

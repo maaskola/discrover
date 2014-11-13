@@ -68,8 +68,8 @@ namespace Seeding {
   std::istream &operator>>(std::istream &in, Algorithm &algorithm);
   std::ostream &operator<<(std::ostream &os, const Algorithm &algorithm);
 
-  typedef Specification::Objective<Measures::Discrete::Measure> Objective;
-  typedef std::vector<Objective> Objectives;
+  using Objective = Specification::Objective<Measures::Discrete::Measure>;
+  using Objectives = std::vector<Objective>;
 
   Objective objective_for_motif(const Objectives &objectives, const Specification::Motif &motif);
 

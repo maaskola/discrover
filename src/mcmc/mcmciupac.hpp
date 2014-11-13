@@ -37,7 +37,7 @@
 #include "montecarlo.hpp"
 
 namespace MCMC {
-  typedef std::string Motif;
+  using Motif = std::string;
   template <>
     class Generator<Motif> {
       private:

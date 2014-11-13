@@ -13,14 +13,14 @@ using namespace std;
 // based on altschulEriksonDinuclShuffle.py
 // P. Clote, Oct 2003
 
-typedef char Nucl;
-typedef pair<Nucl,Nucl> Edge;
-typedef list<Nucl> Nucls;
-typedef list<Edge> EdgeList;
-typedef map<Nucl,size_t> NuclCount;
-typedef map<Edge,size_t> DinuclCount;
+using Nucl = char;
+using Edge = pair<Nucl,Nucl>;
+using Nucls = list<Nucl>;
+using EdgeList = list<Edge>;
+using NuclCount = map<Nucl,size_t>;
+using DinuclCount = map<Edge,size_t>;
 
-typedef map<Nucl,vector<Nucl>> NuclList;
+using NuclList = map<Nucl,vector<Nucl>>;
 
 const string nuclList   = "ACGTN";
 

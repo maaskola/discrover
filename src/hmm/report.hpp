@@ -45,8 +45,8 @@ namespace Evaluation {
 
   /** Expected and Viterbi counts of occurrences and sites with the motifs as key*/
   struct ResultsCounts {
-    typedef std::map<size_t, size_t> map_t;
-    typedef std::map<size_t, double> float_map_t;
+    using map_t = std::map<size_t, size_t>;
+    using float_map_t = std::map<size_t, double>;
     float_map_t exp_sites;
     float_map_t exp_motifs;
     map_t viterbi_sites;

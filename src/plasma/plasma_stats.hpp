@@ -36,9 +36,9 @@
 #include "../matrix.hpp"
 
 namespace Seeding {
-  typedef std::unordered_map<std::string, count_vector_t> hash_map_t;
-  typedef std::unordered_map<std::string, double> score_map_t;
-  typedef std::multimap<double, std::string, std::greater<double>> rev_map_t;
+  using hash_map_t = std::unordered_map<std::string, count_vector_t>;
+  using score_map_t = std::unordered_map<std::string, double>;
+  using rev_map_t = std::multimap<double, std::string, std::greater<double>>;
 }
 
 #endif   /* ----- #ifndef PLASMA_STATS_HPP ----- */

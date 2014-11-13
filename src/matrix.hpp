@@ -34,8 +34,8 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
-typedef double fp_t;
-typedef int index_t;
+using fp_t = double;
+using index_t = int;
 
 struct confusion_matrix {
   double true_positives;
@@ -46,24 +46,24 @@ struct confusion_matrix {
 
 confusion_matrix operator+(const confusion_matrix &m, double x);
 
-typedef boost::numeric::ublas::matrix<fp_t> matrix_t;
-typedef boost::numeric::ublas::vector<fp_t> vector_t;
-typedef boost::numeric::ublas::matrix<size_t> count_matrix_t;
-typedef boost::numeric::ublas::vector<size_t> count_vector_t;
+using matrix_t = boost::numeric::ublas::matrix<fp_t>;
+using vector_t = boost::numeric::ublas::vector<fp_t>;
+using count_matrix_t = boost::numeric::ublas::matrix<size_t>;
+using count_vector_t = boost::numeric::ublas::vector<size_t>;
 
-typedef boost::numeric::ublas::zero_matrix<fp_t> zero_matrix;
-typedef boost::numeric::ublas::identity_matrix<fp_t> identity_matrix;
-typedef boost::numeric::ublas::scalar_matrix<fp_t> scalar_matrix;
+using zero_matrix = boost::numeric::ublas::zero_matrix<fp_t>;
+using identity_matrix = boost::numeric::ublas::identity_matrix<fp_t>;
+using scalar_matrix = boost::numeric::ublas::scalar_matrix<fp_t>;
 
-typedef boost::numeric::ublas::zero_vector<fp_t> zero_vector;
-typedef boost::numeric::ublas::scalar_vector<fp_t> scalar_vector;
+using zero_vector = boost::numeric::ublas::zero_vector<fp_t>;
+using scalar_vector = boost::numeric::ublas::scalar_vector<fp_t>;
 
-typedef boost::numeric::ublas::zero_matrix<size_t> zero_count_matrix;
-typedef boost::numeric::ublas::identity_matrix<size_t> identity_count_matrix;
-typedef boost::numeric::ublas::scalar_matrix<size_t> scalar_count_matrix;
+using zero_count_matrix = boost::numeric::ublas::zero_matrix<size_t>;
+using identity_count_matrix = boost::numeric::ublas::identity_matrix<size_t>;
+using scalar_count_matrix = boost::numeric::ublas::scalar_matrix<size_t>;
 
-typedef boost::numeric::ublas::zero_vector<size_t> zero_count_vector;
-typedef boost::numeric::ublas::scalar_vector<size_t> scalar_count_vector;
+using zero_count_vector = boost::numeric::ublas::zero_vector<size_t>;
+using scalar_count_vector = boost::numeric::ublas::scalar_vector<size_t>;
 
 matrix_t operator+(const matrix_t &a, double x);
 matrix_t operator-(const matrix_t &a, double x);

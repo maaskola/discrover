@@ -42,7 +42,7 @@ namespace Seeding {
     count_vector_t counts;
     Result(const Objective &objective);
   };
-  typedef std::vector<Result> Results;
+  using Results = std::vector<Result>;
 }
 
 #endif   /* ----- #ifndef RESULTS_HPP  ----- */

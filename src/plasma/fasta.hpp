@@ -49,9 +49,9 @@ namespace Fasta {
     size_t mask(std::vector<size_t> pos);
   };
   struct IEntry : public Entry {
-    typedef unsigned char alphabet_idx_t;
-    typedef boost::numeric::ublas::vector<alphabet_idx_t> seq_t;
-    // typedef std::vector<alphabet_idx_t> seq_t;
+    using alphabet_idx_t = unsigned char;
+    using seq_t = boost::numeric::ublas::vector<alphabet_idx_t>;
+    // using seq_t = std::vector<alphabet_idx_t>;
     static const alphabet_idx_t empty_symbol = 5;
     seq_t isequence;
     IEntry(const Entry &entry=Entry());

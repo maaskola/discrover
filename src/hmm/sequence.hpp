@@ -35,8 +35,8 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include "../verbosity.hpp"
 
-typedef unsigned char alphabet_idx_t;
-typedef boost::numeric::ublas::vector<alphabet_idx_t> seq_t;
+using alphabet_idx_t = unsigned char;
+using seq_t = boost::numeric::ublas::vector<alphabet_idx_t>;
 
 const size_t empty_symbol = 5;
 std::string seq2string(const seq_t &s);

@@ -19,7 +19,7 @@
 #include <vector>
 
 const static size_t max_motifs = 32;
-typedef std::bitset<max_motifs> bitmask_t;
+using bitmask_t = std::bitset<max_motifs>;
 
 bitmask_t make_mask(const std::vector<size_t> &v);
 std::vector<size_t> unpack_mask(const bitmask_t x);

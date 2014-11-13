@@ -254,7 +254,7 @@ int main(int argc, const char** argv) {
 
   Seeding::Plasma plasma(options);
   Seeding::Collection ds = plasma.collection;
-  typedef Seeding::Result res_t;
+  using res_t = Seeding::Result;
   vector<res_t> results;
 
   size_t n = options.motif_specifications.size();

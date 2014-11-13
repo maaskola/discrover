@@ -70,7 +70,7 @@ namespace MCMC {
 
   template <class T>
     class MonteCarlo {
-      typedef std::pair<T,double> E;
+      using E = std::pair<T,double>;
       Verbosity verbosity;
       public:
         MonteCarlo(Verbosity ver) :

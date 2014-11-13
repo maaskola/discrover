@@ -119,9 +119,9 @@ class HMM {
     HMM(const std::string &path, Verbosity verbosity_, double pseudo_count_=1.0);
     HMM(const HMM &hmm, bool copy_deep=true);
 
-    typedef std::unordered_map<std::string, std::vector<size_t>> mask_sub_t;
-    typedef std::unordered_map<std::string, mask_sub_t> mask_t;
-    typedef boost::numeric::ublas::vector<size_t> StatePath;
+    using mask_sub_t = std::unordered_map<std::string, std::vector<size_t>>;
+    using mask_t = std::unordered_map<std::string, mask_sub_t>;
+    using StatePath = boost::numeric::ublas::vector<size_t>;
 
   protected:
     /** The number of emissions. */
@@ -314,7 +314,7 @@ class HMM {
       double posterior_none;
     };
 
-    typedef std::vector<pair_posterior_t> pair_posteriors_t;
+    using pair_posteriors_t = std::vector<pair_posterior_t>;
 
   protected:
 

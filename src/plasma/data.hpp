@@ -49,8 +49,8 @@ namespace Data {
   RemovalReport operator+(const RemovalReport &a, const RemovalReport &b);
   RemovalReport &operator+=(RemovalReport &a, const RemovalReport &b);
 
-  typedef std::unordered_map<std::string, std::vector<size_t>> mask_sub_t;
-  typedef std::unordered_map<std::string, mask_sub_t> mask_t;
+  using mask_sub_t = std::unordered_map<std::string, std::vector<size_t>>;
+  using mask_t = std::unordered_map<std::string, mask_sub_t>;
 
   namespace Basic {
     template <typename X>
@@ -58,10 +58,10 @@ namespace Data {
 
         // typedefs
 
-        typedef X seq_t;
-        typedef std::vector<seq_t> seqs_t;
-        typedef typename seqs_t::iterator iterator;
-        typedef typename seqs_t::const_iterator const_iterator;
+        using seq_t = X;
+        using seqs_t = std::vector<seq_t>;
+        using iterator = typename seqs_t::iterator;
+        using const_iterator = typename seqs_t::const_iterator;
 
         // constructors
 
@@ -161,11 +161,11 @@ namespace Data {
 
         // typedefs
 
-        typedef X set_t;
-        typedef typename set_t::seq_t seq_t;
-        typedef std::vector<set_t> sets_t;
-        typedef typename sets_t::iterator iterator;
-        typedef typename sets_t::const_iterator const_iterator;
+        using set_t = X;
+        using seq_t = typename set_t::seq_t;
+        using sets_t = std::vector<set_t>;
+        using iterator = typename sets_t::iterator;
+        using const_iterator = typename sets_t::const_iterator;
 
         // constructors
 
@@ -243,12 +243,12 @@ namespace Data {
 
         // typedefs
 
-        typedef X contrast_t;
-        typedef typename contrast_t::set_t set_t;
-        typedef typename set_t::seq_t seq_t;
-        typedef std::vector<contrast_t> contrasts_t;
-        typedef typename contrasts_t::iterator iterator;
-        typedef typename contrasts_t::const_iterator const_iterator;
+        using contrast_t = X;
+        using set_t = typename contrast_t::set_t;
+        using seq_t = typename set_t::seq_t;
+        using contrasts_t = std::vector<contrast_t>;
+        using iterator = typename contrasts_t::iterator;
+        using const_iterator = typename contrasts_t::const_iterator;
 
         // constructors
 

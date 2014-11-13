@@ -60,7 +60,7 @@ namespace Specification {
     Set();
   };
 
-  typedef std::vector<Set> Sets;
+  using Sets = std::vector<Set>;
 
   /** the format is [MID[:INSERT:]]MSPEC
     where
@@ -99,7 +99,7 @@ namespace Specification {
     Motif(const Motif &spec);
   };
 
-  typedef std::vector<Motif> Motifs;
+  using Motifs = std::vector<Motif>;
 
   namespace Contrast {
     /**
@@ -111,7 +111,7 @@ namespace Specification {
       std::string contrast;
     };
 
-    typedef std::vector<Atom> Expression;
+    using Expression = std::vector<Atom>;
     Expression make_contrast(const std::string &path);
 
     std::string to_string(const Atom &atom);
@@ -129,11 +129,11 @@ namespace Specification {
    */
   template <typename X>
   struct Objective {
-    typedef X measure_t;
-    typedef Contrast::Atom contrast_atom_t;
-    typedef Contrast::Expression contrast_expression_t;
-    typedef typename contrast_expression_t::iterator iterator;
-    typedef typename contrast_expression_t::const_iterator const_iterator;
+    using measure_t = X;
+    using contrast_atom_t = Contrast::Atom;
+    using contrast_expression_t = Contrast::Expression;
+    using iterator = typename contrast_expression_t::iterator;
+    using const_iterator = typename contrast_expression_t::const_iterator;
 
     std::string motif_name;
     contrast_expression_t contrast_expression;
