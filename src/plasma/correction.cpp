@@ -34,11 +34,11 @@ matrix_t compute_zeta_table() {
       else {
         z(n,k) = 0;
         // to determine the number of IUPAC sequences of length n, we consider the previously computed numbers of IUPAC sequences of length n-1 that
-        //  A) have 3 degrees of degenarcy less than k
-        //  B) have 2 degrees of degenarcy less than k
-        //  C) have 1 degrees of degenarcy less than k
-        //  D) have 0 degrees of degenarcy less than k
-        // Each of these numbers of IUPAC sequences is multipled with the number of IUPAC symbols that, by being append to those sequences, add the desired degree of degeneracy.
+        //  A) have 3 degrees of degeneracy less than k
+        //  B) have 2 degrees of degeneracy less than k
+        //  C) have 1 degrees of degeneracy less than k
+        //  D) have 0 degrees of degeneracy less than k
+        // Each of these numbers of IUPAC sequences is multiplied with the number of IUPAC symbols that, by being append to those sequences, add the desired degree of degeneracy.
         // In the general case all four (A,B,C,D) are possible extensions.
         // However, when k is small then some of the added degrees of degeneracy would exceed k.
         // Note that due to the absence of a break statement all following cases are respected.
