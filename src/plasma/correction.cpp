@@ -21,7 +21,7 @@ using namespace std;
 
 matrix_t compute_zeta_table() {
   static const bool debug_output = false;
-  static const size_t max_motif_len = 32;
+  static const size_t max_motif_len = 31;
   static const size_t n_generalizations = 3 * max_motif_len + 1;
   
   matrix_t z(max_motif_len+1, n_generalizations);
