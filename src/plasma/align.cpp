@@ -18,6 +18,7 @@
 #include <boost/iostreams/filter/bzip2.hpp>
 #include <boost/algorithm/string.hpp>
 #include "align.hpp"
+#include "code.hpp"
 #include "fasta.hpp"
 
 using namespace std;
@@ -228,15 +229,20 @@ string collapse_contrast(const Seeding::Contrast &contrast, vector<size_t> &pos2
   return(s);
 }
 
-string collapse_collection(const Seeding::Collection &collection, vector<size_t> &pos2seq, vector<size_t> &seq2set, vector<size_t> &set2contrast) {
-  string s;
+void add_sequence(vector<symbol_t> &s, const string &seq) {
+  for(auto x: seq)
+    s.push_back(Seeding::Code[x]);
+}
+
+vector<symbol_t> collapse_collection(const Seeding::Collection &collection, vector<size_t> &pos2seq, vector<size_t> &seq2set, vector<size_t> &set2contrast) {
+  vector<symbol_t> s;
   size_t seq_idx = 0;
   size_t set_idx = 0;
   size_t contrast_idx = 0;
   for(auto &contrast: collection) {
     for(auto &dataset: contrast) {
       for(auto &seq: dataset) {
-        s += seq.sequence + "$";
+        add_sequence(s, seq.sequence + "$");
         for(size_t i = 0; i < seq.sequence.size() + 1; i++)
           pos2seq.push_back(seq_idx);
         seq2set.push_back(set_idx);

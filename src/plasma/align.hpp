@@ -31,11 +31,20 @@
 #define ALIGN_HPP
 
 #include <iostream>
+#include <cstring>
+#include <vector>
 // #include <boost/functional/hash.hpp>
 #include "suffix.hpp"
 #include "data.hpp"
 
+using symbol_t = uint8_t;
+void add_sequence(std::vector<symbol_t> &s, const std::string &seq);
+
 bool iupac_included(char q, char r);
+
+template <typename T> bool binary_and_not_null(T a, T b) {
+  return (a & b) != 0;
+}
 
 std::string iupac_reverse_complement(const std::string &s);
 
@@ -48,7 +57,7 @@ void list_occurrences(const data_t &x, const data_t &q) {
   std::vector<lcp_t> lcp = gen_lcp<lcp_t>(begin(x), end(x), sa);
   std::vector<idx_t> jmp = gen_jmp<idx_t>(lcp);
 
-  std::list<idx_t> hits = match(begin(q), end(q), begin(x), end(x), sa, lcp, jmp, iupac_included);
+  std::list<idx_t> hits = match(begin(q), end(q), begin(x), end(x), sa, lcp, jmp, binary_and_not_null<symbol_t>);
   for(auto &hit: hits) {
     std::cout << "Found match at position " << hit << ":\t";
     for(size_t i = 0; i < q.size(); i++)
@@ -85,9 +94,9 @@ class Index {
 };
 
 // std::string collapse_contrast(const Seeding::Contrast &contrast, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set);
-std::string collapse_collection(const Seeding::Collection &collection, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set, std::vector<size_t> &set2contrast);
+std::vector<symbol_t> collapse_collection(const Seeding::Collection &collection, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set, std::vector<size_t> &set2contrast);
 
-template <class idx_t=size_t, class lcp_t=size_t, class index_t=Index<std::string, idx_t, lcp_t>>
+template <class idx_t=size_t, class lcp_t=size_t, class index_t=Index<std::vector<symbol_t>, idx_t, lcp_t>>
 class NucleotideIndex {
   struct Hit {
     size_t file_idx;
@@ -106,7 +115,7 @@ class NucleotideIndex {
       pos2seq(),
       seq2set(),
       set2contrast(),
-      index("", verbosity) { };
+      index({}, verbosity) { };
     NucleotideIndex(const Seeding::Collection &collection, Verbosity verbosity) :
       paths(),
       pos2seq(),
@@ -125,8 +134,10 @@ class NucleotideIndex {
       index(read_fasta_with_boundaries(paths, pos2seq, seq2set, nseq)) {
       };
     std::vector<size_t> word_hits_by_file(const std::string &query) const {
+      std::vector<symbol_t> q;
+      add_sequence(q, query);
       std::vector<size_t> counts(paths.size(),0);
-      for(auto &p: index.find_matches(query, iupac_included)) {
+      for(auto &p: index.find_matches(q, binary_and_not_null<symbol_t>)) {
         size_t seqIdx = pos2seq[p];
         size_t fileIdx = seq2set[seqIdx];
         counts[fileIdx]++;
@@ -134,11 +145,14 @@ class NucleotideIndex {
       return(counts);
     };
     std::vector<size_t> seq_hits_by_file(const std::string &query, bool revcomp=false) const {
+      std::vector<symbol_t> q, qrc;
+      add_sequence(q, query);
+      add_sequence(qrc, iupac_reverse_complement(query));
       std::vector<size_t> seqs;
-      for(auto &p: index.find_matches(query, iupac_included))
+      for(auto &p: index.find_matches(q, binary_and_not_null<symbol_t>))
         seqs.push_back(pos2seq[p]);
       if(revcomp)
-        for(auto &p: index.find_matches(iupac_reverse_complement(query), iupac_included))
+        for(auto &p: index.find_matches(qrc, binary_and_not_null<symbol_t>))
           seqs.push_back(pos2seq[p]);
 
       std::sort(begin(seqs), end(seqs));
