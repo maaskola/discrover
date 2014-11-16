@@ -61,7 +61,8 @@ class Index {
 //          std::cout << "JMP hash = " << boost::hash_range(begin(jmp), end(jmp)) << std::endl;
 //        }
       };
-    template<class Cmp=std::equal_to<typename data_t::value_type>> std::list<idx_t> find_matches(const data_t &query, Cmp cmp=Cmp()) const {
+    template<class Cmp=std::equal_to<typename data_t::value_type>>
+    std::vector<idx_t> find_matches(const data_t &query, Cmp cmp=Cmp()) const {
       return(match(begin(query), end(query), begin(data), end(data), sa, lcp, jmp, cmp));
     };
   private:
