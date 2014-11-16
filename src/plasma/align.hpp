@@ -33,7 +33,6 @@
 #include <iostream>
 #include <cstring>
 #include <vector>
-// #include <boost/functional/hash.hpp>
 #include "suffix.hpp"
 #include "data.hpp"
 
@@ -47,25 +46,6 @@ template <typename T> bool binary_and_not_null(T a, T b) {
 std::string iupac_reverse_complement(const std::string &s);
 
 std::string read_fasta_with_boundaries(const std::vector<std::string> &paths, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set, size_t n_seq=0);
-
-template <class data_t, class idx_t=size_t, class lcp_t=size_t>
-void list_occurrences(const data_t &x, const data_t &q) {
-  // generate suffix array, LCP, and JMP tables
-  std::vector<idx_t> sa = gen_suffix_array<idx_t>(begin(x), end(x));
-  std::vector<lcp_t> lcp = gen_lcp<lcp_t>(begin(x), end(x), sa);
-  std::vector<idx_t> jmp = gen_jmp<idx_t>(lcp);
-
-  std::list<idx_t> hits = match(begin(q), end(q), begin(x), end(x), sa, lcp, jmp, binary_and_not_null<symbol_t>);
-  for(auto &hit: hits) {
-    std::cout << "Found match at position " << hit << ":\t";
-    for(size_t i = 0; i < q.size(); i++)
-      std::cout << x[hit+i];
-    std::cout << std::endl;
-
-  }
-  if(hits.empty())
-    std::cout << "No hits found." << std::endl;
-}
 
 template <class data_t, class idx_t=size_t, class lcp_t=size_t>
 class Index {
