@@ -52,15 +52,11 @@ class Index {
   public:
     Index(const data_t &x, Verbosity verbosity) :
       data(x),
+      // generate suffix array, LCP, and JMP tables
       sa(gen_suffix_array<idx_t>(begin(data), end(data), verbosity)),
       lcp(gen_lcp<lcp_t>(begin(data), end(data), sa, verbosity)),
-      jmp(gen_jmp<idx_t>(lcp, verbosity)) {
-//        if(verbosity >= Verbosity::verbose) {
-//          std::cout << "SA hash = " << boost::hash_range(begin(sa), end(sa)) << std::endl;
-//          std::cout << "LCP hash = " << boost::hash_range(begin(lcp), end(lcp)) << std::endl;
-//          std::cout << "JMP hash = " << boost::hash_range(begin(jmp), end(jmp)) << std::endl;
-//        }
-      };
+      jmp(gen_jmp<idx_t>(lcp, verbosity)) { };
+
     template<class Cmp=std::equal_to<typename data_t::value_type>>
     std::vector<idx_t> find_matches(const data_t &query, Cmp cmp=Cmp()) const {
       return(match(begin(query), end(query), begin(data), end(data), sa, lcp, jmp, cmp));
@@ -77,11 +73,6 @@ std::vector<symbol_t> collapse_collection(const Seeding::Collection &collection,
 
 template <class idx_t=size_t, class lcp_t=size_t, class index_t=Index<std::vector<symbol_t>, idx_t, lcp_t>>
 class NucleotideIndex {
-  struct Hit {
-    size_t file_idx;
-    size_t entry_idx;
-    size_t pos;
-  };
   public:
     NucleotideIndex(const NucleotideIndex &i) :
       paths(i.paths),
@@ -89,12 +80,14 @@ class NucleotideIndex {
       seq2set(i.seq2set),
       set2contrast(i.set2contrast),
       index(i.index) { };
+
     NucleotideIndex(Verbosity verbosity=Verbosity::info) :
       paths(),
       pos2seq(),
       seq2set(),
       set2contrast(),
       index({}, verbosity) { };
+
     NucleotideIndex(const Seeding::Collection &collection, Verbosity verbosity) :
       paths(),
       pos2seq(),
@@ -135,6 +128,7 @@ class NucleotideIndex {
         counts[seq2set[s]]++;
       return(counts);
     };
+
   private:
     std::vector<std::string> paths;
     std::vector<size_t> pos2seq, seq2set, set2contrast;
@@ -142,4 +136,3 @@ class NucleotideIndex {
 };
 
 #endif
-

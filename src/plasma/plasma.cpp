@@ -219,7 +219,10 @@ namespace Seeding {
     return(results);
   }
 
-  rev_map_t Plasma::determine_initial_candidates(size_t length, const Objective &objective, string &best_motif, size_t &n_candidates, double &max_score, Results &results, const set<size_t> &degeneracies) const {
+  rev_map_t Plasma::determine_initial_candidates(
+      size_t length, const Objective &objective, string &best_motif,
+      size_t &n_candidates, double &max_score, Results &results,
+      const set<size_t> &degeneracies) const {
     const size_t degeneracy = 0;
     rev_map_t candidates;
 
@@ -697,4 +700,3 @@ namespace Seeding {
   }
 
 }
-
