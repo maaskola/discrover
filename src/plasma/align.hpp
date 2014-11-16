@@ -34,16 +34,22 @@
 #include <cstring>
 #include <vector>
 #include "suffix.hpp"
+#include "align.hpp"
 #include "data.hpp"
 
 using symbol_t = uint8_t;
-void add_sequence(std::vector<symbol_t> &s, const std::string &seq);
+using seq_type = std::vector<symbol_t>;
+seq_type encode(const std::string &seq);
+std::string decode(const seq_type &seq);
+void encode(seq_type &s, const std::string &seq);
+void add_sequence(seq_type &s, const std::string &seq);
 
 template <typename T> bool binary_and_not_null(T a, T b) {
   return (a & b) != 0;
 }
 
-std::string iupac_reverse_complement(const std::string &s);
+std::string iupac_reverse_complement_string(const std::string &s);
+seq_type iupac_reverse_complement(const seq_type &s);
 
 std::string read_fasta_with_boundaries(const std::vector<std::string> &paths, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set, size_t n_seq=0);
 
@@ -68,12 +74,16 @@ class Index {
     std::vector<idx_t> jmp;    // JMP table
 };
 
-// std::string collapse_contrast(const Seeding::Contrast &contrast, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set);
-std::vector<symbol_t> collapse_collection(const Seeding::Collection &collection, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set, std::vector<size_t> &set2contrast);
+seq_type collapse_collection(const Seeding::Collection &collection,
+                             std::vector<size_t> &pos2seq,
+                             std::vector<size_t> &seq2set,
+                             std::vector<size_t> &set2contrast);
 
-template <class idx_t=size_t, class lcp_t=size_t, class index_t=Index<std::vector<symbol_t>, idx_t, lcp_t>>
+template <class idx_t=size_t, class lcp_t=size_t, class base_t=seq_type, class index_t=Index<base_t, idx_t, lcp_t>>
 class NucleotideIndex {
   public:
+    using base_type = base_t;
+
     NucleotideIndex(const NucleotideIndex &i) :
       paths(i.paths),
       pos2seq(i.pos2seq),
@@ -98,27 +108,53 @@ class NucleotideIndex {
           for(auto &dataset: contrast)
             paths.push_back(dataset.path);
       };
-    std::vector<size_t> word_hits_by_file(const std::string &query) const {
-      std::vector<symbol_t> q;
-      add_sequence(q, query);
+
+    std::vector<size_t> word_hits_by_file(const base_type &query, bool revcomp=false) const {
       std::vector<size_t> counts(paths.size(),0);
-      for(auto &p: index.find_matches(q, binary_and_not_null<symbol_t>)) {
+      for(auto &p: index.find_matches(query, binary_and_not_null<symbol_t>)) {
         size_t seqIdx = pos2seq[p];
         size_t fileIdx = seq2set[seqIdx];
         counts[fileIdx]++;
       }
+      if(revcomp) {
+        auto rc = iupac_reverse_complement(query);
+        if(rc != query)
+          for(auto &p: index.find_matches(rc, binary_and_not_null<symbol_t>)) {
+            size_t seqIdx = pos2seq[p];
+            size_t fileIdx = seq2set[seqIdx];
+            counts[fileIdx]++;
+          }
+      }
       return(counts);
     };
-    std::vector<size_t> seq_hits_by_file(const std::string &query, bool revcomp=false) const {
-      std::vector<symbol_t> q, qrc;
-      add_sequence(q, query);
-      add_sequence(qrc, iupac_reverse_complement(query));
+
+    std::vector<size_t> seq_hits_by_file2(const base_type &query, bool revcomp=false) const {
+      std::unordered_set<size_t> seqs;
+      for(auto &p: index.find_matches(query, binary_and_not_null<symbol_t>))
+        seqs.insert(pos2seq[p]);
+      if(revcomp) {
+        auto rc = iupac_reverse_complement(query);
+        if(rc != query)
+          for(auto &p: index.find_matches(rc, binary_and_not_null<symbol_t>))
+            seqs.insert(pos2seq[p]);
+      }
+
+      std::vector<size_t> counts(paths.size(),0);
+      for(auto &s: seqs)
+        counts[seq2set[s]]++;
+      return(counts);
+    };
+
+    std::vector<size_t> seq_hits_by_file(const base_type &query, bool revcomp=false) const {
       std::vector<size_t> seqs;
-      for(auto &p: index.find_matches(q, binary_and_not_null<symbol_t>))
+      for(auto &p: index.find_matches(query, binary_and_not_null<symbol_t>))
         seqs.push_back(pos2seq[p]);
-      if(revcomp)
-        for(auto &p: index.find_matches(qrc, binary_and_not_null<symbol_t>))
-          seqs.push_back(pos2seq[p]);
+      if(revcomp) {
+        auto rc = iupac_reverse_complement(query);
+        if(rc != query)
+          for(auto &p: index.find_matches(rc, binary_and_not_null<symbol_t>))
+            seqs.push_back(pos2seq[p]);
+      }
 
       std::sort(begin(seqs), end(seqs));
       seqs.resize(std::unique(begin(seqs), end(seqs)) - begin(seqs));

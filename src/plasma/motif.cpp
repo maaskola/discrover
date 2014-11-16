@@ -12,9 +12,9 @@
  */
 
 #include <iostream>
-#include <list>
 #include "../aux.hpp"
 #include "code.hpp"
+#include "motif.hpp"
 #include "options.hpp"
 
 using namespace std;
@@ -85,90 +85,43 @@ namespace Seeding {
     return(s);
   }
 
-  list<string> all_generalizations(const string &motif) {
-    list<string> generalizations;
-    // cout << "Generalizations of " << to_string() << endl;
-    string generalization = motif;
+  vector<vector<seq_type::value_type>> build_generalization_table() {
+    using val_t = seq_type::value_type;
+    vector<vector<val_t>> t;
+    for(val_t s = 0; s < 16; ++s) {
+      vector<val_t> v;
+      for(size_t i = 0; i < 4; ++i) {
+        val_t x = s | (1 << i);
+        if(x != s)
+          v.push_back(x);
+      }
+      t.push_back(v);
+    }
+    if(false) {
+      cout << "generalization table:" << endl;
+      for(val_t i = 0; i < t.size(); ++i) {
+        cout << Seeding::Symbol[i] << ":";
+        for(auto &x: t[i])
+          cout << " " << int(x) << ":"
+            << "'" << Seeding::Symbol[x] << "'";
+        cout << endl;
+      }
+    }
+    return t;
+  }
+
+  const vector<vector<seq_type::value_type>> generalization_table = build_generalization_table();
+
+  vector<seq_type> all_generalizations(const seq_type &motif) {
+    vector<seq_type> generalizations;
+    seq_type generalization = motif;
+    // cout << "Generalizations of " << decode(generalization) << endl;
     for(size_t i = 0; i < motif.size(); i++) {
-      char current = generalization[i];
-      switch(current) {
-        case 'a':
-          generalization[i] = 'm';
-          generalizations.push_back(generalization);
-          generalization[i] = 'r';
-          generalizations.push_back(generalization);
-          generalization[i] = 'w';
-          generalizations.push_back(generalization);
-          break;
-        case 'c':
-          generalization[i] = 'm';
-          generalizations.push_back(generalization);
-          generalization[i] = 's';
-          generalizations.push_back(generalization);
-          generalization[i] = 'y';
-          generalizations.push_back(generalization);
-          break;
-        case 'g':
-          generalization[i] = 'r';
-          generalizations.push_back(generalization);
-          generalization[i] = 's';
-          generalizations.push_back(generalization);
-          generalization[i] = 'k';
-          generalizations.push_back(generalization);
-          break;
-        case 't':
-          generalization[i] = 'w';
-          generalizations.push_back(generalization);
-          generalization[i] = 'y';
-          generalizations.push_back(generalization);
-          generalization[i] = 'k';
-          generalizations.push_back(generalization);
-          break;
-        case 'w':
-          generalization[i] = 'd';
-          generalizations.push_back(generalization);
-          generalization[i] = 'h';
-          generalizations.push_back(generalization);
-          break;
-        case 's':
-          generalization[i] = 'b';
-          generalizations.push_back(generalization);
-          generalization[i] = 'v';
-          generalizations.push_back(generalization);
-          break;
-        case 'm':
-          generalization[i] = 'h';
-          generalizations.push_back(generalization);
-          generalization[i] = 'v';
-          generalizations.push_back(generalization);
-          break;
-        case 'k':
-          generalization[i] = 'b';
-          generalizations.push_back(generalization);
-          generalization[i] = 'd';
-          generalizations.push_back(generalization);
-          break;
-        case 'r':
-          generalization[i] = 'd';
-          generalizations.push_back(generalization);
-          generalization[i] = 'v';
-          generalizations.push_back(generalization);
-          break;
-        case 'y':
-          generalization[i] = 'b';
-          generalizations.push_back(generalization);
-          generalization[i] = 'h';
-          generalizations.push_back(generalization);
-          break;
-        case 'b':
-        case 'd':
-        case 'h':
-        case 'v':
-          generalization[i] = 'n';
-          generalizations.push_back(generalization);
-          break;
-        default:
-          break;
+      auto current = generalization[i];
+      for(auto &x: generalization_table[current]) {
+        generalization[i] = x;
+        // cout << "Generalization -> " << decode(generalization) << endl;
+        generalizations.push_back(generalization);
       }
       generalization[i] = current;
     }

@@ -33,13 +33,30 @@
 #include <unordered_map>
 #include <map>
 #include <string>
+#include "align.hpp"
 #include "../matrix.hpp"
+
+namespace std {
+
+template <>
+struct hash<seq_type> {
+  std::size_t operator()(const seq_type& v) const {
+    using std::size_t;
+    using std::hash;
+    using std::string;
+
+    size_t h = 0;
+    for(auto &x: v)
+      h = h ^ hash<seq_type::value_type>()(x);
+    return h;
+  }
+};
+}
 
 namespace Seeding {
   using hash_map_t = std::unordered_map<std::string, count_vector_t>;
-  using score_map_t = std::unordered_map<std::string, double>;
-  using rev_map_t = std::multimap<double, std::string, std::greater<double>>;
+  using score_map_t = std::unordered_map<seq_type, double>;
+  using rev_map_t = std::multimap<double, seq_type, std::greater<double>>;
 }
 
 #endif   /* ----- #ifndef PLASMA_STATS_HPP ----- */
-

@@ -31,8 +31,9 @@
 #define MOTIF_HPP
 
 #include <cstdint>
-#include <list>
+#include <vector>
 #include <string>
+#include "align.hpp"
 #include "../verbosity.hpp"
 
 namespace Seeding {
@@ -119,7 +120,7 @@ namespace Seeding {
     }
   };
 
-  std::list<std::string> all_generalizations(const std::string &motif);
+  std::vector<seq_type> all_generalizations(const seq_type &motif);
 };
 
 #endif   /* ----- #ifndef MOTIF_HPP ----- */

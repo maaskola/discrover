@@ -367,59 +367,49 @@ namespace Seeding {
           cout << "Next round. We have " << candidates.size() << " candidates." << endl;
 
         score_map_t propositions; // scores have been computed for these motifs
-        // alt_score_map_t propositions; // scores have been computed for these motifs
-        // set<string> ignored; // motifs whose score is inferior than one of their specifications
 
         for(auto &candidate: candidates) {
           double candidate_score = candidate.first;
-          string candidate_motif(candidate.second);
+          auto candidate_motif(candidate.second);
 
           if(options.verbosity >= Verbosity::debug)
-            cout << "Considering candidate " << candidate_motif << endl;
+            cout << "Considering candidate " << decode(candidate_motif) << endl;
 
           for(auto &code: all_generalizations(candidate_motif)) {
             if(options.verbosity >= Verbosity::debug)
-              cout << "Considering generalization " << code << endl;
-//            string generalization(code);
+              cout << "Considering generalization " << decode(code) << endl;
             if(options.revcomp) {
-              string rc = reverse_complement(code);
-              if(lexicographical_compare(begin(code), end(code), begin(rc), end(rc)))
+              auto rc = iupac_reverse_complement(code);
+              if(!lexicographical_compare(begin(code), end(code), begin(rc), end(rc)))
                 code = rc;
             }
-            // bool previously_considered = true;
-            // double generalization_score;
 
-            // retrieve or calculate score
+            // set or retrieve and update score
             auto iter = propositions.find(code);
-            if(iter != end(propositions))
-              // it has been considered before, retrieve score
-              iter->second = max<double>(iter->second, candidate_score);
-            else
+            if(iter == end(propositions))
               propositions.insert({code, candidate_score});
+            else {
+              // it has been considered before, retrieve score and possibly update it
+              iter->second = max<double>(iter->second, candidate_score);
+            }
           }
         }
         vector<score_map_t::const_iterator> work;
-        // for(score_map_t::const_iterator &x: propositions)
         for(score_map_t::const_iterator x = propositions.begin(); x != end(propositions); x++)
           work.push_back(x);
         size_t n = work.size();
         vector<double> scores(work.size());
 #pragma omp parallel for
         for(size_t i = 0; i < n; i++) {
-          string generalization = work[i]->first;
+          auto generalization = work[i]->first;
           // double t1;
           // Timer timer;
           count_vector_t counts;
           if(options.word_stats)
-            counts = index.word_hits_by_file(generalization);
+            counts = index.word_hits_by_file(generalization, options.revcomp);
           else
             counts = index.seq_hits_by_file(generalization, options.revcomp);
           // t1 = timer.tock();
-          if(options.word_stats and options.revcomp) {
-            auto counts_vec = index.word_hits_by_file(reverse_complement(generalization));
-            for(size_t i = 0; i < counts_vec.size(); i++)
-              counts[i] += counts_vec[i];
-          }
           scores[i] = compute_score(collection, counts, options, objective, length, degeneracy);
         }
 
@@ -430,9 +420,9 @@ namespace Seeding {
           double generalization_score = scores[i];
           // heuristic: may be exact for short enough sequences, with length of sequence it becomes more of a heuristic
           if(generalization_score >= candidate_score) {
-            string generalization = work[i]->first;
+            auto generalization = work[i]->first;
             if(this->options.verbosity >= Verbosity::debug)
-              cout << "ax " << generalization << " " << generalization_score << endl;
+              cout << "ax " << decode(generalization) << " " << generalization_score << endl;
             if(candidates.empty() or generalization_score > candidates.rbegin()->first or n_candidates < options.plasma.max_candidates) {
               candidates.insert({generalization_score, generalization});
               n_candidates++;
@@ -444,7 +434,7 @@ namespace Seeding {
                 if(this->options.verbosity >= Verbosity::debug)
                   cout << "New maximum!" << endl;
                 max_score = generalization_score;
-                best_motif = work[i]->first;
+                best_motif = decode(work[i]->first);
                 best_motif_changed = true;
               }
             }
