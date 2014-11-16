@@ -9,8 +9,8 @@ count_vector_t generate_sample(const Seeding::Collection &collection, const coun
 
   if(verbosity >= Verbosity::debug)
     cout << "Sample generation"
-      << "original counts = " << counts << endl
-      << "sampled counts = " << sample << endl;
+      << "original counts = " << vec2string(counts) << endl
+      << "sampled counts = " << vec2string(sample) << endl;
 
   size_t start_idx = 0;
 
@@ -22,7 +22,7 @@ count_vector_t generate_sample(const Seeding::Collection &collection, const coun
 
     size_t successes = 0;
     for(size_t i = start_idx; i < stop_idx; i++)
-      successes += counts(i);
+      successes += counts[i];
 
     size_t remaining = contrast.set_size;
 
@@ -63,8 +63,8 @@ bool randomization_test(const Seeding::Collection &collection, const count_vecto
     bool success = sample_score < score;
 
     if(options.verbosity >= Verbosity::debug)
-      cout << "original counts = " << counts << endl
-        << "sampled counts = " << sample << endl
+      cout << "original counts = " << vec2string(counts) << endl
+        << "sampled counts = " << vec2string(sample) << endl
         << "original score = " << score << endl
         << "sampled score = " << sample_score << endl
         << "Success = " << success << endl;

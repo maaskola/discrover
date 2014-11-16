@@ -186,7 +186,7 @@ double compute_score(const Seeding::Collection &collection,
 // double compute_score(const Seeding::Collection &collection, const count_vector_t &counts, const Seeding::Options &options, Measures::Discrete::Measure measure, size_t length, size_t degeneracy, bool do_correction) {
   if(options.verbosity >= Verbosity::debug) {
     cout << "compute_score(Seeding::Collection)" << endl;
-    cout << "counts = " << counts << endl;
+    cout << "counts = " << vec2string(counts) << endl;
   }
   if(measure == Measures::Discrete::Measure::Undefined)
     measure = objective.measure;
@@ -206,7 +206,7 @@ double compute_score(const Seeding::Collection &collection,
       double w = options.weighting ? contrast_iter->set_size : 1;
       W += w;
       if(options.verbosity >= Verbosity::debug)
-        cout << "counts_ = " << counts_ << endl;
+        cout << "counts_ = " << vec2string(counts_) << endl;
       score += expr.sign * w * compute_score(*contrast_iter, counts_, options, measure, length, degeneracy, objective.motif_name, do_correction);
     }
   }

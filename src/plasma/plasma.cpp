@@ -406,22 +406,17 @@ namespace Seeding {
           string generalization = work[i]->first;
           // double t1;
           // Timer timer;
-          // it hasn't been considered before, calculate score
-          vector<size_t> counts_vec;
+          count_vector_t counts;
           if(options.word_stats)
-            counts_vec = index.word_hits_by_file(generalization);
+            counts = index.word_hits_by_file(generalization);
           else
-            counts_vec = index.seq_hits_by_file(generalization, options.revcomp);
+            counts = index.seq_hits_by_file(generalization, options.revcomp);
           // t1 = timer.tock();
-          count_vector_t counts(counts_vec.size());
-          for(size_t i = 0; i < counts_vec.size(); i++)
-            counts[i] = counts_vec[i];
           if(options.word_stats and options.revcomp) {
-            counts_vec = index.word_hits_by_file(reverse_complement(generalization));
+            auto counts_vec = index.word_hits_by_file(reverse_complement(generalization));
             for(size_t i = 0; i < counts_vec.size(); i++)
               counts[i] += counts_vec[i];
           }
-          // count_vector_t counts_old = count_motif(collection, generalization, options);
           scores[i] = compute_score(collection, counts, options, objective, length, degeneracy);
         }
 

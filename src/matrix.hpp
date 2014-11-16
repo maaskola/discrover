@@ -49,7 +49,6 @@ confusion_matrix operator+(const confusion_matrix &m, double x);
 using matrix_t = boost::numeric::ublas::matrix<fp_t>;
 using vector_t = boost::numeric::ublas::vector<fp_t>;
 using count_matrix_t = boost::numeric::ublas::matrix<size_t>;
-using count_vector_t = boost::numeric::ublas::vector<size_t>;
 
 using zero_matrix = boost::numeric::ublas::zero_matrix<fp_t>;
 using identity_matrix = boost::numeric::ublas::identity_matrix<fp_t>;
@@ -62,8 +61,8 @@ using zero_count_matrix = boost::numeric::ublas::zero_matrix<size_t>;
 using identity_count_matrix = boost::numeric::ublas::identity_matrix<size_t>;
 using scalar_count_matrix = boost::numeric::ublas::scalar_matrix<size_t>;
 
-using zero_count_vector = boost::numeric::ublas::zero_vector<size_t>;
-using scalar_count_vector = boost::numeric::ublas::scalar_vector<size_t>;
+using count_vector_t = std::vector<size_t>;
+std::string vec2string(const count_vector_t &v);
 
 matrix_t operator+(const matrix_t &a, double x);
 matrix_t operator-(const matrix_t &a, double x);
