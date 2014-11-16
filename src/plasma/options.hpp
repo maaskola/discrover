@@ -45,19 +45,10 @@ namespace Seeding {
   std::istream &operator>>(std::istream &in, OccurrenceFilter &filter);
   std::ostream &operator<<(std::ostream &os, const OccurrenceFilter &filter);
 
-  enum class CandidateSelection {
-    TopN,
-    RandomizationTest
-  };
-
-  std::istream &operator>>(std::istream &in, CandidateSelection &cand_sel);
-  std::ostream &operator<<(std::ostream &os, const CandidateSelection &cand_sel);
-
   enum class Algorithm {
     Plasma = (1u << 1),
     ExternalDREME = (1u << 2),
-    FIRE = (1u << 3),
-    MCMC = (1u << 4)
+    MCMC = (1u << 3)
   };
 
   inline Algorithm operator|(Algorithm a, Algorithm b)
@@ -76,13 +67,6 @@ namespace Seeding {
   std::ostream &operator<<(std::ostream &out, const Objective &objective);
 
   struct Options {
-    struct FIRE {
-      FIRE();
-      size_t nucleotides_5prime;
-      size_t nucleotides_3prime;
-      size_t nr_rand_tests;
-      double redundancy_threshold;
-    };
     struct Plasma {
       Plasma();
       size_t max_candidates;
@@ -108,7 +92,6 @@ namespace Seeding {
     Algorithm algorithm;
 
     Plasma plasma;
-    FIRE fire;
     MCMC mcmc;
 
     size_t n_threads;
@@ -127,8 +110,6 @@ namespace Seeding {
     bool fixed_motif_space_mode;
 
     std::string label;
-
-    CandidateSelection candidate_selection;
   };
 }
 
