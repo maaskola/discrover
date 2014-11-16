@@ -69,7 +69,7 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
       ;
 
   desc.add_options()
-    (form_switch(prefix, "algo", allow_short).c_str(), po::value<Seeding::Algorithm>(&options.algorithm)->default_value(Seeding::Algorithm::Plasma, "plasma"), "Which algorithm to use for seeding. Available are 'plasma', 'fire', 'mcmc', and 'all'. Multiple algorithms can be used by separating them by comma.")
+    (form_switch(prefix, "algo", allow_short).c_str(), po::value<Seeding::Algorithm>(&options.algorithm)->default_value(Seeding::Algorithm::Plasma, "plasma"), "Which algorithm to use for seeding. Available are 'plasma', 'mcmc', and 'all'. Multiple algorithms can be used by separating them by comma.")
     (form_switch(prefix, "any", false).c_str(), po::bool_switch(&options.no_enrichment_filter), "Whether to allow motifs enriched in the opposite direction.")
     (form_switch(prefix, "filter", false).c_str(), po::value<Seeding::OccurrenceFilter>(&options.occurrence_filter)->default_value(Seeding::OccurrenceFilter::MaskOccurrences, "mask"), "How to filter motif occurrences upon identifying a motif. Available are 'remove' and 'mask'.")
     (form_switch(prefix, "cand", allow_short).c_str(), po::value<size_t>(&options.plasma.max_candidates)->default_value(100), "How many candidates to maintain.")
@@ -97,18 +97,6 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
     options.dump_viterbi = false;
     options.label = generate_random_label("plasma", 0, options.verbosity);
   }
-
-  po::options_description fire_desc("FIRE seeding algorithm options", cols);
-  string fire_prefix = "fire_";
-  fire_desc.add_options()
-    (form_switch(fire_prefix, "select", false).c_str(), po::value<Seeding::CandidateSelection>(&options.candidate_selection)->default_value(Seeding::CandidateSelection::TopN, "topn"), "How to select candidate seeds. Available are 'topn' and 'randtest' which respectively select the top n candidates according to score, or perform randomization test until --signif ones are consecutively failing.")
-    (form_switch(fire_prefix, "nucl5", false).c_str(), po::value<size_t>(&options.fire.nucleotides_5prime)->default_value(1), "Extend seeds by this many nucleotides on the 5' side.")
-    (form_switch(fire_prefix, "nucl3", false).c_str(), po::value<size_t>(&options.fire.nucleotides_3prime)->default_value(1), "Extend seeds by this many nucleotides on the 3' side.")
-    (form_switch(fire_prefix, "signif", false).c_str(), po::value<size_t>(&options.fire.nr_rand_tests)->default_value(10), "Accept seeds until this many randomization tests fail.")
-    (form_switch(fire_prefix, "redund", false).c_str(), po::value<double>(&options.fire.redundancy_threshold)->default_value(5.0), "The threshold that controls redundancy in seed optimization.")
-    ;
-
-  desc.add(fire_desc);
 
   if(include_all) {
     po::options_description mcmc_desc("MCMC seeding options", cols);

@@ -27,7 +27,6 @@ namespace Seeding {
     objectives(),
     algorithm(Algorithm::Plasma),
     plasma(Plasma()),
-    fire(FIRE()),
     n_threads(1),
     revcomp(false),
     strict(false),
@@ -42,8 +41,7 @@ namespace Seeding {
     dump_viterbi(false),
     no_enrichment_filter(false),
     fixed_motif_space_mode(false),
-    label(""),
-    candidate_selection(CandidateSelection::TopN)
+    label("")
     { };
 
   Options::Plasma::Plasma() :
@@ -53,46 +51,12 @@ namespace Seeding {
     per_degeneracy(false)
   { };
 
-  Options::FIRE::FIRE() :
-    nucleotides_5prime(1),
-    nucleotides_3prime(1),
-    nr_rand_tests(10),
-    redundancy_threshold(5.0)
-  { };
-
   Options::MCMC::MCMC() :
     max_iter(1000),
     temperature(1e-3),
     n_parallel(6),
     random_salt(generate_rng_seed())
   { };
-
-
-  std::istream &operator>>(std::istream &in, CandidateSelection &cand_sel) {
-    string token;
-    in >> token;
-    boost::algorithm::to_lower(token);
-    if(token == "topn")
-      cand_sel = CandidateSelection::TopN;
-    else if(token == "rand" or token == "randtest" or token == "randomizationtest")
-      cand_sel = CandidateSelection::RandomizationTest;
-    else {
-      cout << "Couldn't parse candidate selection type '" << token << "'." << endl;
-      exit(-1);
-    }
-    return(in);
-  }
-  std::ostream &operator<<(std::ostream &os, const CandidateSelection &cand_sel) {
-    switch(cand_sel) {
-      case CandidateSelection::TopN:
-        os << "TopN";
-        break;
-      case CandidateSelection::RandomizationTest:
-        os << "RandomizationTest";
-        break;
-    }
-    return(os);
-  }
 
   istream &operator>>(istream &in, OccurrenceFilter &filter) {
     string token;
@@ -127,15 +91,13 @@ namespace Seeding {
       return(Algorithm::Plasma);
     else if(token == "dreme")
       return(Algorithm::ExternalDREME);
-    else if(token == "fire")
-      return(Algorithm::FIRE);
     else if(token == "mcmc")
       return(Algorithm::MCMC);
     else if(token == "all")
-      return(Algorithm::Plasma | Algorithm::ExternalDREME | Algorithm::FIRE | Algorithm::MCMC);
+      return(Algorithm::Plasma | Algorithm::ExternalDREME | Algorithm::MCMC);
     else {
       cout << "Seeding algorithm '" << token_ << "' unknown." << endl
-        << "Please use one of 'plasma', 'dreme', 'fire', 'mcmc', or 'all'." << endl
+        << "Please use one of 'plasma', 'dreme', 'mcmc', or 'all'." << endl
         << "It is also possible to use multiple algorithms by separating them by comma." << endl;
       exit(-1);
     }
@@ -171,10 +133,6 @@ namespace Seeding {
     }
     if((algorithm & Algorithm::ExternalDREME) == Algorithm::ExternalDREME) {
       os << (first ? "" : ",") << "dreme";
-      first = false;
-    }
-    if((algorithm & Algorithm::FIRE) == Algorithm::FIRE) {
-      os << (first ? "" : ",") << "fire";
       first = false;
     }
     if((algorithm & Algorithm::MCMC) == Algorithm::MCMC)

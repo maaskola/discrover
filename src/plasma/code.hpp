@@ -40,6 +40,7 @@ namespace Seeding {
   extern char* Code;
 
   std::string iupac2regex(const std::string &s);
+  bool iupac_included(char q, char r);
 };
 
 #endif   /* ----- #ifndef CODE_HPP ----- */

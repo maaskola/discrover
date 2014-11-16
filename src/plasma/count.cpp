@@ -12,7 +12,8 @@
  */
 
 #include "../aux.hpp"
-#include "align.hpp"
+#include "code.hpp"
+#include "data.hpp"
 #include "../timer.hpp"
 #include "count.hpp"
 
@@ -102,7 +103,7 @@ namespace Seeding {
     for(auto &contrast: collection)
       for(auto &dataset: contrast) {
         for(auto &seq: dataset)
-          stats(idx) += count_motif(seq.sequence, motif, options);
+          stats[idx] += count_motif(seq.sequence, motif, options);
         idx++;
       }
     return(stats);
@@ -155,7 +156,7 @@ namespace Seeding {
         auto inserted = counts.insert({w,default_stats});
         iter = inserted.first;
       }
-      iter->second(idx)++;
+      iter->second[idx]++;
     }
   }
 

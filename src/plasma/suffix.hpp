@@ -34,7 +34,6 @@
 #include <cstdlib>
 #include <cstddef>
 #include <vector>
-#include <list>
 #include <stack>
 #include <numeric>
 #include <algorithm>
@@ -186,10 +185,10 @@ std::vector<idx_t> gen_jmp_var(const std::vector<lcp_t> &lcp) {
 
 
 template <class lcp_t, class idx_t, class Iter, typename Cmp = std::equal_to<typename Iter::value_type>>
-std::list<idx_t> match(Iter qbegin, Iter qend, Iter begin, Iter end, const std::vector<idx_t> &sa, const std::vector<lcp_t> &lcp, const std::vector<idx_t> &jmp, Cmp cmp=Cmp()) {
+std::vector<idx_t> match(Iter qbegin, Iter qend, Iter begin, Iter end, const std::vector<idx_t> &sa, const std::vector<lcp_t> &lcp, const std::vector<idx_t> &jmp, Cmp cmp=Cmp()) {
   Timer timer;
   const bool do_debug = false;
-  std::list<idx_t> hits;
+  std::vector<idx_t> hits;
 
   size_t qsize = std::distance(qbegin, qend);
   std::stack<idx_t> jmp_stack;

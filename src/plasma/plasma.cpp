@@ -125,43 +125,6 @@ namespace Seeding {
     }
   }
 
-  bool admissible(const std::string &word, const score_map_t &previous, size_t max_degeneracy) {
-    return (previous.find(word) == end(previous)) and (motif_degeneracy(word) <= max_degeneracy);
-  }
-
-  std::list<std::string> modifications(const std::string &original_word, const std::string &word, size_t position) {
-    std::list<std::string> l;
-    char c = tolower(original_word[position]);
-    std::string replacements;
-    switch(c) {
-      case 'a':
-        replacements = "amrwvhdn";
-        break;
-      case 'c':
-        replacements = "msyvhbn";
-        break;
-      case 'g':
-        replacements = "grskvbdn";
-        break;
-      case 't':
-      case 'u':
-        replacements = "twykhbdn";
-        break;
-      case 'n':
-        replacements = "acgtmrwsykvhbdn";
-        break;
-      default:
-        throw("Error: unrecognized letter.");
-    }
-    for(auto &r: replacements)
-      if(r != word[position]) {
-        string w(word);
-        w[position] = r;
-        l.push_back(w);
-      }
-    return(l);
-  }
-
   Results Plasma::find_seeds(size_t length, const Objective &objective, Algorithm algorithm) {
 
     size_t max_degeneracy;
@@ -189,10 +152,6 @@ namespace Seeding {
     if((algorithm & Algorithm::ExternalDREME) == Algorithm::ExternalDREME)
       external_dreme_results = find_external_dreme(length, objective, max_degeneracy, degeneracies);
 
-    Results fire_results;
-    if((algorithm & Algorithm::FIRE) == Algorithm::FIRE)
-      fire_results = find_fire(length, objective, max_degeneracy, degeneracies);
-
     Results mcmc_results;
     if((algorithm & Algorithm::MCMC) == Algorithm::MCMC)
       mcmc_results = find_mcmc(length, objective, max_degeneracy);
@@ -205,11 +164,6 @@ namespace Seeding {
         results.push_back(m);
       }
     for(auto &m: external_dreme_results)
-      if(motifs.find(m.motif) == end(motifs)) {
-        motifs.insert(m.motif);
-        results.push_back(m);
-      }
-    for(auto &m: fire_results)
       if(motifs.find(m.motif) == end(motifs)) {
         motifs.insert(m.motif);
         results.push_back(m);
@@ -265,7 +219,10 @@ namespace Seeding {
     return(results);
   }
 
-  rev_map_t Plasma::determine_initial_candidates(size_t length, const Objective &objective, string &best_motif, size_t &n_candidates, double &max_score, Results &results, const set<size_t> &degeneracies) const {
+  rev_map_t Plasma::determine_initial_candidates(
+      size_t length, const Objective &objective, string &best_motif,
+      size_t &n_candidates, double &max_score, Results &results,
+      const set<size_t> &degeneracies) const {
     const size_t degeneracy = 0;
     rev_map_t candidates;
 
@@ -285,8 +242,6 @@ namespace Seeding {
     //      print_counts(word_counts);
 
 
-    // TODO: instead of just using the N words, the FIRE approach uses randomization test for significance,
-    // and stops once 10 consecutive words have failed the test
     for(auto &iter: word_counts) {
       if(options.verbosity >= Verbosity::debug)
         cout << "Candidate " << iter.first << endl;
@@ -298,52 +253,16 @@ namespace Seeding {
         max_score = score;
         best_motif = iter.first;
         if(options.verbosity >= Verbosity::debug)
-          cout << "motif = " << best_motif << " score = " << score << " " << iter.second << endl;
+          cout << "motif = " << best_motif << " score = " << score << " " << vec2string(iter.second) << endl;
       }
       if(candidates.empty() or score > candidates.rbegin()->first or n_candidates < options.plasma.max_candidates) {
-        candidates.insert({score, iter.first});
+        candidates.insert({score, encode(iter.first)});
         n_candidates++;
-        if(options.candidate_selection == CandidateSelection::TopN)
-          if(n_candidates > options.plasma.max_candidates) {
-            candidates.erase(--end(candidates));
-            n_candidates--;
-          }
-      }
-    }
-
-    if(options.candidate_selection == CandidateSelection::RandomizationTest) {
-      size_t consecutive_failures = 0;
-
-      rev_map_t candidates_ = candidates;
-      rev_map_t candidates = rev_map_t();
-      n_candidates = 0;
-
-      for(auto &candidate: candidates_) {
-        double score = candidate.first;
-
-        if(options.verbosity >= Verbosity::debug)
-          cout << "Candidate " << candidate.second << endl;
-        if(options.verbosity >= Verbosity::debug)
-          cout << "score = " << score << endl;
-
-        size_t nr_of_tests_to_do = 1 << (2 * length);
-        if(options.revcomp)
-          nr_of_tests_to_do /= 2;
-        bool test_res = randomization_test(collection, word_counts[candidate.second], nr_of_tests_to_do, score, options, objective, length, degeneracy);
-        if(test_res)
-          consecutive_failures = 0;
-        else {
-          consecutive_failures++;
-          if(consecutive_failures >= options.fire.nr_rand_tests)
-            break;
+        if(n_candidates > options.plasma.max_candidates) {
+          candidates.erase(--end(candidates));
+          n_candidates--;
         }
-
-        candidates.insert(candidate);
-        n_candidates++;
       }
-      // TODO delete the worst options.fire.nr_rand_tests candidates
-      if(options.verbosity >= Verbosity::verbose)
-        cout << "FIRE got " << n_candidates << " candidates. " << endl;
     }
 
     if(degeneracies.find(degeneracy) != end(degeneracies)) {
@@ -412,155 +331,6 @@ namespace Seeding {
     return(results);
   }
 
-
-  /** This executes the FIRE algorithm to find discriminative IUPAC motifs.
-   */
-  Results Plasma::find_fire(size_t length, const Objective &objective, size_t max_degeneracy, const set<size_t> &degeneracies) const {
-    std::mt19937 rng; // RNG Mersenne twister MT19937
-    rng.seed(options.mcmc.random_salt);
-    Results results;
-    if(options.verbosity >= Verbosity::verbose)
-      cout << "Finding motif of length " << length << " using the FIRE approach with top " << options.plasma.max_candidates << " candidates by " << measure2string(objective.measure) << "." << endl;
-
-    string best_motif;
-    size_t n_candidates = 0;
-    double max_score;
-
-    rev_map_t candidates = determine_initial_candidates(length, objective, best_motif, n_candidates, max_score, results, degeneracies);
-
-    // add undetermined nucleotides on each side
-    for(auto &candidate: candidates) {
-      for(size_t i = 0; i < options.fire.nucleotides_5prime; i++)
-        candidate.second = "n" + candidate.second;
-      for(size_t i = 0; i < options.fire.nucleotides_3prime; i++)
-        candidate.second = candidate.second + "n";
-    }
-
-    score_map_t examined_words;
-
-    if(max_degeneracy > 0) {
-      // wait for the index building to finish
-      while(not index_ready) {
-        if(options.verbosity >= Verbosity::verbose)
-          cerr << "Index still not ready." << endl;
-        sleep(1);
-      }
-
-      for(auto &candidate: candidates) {
-        const string original_word = candidate.second;
-        const size_t word_len = original_word.size();
-
-        const size_t n_repetitions = 10;
-
-        if(options.verbosity >= Verbosity::debug)
-          std::cout << "FIRE considers motif " << original_word << " " << candidate.first << endl;
-
-        for(size_t idx_repetition = 0; idx_repetition < n_repetitions; idx_repetition++) {
-          string word = original_word;
-          double previous_score = candidate.first;
-
-          bool tried_all_positions = false;
-
-          if(options.verbosity >= Verbosity::debug)
-            std::cout << "FIRE starts repetition " << idx_repetition << " for motif " << original_word << endl;
-
-          while(not tried_all_positions) {
-            vector<size_t> remaining_positions;
-            for(size_t i = 0; i < word.size(); i++)
-              remaining_positions.push_back(i);
-
-            score_map_t tried;
-
-            while(not remaining_positions.empty()) {
-              if(options.verbosity >= Verbosity::everything) {
-                std::cout << "FIRE remaining positions:";
-                for(auto &x: remaining_positions)
-                  std::cout << " " << x;
-                std::cout << std::endl;
-              }
-
-              std::uniform_int_distribution<size_t> r_pos(0, remaining_positions.size()-1);
-              const size_t position_idx = r_pos(rng);
-              const size_t position = remaining_positions[position_idx];
-              remaining_positions.erase(begin(remaining_positions) + position_idx);
-
-              if(options.verbosity >= Verbosity::debug)
-                std::cout << "FIRE tries modifications to position " << position << " of motif " << original_word << endl;
-
-              for(auto &modified_word: modifications(original_word, word, position)) {
-
-                // TODO: FIRE enforces a sufficient improvement of the score
-                if(not admissible(modified_word, examined_words, max_degeneracy))
-                  continue;
-
-                // find occurrences
-                vector<size_t> counts_vec;
-                if(options.word_stats)
-                  counts_vec = index.word_hits_by_file(modified_word);
-                else
-                  counts_vec = index.seq_hits_by_file(modified_word, options.revcomp);
-                count_vector_t counts(counts_vec.size());
-                for(size_t i = 0; i < counts_vec.size(); i++)
-                  counts[i] = counts_vec[i];
-                if(options.word_stats and options.revcomp) {
-                  counts_vec = index.word_hits_by_file(reverse_complement(modified_word));
-                  for(size_t i = 0; i < counts_vec.size(); i++)
-                    counts[i] += counts_vec[i];
-                }
-
-                double score = compute_score(collection, counts, options, objective, word_len, motif_degeneracy(modified_word));
-
-                tried[modified_word] = score;
-                examined_words[modified_word] = score;
-
-                if(options.verbosity >= Verbosity::debug)
-                  std::cout << "FIRE: modified word " << modified_word << " -> " << score << endl;
-              }
-
-              double achieved_score = previous_score;
-              string best = word;
-              for(auto &x: tried)
-                if(x.second > achieved_score) {
-                  achieved_score = x.second;
-                  best = x.first;
-                }
-
-              if(best != word) {
-                word = best;
-                previous_score = achieved_score;
-                if(options.verbosity >= Verbosity::verbose)
-                  std::cout << "FIRE: increased score: " << word << " " << achieved_score << endl;
-                break;
-              }
-            }
-
-            tried_all_positions = remaining_positions.empty();
-          }
-        }
-      }
-
-      for(auto &x: examined_words)
-        if(x.second > max_score) {
-          max_score = x.second;
-          best_motif = x.first;
-        }
-    }
-
-    count_vector_t best_contrast = count_motif(collection, best_motif, options);
-    double log_p = -compute_score(collection, best_contrast, options, objective, length, motif_degeneracy(best_motif), Measures::Discrete::Measure::CorrectedLogpGtest);
-    Result result(objective);
-    result.motif = best_motif;
-    result.score = max_score;
-    result.log_p = log_p;
-    result.counts = best_contrast;
-    results.push_back(result);
-
-    if(options.verbosity >= Verbosity::verbose)
-      std::cout << "FIRE found: " << best_motif << " " << max_score << " " << log_p << endl;
-
-    return(results);
-  }
-
   /** This executes a progressive algorithm to find discriminative IUPAC motifs.
    * It starts with degeneracy 0 and incrementally allows more degeneracy.
    * For each level of degeneracy the top N generalizations of the motifs of the
@@ -597,64 +367,49 @@ namespace Seeding {
           cout << "Next round. We have " << candidates.size() << " candidates." << endl;
 
         score_map_t propositions; // scores have been computed for these motifs
-        // alt_score_map_t propositions; // scores have been computed for these motifs
-        // set<string> ignored; // motifs whose score is inferior than one of their specifications
 
         for(auto &candidate: candidates) {
           double candidate_score = candidate.first;
-          string candidate_motif(candidate.second);
+          auto candidate_motif(candidate.second);
 
           if(options.verbosity >= Verbosity::debug)
-            cout << "Considering candidate " << candidate_motif << endl;
+            cout << "Considering candidate " << decode(candidate_motif) << endl;
 
           for(auto &code: all_generalizations(candidate_motif)) {
             if(options.verbosity >= Verbosity::debug)
-              cout << "Considering generalization " << code << endl;
-//            string generalization(code);
+              cout << "Considering generalization " << decode(code) << endl;
             if(options.revcomp) {
-              string rc = reverse_complement(code);
-              if(lexicographical_compare(begin(code), end(code), begin(rc), end(rc)))
+              auto rc = iupac_reverse_complement(code);
+              if(!lexicographical_compare(begin(code), end(code), begin(rc), end(rc)))
                 code = rc;
             }
-            // bool previously_considered = true;
-            // double generalization_score;
 
-            // retrieve or calculate score
+            // set or retrieve and update score
             auto iter = propositions.find(code);
-            if(iter != end(propositions))
-              // it has been considered before, retrieve score
-              iter->second = max<double>(iter->second, candidate_score);
-            else
+            if(iter == end(propositions))
               propositions.insert({code, candidate_score});
+            else {
+              // it has been considered before, retrieve score and possibly update it
+              iter->second = max<double>(iter->second, candidate_score);
+            }
           }
         }
         vector<score_map_t::const_iterator> work;
-        // for(score_map_t::const_iterator &x: propositions)
         for(score_map_t::const_iterator x = propositions.begin(); x != end(propositions); x++)
           work.push_back(x);
         size_t n = work.size();
         vector<double> scores(work.size());
 #pragma omp parallel for
         for(size_t i = 0; i < n; i++) {
-          string generalization = work[i]->first;
+          auto generalization = work[i]->first;
           // double t1;
           // Timer timer;
-          // it hasn't been considered before, calculate score
-          vector<size_t> counts_vec;
+          count_vector_t counts;
           if(options.word_stats)
-            counts_vec = index.word_hits_by_file(generalization);
+            counts = index.word_hits_by_file(generalization, options.revcomp);
           else
-            counts_vec = index.seq_hits_by_file(generalization, options.revcomp);
+            counts = index.seq_hits_by_file(generalization, options.revcomp);
           // t1 = timer.tock();
-          count_vector_t counts(counts_vec.size());
-          for(size_t i = 0; i < counts_vec.size(); i++)
-            counts[i] = counts_vec[i];
-          if(options.word_stats and options.revcomp) {
-            counts_vec = index.word_hits_by_file(reverse_complement(generalization));
-            for(size_t i = 0; i < counts_vec.size(); i++)
-              counts[i] += counts_vec[i];
-          }
-          // count_vector_t counts_old = count_motif(collection, generalization, options);
           scores[i] = compute_score(collection, counts, options, objective, length, degeneracy);
         }
 
@@ -665,9 +420,9 @@ namespace Seeding {
           double generalization_score = scores[i];
           // heuristic: may be exact for short enough sequences, with length of sequence it becomes more of a heuristic
           if(generalization_score >= candidate_score) {
-            string generalization = work[i]->first;
+            auto generalization = work[i]->first;
             if(this->options.verbosity >= Verbosity::debug)
-              cout << "ax " << generalization << " " << generalization_score << endl;
+              cout << "ax " << decode(generalization) << " " << generalization_score << endl;
             if(candidates.empty() or generalization_score > candidates.rbegin()->first or n_candidates < options.plasma.max_candidates) {
               candidates.insert({generalization_score, generalization});
               n_candidates++;
@@ -679,7 +434,7 @@ namespace Seeding {
                 if(this->options.verbosity >= Verbosity::debug)
                   cout << "New maximum!" << endl;
                 max_score = generalization_score;
-                best_motif = work[i]->first;
+                best_motif = decode(work[i]->first);
                 best_motif_changed = true;
               }
             }
@@ -935,4 +690,3 @@ namespace Seeding {
   }
 
 }
-
