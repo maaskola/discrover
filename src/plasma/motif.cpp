@@ -125,39 +125,39 @@ namespace Seeding {
           generalizations.push_back(generalization);
           break;
         case 'w':
-          generalization[i] = 'd';
-          generalizations.push_back(generalization);
           generalization[i] = 'h';
+          generalizations.push_back(generalization);
+          generalization[i] = 'd';
           generalizations.push_back(generalization);
           break;
         case 's':
-          generalization[i] = 'b';
-          generalizations.push_back(generalization);
           generalization[i] = 'v';
+          generalizations.push_back(generalization);
+          generalization[i] = 'b';
           generalizations.push_back(generalization);
           break;
         case 'm':
-          generalization[i] = 'h';
-          generalizations.push_back(generalization);
           generalization[i] = 'v';
+          generalizations.push_back(generalization);
+          generalization[i] = 'h';
           generalizations.push_back(generalization);
           break;
         case 'k':
-          generalization[i] = 'b';
-          generalizations.push_back(generalization);
           generalization[i] = 'd';
+          generalizations.push_back(generalization);
+          generalization[i] = 'b';
           generalizations.push_back(generalization);
           break;
         case 'r':
-          generalization[i] = 'd';
-          generalizations.push_back(generalization);
           generalization[i] = 'v';
+          generalizations.push_back(generalization);
+          generalization[i] = 'd';
           generalizations.push_back(generalization);
           break;
         case 'y':
-          generalization[i] = 'b';
-          generalizations.push_back(generalization);
           generalization[i] = 'h';
+          generalizations.push_back(generalization);
+          generalization[i] = 'b';
           generalizations.push_back(generalization);
           break;
         case 'b':
