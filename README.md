@@ -123,6 +123,11 @@ pacman -S git cmake gcc make boost texlive-most imagemagick
 dev-libs/boost dev-util/ctags dev-texlive/texlive-latexextra
 ```
 
+On Fedora 20 the following command will install all dependencies required for building:
+
+```sh
+yum install gcc-c++ cmake ctags git ImageMagick boost-devel texlive-collection-latexextra
+```
 
 
 
