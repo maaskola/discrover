@@ -36,17 +36,15 @@ You can find it [here](https://github.com/maaskola/discrover-galaxy).
 
 
 ## Binary packages
-Binary packages are available upon request for select Linux distributions.
+Binary packages are available for select Linux distributions.
 They were built for 64-bit architectures.
 Packages are available for:
 
-* Debian 7.6
+* Debian 7.7 (Wheezy)
 * Fedora 20
-* Ubuntu 14.04
+* Ubuntu 14.04 (Trusty)
 
-Currently, we do not yet have a convenient place to host these binary packages (suggestions welcome!) as github apparently doesn't offer good solutions for this.
-We will shortly set up a webpage from which they can be downloaded.
-For the time being, please inquire by email (see AUTHORS file).
+You can find the binary packages [here](https://github.com/maaskola/discrover/releases).
 
 
 ## Dependencies for building Discrover
