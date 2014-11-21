@@ -113,7 +113,7 @@ apt-get install git cmake g++ texlive libboost-all-dev ctags texlive-latex-extra
 Similarly, on Gentoo you can use:
 
 ```sh
-emerge -av dev-vcs/git dev-util/cmake sys-devel/gcc dev-libs/boost dev-util/ctags dev-texlive/texlive-latexextra
+emerge -av dev-vcs/git dev-util/cmake sys-devel/gcc media-gfx/imagemagick dev-libs/boost dev-util/ctags dev-texlive/texlive-latexextra
 ```
 
 The corresponding command for Arch linux:
