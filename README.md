@@ -119,8 +119,7 @@ emerge -av dev-vcs/git dev-util/cmake sys-devel/gcc media-gfx/imagemagick dev-li
 The corresponding command for Arch linux:
 
 ```sh
-pacman -S git cmake gcc make boost texlive-most imagemagick
-dev-libs/boost dev-util/ctags dev-texlive/texlive-latexextra
+pacman -S git cmake gcc make boost texlive-most imagemagick dev-libs/boost dev-util/ctags dev-texlive/texlive-latexextra
 ```
 
 On Fedora 20 the following command will install all dependencies required for building:
