@@ -132,9 +132,17 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -std=c++11")
 
 INCLUDE(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
-git_describe(GIT_DESCRIPTION)
-git_branch(GIT_BRANCH)
-
+IF(GIT_SHA1 STREQUAL "GITDIR-NOTFOUND")
+  MESSAGE(STATUS "This is not a build from a git clone.")
+  SET(GIT_SHA1 "Not compiled from a git repository.")
+  SET(GIT_DESCRIPTION
+    "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+  SET(GIT_BRANCH "release")
+ELSE()
+  SET(GIT_BUILD 1)
+  git_describe(GIT_DESCRIPTION)
+  git_branch(GIT_BRANCH)
+ENDIF()
 
 IF(CTAGS_FOUND)
   ADD_CUSTOM_TARGET(ctags ALL
