@@ -41,6 +41,7 @@ They were built for 64-bit architectures.
 Packages are available for:
 
 * Debian 7.6
+* Fedora 20
 * Ubuntu 14.04
 
 Currently, we do not yet have a convenient place to host these binary packages (suggestions welcome!) as github apparently doesn't offer good solutions for this.
