@@ -89,6 +89,7 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
       ("print", po::bool_switch(&options.dump_viterbi), "Print out sequences annotated with motif occurrences.")
       ("threads,T", po::value<size_t>(&options.n_threads)->default_value(omp_get_num_procs()), "The number of threads to use. If this in not specified, the value of the environment variable OMP_NUM_THREADS is used if that is defined, otherwise it will use as many as there are CPU cores on this machine.")
       ("output,o", po::value<string>(&options.label), "Output file names are generated from this label. If this option is not specified the output label will be 'plasma_XXX' where XXX is a string to make the label unique.")
+      ("salt", po::value<unsigned int>(&options.mcmc.random_salt), "Seed for the pseudo random number generator (used e.g. for sequence shuffle generation and MCMC sampling). Set this to get reproducible results.")
       ;
   else {
     options.pseudo_count = 0;
@@ -96,6 +97,7 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
     options.measure_runtime = false;
     options.dump_viterbi = false;
     options.label = generate_random_label("plasma", 0, options.verbosity);
+    options.mcmc.random_salt = generate_rng_seed();
   }
 
   po::options_description fire_desc("FIRE seeding algorithm options", cols);
@@ -117,14 +119,12 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
       ("temp", po::value<double>(&options.mcmc.temperature)->default_value(1e-3), "When performing Gibbs sampling use this temperature. The temperatures of parallel chains is decreasing by factors of two.")
       ("maxiter", po::value<size_t>(&options.mcmc.max_iter)->default_value(1000), "Maximal number of iterations to perform during MCMC seeding.")
       ("partemp", po::value<size_t>(&options.mcmc.n_parallel)->default_value(6), "Parallel chains to run for parallel tempering.")
-      ("mcmcsalt", po::value<unsigned int>(&options.mcmc.random_salt), "Seed for the MCMC random number generator.")
       ;
     desc.add(mcmc_desc);
   } else {
     options.mcmc.temperature = 1e-3;
     options.mcmc.n_parallel = 6;
     options.mcmc.max_iter = 1000;
-    options.mcmc.random_salt = generate_rng_seed();
   }
 
 
