@@ -2,6 +2,33 @@
 Frequently asked questions
 ==========================
 
+Q: I found the right motifs, but the reported p-values are not significant.
+What does this mean?
+
+A: Unfortunately, this sometimes happens. This has for example been found for
+CLIP data of the HuR motif. In this case real biological sequences were used as
+controls, and the right motif was reported. While the motif is occurring more
+frequently in signal sequences than in control sequences, the differences
+between relative occurrence frequencies is low. Apparently, this is due to the
+low sequence complexity of the motif, which leads to an elevated, and perhaps
+unusually high control sequence occurrence frequency. Due to this low relative
+frequency occurrence difference the resulting p-value is not good enough to
+reject the hypothesis that the found motif is independent of the signal and
+control conditions.
+In this case the found motif is assumed to be the true motif. So this signifies
+that the p-values computed by Discrover may sometimes be overly strict.
+We recommend in cases like these (or actually: generally) to take into account
+all available evidence, including prior knowledge, i.e. in the case of the HuR
+motif the fact that this motif is assumed to be true motif. It may not always
+be possible to automate in a simple way, but Bayesian reasoning should guide
+the way. Sometimes it is just necessary to ignore conclusions of tools of auto-
+mated reasoning as implemented in the p-value calculation in our tool, and
+override their results with a judgement call. In this regard, [1] is a
+recommended resource.
+
+[1] Edwin Thompson Jaynes (2003). Probability Theory: The Logic of Science.
+Cambridge University Press.
+
 
 Q: Why is it that sometimes running the HMM parameter learning with identical
 parameters and multiple threads does not yield identical results?

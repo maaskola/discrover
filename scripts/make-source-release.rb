@@ -16,7 +16,7 @@ unless out_path =~ /.tar.gz$/
   exit -1
 end
 
-out_path = Dir.pwd() + "/" + out_path
+out_path = out_path
 
 branch = "master"
 `git branch`.each_line{|line|

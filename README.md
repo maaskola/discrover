@@ -28,12 +28,23 @@ This software package uses routines from Mathlib to compute Chi-Square distribut
 The sub-directory doc contains a manual for this package, written in LaTeX.
 A [PDF version](doc/discrover-manual.pdf) of the manual will be generated during the build process of this package.
 
+
 ## Galaxy front-end
 
 There's a module for using Discrover inside the bioinformatics web framework Galaxy in development.
 You can find it [here](https://github.com/maaskola/discrover-galaxy).
 
 
+## Binary packages
+[Binary packages of Discrover](https://github.com/maaskola/discrover/releases) are available for select Linux distributions.
+They were built for 64-bit architectures.
+Packages are available for:
+
+* Debian 7.7 (Wheezy)
+* Fedora 20
+* Ubuntu 14.04 (Trusty)
+
+The binary packages were generated with the specifications found in [another repository](https://github.com/maaskola/discrover-packages).
 
 
 ## Dependencies for building Discrover
@@ -101,16 +112,20 @@ apt-get install git cmake g++ texlive libboost-all-dev ctags texlive-latex-extra
 Similarly, on Gentoo you can use:
 
 ```sh
-emerge -av dev-vcs/git dev-util/cmake sys-devel/gcc dev-libs/boost dev-util/ctags dev-texlive/texlive-latexextra
+emerge -av dev-vcs/git dev-util/cmake sys-devel/gcc media-gfx/imagemagick dev-libs/boost dev-util/ctags dev-texlive/texlive-latexextra
 ```
 
 The corresponding command for Arch linux:
 
 ```sh
-pacman -S git cmake gcc make boost texlive-most imagemagick
-dev-libs/boost dev-util/ctags dev-texlive/texlive-latexextra
+pacman -S git cmake gcc make boost texlive-most imagemagick dev-libs/boost dev-util/ctags dev-texlive/texlive-latexextra
 ```
 
+On Fedora 20 the following command will install all dependencies required for building:
+
+```sh
+yum install gcc-c++ cmake ctags git ImageMagick boost-devel texlive-collection-latexextra
+```
 
 
 
