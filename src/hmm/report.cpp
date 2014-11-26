@@ -69,7 +69,7 @@ namespace Evaluation {
     ofs << prefix << "Bonferroni corrected log-P(Chi-Square(G-Test)) = " << cor_log_p_g_stringent << endl;
   }
 
-  void eval_contrast(const HMM &hmm, const Data::Contrast &contrast, ostream &ofs, bool limit_logp, const string &tag)
+  void eval_contrast(ostream &ofs, const HMM &hmm, const Data::Contrast &contrast, bool limit_logp, const string &tag)
   {
     // double mi = hmm.mutual_information(contrast, contrast);
     // ofs << "Summed discriminatory mutual information = " << mi << " bit per sequence" << endl;
@@ -442,7 +442,7 @@ namespace Evaluation {
 
       Timer eval_timer;
       for(auto &contrast: collection)
-        eval_contrast(hmm, contrast, summary_out, options.limit_logp, tag);
+        eval_contrast(summary_out, hmm, contrast, options.limit_logp, tag);
       double time = eval_timer.tock();
 
       if(options.timing_information)

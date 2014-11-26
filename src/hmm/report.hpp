@@ -34,15 +34,13 @@
 #include "hmm.hpp"
 #include "../timer.hpp"
 
-using namespace std;
-
 namespace Evaluation {
-  void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast, size_t width, size_t prec);
+  void print_table(std::ostream &ofs, const matrix_t m, const Data::Contrast &contrast, size_t width, size_t prec);
 
   void print_posterior(std::ostream &os, const HMM &hmm, const Data::Seq &seq);
-  void count_report(ostream &ofs, const matrix_t counts, size_t motif_len, const Data::Contrast &contrast, double pseudo_count, bool limit_logp, const string &name, const string &prefix);
+  void count_report(std::ostream &ofs, const matrix_t counts, size_t motif_len, const Data::Contrast &contrast, double pseudo_count, bool limit_logp, const std::string &name, const std::string &prefix);
 
-  void eval_contrast(const HMM &hmm, const Data::Contrast &contrast, ostream &ofs, bool limit_logp, const std::string &tag);
+  void eval_contrast(std::ostream &ofs, const HMM &hmm, const Data::Contrast &contrast, bool limit_logp, const std::string &tag);
 
   /** Expected and Viterbi counts of occurrences and sites with the motifs as key*/
   struct ResultsCounts {
@@ -68,9 +66,9 @@ namespace Evaluation {
    */
   ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm_,
       const Data::Set &dataset,
-      ostream &out,
-      ostream &v_out,
-      ostream &occurrence_out,
+      std::ostream &out,
+      std::ostream &v_out,
+      std::ostream &occurrence_out,
       const Options::HMM &options);
 
   Result evaluate_hmm(const HMM &hmm_,
