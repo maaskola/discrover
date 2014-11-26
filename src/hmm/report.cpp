@@ -217,6 +217,22 @@ namespace Evaluation {
     out.precision(prev_prec);
   }
 
+  void print_posterior(ostream &os, const HMM &hmm, const Data::Seq &seq) {
+    vector_t scale;
+    auto f = hmm.compute_forward_scaled(seq, scale);
+    auto b = hmm.compute_backward_prescaled(seq, scale);
+    size_t n = seq.sequence.size();
+    vector_t posterior(n);
+    for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
+      if (hmm.is_motif_group(group_idx)) {
+        size_t k = *begin(hmm.groups[group_idx].states);
+        os << "Posterior (" << hmm.get_group_name(group_idx) << ")";
+        for (size_t i = 1; i <= n; ++i)
+          os << " " << f(i, k) * b(i, k) * scale(i);
+        os << endl;
+      }
+  }
+
   ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
       const Data::Set &dataset,
       ostream &out,
@@ -312,15 +328,10 @@ namespace Evaluation {
           v_out << dataset.sequences[i].sequence << endl;
           v_out << hmm.path2string_group(viterbi_path) << endl;
         }
-      }
 
-      //    if(options.print_posterior) {
-      //      vector_t posterior = hmm.motif_posterior(dataset.sequences[i]);
-      //      v_out << "Posterior ";
-      //      for(auto v : posterior)
-      //        v_out << " " << v;
-      //      v_out << endl;
-      //    }
+        if(options.print_posterior)
+          print_posterior(v_out, hmm, dataset.sequences[i]);
+      }
 
       if(not options.evaluate.skip_occurrence_table)
         // print to motif occurrence table

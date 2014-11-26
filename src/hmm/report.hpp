@@ -39,6 +39,7 @@ using namespace std;
 namespace Evaluation {
   void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast, size_t width, size_t prec);
 
+  void print_posterior(std::ostream &os, const HMM &hmm, const Data::Seq &seq);
   void count_report(ostream &ofs, const matrix_t counts, size_t motif_len, const Data::Contrast &contrast, double pseudo_count, bool limit_logp, const string &name, const string &prefix);
 
   void eval_contrast(const HMM &hmm, const Data::Contrast &contrast, ostream &ofs, bool limit_logp, const std::string &tag);
