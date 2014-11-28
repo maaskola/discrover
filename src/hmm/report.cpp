@@ -17,8 +17,6 @@
 
 using namespace std;
 
-namespace Evaluation {
-
 void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast,
                  size_t width, size_t prec) {
   size_t w = 0;
@@ -81,8 +79,10 @@ void count_report(ostream &ofs, const matrix_t counts, size_t motif_len,
   print(ofs, tag, "Bonferroni corrected log-P(Chi-Square(G-Test))", cor_log_p_g_stringent);
 }
 
-void eval_contrast(ostream &ofs, const HMM &hmm, const Data::Contrast &contrast,
-                   bool limit_logp, const string &tag) {
+Evaluator::Evaluator(const HMM &hmm_) : hmm(hmm_) { };
+
+void Evaluator::eval_contrast(ostream &ofs, const Data::Contrast &contrast,
+                   bool limit_logp, const string &tag) const {
   // double mi = hmm.mutual_information(contrast, contrast);
   // ofs << "Summed discriminatory mutual information = " << mi << " bit per
   // sequence" << endl;
@@ -234,11 +234,9 @@ void correlation_report(const vector<T> &x, ostream &out, size_t width = 12,
   out.precision(prev_prec);
 }
 
-void print_posterior(ostream &os, const HMM &hmm, const Data::Seq &seq) {
-  vector_t scale;
-  auto f = hmm.compute_forward_scaled(seq, scale);
-  auto b = hmm.compute_backward_prescaled(seq, scale);
-  size_t n = seq.sequence.size();
+void Evaluator::print_posterior(ostream &os, const vector_t &scale,
+                                const matrix_t &f, const matrix_t &b) const {
+  const size_t n = scale.size() - 2;
   vector_t posterior(n);
   for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
     if (hmm.is_motif_group(group_idx)) {
@@ -249,11 +247,28 @@ void print_posterior(ostream &os, const HMM &hmm, const Data::Seq &seq) {
     }
 }
 
-ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
-                                           const Data::Set &dataset,
-                                           ostream &out, ostream &v_out,
-                                           ostream &occurrence_out,
-                                           const Options::HMM &options) {
+void Evaluator::print_best_occurrence(ostream &os, const string &path,
+                                      const Data::Seq &seq,
+                                      const vector_t &scale, const matrix_t &f,
+                                      const matrix_t &b) const {
+  const size_t n = scale.size() - 2;
+  vector_t posterior(n);
+  os << path << "\t" << seq.definition;
+  for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
+    if (hmm.is_motif_group(group_idx)) {
+      size_t k = *begin(hmm.groups[group_idx].states);
+      vector_t posterior(n);
+      for (size_t i = 1; i <= n; ++i)
+        posterior(i - 1) = f(i, k) * b(i, k) * scale(i);
+      auto best = max_element(begin(posterior), end(posterior));
+      os << "\t" << std::distance(begin(posterior), best) << "\t" << *best;
+    }
+  os << endl;
+}
+
+Evaluator::ResultsCounts Evaluator::evaluate_dataset(
+    const Data::Set &dataset, ostream &out, ostream &v_out, ostream &occ_out,
+    ostream &motif_out, const Options::HMM &options) const {
   const size_t width = 12;
   const size_t prec = 5;
   Timer timer;
@@ -359,13 +374,20 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
         v_out << hmm.path2string_group(viterbi_path) << endl;
       }
 
-      if (options.evaluate.print_posterior)
-        print_posterior(v_out, hmm, dataset.sequences[i]);
+      if (options.evaluate.print_posterior or options.evaluate.print_best) {
+        vector_t scale;
+        auto f = hmm.compute_forward_scaled(dataset.sequences[i], scale);
+        auto b = hmm.compute_backward_prescaled(dataset.sequences[i], scale);
+        if (options.evaluate.print_posterior)
+          print_posterior(v_out, scale, f, b);
+        if (options.evaluate.print_best)
+          print_best_occurrence(motif_out, dataset.path, dataset.sequences[i], scale, f, b);
+      }
     }
 
     if (not options.evaluate.skip_occurrence_table)
       hmm.print_occurrence_table(dataset.path, dataset.sequences[i],
-                                 viterbi_path, occurrence_out);
+                                 viterbi_path, occ_out);
   }
 
   if (not options.evaluate.skip_summary) {
@@ -398,9 +420,10 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
   return (results);
 }
 
-Result evaluate_hmm(const HMM &hmm, const Data::Collection &collection,
-                    const string &tag, const Training::Tasks &tasks,
-                    const Options::HMM &options) {
+Evaluator::Result Evaluator::report(const Data::Collection &collection,
+                                    const string &tag,
+                                    const Training::Tasks &tasks,
+                                    const Options::HMM &options) const {
   Result result;
   // TODO see that this does not invalidate previously learned parameters for
   // MMIE!
@@ -438,8 +461,10 @@ Result evaluate_hmm(const HMM &hmm, const Data::Collection &collection,
                        compression2ending(options.output_compression);
   result.files.viterbi = options.label + file_tag + ".viterbi" +
                          compression2ending(options.output_compression);
+  result.files.best_motifs = options.label + file_tag + ".bestmotif" +
+                             compression2ending(options.output_compression);
 
-  ofstream summary_out, occurrence_file, viterbi_file;
+  ofstream summary_out, occurrence_file, viterbi_file, best_motifs_file;
   summary_out.open(result.files.summary.c_str());
 
   if (not options.evaluate.skip_summary) {
@@ -477,7 +502,7 @@ Result evaluate_hmm(const HMM &hmm, const Data::Collection &collection,
 
     Timer eval_timer;
     for (auto &contrast : collection)
-      eval_contrast(summary_out, hmm, contrast, options.limit_logp, tag);
+      eval_contrast(summary_out, contrast, options.limit_logp, tag);
     double time = eval_timer.tock();
 
     if (options.timing_information)
@@ -486,32 +511,44 @@ Result evaluate_hmm(const HMM &hmm, const Data::Collection &collection,
   }
 
   if (collection.set_size != 0) {
-    if (options.verbosity >= Verbosity::info)
-      cout << "Performance summary in " << result.files.summary << endl
-           << "Viterbi path in " << result.files.viterbi << endl
-           << "Motif occurrence table in " << result.files.table << endl;
+    if (options.verbosity >= Verbosity::info) {
+      cout << "Performance summary in " << result.files.summary << endl;
+      if(not options.evaluate.skip_viterbi_path)
+        cout << "Viterbi path in " << result.files.viterbi << endl;
+      if(not options.evaluate.skip_occurrence_table)
+        cout << "Motif occurrence table in " << result.files.table << endl;
+      if(options.evaluate.print_posterior)
+        cout << "Best motif occurrences in " << result.files.best_motifs << endl;
+    }
 
-    occurrence_file.open(result.files.table.c_str());
-    viterbi_file.open(result.files.viterbi.c_str(), flags);
+    if(not options.evaluate.skip_viterbi_path)
+      viterbi_file.open(result.files.viterbi.c_str(), flags);
+    if(not options.evaluate.skip_occurrence_table)
+      occurrence_file.open(result.files.table.c_str());
+    if(options.evaluate.print_best)
+      best_motifs_file.open(result.files.best_motifs.c_str(), flags);
 
     boost::iostreams::filtering_stream<boost::iostreams::output> v_out,
-        occurrence_out;
+        occ_out, motif_out;
     switch (options.output_compression) {
       case Options::Compression::gzip:
         v_out.push(boost::iostreams::gzip_compressor());
-        occurrence_out.push(boost::iostreams::gzip_compressor());
+        occ_out.push(boost::iostreams::gzip_compressor());
+        motif_out.push(boost::iostreams::gzip_compressor());
         break;
       case Options::Compression::bzip2:
         v_out.push(boost::iostreams::bzip2_compressor());
-        occurrence_out.push(boost::iostreams::bzip2_compressor());
+        occ_out.push(boost::iostreams::bzip2_compressor());
+        motif_out.push(boost::iostreams::bzip2_compressor());
         break;
       default:
         break;
     }
     v_out.push(viterbi_file);
-    occurrence_out.push(occurrence_file);
+    occ_out.push(occurrence_file);
+    motif_out.push(best_motifs_file);
 
-    hmm.print_occurrence_table_header(occurrence_out);
+    hmm.print_occurrence_table_header(occ_out);
 
     // TODO reactivate!
     if (false && not options.evaluate.skip_summary) {
@@ -534,8 +571,8 @@ Result evaluate_hmm(const HMM &hmm, const Data::Collection &collection,
     for (auto &contrast : collection) {
       vector<ResultsCounts> counts;
       for (auto &dataset : contrast) {
-        ResultsCounts c = evaluate_hmm_single_data_set(
-            hmm, dataset, summary_out, v_out, occurrence_out, options);
+        ResultsCounts c = evaluate_dataset(
+            dataset, summary_out, v_out, occ_out, motif_out, options);
         counts.push_back(c);
       }
 
@@ -602,5 +639,4 @@ Result evaluate_hmm(const HMM &hmm, const Data::Collection &collection,
     }
   }
   return (result);
-}
 }

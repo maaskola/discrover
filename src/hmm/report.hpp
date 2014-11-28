@@ -32,17 +32,39 @@
 
 #include <iostream>
 #include "hmm.hpp"
-#include "../timer.hpp"
 
-namespace Evaluation {
-  void print_table(std::ostream &ofs, const matrix_t m, const Data::Contrast &contrast, size_t width, size_t prec);
+class Evaluator {
+  HMM hmm;
 
-  void print_posterior(std::ostream &os, const HMM &hmm, const Data::Seq &seq);
-  void count_report(std::ostream &ofs, const matrix_t counts, size_t motif_len, const Data::Contrast &contrast, double pseudo_count, bool limit_logp, const std::string &name, const std::string &prefix);
+  public:
+  Evaluator(const HMM &hmm);
 
-  void eval_contrast(std::ostream &ofs, const HMM &hmm, const Data::Contrast &contrast, bool limit_logp, const std::string &tag);
+  struct Result {
+    struct Files {
+      std::string summary;
+      std::string viterbi;
+      std::string table;
+      std::string best_motifs;
+    };
+    Files files;
+  };
 
-  /** Expected and Viterbi counts of occurrences and sites with the motifs as key*/
+  Result report(const Data::Collection &collection, const std::string &tag,
+                const Training::Tasks &tasks,
+                const Options::HMM &options) const;
+
+  private:
+  void print_posterior(std::ostream &os, const vector_t &scale,
+                       const matrix_t &f, const matrix_t &b) const;
+  void print_best_occurrence(std::ostream &os, const std::string &path,
+                             const Data::Seq &seq, const vector_t &scale,
+                             const matrix_t &f, const matrix_t &b) const;
+
+  void eval_contrast(std::ostream &ofs, const Data::Contrast &contrast,
+                     bool limit_logp, const std::string &tag) const;
+
+  /** Expected and Viterbi counts of occurrences and sites with motifs as key
+   **/
   struct ResultsCounts {
     typedef std::map<size_t, size_t> map_t;
     typedef std::map<size_t, double> float_map_t;
@@ -52,31 +74,13 @@ namespace Evaluation {
     map_t viterbi_motifs;
   };
 
-  struct Result {
-    struct Files {
-      std::string summary;
-      std::string viterbi;
-      std::string table;
-    };
-    Files files;
-  };
-
   /** Evaluate a single data set.
    * @return expected and Viterbi counts of occurrences and sites of all motifs
    */
-  ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm_,
-      const Data::Set &dataset,
-      std::ostream &out,
-      std::ostream &v_out,
-      std::ostream &occurrence_out,
-      const Options::HMM &options);
-
-  Result evaluate_hmm(const HMM &hmm_,
-      const Data::Collection &collection,
-      const std::string &tag,
-      const Training::Tasks &tasks,
-      const Options::HMM &options);
+  ResultsCounts evaluate_dataset(const Data::Set &dataset, std::ostream &out,
+                                 std::ostream &v_out, std::ostream &occ_out,
+                                 std::ostream &motif_out,
+                                 const Options::HMM &options) const;
 };
- 
-#endif
 
+#endif
