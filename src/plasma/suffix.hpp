@@ -189,7 +189,7 @@ std::list<idx_t> match(Iter qbegin, Iter qend, Iter begin, Iter end, const std::
   const bool do_debug = false;
   std::list<idx_t> hits;
 
-  size_t qsize = std::distance(qbegin, qend);
+  const size_t qsize = std::distance(qbegin, qend);
   std::stack<idx_t> jmp_stack;
   idx_t n = std::distance(begin, end);
   
