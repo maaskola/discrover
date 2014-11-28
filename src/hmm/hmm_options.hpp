@@ -78,6 +78,7 @@ namespace Options {
     bool skip_summary;
     bool skip_viterbi_path;
     bool perform_ric;
+    bool print_posterior;
   };
 
   struct MultiMotif {
@@ -117,7 +118,6 @@ namespace Options {
     Compression output_compression;
     size_t extend;
     size_t left_padding, right_padding;
-    bool print_posterior;
     bool timing_information;
     size_t cross_validation_iterations;
     double cross_validation_freq;

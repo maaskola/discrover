@@ -173,6 +173,7 @@ namespace Options {
     os << "Evaluate, skip Viterbi path:\t" << endl << eval_info.skip_viterbi_path << endl;
     os << "Evaluate, skip occurrence table:\t" << endl << eval_info.skip_occurrence_table << endl;
     os << "Evaluate, skip summary:\t" << endl << eval_info.skip_summary << endl;
+    os << "Evaluate, print_posterior:\t" << endl << eval_info.print_posterior << endl;
     return(os);
   }
 
@@ -205,7 +206,6 @@ namespace Options {
       << "extend= " << options.extend << endl
       << "left_padding = " << options.left_padding << endl
       << "right_padding = " << options.right_padding << endl
-      << "print_posterior = " << options.print_posterior << endl
       << "timing_information = " << options.timing_information << endl
       << "cross_validation_iterations = " << options.cross_validation_iterations << endl
       << "cross_validation_freq = " << options.cross_validation_freq << endl

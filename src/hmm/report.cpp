@@ -359,7 +359,7 @@ ResultsCounts evaluate_hmm_single_data_set(const HMM &hmm,
         v_out << hmm.path2string_group(viterbi_path) << endl;
       }
 
-      if (options.print_posterior)
+      if (options.evaluate.print_posterior)
         print_posterior(v_out, hmm, dataset.sequences[i]);
     }
 
