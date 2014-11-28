@@ -169,11 +169,11 @@ namespace Options {
 
   ostream &operator<<(ostream &os, const Evaluation &eval_info)
   {
-    os << "Evaluate, perform RIC analysis:\t" << endl << eval_info.perform_ric << endl;
-    os << "Evaluate, skip Viterbi path:\t" << endl << eval_info.skip_viterbi_path << endl;
-    os << "Evaluate, skip occurrence table:\t" << endl << eval_info.skip_occurrence_table << endl;
-    os << "Evaluate, skip summary:\t" << endl << eval_info.skip_summary << endl;
-    os << "Evaluate, print_posterior:\t" << endl << eval_info.print_posterior << endl;
+    os << "Evaluate, perform RIC analysis = " << eval_info.perform_ric << endl;
+    os << "Evaluate, skip Viterbi path = " << eval_info.skip_viterbi_path << endl;
+    os << "Evaluate, skip occurrence table = " << eval_info.skip_occurrence_table << endl;
+    os << "Evaluate, skip summary = " << eval_info.skip_summary << endl;
+    os << "Evaluate, print_posterior = " << eval_info.print_posterior << endl;
     return(os);
   }
 
