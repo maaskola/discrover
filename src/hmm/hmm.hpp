@@ -95,6 +95,11 @@ inline double scalar_product(const Gradient &gradient1, const Gradient &gradient
   return(g);
 }
 
+// forward-declaration for a friend function
+namespace Evaluation {
+  void print_posterior(std::ostream &os, const HMM &hmm, const Data::Seq &seq);
+}
+
 /** The directional derivate */
 inline double dderiv(const Gradient &direction, const Gradient &gradient)
 {
@@ -265,6 +270,7 @@ class HMM {
 
     friend std::ostream &operator<<(std::ostream& os, const HMM &hmm);
     friend struct Registration;
+    friend void Evaluation::print_posterior(std::ostream &os, const HMM &hmm, const Data::Seq &seq);
 
   public:
     double compute_score(const Data::Collection &col, const Measures::Continuous::Measure &measure, const Options::HMM &options, const std::vector<size_t> &present_motifs, const std::vector<size_t> &previous_motifs=std::vector<size_t>()) const;
