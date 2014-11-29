@@ -549,6 +549,14 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
     motif_out.push(best_motifs_file);
 
     hmm.print_occurrence_table_header(occ_out);
+    if(options.evaluate.print_best) {
+      motif_out << "path" << "\t" << "seq";
+      for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
+        if (hmm.is_motif_group(group_idx))
+          motif_out << "\t" << "bestpos(" << hmm.groups[group_idx].name << ")"
+            << "\t" << "p(bestpos," << hmm.groups[group_idx].name << ")";
+      motif_out << endl;
+    }
 
     // TODO reactivate!
     if (false && not options.evaluate.skip_summary) {
