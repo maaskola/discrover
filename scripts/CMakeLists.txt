@@ -1,3 +1,11 @@
-INSTALL(PROGRAMS tikzlogo hmm.rb sl reldistplot.r hmm2meme
+IF(INSTALL_LOGO_SCRIPT)
+  INSTALL(PROGRAMS tikzlogo hmm.rb
     DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
     )
+ENDIF()
+
+IF(INSTALL_MISC_SCRIPTS)
+  INSTALL(PROGRAMS sl reldistplot.r hmm2meme
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
+    )
+ENDIF()
