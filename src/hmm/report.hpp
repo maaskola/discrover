@@ -44,7 +44,6 @@ class Evaluator {
       std::string summary;
       std::string viterbi;
       std::string table;
-      std::string best_motifs;
     };
     Files files;
   };
@@ -56,10 +55,6 @@ class Evaluator {
   private:
   void print_posterior(std::ostream &os, const vector_t &scale,
                        const matrix_t &f, const matrix_t &b) const;
-  void print_best_occurrence(std::ostream &os, const std::string &path,
-                             const Data::Seq &seq, const vector_t &scale,
-                             const matrix_t &f, const matrix_t &b) const;
-
   void eval_contrast(std::ostream &ofs, const Data::Contrast &contrast,
                      bool limit_logp, const std::string &tag) const;
 

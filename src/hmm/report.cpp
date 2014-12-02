@@ -248,25 +248,6 @@ void Evaluator::print_posterior(ostream &os, const vector_t &scale,
     }
 }
 
-void Evaluator::print_best_occurrence(ostream &os, const string &path,
-                                      const Data::Seq &seq,
-                                      const vector_t &scale, const matrix_t &f,
-                                      const matrix_t &b) const {
-  const size_t n = scale.size() - 2;
-  vector_t posterior(n);
-  os << path << "\t" << seq.definition;
-  for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
-    if (hmm.is_motif_group(group_idx)) {
-      size_t k = *begin(hmm.groups[group_idx].states);
-      vector_t posterior(n);
-      for (size_t i = 1; i <= n; ++i)
-        posterior(i - 1) = f(i, k) * b(i, k) * scale(i);
-      auto best = max_element(begin(posterior), end(posterior));
-      os << "\t" << std::distance(begin(posterior), best) << "\t" << *best;
-    }
-  os << endl;
-}
-
 Evaluator::ResultsCounts Evaluator::evaluate_dataset(
     const Data::Set &dataset, ostream &out, ostream &v_out, ostream &occ_out,
     ostream &motif_out, const Options::HMM &options) const {
@@ -463,10 +444,8 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
                        compression2ending(options.output_compression);
   result.files.viterbi = options.label + file_tag + ".viterbi" +
                          compression2ending(options.output_compression);
-  result.files.best_motifs = options.label + file_tag + ".bestmotif" +
-                             compression2ending(options.output_compression);
 
-  ofstream summary_out, occurrence_file, viterbi_file, best_motifs_file;
+  ofstream summary_out, occurrence_file, viterbi_file;
   summary_out.open(result.files.summary.c_str());
 
   if (not options.evaluate.skip_summary) {
@@ -519,16 +498,12 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
         cout << "Viterbi path in " << result.files.viterbi << endl;
       if(not options.evaluate.skip_occurrence_table)
         cout << "Motif occurrence table in " << result.files.table << endl;
-      if(options.evaluate.print_posterior)
-        cout << "Best motif occurrences in " << result.files.best_motifs << endl;
     }
 
     if(not options.evaluate.skip_viterbi_path)
       viterbi_file.open(result.files.viterbi.c_str(), flags);
     if(not options.evaluate.skip_occurrence_table)
       occurrence_file.open(result.files.table.c_str());
-    if(options.evaluate.conditional_motif_probability)
-      best_motifs_file.open(result.files.best_motifs.c_str(), flags);
 
     boost::iostreams::filtering_stream<boost::iostreams::output> v_out,
         occ_out, motif_out;
@@ -548,17 +523,8 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
     }
     v_out.push(viterbi_file);
     occ_out.push(occurrence_file);
-    motif_out.push(best_motifs_file);
 
     hmm.print_occurrence_table_header(occ_out);
-    if(options.evaluate.conditional_motif_probability) {
-      motif_out << "path" << "\t" << "seq";
-      for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
-        if (hmm.is_motif_group(group_idx))
-          motif_out << "\t" << "bestpos(" << hmm.groups[group_idx].name << ")"
-            << "\t" << "p(bestpos," << hmm.groups[group_idx].name << ")";
-      motif_out << endl;
-    }
 
     // TODO reactivate!
     if (false && not options.evaluate.skip_summary) {
