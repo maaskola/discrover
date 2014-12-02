@@ -53,7 +53,7 @@ Below is a minimal description on how to use this package.
 Please refer to the [manual](doc/discrover-manual.pdf) and the command line help for more information.
 
 The package contains two binaries, ```plasma``` and ```discrover```.
-Furthermore, a Ruby script ```tikzlogo``` creates sequence logos in PDF and PNG format (using LaTex, TikZ, and ImageMagick).
+Furthermore, a Ruby script ```tikzlogo``` creates sequence logos in PDF and PNG format (using LaTeX, TikZ, and ImageMagick).
 
 ```plasma``` is used to find IUPAC regular expression type motifs, and ```discrover``` learns HMMs.
 Both use discriminative objective functions.
