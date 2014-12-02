@@ -81,6 +81,8 @@ struct Gradient {
   matrix_t emission;
 };
 
+class ConditionalDecoder;
+
 inline double scalar_product(const Gradient &gradient1, const Gradient &gradient2)
 {
   assert(gradient1.transition.size1() == gradient2.transition.size1());
@@ -270,6 +272,7 @@ class HMM {
 
     friend std::ostream &operator<<(std::ostream& os, const HMM &hmm);
     friend struct Registration;
+    friend struct ConditionalDecoder;
     friend void Evaluation::print_posterior(std::ostream &os, const HMM &hmm, const Data::Seq &seq);
 
   public:
