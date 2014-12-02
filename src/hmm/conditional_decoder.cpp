@@ -14,14 +14,14 @@ ConditionalDecoder::ConditionalDecoder(const HMM &hmm_) : hmm(hmm_) {
           matrix(i, j) = hmm.emission(group.states[0] + i, j);
       matrices.push_back(matrix);
 
-      // for(auto &x: matrices)
-      //   cerr << group.name << endl << x << endl;
       emission_matrices.push_back(make_pair(group.name, matrices));
     }
 
-  cerr << "Conditional Decoder" << endl;
-  for (auto &x : emission_matrices)
-    for (auto &y : x.second) cerr << x.first << endl << y << endl;
+  if (false) {
+    cerr << "Conditional Decoder" << endl;
+    for (auto &x : emission_matrices)
+      for (auto &y : x.second) cerr << x.first << endl << y << endl;
+  }
 };
 
 void ConditionalDecoder::decode(std::ostream &os, const Data::Seq &seq) const {
