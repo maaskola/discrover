@@ -74,6 +74,7 @@ namespace Options {
   };
 
   struct Evaluation {
+    bool conditional_motif_probability;
     bool skip_occurrence_table;
     bool skip_summary;
     bool skip_viterbi_path;

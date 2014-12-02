@@ -232,6 +232,7 @@ int main(int argc, const char** argv)
 
   eval_options.add_options()
     ("posterior", po::bool_switch(&options.print_posterior), "During evaluation also print out the motif posterior probability.")
+    ("condmotif", po::bool_switch(&options.evaluate.conditional_motif_probability), "During evaluation find the \"best\" motif occurrences.")
     ("nosummary", po::bool_switch(&options.evaluate.skip_summary), "Do not print summary information.")
     ("noviterbi", po::bool_switch(&options.evaluate.skip_viterbi_path), "Do not print the Viterbi path.")
     ("notable", po::bool_switch(&options.evaluate.skip_occurrence_table), "Do not print the occurrence table.")
