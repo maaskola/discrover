@@ -11,6 +11,7 @@
 #include <boost/math/distributions/students_t.hpp>
 #include "../aux.hpp"
 #include "report.hpp"
+#include "conditional_decoder.hpp"
 #include "../timer.hpp"
 #include "../plasma/plasma.hpp"
 #include "../stats_config.hpp"
@@ -273,6 +274,8 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
   const size_t prec = 5;
   Timer timer;
 
+  ConditionalDecoder conditional_decoder(hmm);
+
   map<size_t, double> n_sites;
   map<size_t, double> n_motifs;
   map<size_t, size_t> n_viterbi_sites;
@@ -374,15 +377,14 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
         v_out << hmm.path2string_group(viterbi_path) << endl;
       }
 
-      if (options.evaluate.print_posterior or options.evaluate.conditional_motif_probability) {
+      if (options.evaluate.print_posterior) {
         vector_t scale;
         auto f = hmm.compute_forward_scaled(dataset.sequences[i], scale);
         auto b = hmm.compute_backward_prescaled(dataset.sequences[i], scale);
-        if (options.evaluate.print_posterior)
-          print_posterior(v_out, scale, f, b);
-        if (options.evaluate.conditional_motif_probability)
-          print_best_occurrence(motif_out, dataset.path, dataset.sequences[i], scale, f, b);
+        print_posterior(v_out, scale, f, b);
       }
+      if (options.evaluate.conditional_motif_probability)
+        conditional_decoder.decode(v_out, dataset.sequences[i]);
     }
 
     if (not options.evaluate.skip_occurrence_table)

@@ -30,8 +30,18 @@
 #ifndef CONDITIONAL_DECODER_HPP
 #define CONDITIONAL_DECODER_HPP
 
-class ConditionalDecoder {
+#include <iostream>
+#include "hmm.hpp"
 
+class ConditionalDecoder {
+  HMM hmm;
+  std::vector<std::pair<std::string, std::list<matrix_t>>> emission_matrices;
+
+  public:
+  ConditionalDecoder(const HMM &hmm_);
+  void decode(std::ostream &os, const Data::Seq &seq) const;
+
+  protected:
 };
 
 #endif
