@@ -1,3 +1,3 @@
-#include "conditionaldecoder.hpp"
+#include "conditional_decoder.hpp"
 
 using namespace std;

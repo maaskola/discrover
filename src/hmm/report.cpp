@@ -374,13 +374,13 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
         v_out << hmm.path2string_group(viterbi_path) << endl;
       }
 
-      if (options.evaluate.print_posterior or options.evaluate.print_best) {
+      if (options.evaluate.print_posterior or options.evaluate.conditional_motif_probability) {
         vector_t scale;
         auto f = hmm.compute_forward_scaled(dataset.sequences[i], scale);
         auto b = hmm.compute_backward_prescaled(dataset.sequences[i], scale);
         if (options.evaluate.print_posterior)
           print_posterior(v_out, scale, f, b);
-        if (options.evaluate.print_best)
+        if (options.evaluate.conditional_motif_probability)
           print_best_occurrence(motif_out, dataset.path, dataset.sequences[i], scale, f, b);
       }
     }
@@ -525,7 +525,7 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
       viterbi_file.open(result.files.viterbi.c_str(), flags);
     if(not options.evaluate.skip_occurrence_table)
       occurrence_file.open(result.files.table.c_str());
-    if(options.evaluate.print_best)
+    if(options.evaluate.conditional_motif_probability)
       best_motifs_file.open(result.files.best_motifs.c_str(), flags);
 
     boost::iostreams::filtering_stream<boost::iostreams::output> v_out,
@@ -549,7 +549,7 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
     motif_out.push(best_motifs_file);
 
     hmm.print_occurrence_table_header(occ_out);
-    if(options.evaluate.print_best) {
+    if(options.evaluate.conditional_motif_probability) {
       motif_out << "path" << "\t" << "seq";
       for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
         if (hmm.is_motif_group(group_idx))

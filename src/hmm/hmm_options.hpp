@@ -80,7 +80,6 @@ namespace Options {
     bool skip_viterbi_path;
     bool perform_ric;
     bool print_posterior;
-    bool print_best;
   };
 
   struct MultiMotif {
