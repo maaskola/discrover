@@ -35,7 +35,7 @@
 
 class ConditionalDecoder {
   HMM hmm;
-  std::vector<std::pair<std::string, std::list<matrix_t>>> emission_matrices;
+  std::vector<std::pair<std::string, std::vector<matrix_t>>> emission_matrices;
 
   public:
   ConditionalDecoder(const HMM &hmm_);
