@@ -167,15 +167,17 @@ confusion_matrix operator+(const confusion_matrix &m, double x)
 }
 
 string vec2string(const count_vector_t &v) {
-  string s = "[";
+  string s = "[" + boost::lexical_cast<string>(v.size());
+  s += "](";
   bool first = true;
   for(auto &x: v) {
     if(first)
       first = false;
     else
-      s += s + ", ";
-    s += boost::lexical_cast<size_t>(x);
+      s += ",";
+    s += boost::lexical_cast<string>(x);
   }
+  s += ")";
   return(s);
 }
 
