@@ -2,6 +2,7 @@
 ADD_LIBRARY(discrover SHARED association.cpp ../aux.cpp basedefs.cpp
   analysis.cpp bitmask.cpp
   conditional_mutual_information.cpp
+  conditional_decoder.cpp
   ../executioninformation.cpp ../random_seed.cpp
   hmm.cpp hmm_core.cpp hmm_init.cpp hmm_learn.cpp hmm_linesearch.cpp
   hmm_aux.cpp hmm_gradient.cpp hmm_mcmc.cpp hmm_score.cpp hmm_options.cpp 

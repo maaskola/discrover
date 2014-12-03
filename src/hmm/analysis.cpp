@@ -37,9 +37,9 @@ struct AnalysisResult {
   AnalysisResult(const HMM &model, const Options::HMM &opts) : training(), training_evaluation(), test_evaluation(), full_evaluation(), model(model), options(opts) {
   };
   Training::Result training;
-  Evaluation::Result training_evaluation;
-  Evaluation::Result test_evaluation;
-  Evaluation::Result full_evaluation;
+  Evaluator::Result training_evaluation;
+  Evaluator::Result test_evaluation;
+  Evaluator::Result full_evaluation;
   HMM model;
   Options::HMM options;
   void create_symlinks() const {
@@ -166,11 +166,12 @@ AnalysisResult train_evaluate(HMM &hmm, const Data::Collection &all_data, const 
       result.training = hmm.train(training_data, learn_tasks, options);
   }
 
+  Evaluator evaluator(hmm);
   if(test_data.set_size != 0) {
-    result.training_evaluation = Evaluation::evaluate_hmm(hmm, training_data, "training", eval_tasks, options);
-    result.test_evaluation = Evaluation::evaluate_hmm(hmm, test_data, "Test", eval_tasks, options);
+    result.training_evaluation = evaluator.report(training_data, "training", eval_tasks, options);
+    result.test_evaluation = evaluator.report(test_data, "Test", eval_tasks, options);
   }
-  result.full_evaluation = Evaluation::evaluate_hmm(hmm, all_data, "", eval_tasks, options);
+  result.full_evaluation = evaluator.report(all_data, "", eval_tasks, options);
   result.model = hmm;
   return(result);
 }
