@@ -220,13 +220,13 @@ namespace Seeding {
   }
 
   rev_map_t Plasma::determine_initial_candidates(
-      size_t length, const Objective &objective, string &best_motif,
+      size_t length, const Objective &objective, seq_type &best_motif,
       size_t &n_candidates, double &max_score, Results &results,
       const set<size_t> &degeneracies) const {
     const size_t degeneracy = 0;
     rev_map_t candidates;
 
-    best_motif = "";
+    best_motif = encode("");
     max_score = -numeric_limits<double>::infinity();
 
     Timer my_timer;
@@ -244,7 +244,7 @@ namespace Seeding {
 
     for(auto &iter: word_counts) {
       if(options.verbosity >= Verbosity::debug)
-        cout << "Candidate " << iter.first << endl;
+        cout << "Candidate " << decode(iter.first) << endl;
       double score = compute_score(collection, iter.second, options, objective, length, degeneracy);
 
       if(options.verbosity >= Verbosity::debug)
@@ -253,10 +253,10 @@ namespace Seeding {
         max_score = score;
         best_motif = iter.first;
         if(options.verbosity >= Verbosity::debug)
-          cout << "motif = " << best_motif << " score = " << score << " " << vec2string(iter.second) << endl;
+          cout << "motif = " << decode(best_motif) << " score = " << score << " " << vec2string(iter.second) << endl;
       }
       if(candidates.empty() or score > candidates.rbegin()->first or n_candidates < options.plasma.max_candidates) {
-        candidates.insert({score, encode(iter.first)});
+        candidates.insert({score, iter.first});
         n_candidates++;
         if(n_candidates > options.plasma.max_candidates) {
           candidates.erase(--end(candidates));
@@ -266,10 +266,10 @@ namespace Seeding {
     }
 
     if(degeneracies.find(degeneracy) != end(degeneracies)) {
-      count_vector_t best_contrast = count_motif(collection, best_motif, options);
+      count_vector_t best_contrast = count_motif(collection, decode(best_motif), options);
       double log_p = -compute_score(collection, best_contrast, options, objective, length, degeneracy, Measures::Discrete::Measure::CorrectedLogpGtest);
       Result result(objective);
-      result.motif = best_motif;
+      result.motif = decode(best_motif);
       result.score = max_score;
       result.log_p = log_p;
       result.counts = best_contrast;
@@ -346,7 +346,7 @@ namespace Seeding {
 
     size_t degeneracy = 0;
 
-    string best_motif;
+    seq_type best_motif;
     size_t n_candidates = 0;
     double max_score;
 
@@ -434,7 +434,7 @@ namespace Seeding {
                 if(this->options.verbosity >= Verbosity::debug)
                   cout << "New maximum!" << endl;
                 max_score = generalization_score;
-                best_motif = decode(work[i]->first);
+                best_motif = work[i]->first;
                 best_motif_changed = true;
               }
             }
@@ -442,10 +442,10 @@ namespace Seeding {
         }
 
         if(best_motif_changed and degeneracies.find(degeneracy) != end(degeneracies)) {
-          count_vector_t best_contrast = count_motif(collection, best_motif, options);
+          count_vector_t best_contrast = count_motif(collection, decode(best_motif), options);
           double log_p = -compute_score(collection, best_contrast, options, objective, length, degeneracy, Measures::Discrete::Measure::CorrectedLogpGtest);
           Result result(objective);
-          result.motif = best_motif;
+          result.motif = decode(best_motif);
           result.score = max_score;
           result.log_p = log_p;
           result.counts = best_contrast;
@@ -459,10 +459,10 @@ namespace Seeding {
       }
 
       if(best_motif_changed and degeneracies.find(degeneracy) == end(degeneracies)) {
-        count_vector_t best_contrast = count_motif(collection, best_motif, options);
+        count_vector_t best_contrast = count_motif(collection, decode(best_motif), options);
         double log_p = -compute_score(collection, best_contrast, options, objective, length, degeneracy, Measures::Discrete::Measure::CorrectedLogpGtest);
         Result result(objective);
-        result.motif = best_motif;
+        result.motif = decode(best_motif);
         result.score = max_score;
         result.log_p = log_p;
         result.counts = best_contrast;

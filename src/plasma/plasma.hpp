@@ -54,7 +54,7 @@ namespace Seeding {
       Results find_plasma(size_t length, const Objective &objective, size_t max_degeneracy, const std::set<size_t> &degeneracies) const;
       Results find_external_dreme(size_t length, const Objective &objective, size_t max_degeneracy, const std::set<size_t> &degeneracies) const;
       Results find_mcmc(size_t length, const Objective &objective, size_t max_degeneracy) const;
-      rev_map_t determine_initial_candidates(size_t length, const Objective &objective, std::string &best_motif, size_t &n_candidates, double &max_score, Results &results, const std::set<size_t> &degeneracies) const;
+      rev_map_t determine_initial_candidates(size_t length, const Objective &objective, seq_type &best_motif, size_t &n_candidates, double &max_score, Results &results, const std::set<size_t> &degeneracies) const;
       Results find_all(const Specification::Motif &motif, const Objective &objective) const;
       Results find_multiple(const Specification::Motif &motif, const Objective &objective) const;
       void apply_mask(const std::string &motif);

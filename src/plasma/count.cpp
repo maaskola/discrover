@@ -112,7 +112,7 @@ namespace Seeding {
 
   void print_counts(const hash_map_t &counts) {
     for(auto &iter: counts) {
-      cout << iter.first;
+      cout << decode(iter.first);
       for(auto &x: iter.second)
         cout << "\t" << x;
       cout << endl;
@@ -125,7 +125,7 @@ namespace Seeding {
     if(seq_.size() < length)
       return;
 
-    vector<string> set;
+    vector<hash_map_t::key_type> set;
 
     string seq = string_tolower(seq_);
     for(size_t i = 0; i + length <= seq.size(); i++) {
@@ -134,18 +134,19 @@ namespace Seeding {
         if(options.revcomp) {
           string rc = reverse_complement(s);
           if(options.word_stats){
-            set.push_back(s);
-            set.push_back(rc);
+            set.push_back(encode(s));
+            set.push_back(encode(rc));
           } else {
             if(lexicographical_compare(begin(s), end(s), begin(rc), end(rc)))
-              set.push_back(rc);
+              set.push_back(encode(rc));
             else
-              set.push_back(s);
+              set.push_back(encode(s));
           }
         } else
-          set.push_back(s);
+          set.push_back(encode(s));
       }
     }
+
     if(not options.word_stats) {
       sort(begin(set), end(set));
       set.resize(unique(begin(set), end(set)) - begin(set));

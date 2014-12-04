@@ -54,7 +54,7 @@ struct hash<seq_type> {
 }
 
 namespace Seeding {
-  using hash_map_t = std::unordered_map<std::string, count_vector_t>;
+  using hash_map_t = std::unordered_map<seq_type, count_vector_t>;
   using score_map_t = std::unordered_map<seq_type, double>;
   using rev_map_t = std::multimap<double, seq_type, std::greater<double>>;
 }
