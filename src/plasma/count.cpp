@@ -125,7 +125,7 @@ namespace Seeding {
     if(seq_.size() < length)
       return;
 
-    vector<hash_map_t::key_type> set;
+    vector<hash_map_t::key_type> words;
 
     seq_type seq = encode(seq_);
 
@@ -140,25 +140,25 @@ namespace Seeding {
         if (options.revcomp) {
           auto rc = iupac_reverse_complement(s);
           if (options.word_stats) {
-            set.push_back(s);
-            set.push_back(rc);
+            words.push_back(s);
+            words.push_back(rc);
           } else {
             if (lexicographical_compare(begin(s), end(s), begin(rc), end(rc)))
-              set.push_back(rc);
+              words.push_back(rc);
             else
-              set.push_back(s);
+              words.push_back(s);
           }
         } else
-          set.push_back(s);
+          words.push_back(s);
       }
       ++b1;
     } while (b2++ != e);
 
     if(not options.word_stats) {
-      sort(begin(set), end(set));
-      set.resize(unique(begin(set), end(set)) - begin(set));
+      sort(begin(words), end(words));
+      words.resize(unique(begin(words), end(words)) - begin(words));
     }
-    for(auto &w: set) {
+    for(auto &w: words) {
       hash_map_t::iterator iter = counts.find(w);
       if(iter == end(counts)) {
         auto inserted = counts.insert({w,default_stats});
