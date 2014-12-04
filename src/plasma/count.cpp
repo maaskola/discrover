@@ -126,79 +126,33 @@ namespace Seeding {
       return;
 
     vector<hash_map_t::key_type> set;
-    vector<hash_map_t::key_type> set2;
 
-    Timer t1, t2;
-    double time1, time2;
-    if (true) {
-      t1.tick();
-      seq_type seq = encode(seq_);
+    seq_type seq = encode(seq_);
 
-      auto b1 = begin(seq);
-      auto b2 = b1;
-      std::advance(b2, length);
-      const auto e = end(seq);
+    auto b1 = begin(seq);
+    auto b2 = b1;
+    std::advance(b2, length);
+    const auto e = end(seq);
 
-      do {
-        seq_type s(b1, b2);
-        if (find_if(b1, b2, degenerate_nucleotide) == b2) {
-          if (options.revcomp) {
-            auto rc = iupac_reverse_complement(s);
-            if (options.word_stats) {
-              set2.push_back(s);
-              set2.push_back(rc);
-            } else {
-              if (lexicographical_compare(begin(s), end(s), begin(rc), end(rc)))
-                set2.push_back(rc);
-              else
-                set2.push_back(s);
-            }
-          } else
-            set2.push_back(s);
-        }
-        ++b1;
-      } while (b2++ != e);
-      time1 = t1.tock();
-    }
-
-    t2.tick();
-    string seq = string_tolower(seq_);
-    for(size_t i = 0; i + length <= seq.size(); i++) {
-      string s = seq.substr(i, length);
-      if(s.find_first_not_of("acgt") == string::npos) {
-        if(options.revcomp) {
-          string rc = reverse_complement(s);
-          if(options.word_stats){
-            set.push_back(encode(s));
-            set.push_back(encode(rc));
+    do {
+      seq_type s(b1, b2);
+      if (find_if(b1, b2, degenerate_nucleotide) == b2) {
+        if (options.revcomp) {
+          auto rc = iupac_reverse_complement(s);
+          if (options.word_stats) {
+            set.push_back(s);
+            set.push_back(rc);
           } else {
-            if(lexicographical_compare(begin(s), end(s), begin(rc), end(rc)))
-              set.push_back(encode(rc));
+            if (lexicographical_compare(begin(s), end(s), begin(rc), end(rc)))
+              set.push_back(rc);
             else
-              set.push_back(encode(s));
+              set.push_back(s);
           }
         } else
-          set.push_back(encode(s));
+          set.push_back(s);
       }
-    }
-    time2 = t2.tock();
-
-    if(options.verbosity >= Verbosity::debug) {
-      cerr << "time1 = " << time1 << " time2 = " << time2 << std::endl;
-      cout << "set.size() = " << set.size() << endl;
-      cout << "set2.size() = " << set2.size() << endl;
-      auto x = begin(set);
-      auto y = begin(set2);
-      for( ; x != end(set) and y != end(set2); x++, y++)
-        cout << decode(*x) << "\t" << decode(*y) << endl;
-      for( ; x != end(set); x++)
-        cout << decode(*x) << "\t" << "-X-" << endl;
-      for( ; y != end(set2); y++)
-        cout << "-X-" << "\t" << decode(*y) << endl;
-    }
-    assert(set.size() == set2.size());
-    for(auto x = begin(set), y = begin(set2); x != end(set) and y != end(set2); ++x, ++y)
-      assert(*x == *y);
+      ++b1;
+    } while (b2++ != e);
 
     if(not options.word_stats) {
       sort(begin(set), end(set));
