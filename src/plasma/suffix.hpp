@@ -57,21 +57,30 @@ std::vector<idx_t> gen_suffix_array_slow(Iter begin, Iter end, Verbosity verbosi
   return(sa);
 }
 
+template <typename X>
+X plusOne(X i) {
+  return ++i;
+}
+
 /** A faster (linear-time) algorithm to construct the suffix array */
-template <class idx_t, class Iter>
-std::vector<idx_t> gen_suffix_array(Iter begin, Iter end, Verbosity verbosity) {
+template <class idx_t, class Iter, bool shift>
+std::vector<idx_t> gen_suffix_array(Iter begin, const Iter end, Verbosity verbosity) {
   idx_t K = 0;
   if(begin != end)
     K = *std::max_element(begin, end);
-  idx_t n = std::distance(begin, end);
+  const idx_t n = std::distance(begin, end);
   Timer timer;
 
   // we need to copy the data and make sure that it is padded with three zeros for the DC3 algorithm to work
+  // also, zeros are not allowed, so optionally we increment the data
   std::vector<typename Iter::value_type> v(n+3,0);
-  std::copy(begin, end, v.begin());
+  if(shift)
+    std::transform(begin, end, v.begin(), plusOne<typename Iter::value_type>);
+  else
+    std::copy(begin, end, v.begin());
 
   std::vector<idx_t> sa(n+3, 0);
-  suffixArray(v.begin(), v.end(), sa, n, K);
+  suffixArray(v.begin(), v.end(), sa, n, K + (shift ? 1 : 0));
   double time = timer.tock();
   if(verbosity >= Verbosity::verbose)
     std::cerr << "Fast building SA took " << time << " µs." << std::endl;

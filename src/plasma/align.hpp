@@ -46,13 +46,13 @@ seq_type iupac_reverse_complement(const seq_type &s);
 
 std::string read_fasta_with_boundaries(const std::vector<std::string> &paths, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set, size_t n_seq=0);
 
-template <class data_t, class idx_t=size_t, class lcp_t=size_t>
+template <class data_t, class idx_t=size_t, class lcp_t=size_t, bool shift=false>
 class Index {
   public:
     Index(const data_t &x, Verbosity verbosity) :
       data(x),
       // generate suffix array, LCP, and JMP tables
-      sa(gen_suffix_array<idx_t>(begin(data), end(data), verbosity)),
+      sa(gen_suffix_array<idx_t, typename data_t::const_iterator, shift>(begin(data), end(data), verbosity)),
       lcp(gen_lcp<lcp_t>(begin(data), end(data), sa, verbosity)),
       jmp(gen_jmp<idx_t>(lcp, verbosity)) { };
 
@@ -72,7 +72,7 @@ seq_type collapse_collection(const Seeding::Collection &collection,
                              std::vector<size_t> &seq2set,
                              std::vector<size_t> &set2contrast);
 
-template <class idx_t=size_t, class lcp_t=size_t, class base_t=seq_type, class index_t=Index<base_t, idx_t, lcp_t>>
+template <class idx_t=size_t, class lcp_t=size_t, class base_t=seq_type, class index_t=Index<base_t, idx_t, lcp_t, true>>
 class NucleotideIndex {
   public:
     using base_type = base_t;
