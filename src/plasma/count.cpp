@@ -159,7 +159,7 @@ namespace Seeding {
       words.resize(unique(begin(words), end(words)) - begin(words));
     }
     for(auto &w: words) {
-      hash_map_t::iterator iter = counts.find(w);
+      auto iter = counts.find(w);
       if(iter == end(counts)) {
         auto inserted = counts.insert({w,default_stats});
         iter = inserted.first;
