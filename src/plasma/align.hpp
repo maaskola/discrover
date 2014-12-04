@@ -35,6 +35,7 @@
 #include <vector>
 #include "suffix.hpp"
 #include "align.hpp"
+#include "code.hpp"
 #include "data.hpp"
 
 template <typename T> bool binary_and_not_null(T a, T b) {

@@ -18,7 +18,6 @@
 #include <boost/iostreams/filter/bzip2.hpp>
 #include <boost/algorithm/string.hpp>
 #include "align.hpp"
-#include "code.hpp"
 #include "fasta.hpp"
 
 using namespace std;
@@ -189,23 +188,6 @@ string read_fasta_with_boundaries(const vector<string> &paths, vector<size_t> &p
     };
     auto parser = Fasta::make_parser(parsing);
     in >> parser;
-    set_idx++;
-  }
-  return(s);
-}
-
-string collapse_contrast(const Seeding::Contrast &contrast, vector<size_t> &pos2seq, vector<size_t> &seq2set) {
-  string s;
-  size_t set_idx = 0;
-  size_t seq_idx = 0;
-  for(auto &dataset: contrast) {
-    for(auto &seq: dataset) {
-      s += seq.sequence + TERMINATOR_SYMBOL;
-      for(size_t i = 0; i < seq.sequence.size() + 1; i++)
-        pos2seq.push_back(seq_idx);
-      seq2set.push_back(set_idx);
-      seq_idx++;
-    }
     set_idx++;
   }
   return(s);
