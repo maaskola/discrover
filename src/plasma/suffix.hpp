@@ -168,13 +168,13 @@ std::vector<idx_t> gen_jmp_var(const std::vector<lcp_t> &lcp) {
   std::vector<idx_t> jmp(n);
 
   std::stack<std::pair<idx_t, lcp_t> > s;
-  s.push(std::pair<idx_t, lcp_t>(0,0));
+  s.push(std::make_pair(0,0));
   for(idx_t i = 1; i < n; i++) {
     while(lcp[i] < s.top().second) {
       jmp[s.top().first] = i;
       s.pop();
     }
-    s.push(std::pair<idx_t, lcp_t>(i,lcp[i]));
+    s.push(std::make_pair(i,lcp[i]));
   }
   while(not s.empty()) {
     jmp[s.top().first] = n;
