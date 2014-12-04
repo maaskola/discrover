@@ -192,7 +192,7 @@ std::vector<idx_t> match(Iter qbegin, Iter qend, Iter begin, Iter end, const std
 
   const size_t qsize = std::distance(qbegin, qend);
   std::stack<idx_t> jmp_stack;
-  idx_t n = std::distance(begin, end);
+  const idx_t n = std::distance(begin, end);
   
   idx_t i = 0;
   while(i < n) {
@@ -245,4 +245,3 @@ std::vector<idx_t> match(Iter qbegin, Iter qend, Iter begin, Iter end, const std
 }
 
 #endif
-
