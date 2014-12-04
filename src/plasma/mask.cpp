@@ -24,6 +24,8 @@
 
 using namespace std;
 
+const char MASK_SYMBOL = '-';
+
 namespace Seeding {
   void remove_seqs_with_motif(const string &motif, Set &dataset, const Options &options) {
     vector<size_t> to_be_deleted;
@@ -78,7 +80,7 @@ namespace Seeding {
 
   void mask_motif_occurrences(const string &motif, Set &dataset, const Options &options) {
     for(auto &seq: dataset) {
-      mask_motif_occurrences(motif, seq, options, 'n');
+      mask_motif_occurrences(motif, seq, options, MASK_SYMBOL);
     }
   }
 
