@@ -32,6 +32,7 @@ void radixPass(const std::vector<idx_t> &a, std::vector<idx_t> &b, Iter r, idx_t
 
 // find the suffix array SA of s[0..n-1] in {1..K}^n
 // require s[n]=s[n+1]=s[n+2]=0, n>=2
+// NOTE the input is not supposed to contain zeros!
 template <typename idx_t, typename Iter>
 void suffixArray(Iter begin, Iter end, std::vector<idx_t> &SA, idx_t n, idx_t K) {
   idx_t n0=(n+2)/3, n1=(n+1)/3, n2=n/3, n02=n0+n2; 
