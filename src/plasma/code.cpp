@@ -149,3 +149,23 @@ void add_sequence(vector<symbol_t> &s, const string &seq) {
   for(auto x: seq)
     s.push_back(Seeding::Code[x]);
 }
+
+using nucl_vector_type = vector<bool>;
+
+nucl_vector_type build_pure_nucl_vector() {
+  const size_t n = 16;
+  nucl_vector_type v(n);
+  for (size_t i = 0; i < n; ++i) v[i] = false;
+  for (auto nucl : encode("acgt")) v[nucl] = true;
+  return v;
+}
+
+const static nucl_vector_type pure_nucl_vector = build_pure_nucl_vector();
+
+bool pure_nucleotide(symbol_t s) {
+  return pure_nucl_vector[s];
+}
+
+bool degenerate_nucleotide(symbol_t s) {
+  return not pure_nucl_vector[s];
+}

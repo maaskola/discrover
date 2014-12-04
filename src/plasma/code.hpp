@@ -50,5 +50,8 @@ seq_type encode(const std::string &seq);
 std::string decode(const seq_type &seq);
 void add_sequence(seq_type &s, const std::string &seq);
 
+bool pure_nucleotide(symbol_t s);
+bool degenerate_nucleotide(symbol_t s);
+
 #endif   /* ----- #ifndef CODE_HPP ----- */
 
