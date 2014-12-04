@@ -211,29 +211,6 @@ string collapse_contrast(const Seeding::Contrast &contrast, vector<size_t> &pos2
   return(s);
 }
 
-seq_type encode(const string &s) {
-  size_t n = s.size();
-  seq_type vec(n);
-  auto iter = begin(s);
-  for(auto &v: vec)
-    v = Seeding::Code[*iter++];
-  return vec;
-}
-
-std::string decode(const seq_type &seq) {
-  size_t n = seq.size();
-  string s(n, ' ');
-  auto iter = begin(seq);
-  for(auto &c: s)
-    c = Seeding::Symbol[*iter++];
-  return s;
-}
-
-void add_sequence(vector<symbol_t> &s, const string &seq) {
-  for(auto x: seq)
-    s.push_back(Seeding::Code[x]);
-}
-
 vector<symbol_t> collapse_collection(const Seeding::Collection &collection, vector<size_t> &pos2seq, vector<size_t> &seq2set, vector<size_t> &set2contrast) {
   vector<symbol_t> s;
   size_t seq_idx = 0;
@@ -255,4 +232,3 @@ vector<symbol_t> collapse_collection(const Seeding::Collection &collection, vect
   }
   return(s);
 }
-

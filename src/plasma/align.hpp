@@ -37,13 +37,6 @@
 #include "align.hpp"
 #include "data.hpp"
 
-using symbol_t = uint8_t;
-using seq_type = std::vector<symbol_t>;
-seq_type encode(const std::string &seq);
-std::string decode(const seq_type &seq);
-void encode(seq_type &s, const std::string &seq);
-void add_sequence(seq_type &s, const std::string &seq);
-
 template <typename T> bool binary_and_not_null(T a, T b) {
   return (a & b) != 0;
 }

@@ -31,6 +31,7 @@
 #define  CODE_HPP
 
 #include <string>
+#include <vector>
 
 namespace Seeding {
   const char* const Symbol = "-acmgrsvtwyhkdbn";
@@ -42,6 +43,12 @@ namespace Seeding {
   std::string iupac2regex(const std::string &s);
   bool iupac_included(char q, char r);
 };
+
+using symbol_t = uint8_t;
+using seq_type = std::vector<symbol_t>;
+seq_type encode(const std::string &seq);
+std::string decode(const seq_type &seq);
+void add_sequence(seq_type &s, const std::string &seq);
 
 #endif   /* ----- #ifndef CODE_HPP ----- */
 

@@ -130,3 +130,25 @@ namespace Seeding {
   }
 }
 
+seq_type encode(const string &s) {
+  size_t n = s.size();
+  seq_type vec(n);
+  auto iter = begin(s);
+  for(auto &v: vec)
+    v = Seeding::Code[*iter++];
+  return vec;
+}
+
+std::string decode(const seq_type &seq) {
+  size_t n = seq.size();
+  string s(n, ' ');
+  auto iter = begin(seq);
+  for(auto &c: s)
+    c = Seeding::Symbol[*iter++];
+  return s;
+}
+
+void add_sequence(vector<symbol_t> &s, const string &seq) {
+  for(auto x: seq)
+    s.push_back(Seeding::Code[x]);
+}
