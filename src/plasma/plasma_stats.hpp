@@ -45,10 +45,21 @@ struct hash<seq_type> {
     using std::hash;
     using std::string;
 
-    size_t h = 0;
-    for(auto &x: v)
-      h = h ^ hash<seq_type::value_type>()(x);
-    return h;
+    // slow but compatible with previous, string-based implementation
+    return hash<string>()(decode(v));
+
+    // faster
+    // size_t h = 0;
+    // for(auto &x: v)
+    //   h = h ^ x;
+    // return h;
+
+    // faster, likely the same as above, if the implementation uses identity hashes for integral types
+    // size_t h = 0;
+    // for(auto &x: v)
+    //   h = h ^ hash<seq_type::value_type>()(x);
+    // return h;
+
   }
 };
 }
