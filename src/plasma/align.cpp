@@ -23,6 +23,8 @@
 
 using namespace std;
 
+const char TERMINATOR_SYMBOL = '$';
+
 vector<seq_type::value_type> build_complement_table() {
   using val_t = seq_type::value_type;
   vector<val_t> t;
@@ -178,7 +180,7 @@ string read_fasta_with_boundaries(const vector<string> &paths, vector<size_t> &p
     size_t idx = 0;
     auto parsing = [&](Fasta::Entry &&entry) {
       boost::algorithm::to_lower(entry.sequence);
-      s += entry.sequence + "$";
+      s += entry.sequence + TERMINATOR_SYMBOL;
       for(size_t i = 0; i < entry.sequence.size() + 1; i++)
         pos2seq.push_back(idx);
       seq2set.push_back(set_idx);
@@ -198,7 +200,7 @@ string collapse_contrast(const Seeding::Contrast &contrast, vector<size_t> &pos2
   size_t seq_idx = 0;
   for(auto &dataset: contrast) {
     for(auto &seq: dataset) {
-      s += seq.sequence + "$";
+      s += seq.sequence + TERMINATOR_SYMBOL;
       for(size_t i = 0; i < seq.sequence.size() + 1; i++)
         pos2seq.push_back(seq_idx);
       seq2set.push_back(set_idx);
@@ -240,7 +242,7 @@ vector<symbol_t> collapse_collection(const Seeding::Collection &collection, vect
   for(auto &contrast: collection) {
     for(auto &dataset: contrast) {
       for(auto &seq: dataset) {
-        add_sequence(s, seq.sequence + "$");
+        add_sequence(s, seq.sequence + TERMINATOR_SYMBOL);
         for(size_t i = 0; i < seq.sequence.size() + 1; i++)
           pos2seq.push_back(seq_idx);
         seq2set.push_back(set_idx);
