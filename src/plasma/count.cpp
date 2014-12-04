@@ -75,22 +75,6 @@ namespace Seeding {
     return(cnt);
   }
 
-  /*
-  count_vector_t count_motif(const Contrast &contrast, const string &motif, const Options &options) {
-    count_vector_t stats(contrast.sets.size());
-    for(auto &x: stats)
-      x = 0;
-
-    size_t idx = 0;
-    for(auto &dataset: contrast) {
-      for(auto &seq: dataset)
-        stats(idx) += count_motif(seq.sequence, motif, options);
-      idx++;
-    }
-    return(stats);
-  }
-  */
-
   count_vector_t count_motif(const Collection &collection, const string &motif, const Options &options) {
     size_t n_samples = 0;
     for(auto &contrast: collection)
