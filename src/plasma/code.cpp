@@ -98,7 +98,7 @@ namespace Seeding {
   {
     q = tolower(q);
     r = tolower(r);
-    if(q==r)
+    if(q==r and r != 'n')
       return(true);
     switch(r) {
       case 'a':

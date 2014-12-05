@@ -36,7 +36,7 @@
 namespace Seeding {
   const std::string Symbol = "-acmgrsvtwyhkdbn";
   std::string iupac2regex(const std::string &s);
-  bool iupac_included(char q, char r);
+  bool iupac_included(char r, char q);
 };
 
 using symbol_t = uint8_t;
