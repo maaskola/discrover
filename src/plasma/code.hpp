@@ -34,8 +34,7 @@
 #include <vector>
 
 namespace Seeding {
-  const char* const Symbol = "-acmgrsvtwyhkdbn";
-
+  const std::string Symbol = "-acmgrsvtwyhkdbn";
   std::string iupac2regex(const std::string &s);
   bool iupac_included(char q, char r);
 };

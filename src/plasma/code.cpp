@@ -21,7 +21,7 @@ namespace Seeding {
     char* table = new char[table_size];
     for(size_t i = 0; i < table_size; i++)
       table[i] = 0;
-    for(size_t i = 0; i < 16; i++)
+    for(size_t i = 0; i < Symbol.size(); i++)
       table[Symbol[i]] = i;
     for(char x = 'A'; x <= 'Z'; x++)
       table[x] = table['a' + x - 'A'];
