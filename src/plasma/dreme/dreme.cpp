@@ -80,9 +80,13 @@ namespace Dreme {
 
     string command = str.str();
 
-    cout << "Command = " << command << endl;
+    cout << "Command for running DREME = " << command << endl;
 
     int res = system(command.c_str());
+    if(res != 0) {
+      cout << "There was a problem executing DREME. Exiting." << endl;
+      exit(res);
+    }
 
     auto regexes = parse_dreme_output(dreme_output_dir);
 
