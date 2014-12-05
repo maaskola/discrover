@@ -17,8 +17,9 @@ using namespace std;
 
 namespace Seeding {
   char* construct_code() {
-    char* table = new char[128];
-    for(size_t i = 0; i < 128; i++)
+    const size_t table_size = 128;
+    char* table = new char[table_size];
+    for(size_t i = 0; i < table_size; i++)
       table[i] = 0;
     for(size_t i = 0; i < 16; i++)
       table[Symbol[i]] = i;
