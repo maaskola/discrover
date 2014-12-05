@@ -16,8 +16,6 @@
 using namespace std;
 
 namespace Seeding {
-  char* Code = construct_code();
-
   char* construct_code() {
     char* table = new char[128];
     for(size_t i = 0; i < 128; i++)
@@ -30,6 +28,8 @@ namespace Seeding {
     //    cout << i << " " << static_cast<int>(table[i]) << endl;
     return(table);
   };
+
+  char* Code = construct_code();
 
   string iupac2regex(const string &s) {
     string r;

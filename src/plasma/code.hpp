@@ -36,10 +36,6 @@
 namespace Seeding {
   const char* const Symbol = "-acmgrsvtwyhkdbn";
 
-  char* construct_code();
-
-  extern char* Code;
-
   std::string iupac2regex(const std::string &s);
   bool iupac_included(char q, char r);
 };
