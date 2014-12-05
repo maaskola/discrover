@@ -11,26 +11,25 @@
  * =====================================================================================
  */
 
+#include <limits>
 #include "code.hpp"
 
 using namespace std;
 
 namespace Seeding {
-  char* construct_code() {
-    const size_t table_size = 128;
-    char* table = new char[table_size];
-    for(size_t i = 0; i < table_size; i++)
-      table[i] = 0;
-    for(size_t i = 0; i < Symbol.size(); i++)
+  vector<symbol_t> construct_code() {
+    const size_t table_size = numeric_limits<symbol_t>::max() + 1;
+    vector<symbol_t> table(table_size, 0);
+    for(symbol_t i = 0; i < Symbol.size(); i++)
       table[static_cast<size_t>(Symbol[i])] = i;
-    for(char x = 'A'; x <= 'Z'; x++)
+    for(symbol_t x = 'A'; x <= 'Z'; x++)
       table[static_cast<size_t>(x)] = table['a' + x - 'A'];
-    //  for(size_t i = 0; i < 128; i++)
-    //    cout << i << " " << static_cast<int>(table[i]) << endl;
+    //  for(symbol_t i = 0; i < 128; i++)
+    //    cout << i << " " << static_cast<size_t>(table[i]) << endl;
     return(table);
   };
 
-  char* Code = construct_code();
+  const vector<symbol_t> Code = construct_code();
 
   string iupac2regex(const string &s) {
     string r;
