@@ -22,9 +22,9 @@ namespace Seeding {
     for(size_t i = 0; i < table_size; i++)
       table[i] = 0;
     for(size_t i = 0; i < Symbol.size(); i++)
-      table[Symbol[i]] = i;
+      table[static_cast<size_t>(Symbol[i])] = i;
     for(char x = 'A'; x <= 'Z'; x++)
-      table[x] = table['a' + x - 'A'];
+      table[static_cast<size_t>(x)] = table['a' + x - 'A'];
     //  for(size_t i = 0; i < 128; i++)
     //    cout << i << " " << static_cast<int>(table[i]) << endl;
     return(table);
