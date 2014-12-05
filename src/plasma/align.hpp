@@ -35,7 +35,7 @@
 #include "suffix.hpp"
 #include "data.hpp"
 
-bool iupac_included(char q, char r);
+bool iupac_included(char r, char q);
 
 std::string iupac_reverse_complement(const std::string &s);
 
