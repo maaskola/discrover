@@ -6,7 +6,7 @@
 * Use other regular expression based motif finding tools for seeding
 * Search one strand against the other
 * Find localized motifs
-* Parallelize FIRE and parallel tempering
+* Parallelize parallel tempering
 * Add RNG seed specification for all parts requiring randomization
   - MCMC
 * MCMC seeding can sample across motif lengths
