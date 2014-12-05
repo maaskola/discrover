@@ -132,7 +132,7 @@ seq_type encode(const string &s) {
   seq_type vec(n);
   auto iter = begin(s);
   for(auto &v: vec)
-    v = Seeding::Code[*iter++];
+    v = Seeding::Code[static_cast<symbol_t>(*iter++)];
   return vec;
 }
 
@@ -147,7 +147,7 @@ std::string decode(const seq_type &seq) {
 
 void add_sequence(vector<symbol_t> &s, const string &seq) {
   for(auto x: seq)
-    s.push_back(Seeding::Code[x]);
+    s.push_back(Seeding::Code[static_cast<symbol_t>(x)]);
 }
 
 using nucl_vector_type = vector<bool>;
