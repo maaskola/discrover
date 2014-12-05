@@ -41,6 +41,7 @@ namespace Seeding {
     dump_viterbi(false),
     no_enrichment_filter(false),
     fixed_motif_space_mode(false),
+    allow_iupac_wildcards(false),
     label("")
     { };
 

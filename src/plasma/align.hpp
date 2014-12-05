@@ -71,7 +71,8 @@ class Index {
 seq_type collapse_collection(const Seeding::Collection &collection,
                              std::vector<size_t> &pos2seq,
                              std::vector<size_t> &seq2set,
-                             std::vector<size_t> &set2contrast);
+                             std::vector<size_t> &set2contrast,
+                             bool allow_iupac_wildcards);
 
 template <class idx_t=size_t, class lcp_t=size_t, class base_t=seq_type, class index_t=Index<base_t, idx_t, lcp_t, true>>
 class NucleotideIndex {
@@ -92,12 +93,12 @@ class NucleotideIndex {
       set2contrast(),
       index({}, verbosity) { };
 
-    NucleotideIndex(const Seeding::Collection &collection, Verbosity verbosity) :
+    NucleotideIndex(const Seeding::Collection &collection, bool allow_iupac_wildcards, Verbosity verbosity) :
       paths(),
       pos2seq(),
       seq2set(),
       set2contrast(),
-      index(collapse_collection(collection, pos2seq, seq2set, set2contrast), verbosity) {
+      index(collapse_collection(collection, pos2seq, seq2set, set2contrast, allow_iupac_wildcards), verbosity) {
         for(auto &contrast: collection)
           for(auto &dataset: contrast)
             paths.push_back(dataset.path);

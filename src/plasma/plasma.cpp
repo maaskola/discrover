@@ -637,7 +637,7 @@ namespace Seeding {
       Timer my_timer;
       if(options.verbosity >= Verbosity::verbose)
         cerr << "Starting building of index." << endl;
-      index = NucleotideIndex<size_t,size_t>(collection, options.verbosity);
+      index = NucleotideIndex<size_t,size_t>(collection, options.allow_iupac_wildcards, options.verbosity);
       if(options.measure_runtime)
         cerr << "Built index in " << my_timer.tock() << " \u00b5s." << endl;
       index_ready = true;

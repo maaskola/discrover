@@ -29,7 +29,22 @@ namespace Seeding {
     return(table);
   };
 
+  vector<symbol_t> construct_pure_code() {
+    const size_t table_size = numeric_limits<symbol_t>::max() + 1;
+    vector<symbol_t> table(table_size, 0);
+    const string pure = "acgt";
+    for(symbol_t i = 0; i < Symbol.size(); i++)
+      if(pure.find(Symbol[i]) != string::npos)
+        table[static_cast<size_t>(Symbol[i])] = i;
+    for(symbol_t x = 'A'; x <= 'Z'; x++)
+      table[static_cast<size_t>(x)] = table['a' + x - 'A'];
+    //  for(symbol_t i = 0; i < 128; i++)
+    //    cout << i << " " << static_cast<size_t>(table[i]) << endl;
+    return(table);
+  };
+
   const vector<symbol_t> Code = construct_code();
+  const vector<symbol_t> PureCode = construct_pure_code();
 
   string iupac2regex(const string &s) {
     string r;
@@ -145,9 +160,13 @@ std::string decode(const seq_type &seq) {
   return s;
 }
 
-void add_sequence(vector<symbol_t> &s, const string &seq) {
-  for(auto x: seq)
-    s.push_back(Seeding::Code[static_cast<symbol_t>(x)]);
+void add_sequence(vector<symbol_t> &s, const string &seq, bool allow_iupac_wildcards) {
+  if (allow_iupac_wildcards)
+    for (auto x: seq)
+      s.push_back(Seeding::Code[static_cast<symbol_t>(x)]);
+  else
+    for (auto x: seq)
+      s.push_back(Seeding::PureCode[static_cast<symbol_t>(x)]);
 }
 
 using nucl_vector_type = vector<bool>;

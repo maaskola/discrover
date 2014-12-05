@@ -41,9 +41,21 @@ namespace Seeding {
 
 using symbol_t = uint8_t;
 using seq_type = std::vector<symbol_t>;
+
+/** Encode nucleic acid sequences
+ * Takes strings and produces seq_type
+ * IUPAC characters (whether upper or lower case) are faithfully encoded
+ * All other characters are represented by non-matching symbols
+ **/
 seq_type encode(const std::string &seq);
+/** Decode nucleic acid sequences, producing lower case strings
+ **/
 std::string decode(const seq_type &seq);
-void add_sequence(seq_type &s, const std::string &seq);
+/** Extends seq_type nucleic acid sequences by sequences given in strings
+ * Optionally, IUPAC wildcards are faithfully encoded.
+ * Otherwise, they and all non-IUPAC symbols are encoded by non-matching symbols
+ */
+void add_sequence(seq_type &s, const std::string &seq, bool allow_iupac_wildcards);
 
 bool pure_nucleotide(symbol_t s);
 bool degenerate_nucleotide(symbol_t s);

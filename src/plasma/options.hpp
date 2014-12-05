@@ -108,6 +108,7 @@ namespace Seeding {
     bool dump_viterbi;
     bool no_enrichment_filter;
     bool fixed_motif_space_mode;
+    bool allow_iupac_wildcards;
 
     std::string label;
   };

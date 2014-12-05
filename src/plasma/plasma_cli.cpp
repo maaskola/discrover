@@ -79,6 +79,7 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
     (form_switch(prefix, "best", false).c_str(), po::bool_switch(&options.only_best), "Whether to report only the single best motif for each motif specification.  Default is to report for each motif specification the best result for each length.")
     (form_switch(prefix, "strict", false).c_str(), po::bool_switch(&options.strict), "Do not allow insignificant seeds.")
     (form_switch(prefix, "fix_mspace", false).c_str(), po::bool_switch(&options.fixed_motif_space_mode), "Deactivate dynamic motif space mode. Influences how the multiple-testing correction for the log-p value of the G-test is calculated.")
+    (form_switch(prefix, "allowIUPAC", false).c_str(), po::bool_switch(&options.allow_iupac_wildcards), "Interpret IUPAC wildcard symbols in FASTA files. When this option is used e.g. S (strong) matches C and G, and so on. Importantly, N matches any character! Use non-IUPAC characters for positions where the sequence is unknown or masked, e.g. you could use '-' for this. By default, only A, C, G, and T characters (and their lower case variants) are encoded while all other characters are interpreted as masked.")
     ;
   if(include_all)
     desc.add_options()
