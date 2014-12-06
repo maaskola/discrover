@@ -66,25 +66,25 @@ Note that the above-given list of dependencies is required only for BUILDING, no
 On Debian and Ubuntu, you can install all necessary and optional software to build Discrover with the following command:
 
 ```sh
-apt-get install git cmake g++ imagemagick texlive libboost-all-dev ctags texlive-latex-extra
+apt-get install git cmake g++ imagemagick libboost-all-dev texlive texlive-latex-base latex-xcolor texlive-latex-extra pgf ruby ruby-dev
 ```
 
 Similarly, on Gentoo you can use:
 
 ```sh
-emerge -av dev-vcs/git dev-util/cmake sys-devel/gcc media-gfx/imagemagick dev-libs/boost dev-util/ctags dev-texlive/texlive-latexextra
+emerge -av dev-vcs/git dev-util/cmake sys-devel/gcc media-gfx/imagemagick dev-libs/boost dev-texlive/texlive-latexextra dev-lang/ruby
 ```
 
 The corresponding command for Arch linux:
 
 ```sh
-pacman -S git cmake gcc make boost texlive-most imagemagick dev-libs/boost dev-util/ctags dev-texlive/texlive-latexextra
+pacman -S git cmake make gcc boost texlive-core texlive-latexextra imagemagick ruby
 ```
 
 On Fedora 20 the following command will install all dependencies required for building:
 
 ```sh
-yum install gcc-c++ cmake ctags git ImageMagick boost-devel texlive-collection-latexextra
+yum install gcc-c++ cmake git ImageMagick boost boost-devel texlive-latex-bin texlive-pgf texlive-xcolor texlive-collection-latexextra ruby ruby-devel
 ```
 
 
