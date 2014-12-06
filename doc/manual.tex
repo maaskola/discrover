@@ -103,7 +103,7 @@ The publication describing this method, \cite{Maaskola2014}, presents experiment
 
 \section{Tutorial}
 This tutorial will demonstrate the basic usage of the motif discovery tools in this package.
-Let us assume that you have one FASTA file with signal sequences, \verb|signal.fa|, and one with control sequences, and that you want to find motifs of length 8~nt that are discriminative between the two.
+Let us assume that you have one FASTA file with signal sequences, \verb|signal.fa|, and one with control sequences, \verb|control.fa|, and that you want to find motifs of length 8~nt that are discriminative between the two.
 \subsection{Basic usage}
 To perform a full analysis of discriminative motifs, \discrover{} automatically discovers the most discriminative IUPAC regular expression as seed, initializes an HMM on it, and subsequently optimizes the HMM parameters.
 \subsubsection{Analysis of RNA-binding proteins}
