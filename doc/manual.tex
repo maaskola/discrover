@@ -178,7 +178,7 @@ dinucleotide_shuffle signal.fa > control.fa
 \end{verbbox}
 \fbox{\theverbbox[t]}
 
-Note that for purposes of reproducibility, you can provide a seed for the random shuffle generation.
+Note that for purposes of reproducibility, you can provide a seed (\verb|--salt|) for the random shuffle generation.
 
 \subsubsection{Automatic generation of random dinucleotide shuffles}
 You can also use the same shuffling routines by providing only a set of signal sequences to either \plasma{} or \discrover{}, as the following two commands exemplify.
@@ -195,7 +195,7 @@ discrover signal.fa -m 8
 
 In both cases, dinucleotide shuffles will be generated using the same routines as in \dinuclshuffle{}, and subsequently motif discovery will be executed for motifs that are discriminative between \verb|signal.fa| and the randomly generated set of dinucleotide shuffles.
 
-Note that also in this case for the purpose of reproducibility, you can provide a seed for the random shuffle generation.
+Note that also in this case for the purpose of reproducibility, you can provide a seed (\verb|--salt|) for the random shuffle generation.
 
 
 
