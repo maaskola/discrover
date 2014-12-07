@@ -30,7 +30,7 @@ vector_t row_sums(const matrix_t &m) {
   for(size_t i = 0; i < n; i++)
     for(size_t j = 0; j < m.size2(); j++)
       v(i) += m(i,j);
-  return(v);
+  return v;
 }
 
 vector_t col_sums(const matrix_t &m) {
@@ -39,7 +39,7 @@ vector_t col_sums(const matrix_t &m) {
   for(size_t j = 0; j < m.size1(); j++)
     for(size_t i = 0; i < n; i++)
       v(i) += m(j,i);
-  return(v);
+  return v;
 }
 
 double compute_mutual_information_variance(const matrix_t &m_, double pseudo_count, bool normalize) {
@@ -80,7 +80,7 @@ double compute_mutual_information_variance(const matrix_t &m_, double pseudo_cou
 
   double j = compute_mutual_information(m_, pseudo_count, normalize, true);
   double var = 1/ (z+1) * (mi - j*j);
-  return(var);
+  return var;
 }
 
 double compute_mutual_information(const matrix_t &m_, double pseudo_count, bool normalize, bool do_correction) {
@@ -120,7 +120,7 @@ double compute_mutual_information(const matrix_t &m_, double pseudo_count, bool 
   if(do_correction) {
     mi += (m.size1() - 1) * (m.size2() - 1) / (z + 1);
   }
-  return(mi);
+  return mi;
 }
 
 double compute_gtest(const matrix_t &m, double pseudo_count, bool normalize) {
@@ -129,11 +129,11 @@ double compute_gtest(const matrix_t &m, double pseudo_count, bool normalize) {
     for(size_t j = 0; j < m.size2(); j++)
       n += m(i,j);
   n += m.size1() * m.size2() * pseudo_count;
-  return(compute_mutual_information(m, pseudo_count, normalize) * log(2.0) * 2 * n);
+  return compute_mutual_information(m, pseudo_count, normalize) * log(2.0) * 2 * n;
 }
 
 double compute_logp_gtest(const matrix_t &m, double pseudo_count, bool normalize) {
-  return(-pchisq(compute_gtest(m, pseudo_count, normalize), (m.size1() - 1) * (m.size2() - 1), false, true));
+  return -pchisq(compute_gtest(m, pseudo_count, normalize), (m.size1() - 1) * (m.size2() - 1), false, true);
 }
 
 double compute_bonferroni_corrected_logp_gtest(const matrix_t &m, double pseudo_count, bool normalize, size_t length, size_t degeneracy, bool dynamic_mode) {
@@ -143,7 +143,7 @@ double compute_bonferroni_corrected_logp_gtest(const matrix_t &m, double pseudo_
   else
     log_correction = log(149);
 
-  return(compute_logp_gtest(m, pseudo_count, normalize) - log_correction);
+  return compute_logp_gtest(m, pseudo_count, normalize) - log_correction;
 }
 
 double compute_mcc(double a, double b, double c, double d) {
@@ -168,11 +168,11 @@ count_vector_t reduce_count(const count_vector_t &full, const Seeding::Collectio
       full_iter += n;
   }
   counts.resize(std::distance(begin(counts), iter));
-  return(counts);
+  return counts;
 }
 
 double compute_score(const Seeding::Collection &collection, const Seeding::Result &result, const Seeding::Options &options, Measures::Discrete::Measure measure, bool do_correction) {
-  return(compute_score(collection, result.counts, options, result, result.motif.length(), Seeding::motif_degeneracy(result.motif), measure, do_correction));
+  return compute_score(collection, result.counts, options, result, result.motif.length(), Seeding::motif_degeneracy(result.motif), measure, do_correction);
 }
 
 double compute_score(const Seeding::Collection &collection,
@@ -214,7 +214,7 @@ double compute_score(const Seeding::Collection &collection,
     score /= W;
   if(options.verbosity >= Verbosity::debug)
     cout << "end: compute_score(Seeding::Collection) -> " << score << endl;
-  return(score);
+  return score;
 }
 
 double compute_score(const Seeding::Contrast &contrast, const count_vector_t &counts, const Seeding::Options &options, Measures::Discrete::Measure measure, size_t length, size_t degeneracy, const string &motif_name, bool do_correction) {
@@ -223,7 +223,7 @@ double compute_score(const Seeding::Contrast &contrast, const count_vector_t &co
     exit(-1);
   }
   if(measure != Measures::Discrete::Measure::SignalFrequency and contrast.sets.size() < 2)
-    return(-std::numeric_limits<double>::infinity());
+    return -std::numeric_limits<double>::infinity();
 
   matrix_t occurrence_table = matrix_t(counts.size(), 2);
   for(size_t i = 0; i < counts.size(); i++) {
@@ -266,7 +266,7 @@ double compute_score(const Seeding::Contrast &contrast, const count_vector_t &co
       << " signal_rel_freq = " << signal_rel_freq
       << " control_rel_freq = " << control_rel_freq << std::endl;
   if(not options.no_enrichment_filter and signal_present and signal_rel_freq < control_rel_freq)
-    return(-std::numeric_limits<double>::infinity());
+    return -std::numeric_limits<double>::infinity();
 
   double score = 0;
   switch(measure) {
@@ -286,17 +286,17 @@ double compute_score(const Seeding::Contrast &contrast, const count_vector_t &co
       score = compute_bonferroni_corrected_logp_gtest(occurrence_table, options.pseudo_count, true, length, degeneracy, not options.fixed_motif_space_mode);
       break;
     case Measures::Discrete::Measure::MatthewsCorrelationCoefficient:
-      return(compute_mcc(signal_freq, signal_size - signal_freq, control_freq, control_size - control_freq));
+      return compute_mcc(signal_freq, signal_size - signal_freq, control_freq, control_size - control_freq);
     case Measures::Discrete::Measure::DeltaFrequency:
-      return(signal_rel_freq - control_rel_freq);
+      return signal_rel_freq - control_rel_freq;
     case Measures::Discrete::Measure::SignalFrequency:
-      return(signal_rel_freq);
+      return signal_rel_freq;
     case Measures::Discrete::Measure::ControlFrequency:
-      return(control_rel_freq);
+      return control_rel_freq;
     default:
       assert(false);
   }
 
-  return(score);
+  return score;
 }
 

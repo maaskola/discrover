@@ -39,7 +39,7 @@ double information_content(const string &motif) {
       default:
         break;
     }
-  return (ic);
+  return ic;
 }
 size_t motif_degeneracy(const string &motif) {
   size_t s = 0;
@@ -60,7 +60,7 @@ size_t motif_degeneracy(const string &motif) {
       default:
         break;
     }
-  return (s);
+  return s;
 }
 
 vector<vector<seq_type::value_type>> build_generalization_table() {
@@ -106,6 +106,6 @@ vector<seq_type> all_generalizations(const seq_type &motif) {
     }
     generalization[i] = current;
   }
-  return (generalizations);
+  return generalizations;
 }
 }
