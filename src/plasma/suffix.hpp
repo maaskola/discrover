@@ -63,7 +63,7 @@ X plusOne(X i) {
 }
 
 /** A faster (linear-time) algorithm to construct the suffix array */
-template <class idx_t, class Iter, bool shift>
+template <bool shift, class idx_t, class Iter>
 std::vector<idx_t> gen_suffix_array(Iter begin, const Iter end, Verbosity verbosity) {
   idx_t K = 0;
   if(begin != end)

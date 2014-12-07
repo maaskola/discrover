@@ -48,7 +48,7 @@ class Index {
     Index(const data_t &x, Verbosity verbosity) :
       data(x),
       // generate suffix array, LCP, and JMP tables
-      sa(gen_suffix_array<idx_t, typename data_t::const_iterator, shift>(begin(data), end(data), verbosity)),
+      sa(gen_suffix_array<shift, idx_t>(begin(data), end(data), verbosity)),
       lcp(gen_lcp<lcp_t>(begin(data), end(data), sa, verbosity)),
       jmp(gen_jmp<idx_t>(lcp, verbosity)) { };
 
