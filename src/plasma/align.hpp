@@ -42,10 +42,7 @@ template <typename T> bool binary_and_not_null(T a, T b) {
   return (a & b) != 0;
 }
 
-std::string iupac_reverse_complement_string(const std::string &s);
 seq_type iupac_reverse_complement(const seq_type &s);
-
-std::string read_fasta_with_boundaries(const std::vector<std::string> &paths, std::vector<size_t> &pos2seq, std::vector<size_t> &seq2set, size_t n_seq=0);
 
 template <class data_t, class idx_t=size_t, class lcp_t=size_t, bool shift=false>
 class Index {
