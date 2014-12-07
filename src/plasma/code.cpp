@@ -145,7 +145,7 @@ namespace Seeding {
 }
 
 seq_type encode(const string &s) {
-  size_t n = s.size();
+  const size_t n = s.size();
   seq_type vec(n);
   auto iter = begin(s);
   for(auto &v: vec)
@@ -154,7 +154,7 @@ seq_type encode(const string &s) {
 }
 
 std::string decode(const seq_type &seq) {
-  size_t n = seq.size();
+  const size_t n = seq.size();
   string s(n, ' ');
   auto iter = begin(seq);
   for(auto &c: s)
