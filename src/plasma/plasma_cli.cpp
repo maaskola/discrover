@@ -20,14 +20,15 @@
 
 using namespace std;
 
-string form_switch(const string &prefix, const string& s, bool add_short=true) {
-  if(prefix == "") {
-    if(add_short)
-      return(s + "," + s[0]);
+string form_switch(const string &prefix, const string &s,
+                   bool add_short = true) {
+  if (prefix == "") {
+    if (add_short)
+      return s + "," + s[0];
     else
-      return(s);
+      return s;
   } else
-    return(prefix + s);
+    return prefix + s;
 }
 
 boost::program_options::options_description gen_iupac_options_description(Seeding::Options &options,
@@ -117,6 +118,5 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
   }
 
 
-  return(desc);
+  return desc;
 }
-

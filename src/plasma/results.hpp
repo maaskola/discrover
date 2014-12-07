@@ -35,15 +35,14 @@
 #include "options.hpp"
 
 namespace Seeding {
-  struct Result : public Objective {
-    std::string motif;
-    double score;
-    double log_p;
-    count_vector_t counts;
-    Result(const Objective &objective);
-  };
-  using Results = std::vector<Result>;
+struct Result : public Objective {
+  std::string motif;
+  double score;
+  double log_p;
+  count_vector_t counts;
+  Result(const Objective &objective);
+};
+using Results = std::vector<Result>;
 }
 
-#endif   /* ----- #ifndef RESULTS_HPP  ----- */
-
+#endif /* ----- #ifndef RESULTS_HPP  ----- */

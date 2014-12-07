@@ -27,8 +27,8 @@
  * =====================================================================================
  */
 
-#ifndef  PLASMA_STATS_HPP
-#define  PLASMA_STATS_HPP
+#ifndef PLASMA_STATS_HPP
+#define PLASMA_STATS_HPP
 
 #include <unordered_map>
 #include <map>
@@ -54,20 +54,20 @@ struct hash<seq_type> {
     //   h = h ^ x;
     // return h;
 
-    // faster, likely the same as above, if the implementation uses identity hashes for integral types
+    // faster, likely the same as above, if the implementation uses identity
+    // hashes for integral types
     // size_t h = 0;
     // for(auto &x: v)
     //   h = h ^ hash<seq_type::value_type>()(x);
     // return h;
-
   }
 };
 }
 
 namespace Seeding {
-  using hash_map_t = std::unordered_map<seq_type, count_vector_t>;
-  using score_map_t = std::unordered_map<seq_type, double>;
-  using rev_map_t = std::multimap<double, seq_type, std::greater<double>>;
+using hash_map_t = std::unordered_map<seq_type, count_vector_t>;
+using score_map_t = std::unordered_map<seq_type, double>;
+using rev_map_t = std::multimap<double, seq_type, std::greater<double>>;
 }
 
-#endif   /* ----- #ifndef PLASMA_STATS_HPP ----- */
+#endif /* ----- #ifndef PLASMA_STATS_HPP ----- */

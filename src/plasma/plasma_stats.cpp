@@ -1,7 +1,4 @@
 
 #include "plasma_stats.hpp"
 
-namespace Seeding {
-
-}
-
+namespace Seeding {}

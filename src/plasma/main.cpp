@@ -11,7 +11,7 @@
  * =====================================================================================
  */
 
-#include <sys/resource.h> // for getrusage
+#include <sys/resource.h>  // for getrusage
 #include <iostream>
 #include <fstream>
 #include <omp.h>
@@ -33,8 +33,7 @@ const std::string header = "# How to interpret this file:\n"
 
 const std::string program_name = "plasma";
 
-std::string gen_usage_string()
-{
+std::string gen_usage_string() {
   const std::string usage = "This program executes a progressive algorithm, which in each iteration\n"
     "determines the IUPAC word with the highest residual score that is enriched,\n"
     "in signal.fa, accepts it, and masks all occurrences or removes all data samples\n"
@@ -54,7 +53,7 @@ std::string gen_usage_string()
 
 using namespace std;
 
-int main(int argc, const char** argv) {
+int main(int argc, const char **argv) {
   Timer timer;
 
   Seeding::Options options;
@@ -67,183 +66,210 @@ int main(int argc, const char** argv) {
     ("help,h", "produce help message")
     ("version", "Print out the version. Also show git SHA1 with -v.")
     ("verbose,v", "Be verbose about the progress")
-    ("noisy,V", "Be very verbose about the progress")
-    ;
+    ("noisy,V", "Be very verbose about the progress");
   po::options_description ext_options = gen_iupac_options_description(options);
 
   desc.add(ext_options);
 
   po::positional_options_description pos;
-  pos.add("fasta",-1);
+  pos.add("fasta", -1);
 
   po::variables_map vm;
 
   try {
-    po::store(po::command_line_parser(argc, argv).options(desc).positional(pos).run(), vm);
-  } catch(po::unknown_option &e) {
+    po::store(
+        po::command_line_parser(argc, argv).options(desc).positional(pos).run(),
+        vm);
+  } catch (po::unknown_option &e) {
+    cout << "Error while parsing command line options:" << endl << "Option "
+         << e.get_option_name() << " not known." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (po::ambiguous_option &e) {
+    cout << "Error while parsing command line options:" << endl << "Option "
+         << e.get_option_name() << " is ambiguous." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (po::multiple_values &e) {
+    cout << "Error while parsing command line options:" << endl << "Option "
+         << e.get_option_name() << " was specified multiple times." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (po::multiple_occurrences &e) {
+    cout << "Error while parsing command line options:" << endl << "Option --"
+         << e.get_option_name() << " was specified multiple times." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (po::invalid_option_value &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Option " << e.get_option_name() << " not known." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::ambiguous_option &e) {
+         << "The value specified for option " << e.get_option_name()
+         << " has an invalid format." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (po::too_many_positional_options_error &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Option " << e.get_option_name() << " is ambiguous." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::multiple_values &e) {
+         << "Too many positional options were specified." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (po::invalid_command_line_syntax &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Option " << e.get_option_name() << " was specified multiple times." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::multiple_occurrences &e) {
+         << "Invalid command line syntax." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (po::invalid_command_line_style &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Option --" << e.get_option_name() << " was specified multiple times." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::invalid_option_value &e) {
+         << "There is a programming error related to command line style."
+         << endl << "Please inspect the command line help with -h or --help."
+         << endl;
+    return EXIT_FAILURE;
+  } catch (po::reading_file &e) {
     cout << "Error while parsing command line options:" << endl
-      << "The value specified for option " << e.get_option_name() << " has an invalid format." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::too_many_positional_options_error &e) {
+         << "The configuration file can not be read." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (po::validation_error &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Too many positional options were specified." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::invalid_command_line_syntax &e) {
+         << "Validation of option " << e.get_option_name() << " failed." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (po::error &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Invalid command line syntax." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::invalid_command_line_style &e) {
-    cout << "Error while parsing command line options:" << endl
-      << "There is a programming error related to command line style." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::reading_file &e) {
-    cout << "Error while parsing command line options:" << endl
-      << "The configuration file can not be read." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::validation_error &e) {
-    cout << "Error while parsing command line options:" << endl
-      << "Validation of option " << e.get_option_name() << " failed." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::error &e) {
-    cout << "Error while parsing command line options:" << endl
-      << "No further information as to the nature of this error is available, please check your command line arguments." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
+         << "No further information as to the nature of this error is "
+            "available, please check your command line arguments." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
   }
 
-
-  if(vm.count("verbose"))
+  if (vm.count("verbose"))
     options.verbosity = Verbosity::verbose;
-  if(vm.count("noisy"))
+  if (vm.count("noisy"))
     options.verbosity = Verbosity::debug;
 
-  if(vm.count("version") and not vm.count("help"))
-  {
-    cout << program_name << " " << GIT_DESCRIPTION << " [" << GIT_BRANCH << " branch]" << endl;
-    if(options.verbosity >= Verbosity::verbose)
+  if (vm.count("version") and not vm.count("help")) {
+    cout << program_name << " " << GIT_DESCRIPTION << " [" << GIT_BRANCH
+         << " branch]" << endl;
+    if (options.verbosity >= Verbosity::verbose)
       cout << GIT_SHA1 << endl;
-    return(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
   }
 
   if (vm.count("help")) {
-    cout << program_name << " " << GIT_DESCRIPTION << endl << "Copyright (C) 2011 Jonas Maaskola\n"
-      "Provided under GNU General Public License Version 3 or later.\n"
-      "See the file COPYING provided with this software for details of the license.\n" << endl;
+    cout << program_name << " " << GIT_DESCRIPTION << endl
+         << "Copyright (C) 2011 Jonas Maaskola\n"
+            "Provided under GNU General Public License Version 3 or later.\n"
+            "See the file COPYING provided with this software for details of "
+            "the license.\n" << endl;
     cout << gen_usage_string() << endl;
     cout << desc << "\n";
     return EXIT_SUCCESS;
   }
 
-
-
   try {
     po::notify(vm);
-  } catch(po::multiple_values &e) {
+  } catch (po::multiple_values &e) {
+    cout << "Error while parsing command line options:" << endl << "Option "
+         << e.get_option_name() << " was specified multiple times." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (po::invalid_option_value &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Option " << e.get_option_name() << " was specified multiple times." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::invalid_option_value &e) {
+         << "The value specified for option " << e.get_option_name()
+         << " has an invalid format." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (po::too_many_positional_options_error &e) {
     cout << "Error while parsing command line options:" << endl
-      << "The value specified for option " << e.get_option_name() << " has an invalid format." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::too_many_positional_options_error &e) {
+         << "Too many positional options were specified." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (po::invalid_command_line_syntax &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Too many positional options were specified." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::invalid_command_line_syntax &e) {
+         << "Invalid command line syntax." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (po::invalid_command_line_style &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Invalid command line syntax." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::invalid_command_line_style &e) {
+         << "There is a programming error related to command line style."
+         << endl << "Please inspect the command line help with -h or --help."
+         << endl;
+    return EXIT_FAILURE;
+  } catch (po::reading_file &e) {
     cout << "Error while parsing command line options:" << endl
-      << "There is a programming error related to command line style." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::reading_file &e) {
+         << "The configuration file can not be read." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (po::required_option &e) {
     cout << "Error while parsing command line options:" << endl
-      << "The configuration file can not be read." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::required_option &e) {
+         << "The required option " << e.get_option_name()
+         << " was not specified." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (po::validation_error &e) {
     cout << "Error while parsing command line options:" << endl
-      << "The required option " << e.get_option_name() << " was not specified." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::validation_error &e) {
+         << "Validation of option " << e.get_option_name() << " failed." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (po::error &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Validation of option " << e.get_option_name() << " failed." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
-  } catch(po::error &e) {
-    cout << "Error while parsing command line options:" << endl
-      << "No further information as to the nature of this error is available, please check your command line arguments." << endl
-      << "Please inspect the command line help with -h or --help." << endl;
-    return(-1);
+         << "No further information as to the nature of this error is "
+            "available, please check your command line arguments." << endl
+         << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
   }
 
-
-  if(options.motif_specifications.size() == 0) {
-    cout << "Error: you must specify motif lengths of interest with the -m switch." << endl;
+  if (options.motif_specifications.size() == 0) {
+    cout << "Error: you must specify motif lengths of interest with the -m "
+            "switch." << endl;
     exit(-1);
   }
 
-  if(vm.count("threads"))
+  if (vm.count("threads"))
     omp_set_num_threads(options.n_threads);
 
-  if(not vm.count("output")) {
+  if (not vm.count("output")) {
     options.label = generate_random_label(program_name, 0, options.verbosity);
-    if(options.verbosity >= Verbosity::info)
-      cout << "Using \"" << options.label << "\" as label to generate output file names." << endl;
+    if (options.verbosity >= Verbosity::info)
+      cout << "Using \"" << options.label
+           << "\" as label to generate output file names." << endl;
   }
 
-
-  if(options.verbosity >= Verbosity::verbose) {
-    cout << "motif_specifications:"; for(auto &x: options.motif_specifications) cout << " " << x; cout << endl;
-    cout << "paths:"; for(auto &x: options.paths) cout << " " << x; cout << endl;
-    cout << "objectives:"; for(auto &x: options.objectives) cout << " " << x; cout << endl;
+  if (options.verbosity >= Verbosity::verbose) {
+    cout << "motif_specifications:";
+    for (auto &x : options.motif_specifications)
+      cout << " " << x;
+    cout << endl;
+    cout << "paths:";
+    for (auto &x : options.paths)
+      cout << " " << x;
+    cout << endl;
+    cout << "objectives:";
+    for (auto &x : options.objectives)
+      cout << " " << x;
+    cout << endl;
   }
 
-  Specification::harmonize(options.motif_specifications, options.paths, options.objectives, false);
+  Specification::harmonize(options.motif_specifications, options.paths,
+                           options.objectives, false);
 
-  if(options.verbosity >= Verbosity::verbose) {
-    cout << "motif_specifications:"; for(auto &x: options.motif_specifications) cout << " " << x; cout << endl;
-    cout << "paths:"; for(auto &x: options.paths) cout << " " << x; cout << endl;
-    cout << "objectives:"; for(auto &x: options.objectives) cout << " " << x; cout << endl;
+  if (options.verbosity >= Verbosity::verbose) {
+    cout << "motif_specifications:";
+    for (auto &x : options.motif_specifications)
+      cout << " " << x;
+    cout << endl;
+    cout << "paths:";
+    for (auto &x : options.paths)
+      cout << " " << x;
+    cout << endl;
+    cout << "objectives:";
+    for (auto &x : options.objectives)
+      cout << " " << x;
+    cout << endl;
   }
 
   // initialize RNG
-  if(options.verbosity >= Verbosity::verbose)
-    cout << "Initializing random number generator with salt " << options.mcmc.random_salt << "." << endl;
+  if (options.verbosity >= Verbosity::verbose)
+    cout << "Initializing random number generator with salt "
+         << options.mcmc.random_salt << "." << endl;
   mt19937 rng;
   rng.seed(options.mcmc.random_salt);
 
@@ -258,21 +284,24 @@ int main(int argc, const char** argv) {
   vector<res_t> results;
 
   size_t n = options.motif_specifications.size();
-  for(auto &motif: options.motif_specifications) {
-    for(auto &r: plasma.find_motifs(motif, Seeding::objective_for_motif(options.objectives, motif), false))
+  for (auto &motif : options.motif_specifications) {
+    for (auto &r : plasma.find_motifs(
+             motif, Seeding::objective_for_motif(options.objectives, motif),
+             false))
       results.push_back(r);
-    if(--n > 0)
+    if (--n > 0)
       plasma.apply_mask(results);
   }
 
-  if(results.size() == 1)
+  if (results.size() == 1)
     report(cout, results[0], ds, options);
   else {
-    sort(begin(results), end(results), [](const res_t &a, const res_t &b) { return(a.log_p <= b.log_p); });
+    sort(begin(results), end(results),
+         [](const res_t &a, const res_t &b) { return a.log_p <= b.log_p; });
     Seeding::Collection original_ds = ds;
     Seeding::Options opts = options;
     opts.occurrence_filter = Seeding::OccurrenceFilter::RemoveSequences;
-    for(auto &r: results) {
+    for (auto &r : results) {
       report(cout, r, original_ds, options);
       res_t r2 = r;
       r2.counts = count_motif(ds, r.motif, options);
@@ -282,10 +311,10 @@ int main(int argc, const char** argv) {
     }
   }
 
-  if(options.verbosity >= Verbosity::info) {
+  if (options.verbosity >= Verbosity::info) {
     struct rusage usage;
-    if(getrusage(RUSAGE_SELF, &usage) != 0) {
-      cout << "getrusage failed" << endl ;
+    if (getrusage(RUSAGE_SELF, &usage) != 0) {
+      cout << "getrusage failed" << endl;
       exit(0);
     }
 
@@ -294,13 +323,11 @@ int main(int argc, const char** argv) {
     double total_time = utime + stime;
     double elapsed_time = timer.tock() * 1e-6;
 
-    cerr
-      << "User time = " << utime << " sec" << endl
-      << "System time = " << stime << " sec" << endl
-      << "CPU time = " << total_time << " sec" << endl
-      << "Elapsed time = " << elapsed_time << " sec" << endl
-      << 100 * total_time / elapsed_time <<"\% CPU" << endl;
+    cerr << "User time = " << utime << " sec" << endl
+         << "System time = " << stime << " sec" << endl
+         << "CPU time = " << total_time << " sec" << endl
+         << "Elapsed time = " << elapsed_time << " sec" << endl
+         << 100 * total_time / elapsed_time << "\% CPU" << endl;
   }
-  return(EXIT_SUCCESS);
+  return EXIT_SUCCESS;
 }
-
