@@ -36,36 +36,55 @@
 #include "align.hpp"
 
 namespace Seeding {
-  struct Plasma {
-    public:
-      Options options;
-      Collection collection;
-    private:
-      bool index_ready;
-      bool needs_rebuilding;
-      NucleotideIndex<size_t,size_t> index;
-    public:
-      Plasma(const Options &options);
-      Plasma(const Collection &collection_, const Options &opt);
-      Results find_motifs(const Specification::Motif &motif, const Objective &objective, bool doreport=true) const;
-      void apply_mask(const Results &results);
-    private:
-      Results find_seeds(size_t length, const Objective &objective, Algorithm algorithm);
-      Results find_plasma(size_t length, const Objective &objective, size_t max_degeneracy, const std::set<size_t> &degeneracies) const;
-      Results find_external_dreme(size_t length, const Objective &objective, size_t max_degeneracy, const std::set<size_t> &degeneracies) const;
-      Results find_mcmc(size_t length, const Objective &objective, size_t max_degeneracy) const;
-      rev_map_t determine_initial_candidates(size_t length, const Objective &objective, seq_type &best_motif, size_t &n_candidates, double &max_score, Results &results, const std::set<size_t> &degeneracies) const;
-      Results find_all(const Specification::Motif &motif, const Objective &objective) const;
-      Results find_multiple(const Specification::Motif &motif, const Objective &objective) const;
-      void apply_mask(const std::string &motif);
-      void apply_mask(const Result &result);
-      void rebuild_index();
-  };
 
-  void report(std::ostream &os, const Objective &objective, const std::string &motif, const Collection &collection, const Options &options);
-  void report(std::ostream &os, const Result &result, const Collection &collection, const Options &options);
-  void viterbi_dump(const std::string &motif, const Collection &collection, std::ostream &out, const Options &options);
+struct Plasma {
+public:
+  Options options;
+  Collection collection;
+
+private:
+  bool index_ready;
+  bool needs_rebuilding;
+  NucleotideIndex<size_t, size_t> index;
+
+public:
+  Plasma(const Options &options);
+  Plasma(const Collection &collection_, const Options &opt);
+  Results find_motifs(const Specification::Motif &motif,
+                      const Objective &objective, bool doreport = true) const;
+  void apply_mask(const Results &results);
+
+private:
+  Results find_seeds(size_t length, const Objective &objective,
+                     Algorithm algorithm);
+  Results find_plasma(size_t length, const Objective &objective,
+                      size_t max_degeneracy,
+                      const std::set<size_t> &degeneracies) const;
+  Results find_external_dreme(size_t length, const Objective &objective,
+                              size_t max_degeneracy,
+                              const std::set<size_t> &degeneracies) const;
+  Results find_mcmc(size_t length, const Objective &objective,
+                    size_t max_degeneracy) const;
+  rev_map_t determine_initial_candidates(
+      size_t length, const Objective &objective, seq_type &best_motif,
+      size_t &n_candidates, double &max_score, Results &results,
+      const std::set<size_t> &degeneracies) const;
+  Results find_all(const Specification::Motif &motif,
+                   const Objective &objective) const;
+  Results find_multiple(const Specification::Motif &motif,
+                        const Objective &objective) const;
+  void apply_mask(const std::string &motif);
+  void apply_mask(const Result &result);
+  void rebuild_index();
+};
+
+void report(std::ostream &os, const Objective &objective,
+            const std::string &motif, const Collection &collection,
+            const Options &options);
+void report(std::ostream &os, const Result &result,
+            const Collection &collection, const Options &options);
+void viterbi_dump(const std::string &motif, const Collection &collection,
+                  std::ostream &out, const Options &options);
 }
 
-#endif   /* ----- #ifndef FIND_HPP  ----- */
-
+#endif /* ----- #ifndef FIND_HPP  ----- */
