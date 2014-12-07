@@ -42,8 +42,6 @@ template <typename T> bool binary_and_not_null(T a, T b) {
   return (a & b) != 0;
 }
 
-seq_type iupac_reverse_complement(const seq_type &s);
-
 template <class data_t, class idx_t=size_t, class lcp_t=size_t, bool shift=false>
 class Index {
   public:

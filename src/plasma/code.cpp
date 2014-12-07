@@ -3,7 +3,7 @@
  *
  *       Filename:  code.cpp
  *
- *    Description:  
+ *    Description:
  *
  *        Created:  31.05.2012 06:47:48
  *         Author:  Jonas Maaskola <jonas@maaskola.de>
@@ -12,6 +12,8 @@
  */
 
 #include <limits>
+#include <algorithm>
+#include <iostream>
 #include "code.hpp"
 
 using namespace std;
@@ -181,10 +183,35 @@ nucl_vector_type build_pure_nucl_vector() {
 
 const static nucl_vector_type pure_nucl_vector = build_pure_nucl_vector();
 
-bool pure_nucleotide(symbol_t s) {
-  return pure_nucl_vector[s];
+bool pure_nucleotide(symbol_t s) { return pure_nucl_vector[s]; }
+
+bool degenerate_nucleotide(symbol_t s) { return not pure_nucl_vector[s]; }
+
+vector<seq_type::value_type> build_complement_table() {
+  using val_t = seq_type::value_type;
+  vector<val_t> t;
+  for (size_t i = 0; i < 16; ++i) {
+    val_t x = 0;
+    for (size_t j = 0; j < 4; ++j)
+      if ((i & (1 << j)) != 0)
+        x = x | (1 << (3 - j));
+    t.push_back(x);
+  }
+  if (false) {
+    for (val_t i = 0; i < t.size(); ++i)
+      cout << int(i) << ":" << Seeding::Symbol[i] << " " << int(t[i]) << ":"
+           << Seeding::Symbol[t[i]] << endl;
+  }
+  return t;
 }
 
-bool degenerate_nucleotide(symbol_t s) {
-  return not pure_nucl_vector[s];
+const static vector<seq_type::value_type> complement_table
+    = build_complement_table();
+
+seq_type iupac_reverse_complement(const seq_type &s) {
+  seq_type t = s;
+  reverse(begin(t), end(t));
+  for (auto &x : t)
+    x = complement_table[x];
+  return t;
 }

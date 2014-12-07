@@ -60,5 +60,6 @@ void add_sequence(seq_type &s, const std::string &seq, bool allow_iupac_wildcard
 bool pure_nucleotide(symbol_t s);
 bool degenerate_nucleotide(symbol_t s);
 
-#endif   /* ----- #ifndef CODE_HPP ----- */
+seq_type iupac_reverse_complement(const seq_type &s);
 
+#endif /* ----- #ifndef CODE_HPP ----- */
