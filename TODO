@@ -36,3 +36,6 @@ CMake Warning (dev) at doc/CMakeLists.txt:19 (GET_PROPERTY):
   The LOCATION property should not be read from target "plasma-bin".  Use the
   target name directly with add_custom_command, or use the generator
   expression $<TARGET_FILE>, as appropriate.
+
+Either install hmm.rb into a proper location or merge into tikzlogo / hmm2meme
+Automatically run tikzlogo in discrover
