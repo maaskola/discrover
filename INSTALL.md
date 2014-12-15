@@ -80,5 +80,5 @@ emerge -av discrover
 ## Arch Linux
 
 We have written a PKGBUILD file for Arch Linux that specifies dependencies and how to build Discrover.
-You can currently get it [here](https://github.com/maaskola/discrover-packages/blob/master/arch/PKGBUILD).
-We intend to shortly distribute it via [AUR](https://aur.archlinux.org/).
+You can [get it](https://aur.archlinux.org/packages/discrover/) via the [Arch User Repository (AUR)](https://aur.archlinux.org/).
+The most current version is typically available [here](https://github.com/maaskola/discrover-packages/blob/master/arch/PKGBUILD).
