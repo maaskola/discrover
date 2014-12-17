@@ -2,6 +2,6 @@ language: cpp
 compiler:
   - gcc
 before_install: sudo apt-get update -qq
-install: sudo apt-get install -qq libboost-all-dev
+install: sudo apt-get install -qq libboost-all-dev texlive texlive-latex-base latex-xcolor texlive-latex-extra
 before_script: mkdir build && cd build && cmake ../
 script: cd build && make
