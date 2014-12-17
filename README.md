@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/maaskola/discrover.svg?branch=master)](https://travis-ci.org/maaskola/discrover)
+
 # Discrover
 ### Discriminative discovery of sequence motifs with hidden Markov models
 
