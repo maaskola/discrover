@@ -1,7 +1,12 @@
 language: cpp
 compiler:
   - gcc
-before_install: sudo apt-get update -qq
-install: sudo apt-get install -qq libboost-all-dev texlive texlive-latex-base latex-xcolor texlive-latex-extra
+before_install:
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo apt-get update -qq
+install:
+  - sudo apt-get install -qq libboost-all-dev texlive texlive-latex-base latex-xcolor texlive-latex-extra g++-4.8
+  - export CXX="g++-4.8" CC="gcc-4.8"
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
 before_script: mkdir build && cd build && cmake ../
 script: cd build && make
