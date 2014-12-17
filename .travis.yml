@@ -1,7 +1,7 @@
 language: cpp
 compiler:
   - gcc
-before-install: sudo apt-get update -qq
+before_install: sudo apt-get update -qq
 install: sudo apt-get install -qq libboost-all-dev
-before-script: mkdir build && cd build && cmake ../
+before_script: mkdir build && cd build && cmake ../
 script: cd build && make
