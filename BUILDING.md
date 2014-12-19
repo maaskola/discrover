@@ -92,7 +92,26 @@ On Fedora 20 the following command will install all dependencies required for bu
 yum install gcc-c++ cmake git ImageMagick boost boost-devel texlive-latex-bin texlive-pgf texlive-xcolor texlive-collection-latexextra ruby ruby-devel
 ```
 
+### Mac OS X
+On Mac OS X, git is provided with XCode.
+Using (brew)[http://brew.sh], you can install CMake and ImageMagick like this:
 
+```sh
+brew install cmake imagemagick
+```
+
+While brew also provides a binary package for GCC, we cannot use it, as it does not support OpenMP.
+For this reason you need to rebuild GCC on your system:
+
+```sh
+brew install gcc --without-multilib
+```
+
+The boost brew package can also not be used because it relies on the GCC brew package and does not work with the manualy built GCC.
+Therefore, please build boost according to [these instructions](http://qiita.com/misho/items/0c0b3ca25bb8f62aa681).
+Finally, adapt the ``SET(BOOST_ROOT "...")`` statement in ``CMakeLists.txt`` to point to the place where you installed boost.
+
+For TeX, please install [MacTex](https://tug.org/mactex/).
 
 ## Building
 
