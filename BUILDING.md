@@ -94,7 +94,7 @@ yum install gcc-c++ cmake git ImageMagick boost boost-devel texlive-latex-bin te
 
 ### Mac OS X
 On Mac OS X, git is provided with XCode.
-Using (brew)[http://brew.sh], you can install CMake and ImageMagick like this:
+Using [brew](http://brew.sh), you can install CMake and ImageMagick like this:
 
 ```sh
 brew install cmake imagemagick
