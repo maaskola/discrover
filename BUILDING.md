@@ -63,24 +63,29 @@ Similarly, on Gentoo, they are part of the ```dev-texlive/texlive-latexextra``` 
 
 ## Installing build-time dependencies
 Note that the above-given list of dependencies is required only for BUILDING, not for running.
+
+### Debian and Ubuntu
 On Debian and Ubuntu, you can install all necessary and optional software to build Discrover with the following command:
 
 ```sh
 apt-get install git cmake g++ imagemagick libboost-all-dev texlive texlive-latex-base latex-xcolor texlive-latex-extra pgf ruby ruby-dev
 ```
 
+### Gentoo
 Similarly, on Gentoo you can use:
 
 ```sh
 emerge -av dev-vcs/git dev-util/cmake sys-devel/gcc media-gfx/imagemagick dev-libs/boost dev-texlive/texlive-latexextra dev-lang/ruby
 ```
 
+### Arch
 The corresponding command for Arch linux:
 
 ```sh
 pacman -S git cmake make gcc boost texlive-core texlive-latexextra imagemagick ruby
 ```
 
+### Fedora
 On Fedora 20 the following command will install all dependencies required for building:
 
 ```sh
@@ -89,6 +94,7 @@ yum install gcc-c++ cmake git ImageMagick boost boost-devel texlive-latex-bin te
 
 
 
+## Building
 
 The code contained in this package is built in four steps.
 
