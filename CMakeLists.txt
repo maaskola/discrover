@@ -198,7 +198,7 @@ ELSE()
   git_branch(GIT_BRANCH)
 ENDIF()
 
-IF(CTAGS_FOUND)
+IF(CTAGS_FOUND AND NOT(APPLE))
   ADD_CUSTOM_TARGET(ctags ALL
     COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q src/
     COMMENT "Creating Ctags."
