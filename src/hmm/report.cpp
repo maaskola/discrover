@@ -114,7 +114,7 @@ void Evaluator::eval_contrast(ostream &ofs, const Data::Contrast &contrast,
       string consensus = hmm.get_group_consensus(group_idx);
 
       ofs << endl;
-      print(ofs, tag, "Expected occurrence statistics for motif " + name + ":", consensus);
+      print(ofs, tag, "Expected occurrence statistics for motif \"" + name + "\"", consensus);
       count_report(ofs, counts, motif_len, contrast, hmm.get_pseudo_count(),
                    limit_logp, name, tag);
       print(ofs, tag, "Matthews correlation coefficient", mcc);
