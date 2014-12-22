@@ -205,15 +205,15 @@ IF(CTAGS_FOUND AND NOT(APPLE))
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} )
 ENDIF()
 
-# Set WITH_LIBDIR if you want to install libraries into a specific directory.
+# Set LIB_INSTALL_DIR if you want to install libraries into a specific directory.
 # By default, lib is used.
 # This is useful if your distribution prefers 64bit to go into lib64.
 # On Debian and Ubuntu there is only /usr/lib.
 # On Gentoo /usr/lib is a symlink to /usr/lib64.
 # On Fedora, architecture-independent libraries go into /usr/lib, while 64-bit
 # libraries are supposed to go into /usrlib64.
-IF(DEFINED WITH_LIBDIR)
-  SET(LIBDIR ${WITH_LIBDIR})
+IF(DEFINED LIB_INSTALL_DIR)
+  SET(LIBDIR ${LIB_INSTALL_DIR})
 ELSE()
   SET(LIBDIR "lib")
 ENDIF()
