@@ -212,6 +212,7 @@ ENDIF()
 # On Gentoo /usr/lib is a symlink to /usr/lib64.
 # On Fedora, architecture-independent libraries go into /usr/lib, while 64-bit
 # libraries are supposed to go into /usrlib64.
+# See http://www.pathname.com/fhs/ for more information.
 IF(DEFINED WITH_LIBDIR)
   SET(LIBDIR ${WITH_LIBDIR})
 ELSE()
