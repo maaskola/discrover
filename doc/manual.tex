@@ -158,6 +158,35 @@ discrover signal.fa control.fa -m tgtanatw
 \fbox{\theverbbox[t]}
 
 
+\subsection{Finding multiple motifs}
+For some applications it is interesting to discover multiple motifs in a datasets.
+This allows to reveal motifs of co-factors of the assayed factor.
+This is for example of relevance in analyzing ChIP-Seq data, where a given IP'ed transcription factor often acts in conjunction with other factors, whose binding sites are often found nearby, and thus are also frequently enriched in ChIP-Seq sequences.
+
+Discrover has two ways of dealing with multiple motifs, depending on whether or not the switch \verb|--multiple| is used, as described next.
+In both modes, multiple seeds are first determined by giving a length range of interest as well as by looking for possibly multiple seeds of each length.
+The general syntax for such a motif specification is:\\
+\begin{verbbox}
+-m 5-16x3
+\end{verbbox}
+\fbox{\theverbbox[t]}\\
+Here, we use the three best seeds for each length of 5--16~nt.
+
+\subsubsection{Multiple, independent seeds}
+When the switch \verb|--multiple| is not used, as in the next example, multiple seeds are independently sought, an HMM is initialized and independently optimized for each, and subsequently the single best HMM is reported.\\
+\begin{verbbox}
+discrover signal.fa control.fa -m 5-16x3 -r
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+\subsubsection{HMM of multiple motifs}
+However when the switch \verb|--multiple| is used, as in the next example, a more refined procedure is used.\\
+\begin{verbbox}
+discrover signal.fa control.fa -m 5-16x3 -r --multiple
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+
 \subsection{Generating sequence logos for motifs}
 You can generate sequence logos of discovered motifs by using the script \verb|tikzlogo|:\\
 \begin{verbbox}
