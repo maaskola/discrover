@@ -180,6 +180,8 @@ bool draw_logo(const matrix_t &matrix, const string &path, output_t kind) {
     case output_t::PNG:
       surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width, height);
       break;
+    default:
+      return EXIT_FAILURE;
   }
 
   draw_logo_to_surface(surface, matrix);
