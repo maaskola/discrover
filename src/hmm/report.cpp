@@ -19,12 +19,12 @@
 using namespace std;
 
 #if CAIRO_FOUND
-void make_logos(const logo::matrix_t &matrix, const string &path_stem,
+void make_logos(const Logo::matrix_t &matrix, const string &path_stem,
                const Options::HMM &options) {
   if (options.pdf_logo)
-    logo::draw_logo(matrix, path_stem, logo::output_t::PDF);
+    Logo::draw_logo(matrix, path_stem, Logo::output_t::PDF);
   if (options.png_logo)
-    logo::draw_logo(matrix, path_stem, logo::output_t::PNG);
+    Logo::draw_logo(matrix, path_stem, Logo::output_t::PNG);
 }
 
 void Evaluator::generate_logos(const string &path_stem,
@@ -33,9 +33,9 @@ void Evaluator::generate_logos(const string &path_stem,
   for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
     if (hmm.is_motif_group(group_idx)) {
       const string nucls = "acgt";
-      logo::matrix_t matrix;
+      Logo::matrix_t matrix;
       for (auto state : hmm.groups[group_idx].states) {
-        logo::column_t col(4, 0);
+        Logo::column_t col(4, 0);
         for (size_t i = 0; i < nucls.size(); i++)
           col[i] = hmm.emission(state, i);
         matrix.push_back(col);

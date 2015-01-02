@@ -5,7 +5,7 @@
 #include <cairo-pdf.h>
 #include "logo.hpp"
 
-namespace logo {
+namespace Logo {
 using namespace std;
 
 const double factor = 100.0;

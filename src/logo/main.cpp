@@ -10,7 +10,7 @@ int main(int argc, char**argv) {
     return -1;
   }
 
-  logo::matrix_t matrix = {
+  Logo::matrix_t matrix = {
     {1, 0, 0, 0},
     {0, 1, 0, 0},
     {0, 0, 1, 0},

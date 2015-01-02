@@ -1,7 +1,7 @@
 #include <string>
 #include <vector>
 
-namespace logo {
+namespace Logo {
 using column_t = std::vector<double>;
 using matrix_t = std::vector<column_t>;
 
