@@ -25,7 +25,6 @@
 #include "../timer.hpp"
 #include "plasma_cli.hpp"
 #include "../executioninformation.hpp"
-#include "../logo_config.hpp"
 #include "../GitSHA1.hpp"
 #include "../mcmc/montecarlo.hpp"
 

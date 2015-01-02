@@ -35,6 +35,7 @@
 #include "measure.hpp"
 #include "specification.hpp"
 #include "../verbosity.hpp"
+#include "../logo_config.hpp"
 
 namespace Seeding {
   enum class OccurrenceFilter {
@@ -111,8 +112,10 @@ namespace Seeding {
     bool allow_iupac_wildcards;
 
     std::string label;
+#if CAIRO_FOUND
     bool pdf_logo;
     bool png_logo;
+#endif
   };
 }
 
