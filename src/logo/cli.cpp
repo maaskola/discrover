@@ -81,8 +81,8 @@ boost::program_options::options_description gen_logo_options_description(
       ;
   else
     desc.add_options()
-      ("nopdf", po::bool_switch()->notifier([&](bool val){options.pdf_logo = not val;}), "Generate PDF files with sequence logos of the found motifs.")
-      ("nopng", po::bool_switch()->notifier([&](bool val){options.png_logo = not val;}), "Generate PNG files with sequence logos of the found motifs.")
+      ("nopdf", po::bool_switch()->notifier([&](bool val){options.pdf_logo = not val;}), "Do not generate PDF files with sequence logos of the found motifs.")
+      ("nopng", po::bool_switch()->notifier([&](bool val){options.png_logo = not val;}), "Do not generate PNG files with sequence logos of the found motifs.")
       ;
   desc.add_options()
     ("axes", po::bool_switch(&options.axes), "Include axes in sequence logos.")
