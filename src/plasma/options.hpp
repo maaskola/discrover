@@ -94,7 +94,9 @@ struct Options {
 
   Plasma plasma;
   MCMC mcmc;
+#if CAIRO_FOUND
   Logo::Options logo;
+#endif
 
   size_t n_threads;
   bool revcomp;
