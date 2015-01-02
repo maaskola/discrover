@@ -16,6 +16,20 @@ struct rgb_t {
   double b;
 };
 
+struct palette_t {
+  rgb_t a;
+  rgb_t c;
+  rgb_t g;
+  rgb_t t;
+};
+
+palette_t default_colors = {
+  {0.0, 0.75, 0.0},
+  {0.0, 0.0, 1.0},
+  {1, 0.6470588, 0.0},
+  {1.0, 0.0, 0.0}
+};
+
 using coords_t = vector<coord_t>;
 
 coords_t letter_a = {
@@ -59,8 +73,7 @@ bool draw_logo(const string &path) {
   cairo_move_to (cr, 10.0, 50.0);
   cairo_show_text (cr, "Hello, world");
 
-  rgb_t black = {0, 0, 0};
-  draw_letter(cr, letter_a, 10, 50, 30, 30, black);
+  draw_letter(cr, letter_a, 10, 50, 30, 30, default_colors.a);
 
   cairo_destroy (cr);
   cairo_surface_write_to_png (surface, out_path.c_str());
