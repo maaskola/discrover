@@ -165,12 +165,10 @@ string ending(output_t kind) {
 
 bool draw_logo(const matrix_t &matrix, const string &path, output_t kind) {
   string out_path = path + "." + ending(kind);
-  cout << "Drawing the logo for " << path << " to " << out_path << "." << endl;
+  cout << "Generating logo in " << out_path << "." << endl;
 
   double width = node_width * matrix.size();
   double height = node_height;
-
-  cout << "Dimensions = " << width << "x" << height << endl;
 
   cairo_surface_t *surface;
   switch(kind) {
