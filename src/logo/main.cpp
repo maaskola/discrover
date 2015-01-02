@@ -24,17 +24,15 @@ int main(int argc, char**argv) {
     {0, 1.0/3, 1.0/3, 1.0/3}
   };
 
+  Logo::Options options;
+
   for(int i = 1; i < argc; ++i) {
-    if(draw_logo(matrix, argv[i], logo::output_t::PNG)) {
-      cout << "Problem drawing PNG logo for " << argv[i] << endl;
-      return -1;
-    }
-    if(draw_logo(matrix, argv[i], logo::output_t::PDF)) {
-      cout << "Problem drawing PDF logo for " << argv[i] << endl;
+    auto paths = draw_logo(matrix, argv[i], options);
+    if(paths.size() == 0) {
+      cout << "Problem drawing logos for " << argv[i] << endl;
       return -1;
     }
   }
-
 
   return EXIT_SUCCESS;
 }

@@ -8,6 +8,11 @@
 namespace Logo {
 using namespace std;
 
+enum class output_t {
+  PDF,
+  PNG
+};
+
 const double factor = 100.0;
 const double node_width = 0.75 * factor;
 const double node_height = 1.0 * factor;
@@ -163,7 +168,7 @@ string ending(output_t kind) {
   };
 }
 
-bool draw_logo(const matrix_t &matrix, const string &path, output_t kind) {
+string draw_logo(const matrix_t &matrix, const string &path, output_t kind) {
   string out_path = path + "." + ending(kind);
   cout << "Generating logo in " << out_path << "." << endl;
 
@@ -179,7 +184,7 @@ bool draw_logo(const matrix_t &matrix, const string &path, output_t kind) {
       surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width, height);
       break;
     default:
-      return EXIT_FAILURE;
+      return "";
   }
 
   draw_logo_to_surface(surface, matrix);
@@ -193,6 +198,15 @@ bool draw_logo(const matrix_t &matrix, const string &path, output_t kind) {
       break;
   }
   cairo_surface_destroy (surface);
-  return EXIT_SUCCESS;
+  return out_path;
+}
+
+vector<string> draw_logo(const matrix_t &matrix, const string &path, const Options &options) {
+  vector<string> paths;
+  if(options.pdf_logo)
+    paths.push_back(draw_logo(matrix, path, output_t::PDF));
+  if(options.png_logo)
+    paths.push_back(draw_logo(matrix, path, output_t::PNG));
+  return paths;
 }
 };

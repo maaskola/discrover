@@ -74,15 +74,16 @@ Logo::matrix_t build_matrix(const string &motif) {
 }
 
 void generate_logos(const string &motif, const Seeding::Options &options, size_t motif_idx) {
-  logo::matrix_t matrix = build_matrix(motif);
-  if (options.pdf_logo)
-    Logo::draw_logo(matrix, options.label + ".motif"
-        + boost::lexical_cast<string>(motif_idx),
-        Logo::output_t::PDF);
-  if (options.png_logo)
-    Logo::draw_logo(matrix, options.label + ".motif"
-        + boost::lexical_cast<string>(motif_idx),
-        Logo::output_t::PNG);
+  Logo::Options logo_options;
+  Logo::matrix_t matrix = build_matrix(motif);
+  auto paths = Logo::draw_logo(matrix, options.label + ".motif"
+        + boost::lexical_cast<string>(motif_idx), logo_options);
+  if(paths.size() == 0) {
+    cout << "No logos were created." << endl;
+  } else {
+    for(auto &path: paths)
+      cout << "Created logo in " << path << endl;
+  }
 }
 #endif
 

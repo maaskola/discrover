@@ -1,5 +1,5 @@
 # build a shared library
-ADD_LIBRARY(discroverlogo SHARED logo.cpp "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA1.cpp")
+ADD_LIBRARY(discroverlogo SHARED logo.cpp options.cpp "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA1.cpp")
 
 ADD_EXECUTABLE(discrover-logo main.cpp)
 

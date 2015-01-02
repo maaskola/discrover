@@ -19,16 +19,9 @@
 using namespace std;
 
 #if CAIRO_FOUND
-void make_logos(const Logo::matrix_t &matrix, const string &path_stem,
-               const Options::HMM &options) {
-  if (options.pdf_logo)
-    Logo::draw_logo(matrix, path_stem, Logo::output_t::PDF);
-  if (options.png_logo)
-    Logo::draw_logo(matrix, path_stem, Logo::output_t::PNG);
-}
-
 void Evaluator::generate_logos(const string &path_stem,
                                const Options::HMM &options) const {
+  Logo::Options logo_options;
   size_t motif_idx = 0;
   for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
     if (hmm.is_motif_group(group_idx)) {
@@ -40,17 +33,12 @@ void Evaluator::generate_logos(const string &path_stem,
           col[i] = hmm.emission(state, i);
         matrix.push_back(col);
       }
-      if (not options.revcomp) {
-        make_logos(matrix, path_stem + ".motif"
-            + boost::lexical_cast<string>(motif_idx), options);
+      auto paths = Logo::draw_logo(matrix, path_stem, logo_options);
+      if (paths.size() == 0) {
+        cout << "No logos were created." << endl;
       } else {
-        make_logos(matrix, path_stem + ".motif"
-            + boost::lexical_cast<string>(motif_idx) + ".forward", options);
-        reverse(begin(matrix), end(matrix));
-        for(auto &col: matrix)
-          reverse(begin(col), end(col));
-        make_logos(matrix, path_stem + ".motif"
-            + boost::lexical_cast<string>(motif_idx) + ".reverse", options);
+        for (auto &path : paths)
+          cout << "Created logo in " << path << endl;
       }
       motif_idx++;
     }
