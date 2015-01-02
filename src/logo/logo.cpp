@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cairo.h>
+#include <cairo-pdf.h>
 #include "logo.hpp"
 
 using namespace std;
@@ -69,12 +70,7 @@ void draw_letter(cairo_t *cr, const coords_t &coords, double x, double y, double
   cairo_fill(cr);
 }
 
-bool draw_logo(const string &path) {
-  string out_path = "hello.png";
-  cout << "Drawing the logo for " << path << " to " << out_path << "." << endl;
-
-  cairo_surface_t *surface =
-    cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 240, 80);
+void draw_logo_to_surface(cairo_surface_t *surface) {
   cairo_t *cr =
     cairo_create (surface);
 
@@ -89,8 +85,45 @@ bool draw_logo(const string &path) {
   draw_letter(cr, letter_t, 40, 80, 30, 30, default_colors.g);
   draw_letter(cr, letter_a, 40, 20, 30, 30, default_colors.t);
 
-  cairo_destroy (cr);
-  cairo_surface_write_to_png (surface, out_path.c_str());
+  cairo_show_page(cr);
+  cairo_destroy(cr);
+}
+
+string ending(output_t kind) {
+  switch(kind) {
+    case output_t::PDF:
+      return "pdf";
+    case output_t::PNG:
+      return "png";
+    default:
+      return "";
+  };
+}
+
+bool draw_logo(const string &path, output_t kind) {
+  string out_path = path + "." + ending(kind);
+  cout << "Drawing the logo for " << path << " to " << out_path << "." << endl;
+
+  cairo_surface_t *surface;
+  switch(kind) {
+    case output_t::PDF:
+      surface = cairo_pdf_surface_create (out_path.c_str(), 240, 80);
+      break;
+    case output_t::PNG:
+      surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 240, 80);
+      break;
+  }
+
+  draw_logo_to_surface(surface);
+
+  switch(kind) {
+    case output_t::PDF:
+      cairo_surface_flush(surface);
+      break;
+    case output_t::PNG:
+      cairo_surface_write_to_png(surface, out_path.c_str());
+      break;
+  }
   cairo_surface_destroy (surface);
   return EXIT_SUCCESS;
 }

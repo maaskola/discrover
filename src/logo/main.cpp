@@ -10,11 +10,17 @@ int main(int argc, char**argv) {
     return -1;
   }
 
-  for(int i = 1; i < argc; ++i)
-    if(draw_logo(argv[i])) {
-      cout << "Problem drawing logo for " << argv[i] << endl;
+  for(int i = 1; i < argc; ++i) {
+    if(draw_logo(argv[i], output_t::PNG)) {
+      cout << "Problem drawing PNG logo for " << argv[i] << endl;
       return -1;
     }
+    if(draw_logo(argv[i], output_t::PDF)) {
+      cout << "Problem drawing PDF logo for " << argv[i] << endl;
+      return -1;
+    }
+  }
+
 
   return EXIT_SUCCESS;
 }
