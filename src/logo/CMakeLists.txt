@@ -3,8 +3,8 @@ ADD_LIBRARY(discroverlogo SHARED logo.cpp "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA
 
 ADD_EXECUTABLE(discrover-logo main.cpp)
 
-TARGET_LINK_LIBRARIES(discrover-logo
-  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+TARGET_LINK_LIBRARIES(discroverlogo
+  ${CAIRO_LIBRARIES}
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_IOSTREAMS_LIBRARY})
