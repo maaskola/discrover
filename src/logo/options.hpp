@@ -13,6 +13,9 @@
  * =====================================================================================
  */
 
+#ifndef LOGO_OPTIONS_HPP
+#define LOGO_OPTIONS_HPP
+
 namespace Logo {
 enum class Type { Sequence, Frequency };
 
@@ -34,3 +37,5 @@ struct Options {
   double absent;
 };
 }
+
+#endif
