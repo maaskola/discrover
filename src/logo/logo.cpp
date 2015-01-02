@@ -101,10 +101,6 @@ void draw_letter_c(cairo_t *cr, const coord_t &coord, double width, double heigh
   }
 }
 
-void draw_letter_t(cairo_t *cr, const coord_t &coord, double width, double height, rgb_t color) {
-  draw_letter(cr, letter_t, coord, width, height, color);
-}
-
 void draw_letter_g(cairo_t *cr, const coord_t &coord, double width, double height, rgb_t color) {
   draw_letter_c(cr, coord, width, height, color);
   cairo_rectangle(cr, coord.x + 0.5 * width, coord.y - 0.45 * height, 0.5 * width, 0.1 * height);
@@ -112,6 +108,10 @@ void draw_letter_g(cairo_t *cr, const coord_t &coord, double width, double heigh
   cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
   cairo_set_source_rgb (cr, color.r, color.g, color.b);
   cairo_fill(cr);
+}
+
+void draw_letter_t(cairo_t *cr, const coord_t &coord, double width, double height, rgb_t color) {
+  draw_letter(cr, letter_t, coord, width, height, color);
 }
 
 double information_content(const column_t &col) {
