@@ -119,6 +119,28 @@ void draw_letter_t(cairo_t *cr, const coord_t &coord, double width, double heigh
   draw_letter(cr, letter_t, coord, width, height, color);
 }
 
+void draw_letter_u(cairo_t *cr, const coord_t &coord, double width, double height, rgb_t color) {
+  cairo_save(cr);
+  cairo_rectangle(cr, coord.x, coord.y - 0.5 * height, width, 0.5 * height);
+  cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
+  cairo_clip(cr);
+  cairo_save(cr);
+  cairo_translate(cr, coord.x + 0.5 * width, coord.y - 0.5 * height);
+  cairo_scale(cr, 1.0 * width / height, 1.0);
+  cairo_arc(cr, 0, 0, 0.5 * height, 0, M_PI * 2);
+  cairo_arc(cr, 0, 0, 0.5 * 0.8 * height, 0, M_PI * 2);
+  cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
+  cairo_set_source_rgb (cr, color.r, color.g, color.b);
+  cairo_fill(cr);
+  cairo_restore(cr);
+  cairo_restore(cr);
+  cairo_rectangle(cr, coord.x, coord.y - height, 0.1* width, 0.5 * height);
+  cairo_rectangle(cr, coord.x + 0.9 * width, coord.y - height, 0.1* width, 0.5 * height);
+  cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
+  cairo_set_source_rgb (cr, color.r, color.g, color.b);
+  cairo_fill(cr);
+}
+
 double information_content(const column_t &col) {
   double x = 0;
   for(auto &y: col)
@@ -127,7 +149,7 @@ double information_content(const column_t &col) {
   return(2 - x);
 }
 
-void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix) {
+void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix, const Options &options) {
   cairo_t *cr = cairo_create (surface);
 
   coord_t current = {0, node_height};
@@ -148,7 +170,15 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix) {
     current.y -= current_height;
 
     current_height = col[3] * node_height * col_height;
-    draw_letter_t(cr, current, node_width, current_height, default_colors.t);
+    switch(options.alphabet) {
+      case Alphabet::DNA:
+        draw_letter_t(cr, current, node_width, current_height, default_colors.t);
+        break;
+      case Alphabet::RNA:
+      case Alphabet::Undefined: // @TODO
+        draw_letter_u(cr, current, node_width, current_height, default_colors.t);
+        break;
+    };
 
     current.x += node_width;
   }
@@ -168,7 +198,7 @@ string ending(output_t kind) {
   };
 }
 
-string draw_logo(const matrix_t &matrix, const string &path, output_t kind) {
+string draw_logo(const matrix_t &matrix, const string &path, output_t kind, const Options &options) {
   string out_path = path + "." + ending(kind);
   cout << "Generating logo in " << out_path << "." << endl;
 
@@ -187,7 +217,7 @@ string draw_logo(const matrix_t &matrix, const string &path, output_t kind) {
       return "";
   }
 
-  draw_logo_to_surface(surface, matrix);
+  draw_logo_to_surface(surface, matrix, options);
 
   switch(kind) {
     case output_t::PDF:
@@ -204,9 +234,9 @@ string draw_logo(const matrix_t &matrix, const string &path, output_t kind) {
 vector<string> draw_logo(const matrix_t &matrix, const string &path, const Options &options) {
   vector<string> paths;
   if(options.pdf_logo)
-    paths.push_back(draw_logo(matrix, path, output_t::PDF));
+    paths.push_back(draw_logo(matrix, path, output_t::PDF, options));
   if(options.png_logo)
-    paths.push_back(draw_logo(matrix, path, output_t::PNG));
+    paths.push_back(draw_logo(matrix, path, output_t::PNG, options));
   return paths;
 }
 };
