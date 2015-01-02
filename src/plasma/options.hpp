@@ -115,10 +115,6 @@ struct Options {
   bool allow_iupac_wildcards;
 
   std::string label;
-#if CAIRO_FOUND
-  bool pdf_logo;
-  bool png_logo;
-#endif
 };
 }
 

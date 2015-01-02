@@ -35,6 +35,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "../plasma/plasma_cli.hpp"
+#include "../logo/cli.hpp"
 #include "../GitSHA1.hpp"
 #include "analysis.hpp"
 #include "../aux.hpp"
@@ -137,10 +138,10 @@ void fixup_seeding_options(Options::HMM &options) {
   options.seeding.measure_runtime = options.timing_information;
   options.seeding.label = options.label;
 #if CAIRO_FOUND
-  options.seeding.pdf_logo = options.pdf_logo;
-  options.seeding.png_logo = options.png_logo;
+  options.seeding.logo = options.logo;
+  options.seeding.logo.pdf_logo = false;
+  options.seeding.logo.png_logo = false;
 #endif
-
   options.seeding.mcmc.max_iter = options.termination.max_iter;
   options.seeding.mcmc.temperature = options.sampling.temperature;
   options.seeding.mcmc.n_parallel = options.sampling.n_parallel;
@@ -187,6 +188,10 @@ int main(int argc, const char** argv)
   po::options_description hidden_options("Hidden options", cols);
 
   po::options_description seeding_options = gen_plasma_options_description(options.seeding, "", "Seeding options for IUPAC regular expression finding", cols, false, false);
+
+#if CAIRO_FOUND
+  po::options_description logo_options = gen_logo_options_description(options.logo, false, cols);
+#endif
 
   generic_options.add_options()
     ("config", po::value<string>(&config_path), "Read options from a configuration file. ")
@@ -259,10 +264,6 @@ int main(int argc, const char** argv)
     ("iter", po::value<size_t>(&options.termination.max_iter)->default_value(1000), "Maximal number of iterations to perform in training. A value of 0 means no limit, and that the training is only terminated by the tolerance.")
     ("salt", po::value<unsigned int>(&options.random_salt), "Seed for the random number generator.")
     ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
-#if CAIRO_FOUND
-    ("pdf", po::bool_switch(&options.pdf_logo), "Generate PDF files with sequence logos of the found motifs.")
-    ("png", po::bool_switch(&options.png_logo), "Generate PNG files with sequence logos of the found motifs.")
-#endif
     ;
 
   multi_motif_options.add_options()
@@ -338,7 +339,8 @@ int main(int argc, const char** argv)
   common_options
     .add(advanced_options)
     .add(seeding_options)
-    .add(init_options);
+    .add(init_options)
+    .add(logo_options);
 
   po::options_description visible_options;
   visible_options

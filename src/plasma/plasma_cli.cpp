@@ -16,6 +16,7 @@
 #include <vector>
 #include "options.hpp"
 #include "../random_seed.hpp"
+#include "../logo/cli.hpp"
 #include "../executioninformation.hpp"
 
 using namespace std;
@@ -88,10 +89,6 @@ boost::program_options::options_description gen_plasma_options_description(Seedi
       ("word,w", po::bool_switch(&options.word_stats), "Perform nucleotide level statistics instead of on sequence level.")
       ("time,t", po::bool_switch(&options.measure_runtime), "Report running times.")
       ("print", po::bool_switch(&options.dump_viterbi), "Print out sequences annotated with motif occurrences.")
-#if CAIRO_FOUND
-      ("pdf", po::bool_switch(&options.pdf_logo), "Generate PDF files with sequence logos of the found motifs.")
-      ("png", po::bool_switch(&options.png_logo), "Generate PNG files with sequence logos of the found motifs.")
-#endif
       ("threads,T", po::value<size_t>(&options.n_threads)->default_value(omp_get_num_procs()), "The number of threads to use. If this in not specified, the value of the environment variable OMP_NUM_THREADS is used if that is defined, otherwise it will use as many as there are CPU cores on this machine.")
       ("output,o", po::value<string>(&options.label), "Output file names are generated from this label. If this option is not specified the output label will be 'plasma_XXX' where XXX is a string to make the label unique.")
       ("salt", po::value<unsigned int>(&options.mcmc.random_salt), "Seed for the pseudo random number generator (used e.g. for sequence shuffle generation and MCMC sampling). Set this to get reproducible results.")
@@ -103,10 +100,6 @@ boost::program_options::options_description gen_plasma_options_description(Seedi
     options.dump_viterbi = false;
     options.label = generate_random_label("plasma", 0, options.verbosity);
     options.mcmc.random_salt = generate_rng_seed();
-#if CAIRO_FOUND
-    options.pdf_logo = false;
-    options.png_logo = false;
-#endif
   }
 
   if(include_all) {
@@ -118,6 +111,11 @@ boost::program_options::options_description gen_plasma_options_description(Seedi
       ("partemp", po::value<size_t>(&options.mcmc.n_parallel)->default_value(6), "Parallel chains to run for parallel tempering.")
       ;
     desc.add(mcmc_desc);
+
+#if CAIRO_FOUND
+    po::options_description logo_options = gen_logo_options_description(options.logo, true, cols);
+    desc.add(logo_options);
+#endif
   } else {
     options.mcmc.temperature = 1e-3;
     options.mcmc.n_parallel = 6;

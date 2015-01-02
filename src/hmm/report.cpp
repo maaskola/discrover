@@ -21,7 +21,6 @@ using namespace std;
 #if CAIRO_FOUND
 void Evaluator::generate_logos(const string &path_stem,
                                const Options::HMM &options) const {
-  Logo::Options logo_options;
   size_t motif_idx = 0;
   for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
     if (hmm.is_motif_group(group_idx)) {
@@ -33,7 +32,7 @@ void Evaluator::generate_logos(const string &path_stem,
           col[i] = hmm.emission(state, i);
         matrix.push_back(col);
       }
-      auto paths = Logo::draw_logo(matrix, path_stem, logo_options);
+      auto paths = Logo::draw_logo(matrix, path_stem, options.logo);
       if (paths.size() == 0) {
         cout << "No logos were created." << endl;
       } else {

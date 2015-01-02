@@ -105,6 +105,9 @@ namespace Options {
     bool dont_save_shuffle_sequences;
     std::vector<std::string> seeds;
     Seeding::Options seeding;
+#if CAIRO_FOUND
+    Logo::Options logo;
+#endif
     Evaluation evaluate;
     size_t n_threads;
     size_t n_seq;
@@ -147,10 +150,6 @@ namespace Options {
 
     Verbosity verbosity;
     ExecutionInformation exec_info;
-#if CAIRO_FOUND
-    bool pdf_logo;
-    bool png_logo;
-#endif
   };
 
   std::istream &operator>>(std::istream &in, Compression &type);
