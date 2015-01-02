@@ -8,7 +8,7 @@
  *        Version:  1.0
  *        Created:  01/02/2015 08:36:47 PM
  *
- *         Author:  Jonas Maaskola (jonas@maaskola.de)
+ *         Author:  Jonas Maaskola <jonas@maaskola.de>
  *
  * =====================================================================================
  */
