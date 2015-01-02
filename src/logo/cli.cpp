@@ -51,7 +51,16 @@ istream &operator>>(istream &is, Alphabet &alphabet) {
   return is;
 }
 istream &operator>>(istream &is, Order &order) {
-  order = Order::Frequency;
+  string word;
+  is >> word;
+  if (word == "alpha" or word == "alphabetic")
+    order = Order::Alphabetic;
+  else if (word == "freq" or word == "frequency")
+    order = Order::Frequency;
+  else {
+    cout << "Can't parse order type " << word << "." << endl;
+    exit(-1);
+  }
   return is;
 }
 istream &operator>>(istream &is, Palette &palette) {
@@ -79,6 +88,7 @@ boost::program_options::options_description gen_logo_options_description(
     ("axes", po::bool_switch(&options.axes), "Include axes in sequence logos.")
     ("logotype", po::value<Logo::Type>(&options.type)->default_value(Logo::Type::Sequence, "seq"), "Which kind of logo to create; 'seq' for sequence logo (position height scaled by information content), 'freq' for frequency logo.")
     ("alphabet", po::value<Logo::Alphabet>(&options.alphabet), "Which alphabet to use; can be either 'RNA' or 'DNA'. If left unspecified, then 'DNA' is chosen if --revcomp is used, and otherwise 'RNA'.")
+    ("order", po::value<Logo::Order>(&options.order)->default_value(Logo::Order::Frequency, "freq"), "How to vertically order the nucleotides; can be either 'alpha' for alphabetic order or 'freq' for most frequent at top.")
     ;
   if (iupac_mode)
     desc.add_options()

@@ -55,26 +55,34 @@ std::string gen_usage_string()
 using namespace std;
 
 #if CAIRO_FOUND
-Logo::matrix_t build_matrix(const string &motif) {
+Logo::matrix_t build_matrix(const string &motif, double absent) {
   const string nucls = "acgt";
   Logo::matrix_t matrix;
   for(auto pos: motif) {
     Logo::column_t col(4,0);
     double z = 0;
     for(size_t i = 0; i < nucls.size(); i++)
-      if(Seeding::iupac_included(pos, nucls[i])) {
+      if(Seeding::iupac_included(nucls[i], pos)) {
         col[i] = 1;
         z++;
       }
-    for(size_t i = 0; i < nucls.size(); i++)
-      col[i] /= z;
+    if(z == 0)
+      for(size_t i = 0; i < nucls.size(); i++)
+        col[i] = 1.0 / 4;
+    else {
+      for(size_t i = 0; i < nucls.size(); i++)
+        if(col[i] > 0)
+          col[i] = (1.0-(4-z)*absent) / z;
+        else
+          col[i] = absent;
+    }
     matrix.push_back(col);
   }
   return matrix;
 }
 
 void generate_logos(const string &motif, const Seeding::Options &options, size_t motif_idx) {
-  Logo::matrix_t matrix = build_matrix(motif);
+  Logo::matrix_t matrix = build_matrix(motif, options.logo.absent);
   auto paths = Logo::draw_logo(matrix, options.label + ".motif"
         + boost::lexical_cast<string>(motif_idx), options.logo);
   if(paths.size() == 0) {
