@@ -20,7 +20,7 @@ Options::Options()
       png_logo(true),
       axes(false),
       type(Type::Sequence),
-      alphabet(Alphabet::RNA),
+      alphabet(Alphabet::Undefined),
       order(Order::Frequency),
       palette(Palette::Default),
       absent(0.03) {}

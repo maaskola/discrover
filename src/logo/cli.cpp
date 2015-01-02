@@ -35,7 +35,19 @@ istream &operator>>(istream &is, Type &type) {
   return is;
 }
 istream &operator>>(istream &is, Alphabet &alphabet) {
-  alphabet = Alphabet::RNA;
+  string word;
+  is >> word;
+  if (word == "rna" or word == "RNA")
+    alphabet = Alphabet::RNA;
+  else if (word == "dna" or word == "DNA")
+    alphabet = Alphabet::DNA;
+  else if (word == "undef" or word == "undefined" or word == "Undef" or word == "Undefined")
+    alphabet = Alphabet::Undefined;
+  else {
+    cout << "Can't parse alphabet " << word << "." << endl;
+    exit(-1);
+  }
+
   return is;
 }
 istream &operator>>(istream &is, Order &order) {
@@ -66,6 +78,7 @@ boost::program_options::options_description gen_logo_options_description(
   desc.add_options()
     ("axes", po::bool_switch(&options.axes), "Include axes in sequence logos.")
     ("logotype", po::value<Logo::Type>(&options.type)->default_value(Logo::Type::Sequence, "seq"), "Which kind of logo to create; 'seq' for sequence logo (position height scaled by information content), 'freq' for frequency logo.")
+    ("alphabet", po::value<Logo::Alphabet>(&options.alphabet), "Which alphabet to use; can be either 'RNA' or 'DNA'. If left unspecified, then 'DNA' is chosen if --revcomp is used, and otherwise 'RNA'.")
     ;
   if (iupac_mode)
     desc.add_options()
