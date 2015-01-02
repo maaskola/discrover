@@ -53,9 +53,17 @@ boost::program_options::options_description gen_logo_options_description(
     const string &name) {
   namespace po = boost::program_options;
   po::options_description desc(name, cols);
+  if (iupac_mode)
+    desc.add_options()
+      ("pdf", po::bool_switch(&options.pdf_logo), "Generate PDF files with sequence logos of the found motifs.")
+      ("png", po::bool_switch(&options.png_logo), "Generate PDF files with sequence logos of the found motifs.")
+      ;
+  else
+    desc.add_options()
+      ("nopdf", po::bool_switch()->notifier([&](bool val){options.pdf_logo = not val;}), "Generate PDF files with sequence logos of the found motifs.")
+      ("nopng", po::bool_switch()->notifier([&](bool val){options.png_logo = not val;}), "Generate PNG files with sequence logos of the found motifs.")
+      ;
   desc.add_options()
-    ("pdf", po::bool_switch(&options.pdf_logo), "Generate PDF files with sequence logos of the found motifs.")
-    ("png", po::bool_switch(&options.png_logo), "Generate PDF files with sequence logos of the found motifs.")
     ("axes", po::bool_switch(&options.axes), "Include axes in sequence logos.")
     ("logotype", po::value<Logo::Type>(&options.type)->default_value(Logo::Type::Sequence, "seq"), "Which kind of logo to create; 'seq' for sequence logo (position height scaled by information content), 'freq' for frequency logo.")
     ;
