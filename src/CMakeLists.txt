@@ -5,6 +5,9 @@ ADD_DEFINITIONS(-Wall -funroll-loops -march=native -Wno-unused-local-typedefs)
 ADD_SUBDIRECTORY(shuffle)
 ADD_SUBDIRECTORY(plasma)
 ADD_SUBDIRECTORY(hmm)
+if(CAIRO_FOUND)
+  ADD_SUBDIRECTORY(logo)
+ENDIF()
 
 # The directory mcmc contains a demo application that can be built by
 # uncommenting the next line

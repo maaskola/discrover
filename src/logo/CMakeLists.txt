@@ -1,0 +1,19 @@
+# build a shared library
+ADD_LIBRARY(discroverlogo SHARED logo.cpp "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA1.cpp")
+
+ADD_EXECUTABLE(discrover-logo main.cpp)
+
+TARGET_LINK_LIBRARIES(discrover-logo
+  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY}
+  ${Boost_IOSTREAMS_LIBRARY})
+
+TARGET_LINK_LIBRARIES(discrover-logo discroverlogo ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+INSTALL(TARGETS discrover-logo discroverlogo
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION ${LIBDIR}
+  ARCHIVE DESTINATION ${LIBDIR}/static
+  DESTINATION "${CMAKE_INSTALL_PREFIX}"
+  )
