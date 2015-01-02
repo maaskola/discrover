@@ -30,7 +30,7 @@ string form_switch(const string &prefix, const string& s, bool add_short=true) {
     return(prefix + s);
 }
 
-boost::program_options::options_description gen_iupac_options_description(Seeding::Options &options,
+boost::program_options::options_description gen_plasma_options_description(Seeding::Options &options,
     const string &prefix,
     const string &name,
     size_t cols,

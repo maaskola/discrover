@@ -186,7 +186,7 @@ int main(int argc, const char** argv)
   po::options_description termination_options("Termination options", cols);
   po::options_description hidden_options("Hidden options", cols);
 
-  po::options_description seeding_options = gen_iupac_options_description(options.seeding, "", "Seeding options for IUPAC regular expression finding", cols, false, false);
+  po::options_description seeding_options = gen_plasma_options_description(options.seeding, "", "Seeding options for IUPAC regular expression finding", cols, false, false);
 
   generic_options.add_options()
     ("config", po::value<string>(&config_path), "Read options from a configuration file. ")
