@@ -47,6 +47,8 @@ void Evaluator::generate_logos(const string &path_stem,
         make_logos(matrix, path_stem + ".motif"
             + boost::lexical_cast<string>(motif_idx) + ".forward", options);
         reverse(begin(matrix), end(matrix));
+        for(auto &col: matrix)
+          reverse(begin(col), end(col));
         make_logos(matrix, path_stem + ".motif"
             + boost::lexical_cast<string>(motif_idx) + ".reverse", options);
       }
