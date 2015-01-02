@@ -136,6 +136,10 @@ void fixup_seeding_options(Options::HMM &options) {
   options.seeding.pseudo_count = options.contingency_pseudo_count;
   options.seeding.measure_runtime = options.timing_information;
   options.seeding.label = options.label;
+#if CAIRO_FOUND
+  options.seeding.pdf_logo = options.pdf_logo;
+  options.seeding.png_logo = options.png_logo;
+#endif
 
   options.seeding.mcmc.max_iter = options.termination.max_iter;
   options.seeding.mcmc.temperature = options.sampling.temperature;
@@ -255,6 +259,10 @@ int main(int argc, const char** argv)
     ("iter", po::value<size_t>(&options.termination.max_iter)->default_value(1000), "Maximal number of iterations to perform in training. A value of 0 means no limit, and that the training is only terminated by the tolerance.")
     ("salt", po::value<unsigned int>(&options.random_salt), "Seed for the random number generator.")
     ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
+#if CAIRO_FOUND
+    ("pdf", po::bool_switch(&options.pdf_logo), "Generate PDF files with sequence logos of the found motifs.")
+    ("png", po::bool_switch(&options.png_logo), "Generate PNG files with sequence logos of the found motifs.")
+#endif
     ;
 
   multi_motif_options.add_options()

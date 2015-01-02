@@ -76,6 +76,10 @@ class Evaluator {
                                  std::ostream &v_out, std::ostream &occ_out,
                                  std::ostream &motif_out,
                                  const Options::HMM &options) const;
+
+#if CAIRO_FOUND
+  void generate_logos(const std::string &path_stem, const Options::HMM &options) const;
+#endif
 };
 
 #endif

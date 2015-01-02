@@ -18,6 +18,43 @@
 
 using namespace std;
 
+#if CAIRO_FOUND
+void make_logos(const logo::matrix_t &matrix, const string &path_stem,
+               const Options::HMM &options) {
+  if (options.pdf_logo)
+    logo::draw_logo(matrix, path_stem, logo::output_t::PDF);
+  if (options.png_logo)
+    logo::draw_logo(matrix, path_stem, logo::output_t::PNG);
+}
+
+void Evaluator::generate_logos(const string &path_stem,
+                               const Options::HMM &options) const {
+  size_t motif_idx = 0;
+  for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
+    if (hmm.is_motif_group(group_idx)) {
+      const string nucls = "acgt";
+      logo::matrix_t matrix;
+      for (auto state : hmm.groups[group_idx].states) {
+        logo::column_t col(4, 0);
+        for (size_t i = 0; i < nucls.size(); i++)
+          col[i] = hmm.emission(state, i);
+        matrix.push_back(col);
+      }
+      if (not options.revcomp) {
+        make_logos(matrix, path_stem + ".motif"
+            + boost::lexical_cast<string>(motif_idx), options);
+      } else {
+        make_logos(matrix, path_stem + ".motif"
+            + boost::lexical_cast<string>(motif_idx) + ".forward", options);
+        reverse(begin(matrix), end(matrix));
+        make_logos(matrix, path_stem + ".motif"
+            + boost::lexical_cast<string>(motif_idx) + ".reverse", options);
+      }
+      motif_idx++;
+    }
+}
+#endif
+
 void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast,
                  size_t width, size_t prec) {
   size_t w = 0;
@@ -444,6 +481,10 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
                        compression2ending(options.output_compression);
   result.files.viterbi = options.label + file_tag + ".viterbi" +
                          compression2ending(options.output_compression);
+
+#if CAIRO_FOUND
+  generate_logos(options.label + file_tag, options);
+#endif
 
   ofstream summary_out, occurrence_file, viterbi_file;
   summary_out.open(result.files.summary.c_str());

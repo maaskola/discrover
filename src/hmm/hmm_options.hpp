@@ -147,6 +147,10 @@ namespace Options {
 
     Verbosity verbosity;
     ExecutionInformation exec_info;
+#if CAIRO_FOUND
+    bool pdf_logo;
+    bool png_logo;
+#endif
   };
 
   std::istream &operator>>(std::istream &in, Compression &type);
