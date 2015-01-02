@@ -339,8 +339,11 @@ int main(int argc, const char** argv)
   common_options
     .add(advanced_options)
     .add(seeding_options)
-    .add(init_options)
+    .add(init_options);
+#if CAIRO_FOUND
+  common_options
     .add(logo_options);
+#endif
 
   po::options_description visible_options;
   visible_options
