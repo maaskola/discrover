@@ -22,6 +22,10 @@ TARGET_LINK_LIBRARIES(discroverplasma
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_IOSTREAMS_LIBRARY})
 
+IF(CAIRO_FOUND)
+  TARGET_LINK_LIBRARIES(discroverplasma discroverlogo)
+ENDIF()
+
 IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
   TARGET_LINK_LIBRARIES(discroverplasma ${Boost_DATE_TIME_LIBRARY})
 ENDIF()

@@ -1,0 +1,14 @@
+
+
+#ifndef LOGO_CONFIG_HPP
+#define LOGO_CONFIG_HPP
+
+#cmakedefine01 CAIRO_FOUND
+
+
+#if CAIRO_FOUND
+  #include "logo/logo.hpp"
+#endif
+
+#endif
+

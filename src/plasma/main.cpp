@@ -25,6 +25,7 @@
 #include "../timer.hpp"
 #include "plasma_cli.hpp"
 #include "../executioninformation.hpp"
+#include "../logo_config.hpp"
 #include "../GitSHA1.hpp"
 #include "../mcmc/montecarlo.hpp"
 
@@ -53,6 +54,38 @@ std::string gen_usage_string()
 }
 
 using namespace std;
+
+#if CAIRO_FOUND
+logo::matrix_t build_matrix(const string &motif) {
+  const string nucls = "acgt";
+  logo::matrix_t matrix;
+  for(auto pos: motif) {
+    logo::column_t col(4,0);
+    double z = 0;
+    for(size_t i = 0; i < nucls.size(); i++)
+      if(Seeding::iupac_included(pos, nucls[i])) {
+        col[i] = 1;
+        z++;
+      }
+    for(size_t i = 0; i < nucls.size(); i++)
+      col[i] /= z;
+    matrix.push_back(col);
+  }
+  return matrix;
+}
+
+void generate_logos(const string &motif, const Seeding::Options &options, size_t motif_idx) {
+  logo::matrix_t matrix = build_matrix(motif);
+  if (options.pdf_logo)
+    logo::draw_logo(matrix, options.label + ".motif"
+        + boost::lexical_cast<string>(motif_idx),
+        logo::output_t::PDF);
+  if (options.png_logo)
+    logo::draw_logo(matrix, options.label + ".motif"
+        + boost::lexical_cast<string>(motif_idx),
+        logo::output_t::PNG);
+}
+#endif
 
 int main(int argc, const char** argv) {
   Timer timer;
@@ -265,13 +298,17 @@ int main(int argc, const char** argv) {
       plasma.apply_mask(results);
   }
 
-  if(results.size() == 1)
+  if(results.size() == 1) {
     report(cout, results[0], ds, options);
-  else {
+#if CAIRO_FOUND
+    generate_logos(results[0].motif, options, 0);
+#endif
+  } else {
     sort(begin(results), end(results), [](const res_t &a, const res_t &b) { return(a.log_p <= b.log_p); });
     Seeding::Collection original_ds = ds;
     Seeding::Options opts = options;
     opts.occurrence_filter = Seeding::OccurrenceFilter::RemoveSequences;
+    size_t motif_idx = 0;
     for(auto &r: results) {
       report(cout, r, original_ds, options);
       res_t r2 = r;
@@ -279,6 +316,9 @@ int main(int argc, const char** argv) {
       report(cerr, r2, ds, options);
       cout << endl;
       Seeding::apply_mask(ds, r.motif, opts);
+#if CAIRO_FOUND
+      generate_logos(r.motif, options, motif_idx++);
+#endif
     }
   }
 
@@ -303,4 +343,3 @@ int main(int argc, const char** argv) {
   }
   return(EXIT_SUCCESS);
 }
-

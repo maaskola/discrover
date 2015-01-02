@@ -111,6 +111,8 @@ namespace Seeding {
     bool allow_iupac_wildcards;
 
     std::string label;
+    bool pdf_logo;
+    bool png_logo;
   };
 }
 
