@@ -4,6 +4,7 @@
 #include <cairo-pdf.h>
 #include "logo.hpp"
 
+namespace logo {
 using namespace std;
 
 struct coord_t {
@@ -127,3 +128,4 @@ bool draw_logo(const string &path, output_t kind) {
   cairo_surface_destroy (surface);
   return EXIT_SUCCESS;
 }
+};
