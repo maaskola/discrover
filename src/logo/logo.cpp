@@ -128,7 +128,6 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix) {
   coord_t current = {0, node_height};
   for(auto &col: matrix) {
     double col_height = information_content(col) / 2;
-    cout << "IC = " << information_content(col) << endl;
     current.y = node_height;
 
     double current_height = col[0] * node_height * col_height;
