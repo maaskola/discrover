@@ -1,7 +1,8 @@
 # build a shared library
 ADD_LIBRARY(discroverlogo SHARED logo.cpp options.cpp cli.cpp ../aux.cpp "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA1.cpp")
 
-ADD_EXECUTABLE(discrover-logo main.cpp)
+ADD_EXECUTABLE(discrover-logo main.cpp ../sha1.cpp ../terminal.cpp
+  ../plasma/code.cpp ../executioninformation.cpp)
 
 TARGET_LINK_LIBRARIES(discroverlogo
   ${CAIRO_LIBRARIES}
