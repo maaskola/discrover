@@ -32,13 +32,7 @@ void Evaluator::generate_logos(const string &path_stem,
           col[i] = hmm.emission(state, i);
         matrix.push_back(col);
       }
-      auto paths = Logo::draw_logo(matrix, path_stem, options.logo);
-      if (paths.size() == 0) {
-        cout << "No logos were created." << endl;
-      } else {
-        for (auto &path : paths)
-          cout << "Created logo in " << path << endl;
-      }
+      Logo::draw_logo(matrix, path_stem, options.logo);
       motif_idx++;
     }
 }

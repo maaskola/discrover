@@ -219,7 +219,7 @@ string ending(output_t kind) {
 string draw_logo(const matrix_t &matrix, const string &path, output_t kind,
                  const Options &options) {
   string out_path = path + "." + ending(kind);
-  cout << "Generating logo in " << out_path << "." << endl;
+  cout << "Sequence logo in " << out_path << endl;
 
   double width = node_width * matrix.size();
   double height = node_height;

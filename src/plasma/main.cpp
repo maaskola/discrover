@@ -81,18 +81,14 @@ Logo::matrix_t build_matrix(const string &motif, double absent) {
   return matrix;
 }
 
-void generate_logos(const Seeding::Results &results, const Seeding::Options &options) {
+void generate_logos(const Seeding::Results &results,
+                    const Seeding::Options &options) {
   size_t motif_idx = 0;
-  for(auto &result: results) {
+  for (auto &result : results) {
     Logo::matrix_t matrix = build_matrix(result.motif, options.logo.absent);
-    auto paths = Logo::draw_logo(matrix, options.label + ".motif"
-        + boost::lexical_cast<string>(motif_idx++), options.logo);
-    if(paths.size() == 0) {
-      cout << "No logos were created." << endl;
-    } else {
-      for(auto &path: paths)
-        cout << "Created logo in " << path << endl;
-    }
+    Logo::draw_logo(matrix, options.label + ".motif"
+                            + boost::lexical_cast<string>(motif_idx++),
+                    options.logo);
   }
 }
 #endif
