@@ -40,4 +40,3 @@ CMake Warning (dev) at doc/CMakeLists.txt:19 (GET_PROPERTY):
   expression $<TARGET_FILE>, as appropriate.
 
 Either install hmm.rb into a proper location or merge into tikzlogo / hmm2meme
-Automatically run tikzlogo in discrover
