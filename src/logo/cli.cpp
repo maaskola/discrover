@@ -122,7 +122,7 @@ boost::program_options::options_description gen_logo_options_description(
 
   if (mode == Logo::CLI::Full)
     desc.add_options()
-      ("rc", po::bool_switch(&options.revcomp), "Generate sequence logos for forward and reverse complementary strand.")
+      ("revcomp,r", po::bool_switch(&options.revcomp), "Generate sequence logos for forward and reverse complementary strand.")
         ;
   else
     options.revcomp = false;
