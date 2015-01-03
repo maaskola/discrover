@@ -149,7 +149,7 @@ discrover signal.fa control.fa -m 5-10 -r
 
 
 \subsection{Manual seed specification for \discrover{}}
-Say that you have found a seed of interest for your protein, for example by manually using \plasma{} as described in section \ref{tutorial:plasma}.
+Say that you have found a seed of interest for your protein, for example by manually using \plasma{} as described in section~\ref{tutorial:plasma}.
 Let us assume it is the IUPAC regular expression \verb|tgtanatw|, where the \verb|n| stands for any nucleotide and the \verb|w| for either \verb|a| or \verb|t|.
 You can now use this IUPAC regular expression as seed for an HMM and optimize the HMM parameters as follows:\\
 \begin{verbbox}
@@ -204,13 +204,13 @@ There are two main programs that are part of this package, a seed discovery prog
 The seed discovery program \plasma{} can be used independently, but it is also used by \discrover{} for automatic seed discovery.
 The command line options that drive both programs are intentionally similar.
 
-Below, in section \ref{subsection:running-plasma}, we will first describe how to run \plasma{} independently, before section \ref{subsection:running-discrover} describes how to use \discrover{}.
+Below, in section~\ref{subsection:running-plasma}, we will first describe how to run \plasma{} independently, before section~\ref{subsection:running-discrover} describes how to use \discrover{}.
 
 \subsection{Seed discovery with \plasma{}}
 \label{subsection:running-plasma}
 \subsubsection{Getting help on command line options}
 An overview of the available command line options is available with the switch \verb|-h| or its long variant \verb|--help|.
-See section \ref{appendix:plasma-cli-help} for a listing of the output of this command with \plasma{} in version \version{}.
+See section~\ref{appendix:plasma-cli-help} for a listing of the output of this command with \plasma{} in version \version{}.
 \subsubsection{Determining the version}
 The command line switch \verb|--version| displays the version of \plasma{}.
 If additionally the switch \verb|-v| or its long variant \verb|--verbose| is given, then additionally the full SHA1-string of the version is displayed.
@@ -238,7 +238,7 @@ The following algorithms are provided:
 \label{subsection:running-discrover}
 \subsubsection{Getting help on command line options}
 An overview of the available command line options is available with the switch \verb|-h| or its long variant \verb|--help|.
-See section \ref{appendix:discrover-cli-help} for a listing of the output of this command with \discrover{} in version \version{}.
+See section~\ref{appendix:discrover-cli-help} for a listing of the output of this command with \discrover{} in version \version{}.
 
 Note that by default not all options are shown.
 To display some infrequently used options please specify \verb|-hv| or \verb|--help --verbose|.
