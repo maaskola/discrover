@@ -1,3 +1,5 @@
+# vim:ft=todo
+
 * Implement different motif models
   - simple chain of states - done
   - chain of states with manual insertion states - done
@@ -39,3 +41,8 @@ CMake Warning (dev) at doc/CMakeLists.txt:19 (GET_PROPERTY):
 
 Either install hmm.rb into a proper location or merge into tikzlogo / hmm2meme
 Automatically run tikzlogo in discrover
+
+Sequence logos:
+TODO 2015-01-03 Draw axes
+TODO 2015-01-03 Add more color palettes
+TODO 2015-01-03 Making sizing adjustable
