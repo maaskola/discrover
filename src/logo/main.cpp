@@ -67,6 +67,25 @@ Logo::matrix_t build_matrix(const string &motif, double absent) {
   return matrix;
 }
 
+void draw_logos(const HMM &hmm, const Logo::Options &options,
+                const string &label, size_t &motif_idx) {
+  for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
+    if (hmm.is_motif_group(group_idx)) {
+      const string nucls = "acgt";
+      Logo::matrix_t matrix;
+      for (auto state : hmm.groups[group_idx].states) {
+        Logo::column_t col(4, 0);
+        for (size_t i = 0; i < nucls.size(); i++)
+          col[i] = hmm.emission(state, i);
+        matrix.push_back(col);
+      }
+      Logo::draw_logo(
+          matrix, label + ".motif" + boost::lexical_cast<string>(motif_idx++),
+          options);
+      motif_idx++;
+    }
+}
+
 int main(int argc, const char**argv) {
   const string default_error_msg = "Please inspect the command line help with -h or --help.";
 
@@ -109,7 +128,7 @@ int main(int argc, const char**argv) {
 
   po::variables_map vm;
   try {
-    po::store(po::command_line_parser(argc, argv).options(all_options).run(), vm);
+    po::store(po::command_line_parser(argc, argv).options(all_options).positional(pos).run(), vm);
   } catch(po::unknown_option &e) {
     cout << "Error while parsing command line options:" << endl
       << "Option " << e.get_option_name() << " not known." << endl
@@ -173,35 +192,39 @@ int main(int argc, const char**argv) {
     return(EXIT_SUCCESS);
   }
 
-  if(vm.count("help")) {
+  if (vm.count("help")) {
     cout << exec_info.program_name << " " << exec_info.hmm_version << endl;
     cout << "Copyright (C) 2015 Jonas Maaskola\n"
-      "Provided under GNU General Public License Version 3 or later.\n"
-      "See the file COPYING provided with this software for details of the license.\n" << endl;
-    cout << limit_line_length(gen_usage_string(exec_info.program_name), cols) << endl << endl;
+            "Provided under GNU General Public License Version 3 or later.\n"
+            "See the file COPYING provided with this software for details of "
+            "the license.\n" << endl;
+    cout << limit_line_length(gen_usage_string(exec_info.program_name), cols)
+         << endl << endl;
     cout << all_options << endl;
     return EXIT_SUCCESS;
   }
 
   try {
     po::notify(vm);
-  } catch(po::required_option &e) {
+  } catch (po::required_option &e) {
     cout << "Error while parsing command line options:" << endl
-      << "The required option " << e.get_option_name() << " was not specified." << endl
-      << default_error_msg << endl;
-    return(-1);
+         << "The required option " << e.get_option_name()
+         << " was not specified." << endl << default_error_msg << endl;
+    return (-1);
   }
 
   // generate an output path stem if the user did not specify one
-  if(not vm.count("output")) {
+  if (not vm.count("output")) {
     label = generate_random_label(exec_info.program_name, 0, Verbosity::info);
-    while(boost::filesystem::exists(label + ".hmm"))
+    while (boost::filesystem::exists(label + ".hmm"))
       label = generate_random_label(exec_info.program_name, 5, Verbosity::info);
-    cout << "Using \"" << label << "\" as label to generate output file names." << endl;
+    cout << "Using \"" << label << "\" as label to generate output file names."
+         << endl;
   }
 
   size_t motif_idx = 0;
   for (auto iupac : iupacs) {
+    cout << "=> IUPAC motif " << iupac << endl;
     Logo::matrix_t matrix = build_matrix(iupac, options.absent);
     Logo::draw_logo(matrix,
                     label + ".motif" + boost::lexical_cast<string>(motif_idx++),
@@ -209,21 +232,18 @@ int main(int argc, const char**argv) {
   }
 
   for (auto path : matrix_paths) {
+    cout << "=> matrix file " << path << endl;
     Logo::matrix_t matrix = read_matrix(path);
     Logo::draw_logo(matrix,
                     label + ".motif" + boost::lexical_cast<string>(motif_idx++),
                     options);
   }
 
-  /*
   for (auto path : hmm_paths) {
+    cout << "=> .hmm file " << path << endl;
     HMM hmm(path, Verbosity::info);
-    Logo::matrix_t matrix = read_matrix(path);
-    Logo::draw_logo(matrix,
-                    label + ".motif" + boost::lexical_cast<string>(motif_idx++),
-                    options);
+    draw_logos(hmm, options, label, motif_idx);
   }
-  */
 
   if (motif_idx == 0)
     cout << "Nothing to do! " << default_error_msg << endl;
