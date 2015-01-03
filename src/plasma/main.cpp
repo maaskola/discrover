@@ -23,7 +23,7 @@
 #include "mask.hpp"
 #include "plasma.hpp"
 #include "../timer.hpp"
-#include "plasma_cli.hpp"
+#include "cli.hpp"
 #include "../executioninformation.hpp"
 #include "../GitSHA1.hpp"
 #include "../mcmc/montecarlo.hpp"

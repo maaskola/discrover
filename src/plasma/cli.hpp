@@ -16,7 +16,7 @@
  *
  * =====================================================================================
  *
- *       Filename:  plasma_cli.hpp
+ *       Filename:  cli.hpp
  *
  *    Description:  Routine to construct the plasma CLI options
  *
