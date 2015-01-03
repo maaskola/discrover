@@ -184,7 +184,9 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
 
   coord_t current = {0, node_height};
   for (auto &col : matrix) {
-    double col_height = information_content(col) / 2;
+    double col_height = 1;
+    if (options.type == Type::Sequence)
+      col_height = information_content(col) / 2;
 
     vector<size_t> order = {0, 1, 2, 3};
     if (options.order == Order::Frequency)
