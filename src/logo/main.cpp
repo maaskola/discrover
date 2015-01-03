@@ -84,7 +84,6 @@ int main(int argc, const char**argv) {
 
   std::vector<string> hmm_paths, matrix_paths, iupacs;
   string label;
-  // Verbosity verbosity;
   ExecutionInformation exec_info = generate_exec_info(argv[0], GIT_DESCRIPTION, cmdline(argc, argv));
 
   po::options_description basic_options("Basic options", cols);
@@ -96,8 +95,6 @@ int main(int argc, const char**argv) {
     ("output,o", po::value<string>(&label), string("Output file names are generated from this label. If this option is not specified the output label will be '" + exec_info.program_name + "_XXX' where XXX is a string to make the label unique.").c_str())
     ("help,h", "Produce help message.")
     ("version", "Print out the version.")
-    // ("version", "Print out the version. Also show git SHA1 with -v.")
-    // ("verbose,v", "Be verbose about the progress.")
     ;
 
   po::options_description logo_options = gen_logo_options_description(options, Logo::CLI::Full, cols);
@@ -170,17 +167,11 @@ int main(int argc, const char**argv) {
     return(-1);
   }
 
-  // verbosity = Verbosity::info;
-  // if(vm.count("verbose"))
-  //   verbosity = Verbosity::verbose;
-
   if(vm.count("version") and not vm.count("help")) {
     cout << exec_info.program_name << " " << exec_info.hmm_version << " [" << GIT_BRANCH << " branch]" << endl;
-    // if(verbosity >= Verbosity::verbose)
     cout << GIT_SHA1 << endl;
     return(EXIT_SUCCESS);
   }
-
 
   if(vm.count("help")) {
     cout << exec_info.program_name << " " << exec_info.hmm_version << endl;
@@ -206,7 +197,6 @@ int main(int argc, const char**argv) {
     label = generate_random_label(exec_info.program_name, 0, Verbosity::info);
     while(boost::filesystem::exists(label + ".hmm"))
       label = generate_random_label(exec_info.program_name, 5, Verbosity::info);
-//    if(options.verbosity >= Verbosity::info)
     cout << "Using \"" << label << "\" as label to generate output file names." << endl;
   }
 
