@@ -113,7 +113,7 @@ boost::program_options::options_description gen_plasma_options_description(Seedi
     desc.add(mcmc_desc);
 
 #if CAIRO_FOUND
-    po::options_description logo_options = gen_logo_options_description(options.logo, true, cols);
+    po::options_description logo_options = gen_logo_options_description(options.logo, Logo::CLI::IUPAC, cols);
     desc.add(logo_options);
 #endif
   } else {

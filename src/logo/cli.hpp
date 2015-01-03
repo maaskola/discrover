@@ -33,8 +33,12 @@
 #include <boost/program_options.hpp>
 #include "options.hpp"
 
+namespace Logo {
+enum class CLI { HMM, IUPAC, Full };
+}
+
 boost::program_options::options_description gen_logo_options_description(
-    Logo::Options &options, bool iupac_mode = true, size_t cols = 80,
+    Logo::Options &options, Logo::CLI mode, size_t cols = 80,
     const std::string &name = "Sequence logo creation options");
 
 #endif /* ----- #ifndef LOGO_CLI_HPP  ----- */

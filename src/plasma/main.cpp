@@ -81,15 +81,18 @@ Logo::matrix_t build_matrix(const string &motif, double absent) {
   return matrix;
 }
 
-void generate_logos(const string &motif, const Seeding::Options &options, size_t motif_idx) {
-  Logo::matrix_t matrix = build_matrix(motif, options.logo.absent);
-  auto paths = Logo::draw_logo(matrix, options.label + ".motif"
-        + boost::lexical_cast<string>(motif_idx), options.logo);
-  if(paths.size() == 0) {
-    cout << "No logos were created." << endl;
-  } else {
-    for(auto &path: paths)
-      cout << "Created logo in " << path << endl;
+void generate_logos(const Seeding::Results &results, const Seeding::Options &options) {
+  size_t motif_idx = 0;
+  for(auto &result: results) {
+    Logo::matrix_t matrix = build_matrix(result.motif, options.logo.absent);
+    auto paths = Logo::draw_logo(matrix, options.label + ".motif"
+        + boost::lexical_cast<string>(motif_idx++), options.logo);
+    if(paths.size() == 0) {
+      cout << "No logos were created." << endl;
+    } else {
+      for(auto &path: paths)
+        cout << "Created logo in " << path << endl;
+    }
   }
 }
 #endif
@@ -251,7 +254,6 @@ int main(int argc, const char** argv) {
     return(-1);
   }
 
-
   if(options.motif_specifications.size() == 0) {
     cout << "Error: you must specify motif lengths of interest with the -m switch." << endl;
     exit(-1);
@@ -294,8 +296,8 @@ int main(int argc, const char** argv) {
 
   Seeding::Plasma plasma(options);
   Seeding::Collection ds = plasma.collection;
+  Seeding::Results results;
   using res_t = Seeding::Result;
-  vector<res_t> results;
 
   size_t n = options.motif_specifications.size();
   for(auto &motif: options.motif_specifications) {
@@ -307,15 +309,11 @@ int main(int argc, const char** argv) {
 
   if(results.size() == 1) {
     report(cout, results[0], ds, options);
-#if CAIRO_FOUND
-    generate_logos(results[0].motif, options, 0);
-#endif
   } else {
     sort(begin(results), end(results), [](const res_t &a, const res_t &b) { return(a.log_p <= b.log_p); });
     Seeding::Collection original_ds = ds;
     Seeding::Options opts = options;
     opts.occurrence_filter = Seeding::OccurrenceFilter::RemoveSequences;
-    size_t motif_idx = 0;
     for(auto &r: results) {
       report(cout, r, original_ds, options);
       res_t r2 = r;
@@ -323,11 +321,13 @@ int main(int argc, const char** argv) {
       report(cerr, r2, ds, options);
       cout << endl;
       Seeding::apply_mask(ds, r.motif, opts);
-#if CAIRO_FOUND
-      generate_logos(r.motif, options, motif_idx++);
-#endif
     }
   }
+
+#if CAIRO_FOUND
+  options.logo.revcomp = options.revcomp;
+  generate_logos(results, options);
+#endif
 
   if(options.verbosity >= Verbosity::info) {
     struct rusage usage;

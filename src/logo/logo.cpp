@@ -154,10 +154,19 @@ void draw_letter(cairo_t *cr, size_t letter, const coord_t &coord, double width,
             draw_letter_t(cr, coord, width, height, default_colors.t);
             break;
           case Alphabet::RNA:
-          case Alphabet::Undefined:  // @TODO
             draw_letter_u(cr, coord, width, height, default_colors.t);
             break;
+          case Alphabet::Undefined:
+            if (options.revcomp)
+              draw_letter_t(cr, coord, width, height, default_colors.t);
+            else
+              draw_letter_u(cr, coord, width, height, default_colors.t);
+            break;
         }
+        break;
+      default:
+        cout << "Error: wrong nucleotide index specified in generating sequence logo." << endl;
+        exit(-1);
     }
 }
 
@@ -241,13 +250,29 @@ string draw_logo(const matrix_t &matrix, const string &path, output_t kind,
   return out_path;
 }
 
-vector<string> draw_logo(const matrix_t &matrix, const string &path,
-                         const Options &options) {
+vector<string> draw_logo_rc(const matrix_t &matrix, const string &path,
+                            const Options &options) {
   vector<string> paths;
   if (options.pdf_logo)
     paths.push_back(draw_logo(matrix, path, output_t::PDF, options));
   if (options.png_logo)
     paths.push_back(draw_logo(matrix, path, output_t::PNG, options));
   return paths;
+}
+
+vector<string> draw_logo(const matrix_t &matrix, const string &out_path,
+                         const Options &options) {
+  if (not options.revcomp)
+    return draw_logo_rc(matrix, out_path, options);
+  else {
+    vector<string> paths = draw_logo_rc(matrix, out_path + ".forward", options);
+    auto rc_matrix = matrix;
+    reverse(begin(rc_matrix), end(rc_matrix));
+    for (auto &col : rc_matrix)
+      reverse(begin(col), end(col));
+    for (auto path : draw_logo_rc(rc_matrix, out_path + ".revcomp", options))
+      paths.push_back(path);
+    return paths;
+  }
 }
 };

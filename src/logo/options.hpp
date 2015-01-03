@@ -30,6 +30,7 @@ struct Options {
   bool pdf_logo;
   bool png_logo;
   bool axes;
+  bool revcomp;
   Type type;
   Alphabet alphabet;
   Order order;

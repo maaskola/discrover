@@ -138,6 +138,7 @@ void fixup_seeding_options(Options::HMM &options) {
   options.seeding.measure_runtime = options.timing_information;
   options.seeding.label = options.label;
 #if CAIRO_FOUND
+  options.logo.revcomp = options.revcomp;
   options.seeding.logo = options.logo;
   options.seeding.logo.pdf_logo = false;
   options.seeding.logo.png_logo = false;
@@ -190,7 +191,7 @@ int main(int argc, const char** argv)
   po::options_description seeding_options = gen_plasma_options_description(options.seeding, "", "Seeding options for IUPAC regular expression finding", cols, false, false);
 
 #if CAIRO_FOUND
-  po::options_description logo_options = gen_logo_options_description(options.logo, false, cols);
+  po::options_description logo_options = gen_logo_options_description(options.logo, Logo::CLI::HMM, cols);
 #endif
 
   generic_options.add_options()

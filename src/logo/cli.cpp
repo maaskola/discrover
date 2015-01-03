@@ -15,8 +15,8 @@
 #include <boost/program_options.hpp>
 #include <vector>
 #include <iostream>
-#include "options.hpp"
 #include "../executioninformation.hpp"
+#include "cli.hpp"
 
 using namespace std;
 
@@ -70,11 +70,11 @@ istream &operator>>(istream &is, Palette &palette) {
 }
 
 boost::program_options::options_description gen_logo_options_description(
-    Logo::Options &options, bool iupac_mode, size_t cols,
+    Logo::Options &options, Logo::CLI mode, size_t cols,
     const string &name) {
   namespace po = boost::program_options;
   po::options_description desc(name, cols);
-  if (iupac_mode)
+  if (mode == Logo::CLI::IUPAC)
     desc.add_options()
       ("pdf", po::bool_switch(&options.pdf_logo), "Generate PDF files with sequence logos of the found motifs.")
       ("png", po::bool_switch(&options.png_logo), "Generate PDF files with sequence logos of the found motifs.")
@@ -90,12 +90,19 @@ boost::program_options::options_description gen_logo_options_description(
     ("alphabet", po::value<Logo::Alphabet>(&options.alphabet), "Which alphabet to use; can be either 'RNA' or 'DNA'. If left unspecified, then 'DNA' is chosen if --revcomp is used, and otherwise 'RNA'.")
     ("order", po::value<Logo::Order>(&options.order)->default_value(Logo::Order::Frequency, "freq"), "How to vertically order the nucleotides; can be either 'alpha' for alphabetic order or 'freq' for most frequent at top.")
     ;
-  if (iupac_mode)
+  if (mode == Logo::CLI::IUPAC)
     desc.add_options()
       ("absent", po::value<double>(&options.absent)->default_value(0.03, "0.03"), "Use this frequency for absent nucleotides when creating logos for IUPAC regular expression motifs.")
       ;
   else
     options.absent = 0.03;
+
+  if (mode == Logo::CLI::Full)
+    desc.add_options()
+      ("rc", po::bool_switch(&options.revcomp), "Generate sequence logos for forward and reverse complementary strand.")
+        ;
+  else
+    options.revcomp = false;
 
   return (desc);
 }

@@ -19,6 +19,7 @@ Options::Options()
     : pdf_logo(true),
       png_logo(true),
       axes(false),
+      revcomp(false),
       type(Type::Sequence),
       alphabet(Alphabet::Undefined),
       order(Order::Frequency),
