@@ -36,6 +36,10 @@ We use OpenMP to support parallelization.
 As of version 4.2 the GCC supports OpenMP out of the box, so we suggest building with a recent compiler version.
 
 
+### Cairo
+As of version 1.4.0 [Cairo](http://cairographics.org/) is used to generate sequence logos in PDF and PNG format.
+
+
 ### R library
 We are using code from the R library to compute the logarithm of the chi-square distribution function.
 During configuration it is checked if the R library is found.
@@ -68,28 +72,28 @@ Note that the above-given list of dependencies is required only for BUILDING, no
 On Debian and Ubuntu, you can install all necessary and optional software to build Discrover with the following command:
 
 ```sh
-apt-get install git cmake g++ imagemagick libboost-all-dev texlive texlive-latex-base latex-xcolor texlive-latex-extra pgf ruby ruby-dev
+apt-get install git cmake g++ libboost-all-dev texlive texlive-latex-base latex-xcolor texlive-latex-extra pgf libcairo-dev
 ```
 
 ### Gentoo
 Similarly, on Gentoo you can use:
 
 ```sh
-emerge -av dev-vcs/git dev-util/cmake sys-devel/gcc media-gfx/imagemagick dev-libs/boost dev-texlive/texlive-latexextra dev-lang/ruby
+emerge -av dev-vcs/git dev-util/cmake sys-devel/gcc dev-libs/boost dev-texlive/texlive-latexextra x11-libs/cairo
 ```
 
 ### Arch
 The corresponding command for Arch linux:
 
 ```sh
-pacman -S git cmake make gcc boost texlive-core texlive-latexextra imagemagick ruby
+pacman -S git cmake make gcc boost texlive-core texlive-latexextra cairo
 ```
 
 ### Fedora
-On Fedora 20 the following command will install all dependencies required for building:
+On Fedora 20 and 21 the following command will install all dependencies required for building:
 
 ```sh
-yum install gcc-c++ cmake git ImageMagick boost boost-devel texlive-latex-bin texlive-pgf texlive-xcolor texlive-collection-latexextra ruby ruby-devel
+yum install gcc-c++ cmake git boost boost-devel texlive-latex-bin texlive-pgf texlive-xcolor texlive-collection-latexextra cairo-devel
 ```
 
 ### Mac OS X
