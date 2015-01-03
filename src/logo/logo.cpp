@@ -33,8 +33,24 @@ struct palette_t {
   rgb_t t;
 };
 
-palette_t default_colors
+const palette_t default_colors
     = {{0.0, 0.75, 0.0}, {0.0, 0.0, 1.0}, {1, 0.6470588, 0.0}, {1.0, 0.0, 0.0}};
+
+// B58900 DC322F 6C71C4 2AA198
+const palette_t solarized_colors = {
+  {0xB5 / 255.0, 0x89 / 255.0, 0x00 / 255.0},
+  {0xDC / 255.0, 0x32 / 255.0, 0x2F / 255.0},
+  {0x6C / 255.0, 0x71 / 255.0, 0xC4 / 255.0},
+  {0x2A / 255.0, 0xA1 / 255.0, 0x98 / 255.0}
+};
+
+// 0FAD00 FF0000 FFC600 0011A4
+const palette_t tetrad_colors = {
+  {0x0F / 255.0, 0xAD / 255.0, 0x00 / 255.0},
+  {0xFF / 255.0, 0x00 / 255.0, 0x00 / 255.0},
+  {0xFF / 255.0, 0xC6 / 255.0, 0x00 / 255.0},
+  {0x00 / 255.0, 0x11 / 255.0, 0xA4 / 255.0}
+};
 
 using coords_t = vector<coord_t>;
 
@@ -137,30 +153,42 @@ void draw_letter_u(cairo_t *cr, const coord_t &coord, double width,
 
 void draw_letter(cairo_t *cr, size_t letter, const coord_t &coord, double width,
                  double height, const Options &options) {
+  palette_t palette;
+  switch(options.palette) {
+    case Palette::Default:
+      palette = default_colors;
+      break;
+    case Palette::Solarized:
+      palette = solarized_colors;
+      break;
+    case Palette::Tetrad:
+      palette = tetrad_colors;
+      break;
+  }
   if (height > 0)
     switch (letter) {
       case 0:
-        draw_letter_a(cr, coord, width, height, default_colors.a);
+        draw_letter_a(cr, coord, width, height, palette.a);
         break;
       case 1:
-        draw_letter_c(cr, coord, width, height, default_colors.c);
+        draw_letter_c(cr, coord, width, height, palette.c);
         break;
       case 2:
-        draw_letter_g(cr, coord, width, height, default_colors.g);
+        draw_letter_g(cr, coord, width, height, palette.g);
         break;
       case 3:
         switch (options.alphabet) {
           case Alphabet::DNA:
-            draw_letter_t(cr, coord, width, height, default_colors.t);
+            draw_letter_t(cr, coord, width, height, palette.t);
             break;
           case Alphabet::RNA:
-            draw_letter_u(cr, coord, width, height, default_colors.t);
+            draw_letter_u(cr, coord, width, height, palette.t);
             break;
           case Alphabet::Undefined:
             if (options.revcomp)
-              draw_letter_t(cr, coord, width, height, default_colors.t);
+              draw_letter_t(cr, coord, width, height, palette.t);
             else
-              draw_letter_u(cr, coord, width, height, default_colors.t);
+              draw_letter_u(cr, coord, width, height, palette.t);
             break;
         }
         break;
@@ -218,7 +246,7 @@ string ending(output_t kind) {
   };
 }
 
-string draw_logo(const matrix_t &matrix, const string &path, output_t kind,
+string draw_logo_sub(const matrix_t &matrix, const string &path, output_t kind,
                  const Options &options) {
   string out_path = path + "." + ending(kind);
   cout << "Sequence logo in " << out_path << endl;
@@ -256,9 +284,9 @@ vector<string> draw_logo_rc(const matrix_t &matrix, const string &path,
                             const Options &options) {
   vector<string> paths;
   if (options.pdf_logo)
-    paths.push_back(draw_logo(matrix, path, output_t::PDF, options));
+    paths.push_back(draw_logo_sub(matrix, path, output_t::PDF, options));
   if (options.png_logo)
-    paths.push_back(draw_logo(matrix, path, output_t::PNG, options));
+    paths.push_back(draw_logo_sub(matrix, path, output_t::PNG, options));
   return paths;
 }
 
