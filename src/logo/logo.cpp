@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cairo.h>
 #include <cairo-pdf.h>
+#include <boost/lexical_cast.hpp>
 #include "logo.hpp"
 
 namespace Logo {
@@ -14,6 +15,15 @@ enum class output_t { PDF, PNG };
 const double factor = 100.0;
 const double node_width = 0.75 * factor;
 const double node_height = 1.0 * factor;
+const double axis_rel_ext = 0.1;
+const double axis_tick_len = 15;
+const double axis_horiz_space = 100;
+const double axis_offset = 5;
+const double axis_line_width = 2.0;
+const double axis_font_size = 30;
+const string font_face = "sans";
+const double plot_margin = 5;
+// const string font_face = "serif";
 
 struct coord_t {
   double x;
@@ -210,7 +220,14 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
                           const Options &options) {
   cairo_t *cr = cairo_create(surface);
 
-  coord_t current = {0, node_height};
+  double basecol = 0;
+  double baseline = node_height;
+  if (options.axes) {
+    baseline *= 1.0 + axis_rel_ext;
+    baseline += plot_margin;
+    basecol = axis_horiz_space;
+  }
+  coord_t current = {basecol, baseline};
   for (auto &col : matrix) {
     double col_height = 1;
     if (options.type == Type::Sequence)
@@ -228,7 +245,58 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
     }
 
     current.x += node_width;
-    current.y = node_height;
+    current.y = baseline;
+  }
+
+  const double axis_basecol = basecol - axis_offset;
+  if (options.axes) {
+    cairo_move_to(cr, axis_basecol, node_height * (1.0 + 2 * axis_rel_ext) + plot_margin);
+    cairo_line_to(cr, axis_basecol, plot_margin);
+
+    const vector<double> ticks = {0, 0.5, 1.0};
+    for (auto pos : ticks) {
+      cairo_move_to(cr, axis_basecol,
+                    node_height * axis_rel_ext + node_height * pos + plot_margin);
+      cairo_rel_line_to(cr, -axis_tick_len, 0);
+    }
+
+    cairo_set_source_rgb(cr, 0, 0, 0);
+    cairo_set_line_width(cr, axis_line_width);
+    cairo_stroke(cr);
+
+    const double axis_annot_basecol = axis_basecol - 1.75 * axis_tick_len - (options.type == Type::Sequence ? 0 : 5);
+    for (auto pos : ticks) {
+      cairo_text_extents_t te;
+      cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+      cairo_select_font_face(cr, font_face.c_str(), CAIRO_FONT_SLANT_NORMAL,
+                             CAIRO_FONT_WEIGHT_NORMAL);
+      cairo_set_font_size(cr, axis_font_size);
+      string label = boost::lexical_cast<string>(
+          (1.0 - pos) * (options.type == Type::Sequence ? 2 : 1));
+      if (label == "0.5")
+        label = "½";
+      cairo_text_extents(cr, label.c_str(), &te);
+      cairo_move_to(cr, axis_annot_basecol - te.width / 2 - te.x_bearing,
+                    node_height * axis_rel_ext + node_height * pos
+                    - te.height / 2 - te.y_bearing + plot_margin);
+      cairo_show_text(cr, label.c_str());
+    }
+
+    const double axis_label_basecol = axis_annot_basecol - 1.2 * axis_font_size;
+    cairo_save(cr);
+    cairo_text_extents_t te;
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    cairo_select_font_face(cr, font_face.c_str(), CAIRO_FONT_SLANT_NORMAL,
+                           CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cr, axis_font_size);
+    const string label = boost::lexical_cast<string>(
+        options.type == Type::Sequence ? "IC [bit]" : "Freq.");
+    cairo_text_extents(cr, label.c_str(), &te);
+    cairo_move_to(cr, axis_label_basecol - te.height / 2 - te.y_bearing,
+                  node_height * axis_rel_ext + node_height * 0.5 + te.width / 2 + te.x_bearing);
+    cairo_rotate(cr, -0.5 * M_PI);
+    cairo_show_text(cr, label.c_str());
+    cairo_restore(cr);
   }
 
   cairo_show_page(cr);
@@ -253,6 +321,11 @@ string draw_logo_sub(const matrix_t &matrix, const string &path, output_t kind,
 
   double width = node_width * matrix.size();
   double height = node_height;
+  if (options.axes) {
+    width += axis_horiz_space;
+    height *= 1.0 + 2 * axis_rel_ext;
+    height += 2 * plot_margin;
+  }
 
   cairo_surface_t *surface;
   switch (kind) {

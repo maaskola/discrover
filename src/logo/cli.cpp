@@ -26,7 +26,8 @@ istream &operator>>(istream &is, Type &type) {
   string Word;
   is >> Word;
   string word = string_tolower(Word);
-  if (word == "seq" or word == "sequence")
+  if (word == "seq" or word == "sequence" or word == "info"
+      or word == "information")
     type = Type::Sequence;
   else if (word == "freq" or word == "frequency")
     type = Type::Frequency;
@@ -106,7 +107,7 @@ boost::program_options::options_description gen_logo_options_description(
       ;
   desc.add_options()
     ("axes", po::bool_switch(&options.axes), "Include axes in sequence logos.")
-    ("logotype", po::value<Logo::Type>(&options.type)->default_value(Logo::Type::Sequence, "seq"), "Which kind of logo to create; 'seq' for sequence logo (position height scaled by information content), 'freq' for frequency logo.")
+    ("logo", po::value<Logo::Type>(&options.type)->default_value(Logo::Type::Sequence, "info"), "Which kind of logo to create; 'info' for information-type sequence logo (position height scaled by information content), 'freq' for frequency logo.")
     ("alphabet", po::value<Logo::Alphabet>(&options.alphabet), "Which alphabet to use; can be either 'RNA' or 'DNA'. If left unspecified, then 'DNA' is chosen if --revcomp is used, and otherwise 'RNA'.")
     ("order", po::value<Logo::Order>(&options.order)->default_value(Logo::Order::Frequency, "freq"), "How to vertically order the nucleotides; can be either 'alpha' for alphabetic order or 'freq' for most frequent at top.")
     ("pal", po::value<Logo::Palette>(&options.palette)->default_value(Logo::Palette::Default, "default"), "Color palette to use; available are 'default', 'solarized', 'tetrad'.")
