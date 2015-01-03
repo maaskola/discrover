@@ -12,18 +12,33 @@ using namespace std;
 
 enum class output_t { PDF, PNG };
 
-const double factor = 100.0;
-const double node_width = 0.75 * factor;
-const double node_height = 1.0 * factor;
-const double axis_rel_ext = 0.1;
-const double axis_tick_len = 15;
-const double axis_horiz_space = 100;
-const double axis_offset = 5;
-const double axis_line_width = 2.0;
-const double axis_font_size = 30;
 const string font_face = "sans";
-const double plot_margin = 5;
 // const string font_face = "serif";
+
+struct dimensions_t {
+  dimensions_t(double scale) :
+    factor(scale / 100.0),
+    node_width(0.75 * scale),
+    node_height(1.0 * scale),
+    axis_rel_ext(0.1),
+    axis_tick_len(15.0 * factor),
+    axis_horiz_space(100.0 * factor),
+    axis_offset(5.0 * factor),
+    axis_line_width(2.0 * factor),
+    axis_font_size(30.0 * factor),
+    plot_margin(5.0 * factor) { };
+
+  double factor;
+  double node_width;
+  double node_height;
+  double axis_rel_ext;
+  double axis_tick_len;
+  double axis_horiz_space;
+  double axis_offset;
+  double axis_line_width;
+  double axis_font_size;
+  double plot_margin;
+};
 
 struct coord_t {
   double x;
@@ -217,15 +232,15 @@ double information_content(const column_t &col) {
 }
 
 void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
-                          const Options &options) {
+    const dimensions_t &dims, const Options &options) {
   cairo_t *cr = cairo_create(surface);
 
   double basecol = 0;
-  double baseline = node_height;
+  double baseline = dims.node_height;
   if (options.axes) {
-    baseline *= 1.0 + axis_rel_ext;
-    baseline += plot_margin;
-    basecol = axis_horiz_space;
+    baseline *= 1.0 + dims.axis_rel_ext;
+    baseline += dims.plot_margin;
+    basecol = dims.axis_horiz_space;
   }
   coord_t current = {basecol, baseline};
   for (auto &col : matrix) {
@@ -239,61 +254,61 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
            [&](size_t a, size_t b) { return col[a] < col[b]; });
 
     for (auto idx : order) {
-      double current_height = col[idx] * node_height * col_height;
-      draw_letter(cr, idx, current, node_width, current_height, options);
+      double current_height = col[idx] * dims.node_height * col_height;
+      draw_letter(cr, idx, current, dims.node_width, current_height, options);
       current.y -= current_height;
     }
 
-    current.x += node_width;
+    current.x += dims.node_width;
     current.y = baseline;
   }
 
-  const double axis_basecol = basecol - axis_offset;
+  const double axis_basecol = basecol - dims.axis_offset;
   if (options.axes) {
-    cairo_move_to(cr, axis_basecol, node_height * (1.0 + 2 * axis_rel_ext) + plot_margin);
-    cairo_line_to(cr, axis_basecol, plot_margin);
+    cairo_move_to(cr, axis_basecol, dims.node_height * (1.0 + 2 * dims.axis_rel_ext) + dims.plot_margin);
+    cairo_line_to(cr, axis_basecol, dims.plot_margin);
 
     const vector<double> ticks = {0, 0.5, 1.0};
     for (auto pos : ticks) {
       cairo_move_to(cr, axis_basecol,
-                    node_height * axis_rel_ext + node_height * pos + plot_margin);
-      cairo_rel_line_to(cr, -axis_tick_len, 0);
+                    dims.node_height * dims.axis_rel_ext + dims.node_height * pos + dims.plot_margin);
+      cairo_rel_line_to(cr, -dims.axis_tick_len, 0);
     }
 
     cairo_set_source_rgb(cr, 0, 0, 0);
-    cairo_set_line_width(cr, axis_line_width);
+    cairo_set_line_width(cr, dims.axis_line_width);
     cairo_stroke(cr);
 
-    const double axis_annot_basecol = axis_basecol - 1.75 * axis_tick_len - (options.type == Type::Sequence ? 0 : 5);
+    const double axis_annot_basecol = axis_basecol - 1.75 * dims.axis_tick_len - (options.type == Type::Sequence ? 0 : 5);
     for (auto pos : ticks) {
       cairo_text_extents_t te;
       cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
       cairo_select_font_face(cr, font_face.c_str(), CAIRO_FONT_SLANT_NORMAL,
                              CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size(cr, axis_font_size);
+      cairo_set_font_size(cr, dims.axis_font_size);
       string label = boost::lexical_cast<string>(
           (1.0 - pos) * (options.type == Type::Sequence ? 2 : 1));
       if (label == "0.5")
         label = "½";
       cairo_text_extents(cr, label.c_str(), &te);
       cairo_move_to(cr, axis_annot_basecol - te.width / 2 - te.x_bearing,
-                    node_height * axis_rel_ext + node_height * pos
-                    - te.height / 2 - te.y_bearing + plot_margin);
+                    dims.node_height * dims.axis_rel_ext + dims.node_height * pos
+                    - te.height / 2 - te.y_bearing + dims.plot_margin);
       cairo_show_text(cr, label.c_str());
     }
 
-    const double axis_label_basecol = axis_annot_basecol - 1.2 * axis_font_size;
+    const double axis_label_basecol = axis_annot_basecol - 1.2 * dims.axis_font_size;
     cairo_save(cr);
     cairo_text_extents_t te;
     cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
     cairo_select_font_face(cr, font_face.c_str(), CAIRO_FONT_SLANT_NORMAL,
                            CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size(cr, axis_font_size);
+    cairo_set_font_size(cr, dims.axis_font_size);
     const string label = boost::lexical_cast<string>(
         options.type == Type::Sequence ? "IC [bit]" : "Freq.");
     cairo_text_extents(cr, label.c_str(), &te);
     cairo_move_to(cr, axis_label_basecol - te.height / 2 - te.y_bearing,
-                  node_height * axis_rel_ext + node_height * 0.5 + te.width / 2 + te.x_bearing);
+                  dims.node_height * dims.axis_rel_ext + dims.node_height * 0.5 + te.width / 2 + te.x_bearing);
     cairo_rotate(cr, -0.5 * M_PI);
     cairo_show_text(cr, label.c_str());
     cairo_restore(cr);
@@ -319,12 +334,13 @@ string draw_logo_sub(const matrix_t &matrix, const string &path, output_t kind,
   string out_path = path + "." + ending(kind);
   cout << "Sequence logo in " << out_path << endl;
 
-  double width = node_width * matrix.size();
-  double height = node_height;
+  dimensions_t dims(options.scale);
+  double width = dims.node_width * matrix.size();
+  double height = dims.node_height;
   if (options.axes) {
-    width += axis_horiz_space;
-    height *= 1.0 + 2 * axis_rel_ext;
-    height += 2 * plot_margin;
+    width += dims.axis_horiz_space;
+    height *= 1.0 + 2 * dims.axis_rel_ext;
+    height += 2 * dims.plot_margin;
   }
 
   cairo_surface_t *surface;
@@ -339,7 +355,7 @@ string draw_logo_sub(const matrix_t &matrix, const string &path, output_t kind,
       return "";
   }
 
-  draw_logo_to_surface(surface, matrix, options);
+  draw_logo_to_surface(surface, matrix, dims, options);
 
   switch (kind) {
     case output_t::PDF:

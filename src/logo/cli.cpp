@@ -111,6 +111,7 @@ boost::program_options::options_description gen_logo_options_description(
     ("alphabet", po::value<Logo::Alphabet>(&options.alphabet), "Which alphabet to use; can be either 'RNA' or 'DNA'. If left unspecified, then 'DNA' is chosen if --revcomp is used, and otherwise 'RNA'.")
     ("order", po::value<Logo::Order>(&options.order)->default_value(Logo::Order::Frequency, "freq"), "How to vertically order the nucleotides; can be either 'alpha' for alphabetic order or 'freq' for most frequent at top.")
     ("pal", po::value<Logo::Palette>(&options.palette)->default_value(Logo::Palette::Default, "default"), "Color palette to use; available are 'default', 'solarized', 'tetrad'.")
+    ("scale", po::value<double>(&options.scale)->default_value(100.0, "100"), "Height in pixels of the nucleotide stacks in the sequence logos.")
     ;
   if (mode != Logo::CLI::HMM)
     desc.add_options()

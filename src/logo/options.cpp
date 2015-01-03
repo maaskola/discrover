@@ -24,5 +24,6 @@ Options::Options()
       alphabet(Alphabet::Undefined),
       order(Order::Frequency),
       palette(Palette::Default),
-      absent(0.03) {}
+      absent(0.03),
+      scale(1.0) {}
 }

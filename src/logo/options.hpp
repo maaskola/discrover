@@ -36,6 +36,7 @@ struct Options {
   Order order;
   Palette palette;
   double absent;
+  double scale;
 };
 }
 
