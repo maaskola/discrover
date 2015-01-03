@@ -180,7 +180,7 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
     vector<size_t> order = {0, 1, 2, 3};
     if (options.order == Order::Frequency)
       sort(begin(order), end(order),
-           [&](size_t a, size_t b) { return col[a] > col[b]; });
+           [&](size_t a, size_t b) { return col[a] < col[b]; });
 
     for (auto idx : order) {
       double current_height = col[idx] * node_height * col_height;
