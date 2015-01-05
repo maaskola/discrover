@@ -5,6 +5,7 @@
 \documentclass[a4paper]{article}
 
 \usepackage{doi,hyperref,verbatimbox,verbatim,url}
+\usepackage{tikz,xcolor,booktabs}
 \usepackage[numbers]{natbib}
 
 \newcommand{\plasma}[0]{\texttt{plasma}}
@@ -147,6 +148,87 @@ discrover signal.fa control.fa -m 5-10 -r
 \fbox{\theverbbox[t]}
 
 
+\begin{figure}
+  \def\dist{1cm}
+  \centering
+  \begin{tikzpicture}[%
+      baseline=(n.north),
+      every path/.style={gray},
+      every node/.style={%
+        black,
+        anchor=base
+      },
+    ]
+    \node at (0*\dist,0) (a) {a};
+    \node at (1*\dist,0) (c) {c};
+    \node at (2*\dist,0) (g) {g};
+    \node at (3*\dist,0) (t) {t};
+    \node at (-1*\dist,2*\dist) (s) {s};
+    \node at (0*\dist,2*\dist) (w) {w};
+    \node at (1*\dist,2*\dist) (r) {r};
+    \node at (2*\dist,2*\dist) (y) {y};
+    \node at (3*\dist,2*\dist) (k) {k};
+    \node at (4*\dist,2*\dist) (m) {m};
+    \draw (a) -- (w);
+    \draw (a) -- (m);
+    \draw (a) -- (r);
+    \draw (c) -- (s);
+    \draw (c) -- (y);
+    \draw (c) -- (m);
+    \draw (g) -- (s);
+    \draw (g) -- (k);
+    \draw (g) -- (r);
+    \draw (t) -- (w);
+    \draw (t) -- (k);
+    \draw (t) -- (y);
+    \node at (0*\dist,4*\dist) (b) {b};
+    \node at (1*\dist,4*\dist) (d) {d};
+    \node at (2*\dist,4*\dist) (h) {h};
+    \node at (3*\dist,4*\dist) (v) {v};
+    \node at (1.5*\dist,6*\dist) (n) {n};
+    \draw (s) -- (b);
+    \draw (k) -- (b);
+    \draw (y) -- (b);
+    \draw (r) -- (d);
+    \draw (k) -- (d);
+    \draw (w) -- (d);
+    \draw (m) -- (h);
+    \draw (y) -- (h);
+    \draw (w) -- (h);
+    \draw (m) -- (v);
+    \draw (s) -- (v);
+    \draw (r) -- (v);
+    \draw (b) -- (n);
+    \draw (d) -- (n);
+    \draw (h) -- (n);
+    \draw (v) -- (n);
+  \end{tikzpicture}
+  \hfill
+  \begin{tabular}[t]{ccc}
+    \toprule
+    Code & Nucleotides & Mnemonic\\
+    \midrule
+    a & a & Adenine \\
+    c & c & Cytosin \\
+    g & g & Guanine \\
+    t & t & Thymine \\
+    s & cg & Strong \\
+    w & at & Weak \\
+    r & ag & Purine \\
+    y & ct & Pyrimidine \\
+    m & ac & Amino \\
+    k & gt & Keto \\
+    b & cgt & Not-a \\
+    d & agt & Not-c \\
+    h & act & Not-d \\
+    v & acg & Not-t \\
+    n & acgt & Any \\
+    \bottomrule
+  \end{tabular}
+  \caption[IUPAC nucleic acid code]{%
+    The IUPAC code for nucleic acids.
+  }
+\end{figure}
 
 \subsection{Manual seed specification for \discrover{}}
 Say that you have found a seed of interest for your protein, for example by manually using \plasma{} as described in section \ref{tutorial:plasma}.
