@@ -172,20 +172,24 @@ The general syntax for such a motif specification is:\\
 \fbox{\theverbbox[t]}\\
 Here, we use the three best seeds for each length of 5--16~nt.
 
-\subsubsection{Multiple, independent seeds}
+\subsubsection{Multiple independent models with individual seeds}
 When the switch \verb|--multiple| is not used, as in the next example, multiple seeds are independently sought, an HMM is initialized and independently optimized for each, and subsequently the single best HMM is reported.\\
 \begin{verbbox}
 discrover signal.fa control.fa -m 5-16x3 -r
 \end{verbbox}
 \fbox{\theverbbox[t]}
 
-\subsubsection{HMM of multiple motifs}
-However when the switch \verb|--multiple| is used, as in the next example, a more refined procedure is used.\\
+\subsubsection{HMMs of multiple motifs}
+However when the switch \verb|--multiple| is used, as in the next example, a more refined procedure is used.
+For the details of this mode please refer to the publication.
+In particular, the supplementary material contains flowcharts illustrating how this mode builds models of multiple motifs.\\
 \begin{verbbox}
 discrover signal.fa control.fa -m 5-16x3 -r --multiple
 \end{verbbox}
 \fbox{\theverbbox[t]}
 
+Different models are learned and tested when the switch \verb|--multiple| is used.
+The final, accepted model's parameters and output files extend the label used for the file names with a \verb|.accepted| tag.
 
 \subsection{Generating sequence logos for motifs}
 The package provides multiple ways to generate sequence logos of motifs.
