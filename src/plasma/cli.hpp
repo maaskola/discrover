@@ -1,5 +1,5 @@
 /* =====================================================================================
- * Copyright (c) 2011, Jonas Maaskola
+ * Copyright (c) 2012, Jonas Maaskola
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,22 +16,26 @@
  *
  * =====================================================================================
  *
- *       Filename:  analysis.hpp
+ *       Filename:  cli.hpp
  *
- *    Description:  Header for the top-level analysis routines
+ *    Description:  Routine to construct the plasma CLI options
  *
- *        Created:  Thu Aug 4 22:12:31 2011 +0200
+ *        Created:  Thu May 31 06:47:48 2012 +0200
  *
  *         Author:  Jonas Maaskola <jonas@maaskola.de>
  *
  * =====================================================================================
  */
 
-#ifndef ANALYSIS_HPP
-#define ANALYSIS_HPP
+#ifndef PLASMA_CLI_HPP
+#define PLASMA_CLI_HPP
 
-#include "hmm.hpp"
+#include <boost/program_options.hpp>
+#include "options.hpp"
 
-int perform_analysis(Options::HMM &options);
+boost::program_options::options_description gen_plasma_options_description(
+    Seeding::Options &options, const std::string &prefix = "",
+    const std::string &name = "IUPAC regular expression finding options",
+    size_t cols = 80, bool include_all = true, bool allow_short = true);
 
-#endif
+#endif /* ----- #ifndef PLASMA_CLI_HPP  ----- */

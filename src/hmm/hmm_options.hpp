@@ -105,6 +105,9 @@ namespace Options {
     bool dont_save_shuffle_sequences;
     std::vector<std::string> seeds;
     Seeding::Options seeding;
+#if CAIRO_FOUND
+    Logo::Options logo;
+#endif
     Evaluation evaluate;
     size_t n_threads;
     size_t n_seq;

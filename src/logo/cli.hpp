@@ -1,5 +1,5 @@
 /* =====================================================================================
- * Copyright (c) 2012, Jonas Maaskola
+ * Copyright (c) 2014, Jonas Maaskola
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,26 +16,29 @@
  *
  * =====================================================================================
  *
- *       Filename:  plasma_cli.hpp
+ *       Filename:  cli.hpp
  *
- *    Description:  Routine to construct the plasma CLI options
+ *    Description:  Routine to construct the CLI options for logo creation
  *
- *        Created:  Thu May 31 06:47:48 2012 +0200
+ *        Created:  Fri Jan 02 20:32:15 2014 +0100
  *
  *         Author:  Jonas Maaskola <jonas@maaskola.de>
  *
  * =====================================================================================
  */
 
-#ifndef PLASMA_CLI_HPP
-#define PLASMA_CLI_HPP
+#ifndef LOGO_CLI_HPP
+#define LOGO_CLI_HPP
 
 #include <boost/program_options.hpp>
 #include "options.hpp"
 
-boost::program_options::options_description gen_iupac_options_description(
-    Seeding::Options &options, const std::string &prefix = "",
-    const std::string &name = "IUPAC regular expression finding options",
-    size_t cols = 80, bool include_all = true, bool allow_short = true);
+namespace Logo {
+enum class CLI { HMM, IUPAC, Full };
+}
 
-#endif /* ----- #ifndef PLASMA_CLI_HPP  ----- */
+boost::program_options::options_description gen_logo_options_description(
+    Logo::Options &options, Logo::CLI mode, size_t cols = 80,
+    const std::string &name = "Sequence logo creation options");
+
+#endif /* ----- #ifndef LOGO_CLI_HPP  ----- */

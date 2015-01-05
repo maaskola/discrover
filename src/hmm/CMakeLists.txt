@@ -20,6 +20,7 @@ SET_TARGET_PROPERTIES(discrover-bin
   PROPERTIES OUTPUT_NAME discrover)
 
 TARGET_LINK_LIBRARIES(discrover
+  discroverplasma
   -L${Boost_LIBRARY_DIRS}
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
@@ -35,7 +36,6 @@ ENDIF()
 
 TARGET_LINK_LIBRARIES(discrover-bin
   discrover
-  discroverplasma
   -L${Boost_LIBRARY_DIRS}
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
   ${Boost_DATE_TIME_LIBRARY})
@@ -48,7 +48,7 @@ ENDIF()
 
 INSTALL(TARGETS discrover-bin discrover
     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib/static
+    LIBRARY DESTINATION ${LIBDIR}
+    ARCHIVE DESTINATION ${LIBDIR}/static
     DESTINATION "${CMAKE_INSTALL_PREFIX}"
     )

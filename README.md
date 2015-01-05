@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/maaskola/discrover.svg?branch=master)](https://travis-ci.org/maaskola/discrover)
+
 # Discrover
 ### Discriminative discovery of sequence motifs with hidden Markov models
 
@@ -52,16 +54,18 @@ The synthetic sequence data used in the [publication](http://nar.oxfordjournals.
 Below is a minimal description on how to use this package.
 Please refer to the [manual](doc/discrover-manual.pdf) and the command line help for more information.
 
-The package contains two binaries, ```plasma``` and ```discrover```.
-Furthermore, a Ruby script ```tikzlogo``` creates sequence logos in PDF and PNG format (using LaTeX, TikZ, and ImageMagick).
+The package contains two main programs: ```plasma``` and ```discrover```.
 
 ```plasma``` is used to find IUPAC regular expression type motifs, and ```discrover``` learns HMMs.
 Both use discriminative objective functions.
 If no seeds are specified for ```discrover```, ```plasma``` will be used to find seeds automatically.
 
-The command line help is available with ```discrover -h``` or ```discrover --help``` and, similarly, ```plasma -h``` or ```plasma --help```.
+Command line help is available with ```discrover -h``` or ```discrover --help``` and, similarly, ```plasma -h``` or ```plasma --help```.
 
 Note that some infrequently used options are hidden by default, and may be shown with the verbose switch: ```discrover -hv```
 
 Even more obscure options are available by adding the very verbose switch: ```discrover -hV```
 
+### Sequence logos
+Both ```plasma``` and ```discrover``` can generate sequence logos (and ```discrover``` does so by default).
+The same sequence logo creation routines are also available in the separate program ```discrover-logo```.

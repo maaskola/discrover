@@ -21,7 +21,7 @@ IF(NOT(PDFLATEX_COMPILER STREQUAL "PDFLATEX_COMPILER-NOTFOUND"))
 
   ADD_CUSTOM_TARGET(GenCLIHelp
     COMMAND ${PLASMA_BINARY_PATH} -h > plasma-cli-help.txt
-    COMMAND ${DISCROVER_BINARY_PATH} -h > discrover-cli-help.txt
+    COMMAND ${DISCROVER_BINARY_PATH} -hv > discrover-cli-help.txt
     DEPENDS plasma-bin discrover-bin
   )
 

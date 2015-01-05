@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  main.cpp
+ *       Filename:  cli.cpp
  *
  *    Description:  
  *
@@ -16,6 +16,7 @@
 #include <vector>
 #include "options.hpp"
 #include "../random_seed.hpp"
+#include "../logo/cli.hpp"
 #include "../executioninformation.hpp"
 
 using namespace std;
@@ -31,7 +32,7 @@ string form_switch(const string &prefix, const string &s,
     return prefix + s;
 }
 
-boost::program_options::options_description gen_iupac_options_description(Seeding::Options &options,
+boost::program_options::options_description gen_plasma_options_description(Seeding::Options &options,
     const string &prefix,
     const string &name,
     size_t cols,
@@ -111,6 +112,11 @@ boost::program_options::options_description gen_iupac_options_description(Seedin
       ("partemp", po::value<size_t>(&options.mcmc.n_parallel)->default_value(6), "Parallel chains to run for parallel tempering.")
       ;
     desc.add(mcmc_desc);
+
+#if CAIRO_FOUND
+    po::options_description logo_options = gen_logo_options_description(options.logo, Logo::CLI::IUPAC, cols);
+    desc.add(logo_options);
+#endif
   } else {
     options.mcmc.temperature = 1e-3;
     options.mcmc.n_parallel = 6;

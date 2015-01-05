@@ -23,7 +23,7 @@
 #include "mask.hpp"
 #include "plasma.hpp"
 #include "../timer.hpp"
-#include "plasma_cli.hpp"
+#include "cli.hpp"
 #include "../executioninformation.hpp"
 #include "../GitSHA1.hpp"
 #include "../mcmc/montecarlo.hpp"
@@ -53,7 +53,46 @@ std::string gen_usage_string() {
 
 using namespace std;
 
-int main(int argc, const char **argv) {
+#if CAIRO_FOUND
+Logo::matrix_t build_matrix(const string &motif, double absent) {
+  const string nucls = "acgt";
+  Logo::matrix_t matrix;
+  for(auto pos: motif) {
+    Logo::column_t col(4,0);
+    double z = 0;
+    for(size_t i = 0; i < nucls.size(); i++)
+      if(Seeding::iupac_included(nucls[i], pos)) {
+        col[i] = 1;
+        z++;
+      }
+    if(z == 0)
+      for(size_t i = 0; i < nucls.size(); i++)
+        col[i] = 1.0 / 4;
+    else {
+      for(size_t i = 0; i < nucls.size(); i++)
+        if(col[i] > 0)
+          col[i] = (1.0-(4-z)*absent) / z;
+        else
+          col[i] = absent;
+    }
+    matrix.push_back(col);
+  }
+  return matrix;
+}
+
+void generate_logos(const Seeding::Results &results,
+                    const Seeding::Options &options) {
+  size_t motif_idx = 0;
+  for (auto &result : results) {
+    Logo::matrix_t matrix = build_matrix(result.motif, options.logo.absent);
+    Logo::draw_logo(matrix, options.label + ".motif"
+                            + boost::lexical_cast<string>(motif_idx++),
+                    options.logo);
+  }
+}
+#endif
+
+int main(int argc, const char** argv) {
   Timer timer;
 
   Seeding::Options options;
@@ -66,8 +105,9 @@ int main(int argc, const char **argv) {
     ("help,h", "produce help message")
     ("version", "Print out the version. Also show git SHA1 with -v.")
     ("verbose,v", "Be verbose about the progress")
-    ("noisy,V", "Be very verbose about the progress");
-  po::options_description ext_options = gen_iupac_options_description(options);
+    ("noisy,V", "Be very verbose about the progress")
+    ;
+  po::options_description ext_options = gen_plasma_options_description(options);
 
   desc.add(ext_options);
 
@@ -280,8 +320,8 @@ int main(int argc, const char **argv) {
 
   Seeding::Plasma plasma(options);
   Seeding::Collection ds = plasma.collection;
+  Seeding::Results results;
   using res_t = Seeding::Result;
-  vector<res_t> results;
 
   size_t n = options.motif_specifications.size();
   for (auto &motif : options.motif_specifications) {
@@ -310,6 +350,11 @@ int main(int argc, const char **argv) {
       Seeding::apply_mask(ds, r.motif, opts);
     }
   }
+
+#if CAIRO_FOUND
+  options.logo.revcomp = options.revcomp;
+  generate_logos(results, options);
+#endif
 
   if (options.verbosity >= Verbosity::info) {
     struct rusage usage;

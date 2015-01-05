@@ -35,6 +35,8 @@
 #include "measure.hpp"
 #include "specification.hpp"
 #include "../verbosity.hpp"
+#include "../logo_config.hpp"
+#include "../logo/options.hpp"
 
 namespace Seeding {
 enum class OccurrenceFilter { RemoveSequences, MaskOccurrences };
@@ -92,6 +94,9 @@ struct Options {
 
   Plasma plasma;
   MCMC mcmc;
+#if CAIRO_FOUND
+  Logo::Options logo;
+#endif
 
   size_t n_threads;
   bool revcomp;

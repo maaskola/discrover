@@ -272,6 +272,9 @@ class HMM {
     friend struct Registration;
     friend struct Evaluator;
     friend struct ConditionalDecoder;
+#if CAIRO_FOUND
+    friend void draw_logos(const HMM &hmm, const Logo::Options &options, const std::string &label, size_t &motif_idx);
+#endif
 
   public:
     double compute_score(const Data::Collection &col, const Measures::Continuous::Measure &measure, const Options::HMM &options, const std::vector<size_t> &present_motifs, const std::vector<size_t> &previous_motifs=std::vector<size_t>()) const;

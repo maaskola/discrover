@@ -3,7 +3,7 @@
 
 # build a shared library
 ADD_LIBRARY(discroverplasma SHARED options.cpp measure.cpp align.cpp fasta.cpp
-  specification.cpp plasma.cpp mask.cpp count.cpp results.cpp ../matrix.cpp plasma_cli.cpp
+  specification.cpp plasma.cpp mask.cpp count.cpp results.cpp ../matrix.cpp cli.cpp
   score.cpp code.cpp data.cpp motif.cpp ../aux.cpp correction.cpp
   plasma_stats.cpp ../random_seed.cpp randomization_test.cpp dreme/dreme.cpp
   ../sha1.cpp ../timer.cpp ../shuffle/dinucleotide_shuffle.cpp
@@ -22,6 +22,10 @@ TARGET_LINK_LIBRARIES(discroverplasma
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_IOSTREAMS_LIBRARY})
 
+IF(CAIRO_FOUND)
+  TARGET_LINK_LIBRARIES(discroverplasma discroverlogo)
+ENDIF()
+
 IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
   TARGET_LINK_LIBRARIES(discroverplasma ${Boost_DATE_TIME_LIBRARY})
 ENDIF()
@@ -39,8 +43,8 @@ ENDIF()
 
 INSTALL(TARGETS plasma-bin discroverplasma
   RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib/static
+  LIBRARY DESTINATION ${LIBDIR}
+  ARCHIVE DESTINATION ${LIBDIR}/static
   DESTINATION "${CMAKE_INSTALL_PREFIX}"
   )
 

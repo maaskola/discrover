@@ -34,7 +34,8 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include "../plasma/plasma_cli.hpp"
+#include "../plasma/cli.hpp"
+#include "../logo/cli.hpp"
 #include "../GitSHA1.hpp"
 #include "analysis.hpp"
 #include "../aux.hpp"
@@ -136,7 +137,12 @@ void fixup_seeding_options(Options::HMM &options) {
   options.seeding.pseudo_count = options.contingency_pseudo_count;
   options.seeding.measure_runtime = options.timing_information;
   options.seeding.label = options.label;
-
+#if CAIRO_FOUND
+  options.logo.revcomp = options.revcomp;
+  options.seeding.logo = options.logo;
+  options.seeding.logo.pdf_logo = false;
+  options.seeding.logo.png_logo = false;
+#endif
   options.seeding.mcmc.max_iter = options.termination.max_iter;
   options.seeding.mcmc.temperature = options.sampling.temperature;
   options.seeding.mcmc.n_parallel = options.sampling.n_parallel;
@@ -182,7 +188,11 @@ int main(int argc, const char** argv)
   po::options_description termination_options("Termination options", cols);
   po::options_description hidden_options("Hidden options", cols);
 
-  po::options_description seeding_options = gen_iupac_options_description(options.seeding, "", "Seeding options for IUPAC regular expression finding", cols, false, false);
+  po::options_description seeding_options = gen_plasma_options_description(options.seeding, "", "Seeding options for IUPAC regular expression finding", cols, false, false);
+
+#if CAIRO_FOUND
+  po::options_description logo_options = gen_logo_options_description(options.logo, Logo::CLI::HMM, cols);
+#endif
 
   generic_options.add_options()
     ("config", po::value<string>(&config_path), "Read options from a configuration file. ")
@@ -331,6 +341,10 @@ int main(int argc, const char** argv)
     .add(advanced_options)
     .add(seeding_options)
     .add(init_options);
+#if CAIRO_FOUND
+  common_options
+    .add(logo_options);
+#endif
 
   po::options_description visible_options;
   visible_options

@@ -45,7 +45,7 @@ struct hash<seq_type> {
     using std::hash;
     using std::string;
 
-    // slow but compatible with previous, string-based implementation
+    // compatible with previous, string-based implementation
     return hash<string>()(decode(v));
 
     // faster

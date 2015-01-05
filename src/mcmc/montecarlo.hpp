@@ -101,7 +101,7 @@ namespace MCMC {
             std::cerr << "T = " << temp << " next state = " << nextstate << std::endl
               << "nextG = " << nextG << " G = " << G << " dG = " << dG << std::endl
               << " p = " << p << " r = " << r << std::endl;
-          if(isnan(nextG) == 0 and (dG > 0 or r <= p)) {
+          if(std::isnan(nextG) == 0 and (dG > 0 or r <= p)) {
             if(verbosity >= Verbosity::verbose)
               std::cerr << "Accepted!" << std::endl;
             state = nextstate;
