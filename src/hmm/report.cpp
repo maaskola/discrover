@@ -19,8 +19,9 @@
 using namespace std;
 
 #if CAIRO_FOUND
-void Evaluator::generate_logos(const string &path_stem,
-                               const Options::HMM &options) const {
+vector<string> Evaluator::generate_logos(const string &path_stem,
+                                         const Options::HMM &options) const {
+  vector<string> paths;
   size_t motif_idx = 0;
   for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
     if (hmm.is_motif_group(group_idx)) {
@@ -32,9 +33,11 @@ void Evaluator::generate_logos(const string &path_stem,
           col[i] = hmm.emission(state, i);
         matrix.push_back(col);
       }
-      Logo::draw_logo(matrix, path_stem, options.logo);
+      for (auto path : Logo::draw_logo(matrix, path_stem, options.logo))
+          paths.push_back(path);
       motif_idx++;
     }
+  return paths;
 }
 #endif
 
@@ -466,7 +469,7 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
                          compression2ending(options.output_compression);
 
 #if CAIRO_FOUND
-  generate_logos(options.label + file_tag, options);
+  result.files.logos = generate_logos(options.label + file_tag, options);
 #endif
 
   ofstream summary_out, occurrence_file, viterbi_file;

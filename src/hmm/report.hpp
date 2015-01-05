@@ -44,6 +44,7 @@ class Evaluator {
       std::string summary;
       std::string viterbi;
       std::string table;
+      std::vector<std::string> logos;
     };
     Files files;
   };
@@ -78,7 +79,7 @@ class Evaluator {
                                  const Options::HMM &options) const;
 
 #if CAIRO_FOUND
-  void generate_logos(const std::string &path_stem, const Options::HMM &options) const;
+  std::vector<std::string> generate_logos(const std::string &path_stem, const Options::HMM &options) const;
 #endif
 };
 
