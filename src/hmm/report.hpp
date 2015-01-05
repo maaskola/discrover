@@ -36,7 +36,7 @@
 class Evaluator {
   HMM hmm;
 
-  public:
+public:
   Evaluator(const HMM &hmm);
 
   struct Result {
@@ -53,7 +53,7 @@ class Evaluator {
                 const Training::Tasks &tasks,
                 const Options::HMM &options) const;
 
-  private:
+private:
   void print_posterior(std::ostream &os, const vector_t &scale,
                        const matrix_t &f, const matrix_t &b) const;
   void eval_contrast(std::ostream &ofs, const Data::Contrast &contrast,
@@ -79,7 +79,8 @@ class Evaluator {
                                  const Options::HMM &options) const;
 
 #if CAIRO_FOUND
-  std::vector<std::string> generate_logos(const std::string &path_stem, const Options::HMM &options) const;
+  std::vector<std::string> generate_logos(const std::string &path_stem,
+                                          const Options::HMM &options) const;
 #endif
 };
 

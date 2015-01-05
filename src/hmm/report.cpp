@@ -34,7 +34,7 @@ vector<string> Evaluator::generate_logos(const string &path_stem,
         matrix.push_back(col);
       }
       for (auto path : Logo::draw_logo(matrix, path_stem, options.logo))
-          paths.push_back(path);
+        paths.push_back(path);
       motif_idx++;
     }
   return paths;
@@ -47,10 +47,10 @@ void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast,
   for (size_t i = 0; i < m.size1(); i++)
     w = max(w, contrast.sets[i].path.size());
 
-  ofs << left << setw(w) << ""
-      << right << setw(width) << "Present"
-      << right << setw(width) << "Absent";
-  if (m.size2() == 2) ofs << right << setw(width) << "Percent";
+  ofs << left << setw(w) << "" << right << setw(width) << "Present" << right
+      << setw(width) << "Absent";
+  if (m.size2() == 2)
+    ofs << right << setw(width) << "Percent";
   ofs << endl;
 
   size_t prev_prec = ofs.precision();
@@ -71,7 +71,8 @@ template <typename X>
 void print(ostream &ofs, const string &tag, const string &what, X x,
            const string &unit = "") {
   ofs << tag << what << " = " << x;
-  if (unit != "") ofs << " " << unit;
+  if (unit != "")
+    ofs << " " << unit;
   ofs << endl;
 }
 
@@ -81,9 +82,12 @@ void count_report(ostream &ofs, const matrix_t counts, size_t motif_len,
   size_t degrees_freedom = (counts.size1() - 1) * (counts.size2() - 1);
   print_table(ofs, counts, contrast, 10, 2);
 
-  double mutualinf = calc_mutual_information(counts, pseudo_count, true, false, false);
-  double exp_mutualinf = calc_mutual_information(counts, pseudo_count, true, true, false);
-  double var_mutualinf = calc_mutual_information(counts, pseudo_count, true, true, true);
+  double mutualinf
+      = calc_mutual_information(counts, pseudo_count, true, false, false);
+  double exp_mutualinf
+      = calc_mutual_information(counts, pseudo_count, true, true, false);
+  double var_mutualinf
+      = calc_mutual_information(counts, pseudo_count, true, true, true);
   double sd_mutualinf = sqrt(var_mutualinf);
   double zscore_mutualinf = exp_mutualinf / sd_mutualinf;
   double g = calc_g_test(counts, pseudo_count);
@@ -91,22 +95,29 @@ void count_report(ostream &ofs, const matrix_t counts, size_t motif_len,
   // double correct_class = hmm.correct_classification(contrast);
   double log_p_g = pchisq(g, degrees_freedom, false, true);
   double cor_log_p_g_stringent = log(149) * motif_len + log_p_g;
-  if (limit_logp) cor_log_p_g_stringent = min<double>(0, cor_log_p_g_stringent);
+  if (limit_logp)
+    cor_log_p_g_stringent = min<double>(0, cor_log_p_g_stringent);
 
-  print(ofs, tag, "Discriminatory mutual information", mutualinf, "bit per sequence");
-  print(ofs, tag, "Expected discriminatory mutual information", exp_mutualinf, "bit per sequence");
-  print(ofs, tag, "Variance of discriminatory mutual information", var_mutualinf, "bit per sequence");
-  print(ofs, tag, "Std. dev. of discriminatory mutual information", sd_mutualinf, "bit per sequence");
-  print(ofs, tag, "Z-score of discriminatory mutual information", zscore_mutualinf, "bit per sequence");
+  print(ofs, tag, "Discriminatory mutual information", mutualinf,
+        "bit per sequence");
+  print(ofs, tag, "Expected discriminatory mutual information", exp_mutualinf,
+        "bit per sequence");
+  print(ofs, tag, "Variance of discriminatory mutual information",
+        var_mutualinf, "bit per sequence");
+  print(ofs, tag, "Std. dev. of discriminatory mutual information",
+        sd_mutualinf, "bit per sequence");
+  print(ofs, tag, "Z-score of discriminatory mutual information",
+        zscore_mutualinf, "bit per sequence");
   print(ofs, tag, "G-test", g);
   print(ofs, tag, "Log-P(Chi-Square(G-Test))", log_p_g);
-  print(ofs, tag, "Bonferroni corrected log-P(Chi-Square(G-Test))", cor_log_p_g_stringent);
+  print(ofs, tag, "Bonferroni corrected log-P(Chi-Square(G-Test))",
+        cor_log_p_g_stringent);
 }
 
-Evaluator::Evaluator(const HMM &hmm_) : hmm(hmm_) { };
+Evaluator::Evaluator(const HMM &hmm_) : hmm(hmm_){};
 
 void Evaluator::eval_contrast(ostream &ofs, const Data::Contrast &contrast,
-                   bool limit_logp, const string &tag) const {
+                              bool limit_logp, const string &tag) const {
   // double mi = hmm.mutual_information(contrast, contrast);
   // ofs << "Summed discriminatory mutual information = " << mi << " bit per
   // sequence" << endl;
@@ -124,8 +135,7 @@ void Evaluator::eval_contrast(ostream &ofs, const Data::Contrast &contrast,
       }
       // TODO EVALUATION
       // TODO compute from count table
-      double mcc = hmm.matthews_correlation_coefficient(
-          contrast, present_mask);
+      double mcc = hmm.matthews_correlation_coefficient(contrast, present_mask);
       // double llr = calc_log_likelihood_ratio(counts, hmm.pseudo_count);
       // double dips_tscore = hmm.dips_tscore(contrast, feature);
       // TODO EVALUATION
@@ -137,7 +147,9 @@ void Evaluator::eval_contrast(ostream &ofs, const Data::Contrast &contrast,
       string consensus = hmm.get_group_consensus(group_idx);
 
       ofs << endl;
-      print(ofs, tag, "Expected occurrence statistics for motif \"" + name + "\"", consensus);
+      print(ofs, tag,
+            "Expected occurrence statistics for motif \"" + name + "\"",
+            consensus);
       count_report(ofs, counts, motif_len, contrast, hmm.get_pseudo_count(),
                    limit_logp, name, tag);
       print(ofs, tag, "Matthews correlation coefficient", mcc);
@@ -150,7 +162,7 @@ void Evaluator::eval_contrast(ostream &ofs, const Data::Contrast &contrast,
       // TODO EVALUATION
       // TODO compute from count table
       print(ofs, tag, "Log likelihood difference",
-                  hmm.log_likelihood_difference(contrast, present_mask));
+            hmm.log_likelihood_difference(contrast, present_mask));
     }
 }
 
@@ -171,7 +183,8 @@ double cor_pearson(const vector<X> &x, const vector<Y> &y) {
     denom_x += a * a;
     denom_y += b * b;
   }
-  if (num == 0) return (0);
+  if (num == 0)
+    return (0);
   double r = num / sqrt(denom_x) / sqrt(denom_y);
   return (r);
 }
@@ -181,7 +194,8 @@ vector<double> tied_ranking(const vector<X> &x) {
   const size_t n = x.size();
   vector<double> r(n);
   map<X, size_t> counts;
-  for (auto &y : x) counts[y]++;
+  for (auto &y : x)
+    counts[y]++;
   size_t cumul = 0;
   for (auto &y : counts) {
     double first = cumul;
@@ -189,7 +203,8 @@ vector<double> tied_ranking(const vector<X> &x) {
     double ave = (first + cumul - 1) / 2;
     y.second = ave;
   }
-  for (size_t i = 0; i < n; i++) r[i] = counts[x[i]];
+  for (size_t i = 0; i < n; i++)
+    r[i] = counts[x[i]];
   return (r);
 }
 
@@ -247,13 +262,11 @@ void correlation_report(const vector<T> &x, ostream &out, size_t width = 12,
   }
   size_t prev_prec = out.precision();
   out << setw(width) << fixed << right << setprecision(prec) << rho
-      << setw(width) << fixed << right << setprecision(2) << z
-      << setw(width) << fixed << right << setprecision(2) << log(p_norm)
-      << setw(4) << right << stars(p_norm)
-      << setw(width) << fixed << right << setprecision(2) << t
-      << setw(width) << fixed << right << setprecision(2) << log(p_t)
-      << setw(4) << right << stars(p_t)
-      << endl;
+      << setw(width) << fixed << right << setprecision(2) << z << setw(width)
+      << fixed << right << setprecision(2) << log(p_norm) << setw(4) << right
+      << stars(p_norm) << setw(width) << fixed << right << setprecision(2) << t
+      << setw(width) << fixed << right << setprecision(2) << log(p_t) << setw(4)
+      << right << stars(p_t) << endl;
   out.unsetf(ios_base::fixed);
   out.precision(prev_prec);
 }
@@ -266,7 +279,8 @@ void Evaluator::print_posterior(ostream &os, const vector_t &scale,
     if (hmm.is_motif_group(group_idx)) {
       size_t k = *begin(hmm.groups[group_idx].states);
       os << "Posterior (" << hmm.get_group_name(group_idx) << ")";
-      for (size_t i = 1; i <= n; ++i) os << " " << f(i, k) * b(i, k) * scale(i);
+      for (size_t i = 1; i <= n; ++i)
+        os << " " << f(i, k) * b(i, k) * scale(i);
       os << endl;
     }
 }
@@ -306,7 +320,8 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
   const size_t n = dataset.sequences.size();
   size_t number_motifs = 0;
   for (size_t group_idx = 0; group_idx < n_groups; group_idx++)
-    if (hmm.is_motif_group(group_idx)) number_motifs++;
+    if (hmm.is_motif_group(group_idx))
+      number_motifs++;
 
   vector<vector<double>> atl_counts(number_motifs), exp_counts(number_motifs),
       vit_counts(number_motifs);
@@ -330,8 +345,8 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
     // TODO EVALUATION
     double lp = hmm.viterbi(dataset.sequences[i], viterbi_path);
 
-    if (not(options.evaluate.skip_viterbi_path and
-            options.evaluate.skip_summary)) {
+    if (not(options.evaluate.skip_viterbi_path
+            and options.evaluate.skip_summary)) {
       stringstream viterbi_str, exp_str, atl_str;
 
       bool first = true;
@@ -351,8 +366,8 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
           double atl = hmm.posterior_atleast_one(dataset.sequences[i],
                                                  present_mask).posterior;
           // TODO EVALUATION
-          double expected =
-              hmm.expected_posterior(dataset.sequences[i], present_mask);
+          double expected
+              = hmm.expected_posterior(dataset.sequences[i], present_mask);
           size_t n_viterbi = hmm.count_motif(viterbi_path, group_idx);
           atl_counts[motif_idx][i] = atl;
           exp_counts[motif_idx][i] = expected;
@@ -409,7 +424,8 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
       out << setw(30) << left << "Posterior number motif";
       correlation_report(exp_counts[group_idx], out, width, prec);
       vector<size_t> vit(n);
-      for (size_t i = 0; i < n; i++) vit[i] = vit_counts[group_idx][i] > 0;
+      for (size_t i = 0; i < n; i++)
+        vit[i] = vit_counts[group_idx][i] > 0;
       out << setw(30) << left << "Viterbi site";
       correlation_report(vit, out, width, prec);
       out << setw(30) << left << "Viterbi number motif";
@@ -421,8 +437,8 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
   if (options.timing_information)
     cerr << "Evaluation for " << dataset.path << ": " << time
          << " micro-seconds" << endl;
-  ResultsCounts results = {n_sites, n_motifs, n_viterbi_sites,
-                           n_viterbi_motifs};
+  ResultsCounts results
+      = {n_sites, n_motifs, n_viterbi_sites, n_viterbi_motifs};
   return (results);
 }
 
@@ -461,12 +477,13 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
     flags |= ios_base::binary;
 
   string file_tag = "";
-  if (tag != "") file_tag = tag + ".";
+  if (tag != "")
+    file_tag = tag + ".";
   result.files.summary = options.label + file_tag + ".summary";
-  result.files.table = options.label + file_tag + ".table" +
-                       compression2ending(options.output_compression);
-  result.files.viterbi = options.label + file_tag + ".viterbi" +
-                         compression2ending(options.output_compression);
+  result.files.table = options.label + file_tag + ".table"
+                       + compression2ending(options.output_compression);
+  result.files.viterbi = options.label + file_tag + ".viterbi"
+                         + compression2ending(options.output_compression);
 
 #if CAIRO_FOUND
   result.files.logos = generate_logos(options.label + file_tag, options);
@@ -491,20 +508,16 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
     col1_w += 2;
     summary_out << "Motif summary" << endl;
     // TODO: print out PWM and affinity matrix
-    summary_out << left  << setw(col0_w) << "Motif name"
-                << left  << setw(col1_w) << "Consensus"
-                << right << setw(col2_w) << "IC [bit]"
-                << endl;
+    summary_out << left << setw(col0_w) << "Motif name" << left << setw(col1_w)
+                << "Consensus" << right << setw(col2_w) << "IC [bit]" << endl;
     for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
       // do not output information about non-motif groups
       if (hmm.is_motif_group(group_idx)) {
         string consensus = hmm.get_group_consensus(group_idx);
         string name = hmm.get_group_name(group_idx);
         double ic = hmm.information_content(group_idx);
-        summary_out << left  << setw(col0_w) << name
-                    << left  << setw(col1_w) << consensus
-                    << right << setw(col2_w) << ic
-                    << endl;
+        summary_out << left << setw(col0_w) << name << left << setw(col1_w)
+                    << consensus << right << setw(col2_w) << ic << endl;
       }
     summary_out << endl;
 
@@ -521,19 +534,19 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
   if (collection.set_size != 0) {
     if (options.verbosity >= Verbosity::info) {
       cout << "Performance summary in " << result.files.summary << endl;
-      if(not options.evaluate.skip_viterbi_path)
+      if (not options.evaluate.skip_viterbi_path)
         cout << "Viterbi path in " << result.files.viterbi << endl;
-      if(not options.evaluate.skip_occurrence_table)
+      if (not options.evaluate.skip_occurrence_table)
         cout << "Motif occurrence table in " << result.files.table << endl;
     }
 
-    if(not options.evaluate.skip_viterbi_path)
+    if (not options.evaluate.skip_viterbi_path)
       viterbi_file.open(result.files.viterbi.c_str(), flags);
-    if(not options.evaluate.skip_occurrence_table)
+    if (not options.evaluate.skip_occurrence_table)
       occurrence_file.open(result.files.table.c_str());
 
-    boost::iostreams::filtering_stream<boost::iostreams::output> v_out,
-        occ_out, motif_out;
+    boost::iostreams::filtering_stream<boost::iostreams::output> v_out, occ_out,
+        motif_out;
     switch (options.output_compression) {
       case Options::Compression::gzip:
         v_out.push(boost::iostreams::gzip_compressor());
@@ -574,23 +587,24 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
     for (auto &contrast : collection) {
       vector<ResultsCounts> counts;
       for (auto &dataset : contrast) {
-        ResultsCounts c = evaluate_dataset(
-            dataset, summary_out, v_out, occ_out, motif_out, options);
+        ResultsCounts c = evaluate_dataset(dataset, summary_out, v_out, occ_out,
+                                           motif_out, options);
         counts.push_back(c);
       }
 
       if (not options.evaluate.skip_summary) {
         set<size_t> idxs;
         for (auto &a : counts)
-          for (auto &b : a.exp_sites) idxs.insert(b.first);
+          for (auto &b : a.exp_sites)
+            idxs.insert(b.first);
         for (auto i : idxs) {
           if (hmm.is_motif_group(i)) {
             size_t motif_len = hmm.get_motif_len(i);
             string name = hmm.get_group_name(i);
             string consensus = hmm.get_group_consensus(i);
 
-            string exp_motif_tag =
-                "Posterior decoded motif counts - " + name + ":" + consensus;
+            string exp_motif_tag = "Posterior decoded motif counts - " + name
+                                   + ":" + consensus;
             summary_out << endl << exp_motif_tag << endl;
             matrix_t em(counts.size(), 2);
             for (size_t j = 0; j < counts.size(); j++) {
@@ -601,8 +615,8 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
                          hmm.get_pseudo_count(), options.limit_logp, name,
                          tag + exp_motif_tag + " ");
 
-            string vit_motif_tag =
-                "Viterbi decoded motif counts - " + name + ":" + consensus;
+            string vit_motif_tag = "Viterbi decoded motif counts - " + name
+                                   + ":" + consensus;
             summary_out << endl << vit_motif_tag << endl;
             matrix_t vm(counts.size(), 2);
             for (size_t j = 0; j < counts.size(); j++) {
@@ -613,8 +627,8 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
                          hmm.get_pseudo_count(), options.limit_logp, name,
                          tag + vit_motif_tag + " ");
 
-            string exp_tag =
-                "Posterior decoded site counts - " + name + ":" + consensus;
+            string exp_tag = "Posterior decoded site counts - " + name + ":"
+                             + consensus;
             summary_out << endl << exp_tag << endl;
             matrix_t e(counts.size(), 2);
             for (size_t j = 0; j < counts.size(); j++) {
@@ -625,8 +639,8 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
                          hmm.get_pseudo_count(), options.limit_logp, name,
                          tag + exp_tag + " ");
 
-            string vit_tag =
-                "Viterbi decoded site counts - " + name + ":" + consensus;
+            string vit_tag = "Viterbi decoded site counts - " + name + ":"
+                             + consensus;
             summary_out << endl << vit_tag << endl;
             matrix_t v(counts.size(), 2);
             for (size_t j = 0; j < counts.size(); j++) {

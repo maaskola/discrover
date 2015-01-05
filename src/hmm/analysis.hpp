@@ -35,4 +35,3 @@
 int perform_analysis(Options::HMM &options);
 
 #endif
-
