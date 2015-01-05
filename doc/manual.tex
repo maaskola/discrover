@@ -102,7 +102,7 @@ The publication describing this method, \cite{Maaskola2014}, presents experiment
 \subsection{Binding site HMM optimization}
 
 \section{Tutorial}
-This tutorial will demonstrate the basic usage of the motif discovery tools in this package.
+This tutorial demonstrates the basic usage of the motif discovery tools in this package.
 Let us assume that you have one FASTA file with signal sequences, \verb|signal.fa|, and one with control sequences, \verb|control.fa|, and that you want to find motifs of length 8~nt that are discriminative between the two.
 \subsection{Basic usage}
 To perform a full analysis of discriminative motifs, \discrover{} automatically discovers the most discriminative IUPAC regular expression as seed, initializes an HMM on it, and subsequently optimizes the HMM parameters.
@@ -154,6 +154,35 @@ Let us assume it is the IUPAC regular expression \verb|tgtanatw|, where the \ver
 You can now use this IUPAC regular expression as seed for an HMM and optimize the HMM parameters as follows:\\
 \begin{verbbox}
 discrover signal.fa control.fa -m tgtanatw
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+
+\subsection{Finding multiple motifs}
+For some applications it is interesting to discover multiple motifs in a datasets.
+This allows to reveal motifs of co-factors of the assayed factor.
+This is for example of relevance in analyzing ChIP-Seq data, where a given IP'ed transcription factor often acts in conjunction with other factors, whose binding sites are often found nearby, and thus are also frequently enriched in ChIP-Seq sequences.
+
+Discrover has two ways of dealing with multiple motifs, depending on whether or not the switch \verb|--multiple| is used, as described next.
+In both modes, multiple seeds are first determined by giving a length range of interest as well as by looking for possibly multiple seeds of each length.
+The general syntax for such a motif specification is:\\
+\begin{verbbox}
+-m 5-16x3
+\end{verbbox}
+\fbox{\theverbbox[t]}\\
+Here, we use the three best seeds for each length of 5--16~nt.
+
+\subsubsection{Multiple, independent seeds}
+When the switch \verb|--multiple| is not used, as in the next example, multiple seeds are independently sought, an HMM is initialized and independently optimized for each, and subsequently the single best HMM is reported.\\
+\begin{verbbox}
+discrover signal.fa control.fa -m 5-16x3 -r
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+\subsubsection{HMM of multiple motifs}
+However when the switch \verb|--multiple| is used, as in the next example, a more refined procedure is used.\\
+\begin{verbbox}
+discrover signal.fa control.fa -m 5-16x3 -r --multiple
 \end{verbbox}
 \fbox{\theverbbox[t]}
 
