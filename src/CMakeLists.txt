@@ -1,7 +1,5 @@
 # add definitions, compiler switches, etc.
-ADD_DEFINITIONS(-Wall -funroll-loops -march=native -Wno-unused-local-typedefs
-  -fPIC)
-# ADD_DEFINITIONS(-Wall -funroll-loops -march=native -flto -Wno-unused-local-typedefs)
+ADD_DEFINITIONS(-Wall -funroll-loops -march=native -Wno-unused-local-typedefs -fPIC)
 
 ADD_SUBDIRECTORY(shuffle)
 IF(CAIRO_FOUND)
