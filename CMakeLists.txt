@@ -64,10 +64,10 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX11_FLAGS}")
 INCLUDE(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG(-flto COMPILER_SUPPORTS_LTO)
 IF(COMPILER_SUPPORTS_LTO)
-  MESSAGE(STATUS "Enabled: link-time optimizaiton.")
+  MESSAGE(STATUS "Enabled: link-time optimization")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
 ELSEIF(COMPILER_SUPPORTS_CXX0X)
-  MESSAGE(STATUS "The compiler does not support link-time optimizaiton.")
+  MESSAGE(STATUS "Disabled: link-time optimization - no compiler support")
 ENDIF()
 
 
