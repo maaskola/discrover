@@ -59,7 +59,6 @@ SET(DISCROVER_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MI
 INCLUDE(CheckCXX11Features)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX11_FLAGS}")
 
-
 # Check whether the compiler supports link-time optimization
 
 INCLUDE(CheckCXXCompilerFlag)
@@ -70,7 +69,6 @@ IF(COMPILER_SUPPORTS_LTO)
 ELSEIF(COMPILER_SUPPORTS_CXX0X)
   MESSAGE(STATUS "The compiler does not support link-time optimizaiton.")
 ENDIF()
-
 
 
 # Boost configuration
