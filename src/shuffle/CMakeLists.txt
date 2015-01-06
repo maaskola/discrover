@@ -3,6 +3,9 @@ ADD_LIBRARY(discrovershuffle SHARED dinucleotide_shuffle.cpp "${CMAKE_CURRENT_BI
 
 ADD_EXECUTABLE(dinucleotide_shuffle main.cpp ../plasma/fasta.cpp)
 
+SET_TARGET_PROPERTIES(dinucleotide_shuffle
+  PROPERTIES OUTPUT_NAME discrover-shuffle)
+
 TARGET_LINK_LIBRARIES(dinucleotide_shuffle
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
   ${Boost_FILESYSTEM_LIBRARY}

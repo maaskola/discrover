@@ -23,7 +23,7 @@
 #include "../plasma/fasta.hpp"
 #include "dinucleotide_shuffle.hpp"
 
-const std::string program_name = "dinucleotide_shuffle";
+const std::string program_name = "discrover-shuffle";
 
 std::string gen_usage_string()
 {

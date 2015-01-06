@@ -9,7 +9,7 @@
 
 \newcommand{\plasma}[0]{\texttt{plasma}}
 \newcommand{\discrover}[0]{\texttt{discrover}}
-\newcommand{\dinuclshuffle}[0]{\texttt{dinucleotide\_shuffle}}
+\newcommand{\dinuclshuffle}[0]{\texttt{discrover-shuffle}}
 
 \newcommand{\version}[0]{@GIT_DESCRIPTION@}
 \newcommand{\theurl}[0]{\url{https://github.com/maaskola/discrover}}
@@ -226,7 +226,7 @@ This software package comes with a C++ implementation of the Altschul-Erkison di
 It is available in the program \dinuclshuffle{}.
 To generate for each sequence contained within a set of signal sequence a shuffled sequence of equal length and equal dinucleotide counts, use the following command:\\
 \begin{verbbox}
-dinucleotide_shuffle signal.fa > control.fa
+discrover-shuffle signal.fa > control.fa
 \end{verbbox}
 \fbox{\theverbbox[t]}
 
