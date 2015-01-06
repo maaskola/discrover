@@ -56,8 +56,9 @@ SET(DISCROVER_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MI
 
 
 # Check for C++11 features of the compiler
-#
 INCLUDE(CheckCXX11Features)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX11_FLAGS}")
+
 
 # Boost configuration
 # You may try uncommenting some of the commented options below if you have
@@ -198,7 +199,7 @@ ELSE()
   MESSAGE(STATUS "Disabled: miscellaneous scripts (use -DWITH_MISC_SCRIPTS=ON to enable)")
 ENDIF()
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -std=c++11")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
 INCLUDE(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
