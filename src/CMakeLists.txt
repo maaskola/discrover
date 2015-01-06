@@ -2,9 +2,6 @@
 ADD_DEFINITIONS(-Wall -funroll-loops -march=native -Wno-unused-local-typedefs -fPIC)
 
 ADD_SUBDIRECTORY(shuffle)
-IF(CAIRO_FOUND)
-  ADD_SUBDIRECTORY(logo)
-ENDIF()
 ADD_SUBDIRECTORY(plasma)
 ADD_SUBDIRECTORY(hmm)
 
@@ -15,24 +12,26 @@ ADD_SUBDIRECTORY(hmm)
 ADD_LIBRARY(discrover-common OBJECT aux.cpp executioninformation.cpp matrix.cpp
   random_seed.cpp sha1.cpp terminal.cpp timer.cpp mcmc/montecarlo.cpp)
 
+LIST(APPEND DISCROVER_OBJECTS
+  $<TARGET_OBJECTS:discrover-common>
+  $<TARGET_OBJECTS:discrover-hmm>
+  $<TARGET_OBJECTS:discrover-plasma>
+  $<TARGET_OBJECTS:discrover-shuffle>)
+
 IF(CAIRO_FOUND)
-  ADD_LIBRARY(discrover SHARED
-    $<TARGET_OBJECTS:discrover-common>
-    $<TARGET_OBJECTS:discrover-hmm>
-    $<TARGET_OBJECTS:discrover-plasma>
-    $<TARGET_OBJECTS:discrover-shuffle>
-    $<TARGET_OBJECTS:discrover-logo>
-    )
-ELSE()
-  ADD_LIBRARY(discrover SHARED
-    $<TARGET_OBJECTS:discrover-common>
-    $<TARGET_OBJECTS:discrover-hmm>
-    $<TARGET_OBJECTS:discrover-plasma>
-    $<TARGET_OBJECTS:discrover-shuffle>
-    )
+  ADD_SUBDIRECTORY(logo)
+  LIST(APPEND DISCROVER_OBJECTS $<TARGET_OBJECTS:discrover-logo>)
 ENDIF()
 
+IF(NOT(LIBR_FOUND AND LIBR_MATHLIB_LIBRARY))
+  ADD_SUBDIRECTORY(stats)
+  LIST(APPEND DISCROVER_OBJECTS $<TARGET_OBJECTS:discrover-stats>)
+ENDIF()
+
+ADD_LIBRARY(discrover SHARED ${DISCROVER_OBJECTS})
+
 TARGET_LINK_LIBRARIES(discrover
+  m
   -L${Boost_LIBRARY_DIRS}
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
@@ -46,10 +45,7 @@ if(CAIRO_FOUND)
 ENDIF()
 
 IF(LIBR_FOUND AND LIBR_MATHLIB_LIBRARY)
-  TARGET_LINK_LIBRARIES(discrover m ${LIBR_LIBRARIES})
-ELSE()
-  ADD_SUBDIRECTORY(stats)
-  TARGET_LINK_LIBRARIES(discrover discroverstats)
+  TARGET_LINK_LIBRARIES(discrover ${LIBR_LIBRARIES})
 ENDIF()
 
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in"
