@@ -14,12 +14,12 @@ ADD_SUBDIRECTORY(hmm)
 # uncommenting the next line
 # ADD_SUBDIRECTORY(mcmc)
 
-ADD_LIBRARY(discrover-core OBJECT aux.cpp executioninformation.cpp matrix.cpp
+ADD_LIBRARY(discrover-common OBJECT aux.cpp executioninformation.cpp matrix.cpp
   random_seed.cpp sha1.cpp terminal.cpp timer.cpp mcmc/montecarlo.cpp)
 
 IF(CAIRO_FOUND)
   ADD_LIBRARY(discrover SHARED
-    $<TARGET_OBJECTS:discrover-core>
+    $<TARGET_OBJECTS:discrover-common>
     $<TARGET_OBJECTS:discrover-hmm>
     $<TARGET_OBJECTS:discrover-plasma>
     $<TARGET_OBJECTS:discrover-shuffle>
@@ -27,7 +27,7 @@ IF(CAIRO_FOUND)
     )
 ELSE()
   ADD_LIBRARY(discrover SHARED
-    $<TARGET_OBJECTS:discrover-core>
+    $<TARGET_OBJECTS:discrover-common>
     $<TARGET_OBJECTS:discrover-hmm>
     $<TARGET_OBJECTS:discrover-plasma>
     $<TARGET_OBJECTS:discrover-shuffle>
