@@ -91,8 +91,7 @@ istream &operator>>(istream &is, Palette &palette) {
 }
 
 boost::program_options::options_description gen_logo_options_description(
-    Logo::Options &options, Logo::CLI mode, size_t cols,
-    const string &name) {
+    Logo::Options &options, Logo::CLI mode, size_t cols, const string &name) {
   namespace po = boost::program_options;
   po::options_description desc(name, cols);
   if (mode == Logo::CLI::IUPAC)
@@ -127,5 +126,5 @@ boost::program_options::options_description gen_logo_options_description(
   else
     options.revcomp = false;
 
-  return (desc);
+  return desc;
 }

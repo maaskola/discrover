@@ -18,7 +18,7 @@
  *
  *       Filename:  matrix.hpp
  *
- *    Description:  Type definitions and routines for Boost matrix and vectors classes
+ *    Description:  Types and routines for Boost matrix and vectors classes
  *
  *        Created:  Thu Aug 4 22:12:31 2011 +0200
  *
@@ -83,4 +83,3 @@ void normalize(matrix_t &m);
 void normalize(vector_t &m);
 
 #endif
-

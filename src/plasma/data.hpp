@@ -55,7 +55,6 @@ using mask_t = std::unordered_map<std::string, mask_sub_t>;
 namespace Basic {
 template <typename X>
 struct Set : public Specification::Set {
-
   // typedefs
 
   using seq_t = X;
@@ -153,7 +152,6 @@ struct Set : public Specification::Set {
 
 template <typename X>
 struct Contrast {
-
   // typedefs
 
   using set_t = X;
@@ -232,7 +230,6 @@ struct Contrast {
 
 template <typename X>
 struct Collection {
-
   // typedefs
 
   using contrast_t = X;

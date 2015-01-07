@@ -35,7 +35,7 @@ string sha1hash(const string &s) {
 
 namespace Data {
 RemovalReport::RemovalReport(size_t n, size_t s)
-    : nucleotides(0), sequences(0) {};
+    : nucleotides(0), sequences(0){};
 
 RemovalReport &operator+=(RemovalReport &a, const RemovalReport &b) {
   a = a + b;
@@ -52,7 +52,7 @@ namespace Seeding {
 Set::Set() : Data::Basic::Set<Fasta::Entry>() {}
 
 Set::Set(const Specification::Set &s, bool revcomp, size_t n_seq)
-    : Data::Basic::Set<Fasta::Entry>(s, revcomp, n_seq) {};
+    : Data::Basic::Set<Fasta::Entry>(s, revcomp, n_seq){};
 
 Contrast::Contrast() : Data::Basic::Contrast<Set>() {}
 

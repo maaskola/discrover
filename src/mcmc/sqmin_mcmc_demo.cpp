@@ -32,28 +32,30 @@
 #include "montecarlo.hpp"
 
 namespace MCMC {
-  template <>
-    class Evaluator<double> {
-      public:
-        double evaluate(double i) const { return -i*i; };
-    };
-  template <>
-    class Generator<double> {
-      public:
-        double generate(double i) const { return i+2*(rand() * 1.0 / RAND_MAX -0.5); };
-    };
+template <>
+class Evaluator<double> {
+public:
+  double evaluate(double i) const { return -i * i; };
+};
+template <>
+class Generator<double> {
+public:
+  double generate(double i) const {
+    return i + 2 * (rand() * 1.0 / RAND_MAX - 0.5);
+  };
+};
 }
 
 using namespace std;
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   srand(time(0));
 
   size_t n_iter = 10;
   const size_t n_chains = 10;
   double temperature = 1e-3;
 
-  if(argc > 1)
+  if (argc > 1)
     n_iter = atoi(argv[1]);
 
   cout << "Doing " << n_iter << " iterations." << endl;
@@ -63,20 +65,19 @@ int main(int argc, char** argv) {
   MCMC::MonteCarlo<double> mcmc(gen, eval, Verbosity::info);
   vector<double> temperatures;
   vector<double> init;
-  for(size_t i = 0; i < n_chains; i++) {
-    init.push_back(100 + i); // + 1.0 * rand() / RAND_MAX);
+  for (size_t i = 0; i < n_chains; i++) {
+    init.push_back(100 + i);  // + 1.0 * rand() / RAND_MAX);
     temperatures.push_back(temperature);
     temperature /= 2;
   }
   cout << "Initial values:";
-  for(auto &x: init)
+  for (auto &x : init)
     cout << "\t" << x;
   cout << endl;
   auto results = mcmc.parallel_tempering(temperatures, init, n_iter);
   cout << "Final values:";
-  for(auto &x: results)
+  for (auto &x : results)
     cout << "\t" << x.back().first;
   cout << endl;
-  return(EXIT_SUCCESS);
+  return EXIT_SUCCESS;
 }
-

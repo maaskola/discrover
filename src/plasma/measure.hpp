@@ -82,19 +82,28 @@ std::istream &operator>>(std::istream &in, Measure &measure);
 std::ostream &operator<<(std::ostream &out, const Measure &measure);
 }
 
-template <typename X> bool is_discriminative(X measure);
-template <> bool is_discriminative<Discrete::Measure>(Discrete::Measure measure);
-template <> bool is_discriminative<Continuous::Measure>(Continuous::Measure measure);
+template <typename X>
+bool is_discriminative(X measure);
+template <>
+bool is_discriminative<Discrete::Measure>(Discrete::Measure measure);
+template <>
+bool is_discriminative<Continuous::Measure>(Continuous::Measure measure);
 
-template <typename X> bool is_generative(X measure) {
+template <typename X>
+bool is_generative(X measure) {
   return false;
 };
-template <> bool is_generative<Discrete::Measure>(Discrete::Measure measure);
-template <> bool is_generative<Continuous::Measure>(Continuous::Measure measure);
+template <>
+bool is_generative<Discrete::Measure>(Discrete::Measure measure);
+template <>
+bool is_generative<Continuous::Measure>(Continuous::Measure measure);
 
-template <typename X> bool is_two_by_two(X measure);
-template <> bool is_two_by_two<Discrete::Measure>(Discrete::Measure measure);
-template <> bool is_two_by_two<Continuous::Measure>(Continuous::Measure measure);
+template <typename X>
+bool is_two_by_two(X measure);
+template <>
+bool is_two_by_two<Discrete::Measure>(Discrete::Measure measure);
+template <>
+bool is_two_by_two<Continuous::Measure>(Continuous::Measure measure);
 
 Discrete::Measure corresponding_measure(Continuous::Measure);
 }

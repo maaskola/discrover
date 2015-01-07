@@ -16,17 +16,17 @@ const string font_face = "sans";
 // const string font_face = "serif";
 
 struct dimensions_t {
-  dimensions_t(double scale) :
-    factor(scale / 100.0),
-    node_width(0.75 * scale),
-    node_height(1.0 * scale),
-    axis_rel_ext(0.1),
-    axis_tick_len(15.0 * factor),
-    axis_horiz_space(100.0 * factor),
-    axis_offset(5.0 * factor),
-    axis_line_width(2.0 * factor),
-    axis_font_size(30.0 * factor),
-    plot_margin(5.0 * factor) { };
+  dimensions_t(double scale)
+      : factor(scale / 100.0),
+        node_width(0.75 * scale),
+        node_height(1.0 * scale),
+        axis_rel_ext(0.1),
+        axis_tick_len(15.0 * factor),
+        axis_horiz_space(100.0 * factor),
+        axis_offset(5.0 * factor),
+        axis_line_width(2.0 * factor),
+        axis_font_size(30.0 * factor),
+        plot_margin(5.0 * factor){};
 
   double factor;
   double node_width;
@@ -62,20 +62,16 @@ const palette_t default_colors
     = {{0.0, 0.75, 0.0}, {0.0, 0.0, 1.0}, {1, 0.6470588, 0.0}, {1.0, 0.0, 0.0}};
 
 // B58900 DC322F 6C71C4 2AA198
-const palette_t solarized_colors = {
-  {0xB5 / 255.0, 0x89 / 255.0, 0x00 / 255.0},
-  {0xDC / 255.0, 0x32 / 255.0, 0x2F / 255.0},
-  {0x6C / 255.0, 0x71 / 255.0, 0xC4 / 255.0},
-  {0x2A / 255.0, 0xA1 / 255.0, 0x98 / 255.0}
-};
+const palette_t solarized_colors = {{0xB5 / 255.0, 0x89 / 255.0, 0x00 / 255.0},
+                                    {0xDC / 255.0, 0x32 / 255.0, 0x2F / 255.0},
+                                    {0x6C / 255.0, 0x71 / 255.0, 0xC4 / 255.0},
+                                    {0x2A / 255.0, 0xA1 / 255.0, 0x98 / 255.0}};
 
 // 0FAD00 FF0000 FFC600 0011A4
-const palette_t tetrad_colors = {
-  {0x0F / 255.0, 0xAD / 255.0, 0x00 / 255.0},
-  {0xFF / 255.0, 0x00 / 255.0, 0x00 / 255.0},
-  {0xFF / 255.0, 0xC6 / 255.0, 0x00 / 255.0},
-  {0x00 / 255.0, 0x11 / 255.0, 0xA4 / 255.0}
-};
+const palette_t tetrad_colors = {{0x0F / 255.0, 0xAD / 255.0, 0x00 / 255.0},
+                                 {0xFF / 255.0, 0x00 / 255.0, 0x00 / 255.0},
+                                 {0xFF / 255.0, 0xC6 / 255.0, 0x00 / 255.0},
+                                 {0x00 / 255.0, 0x11 / 255.0, 0xA4 / 255.0}};
 
 using coords_t = vector<coord_t>;
 
@@ -177,9 +173,9 @@ void draw_letter_u(cairo_t *cr, const coord_t &coord, double width,
 }
 
 void draw_letter(cairo_t *cr, size_t letter, const coord_t &coord, double width,
-                 double height, const Options &options, double eps=1e-6) {
+                 double height, const Options &options, double eps = 1e-6) {
   palette_t palette;
-  switch(options.palette) {
+  switch (options.palette) {
     case Palette::Default:
       palette = default_colors;
       break;
@@ -218,7 +214,8 @@ void draw_letter(cairo_t *cr, size_t letter, const coord_t &coord, double width,
         }
         break;
       default:
-        cout << "Error: wrong nucleotide index specified in generating sequence logo." << endl;
+        cout << "Error: wrong nucleotide index specified in generating "
+                "sequence logo." << endl;
         exit(-1);
     }
 }
@@ -228,11 +225,11 @@ double information_content(const column_t &col) {
   for (auto &y : col)
     if (y > 0)
       x -= y * log(y) / log(2.0);
-  return (2 - x);
+  return 2 - x;
 }
 
 void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
-    const dimensions_t &dims, const Options &options) {
+                          const dimensions_t &dims, const Options &options) {
   cairo_t *cr = cairo_create(surface);
 
   double basecol = 0;
@@ -265,13 +262,16 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
 
   const double axis_basecol = basecol - dims.axis_offset;
   if (options.axes) {
-    cairo_move_to(cr, axis_basecol, dims.node_height * (1.0 + 2 * dims.axis_rel_ext) + dims.plot_margin);
+    cairo_move_to(
+        cr, axis_basecol,
+        dims.node_height * (1.0 + 2 * dims.axis_rel_ext) + dims.plot_margin);
     cairo_line_to(cr, axis_basecol, dims.plot_margin);
 
     const vector<double> ticks = {0, 0.5, 1.0};
     for (auto pos : ticks) {
-      cairo_move_to(cr, axis_basecol,
-                    dims.node_height * dims.axis_rel_ext + dims.node_height * pos + dims.plot_margin);
+      cairo_move_to(cr, axis_basecol, dims.node_height * dims.axis_rel_ext
+                                      + dims.node_height * pos
+                                      + dims.plot_margin);
       cairo_rel_line_to(cr, -dims.axis_tick_len, 0);
     }
 
@@ -279,7 +279,9 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
     cairo_set_line_width(cr, dims.axis_line_width);
     cairo_stroke(cr);
 
-    const double axis_annot_basecol = axis_basecol - 1.75 * dims.axis_tick_len - (options.type == Type::Sequence ? 0 : 5);
+    const double axis_annot_basecol
+        = axis_basecol - 1.75 * dims.axis_tick_len
+          - (options.type == Type::Sequence ? 0 : 5);
     for (auto pos : ticks) {
       cairo_text_extents_t te;
       cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
@@ -292,12 +294,14 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
         label = "½";
       cairo_text_extents(cr, label.c_str(), &te);
       cairo_move_to(cr, axis_annot_basecol - te.width / 2 - te.x_bearing,
-                    dims.node_height * dims.axis_rel_ext + dims.node_height * pos
-                    - te.height / 2 - te.y_bearing + dims.plot_margin);
+                    dims.node_height * dims.axis_rel_ext
+                    + dims.node_height * pos - te.height / 2 - te.y_bearing
+                    + dims.plot_margin);
       cairo_show_text(cr, label.c_str());
     }
 
-    const double axis_label_basecol = axis_annot_basecol - 1.2 * dims.axis_font_size;
+    const double axis_label_basecol = axis_annot_basecol
+                                      - 1.2 * dims.axis_font_size;
     cairo_save(cr);
     cairo_text_extents_t te;
     cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
@@ -308,7 +312,8 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
         options.type == Type::Sequence ? "IC [bit]" : "Freq.");
     cairo_text_extents(cr, label.c_str(), &te);
     cairo_move_to(cr, axis_label_basecol - te.height / 2 - te.y_bearing,
-                  dims.node_height * dims.axis_rel_ext + dims.node_height * 0.5 + te.width / 2 + te.x_bearing);
+                  dims.node_height * dims.axis_rel_ext + dims.node_height * 0.5
+                  + te.width / 2 + te.x_bearing);
     cairo_rotate(cr, -0.5 * M_PI);
     cairo_show_text(cr, label.c_str());
     cairo_restore(cr);
@@ -330,7 +335,7 @@ string ending(output_t kind) {
 }
 
 string draw_logo_sub(const matrix_t &matrix, const string &path, output_t kind,
-                 const Options &options) {
+                     const Options &options) {
   string out_path = path + "." + ending(kind);
   cout << "Sequence logo in " << out_path << endl;
 

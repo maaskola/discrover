@@ -3,7 +3,7 @@
  *
  *       Filename:  cli.cpp
  *
- *    Description:  
+ *    Description:
  *
  *        Created:  31.05.2012 06:47:48
  *         Author:  Jonas Maaskola <jonas@maaskola.de>
@@ -32,15 +32,12 @@ string form_switch(const string &prefix, const string &s,
     return prefix + s;
 }
 
-boost::program_options::options_description gen_plasma_options_description(Seeding::Options &options,
-    const string &prefix,
-    const string &name,
-    size_t cols,
-    bool include_all,
-    bool allow_short) {
+boost::program_options::options_description gen_plasma_options_description(
+    Seeding::Options &options, const string &prefix, const string &name,
+    size_t cols, bool include_all, bool allow_short) {
   namespace po = boost::program_options;
   po::options_description desc(name, cols);
-  if(include_all)
+  if (include_all)
     desc.add_options()
       ("fasta,f", po::value<vector<Specification::Set>>(&options.paths)->required(), "FASTA file(s) with nucleic acid sequences.")
       ("motif,m", po::value<vector<Specification::Motif>>(&options.motif_specifications)->required(), "Motif specification. "
@@ -65,7 +62,7 @@ boost::program_options::options_description gen_plasma_options_description(Seedi
     options.n_seq = 0;
   }
 
-  if(not include_all)
+  if (not include_all)
     desc.add_options()
       (form_switch(prefix, "seedscore", allow_short).c_str(), po::value<Seeding::Objectives>(&options.objectives)->default_value(Seeding::Objectives(1,Seeding::Objective("mi")), "mi"), "Which objective function to evaluate. TODO: documentation needs updating to reflect more advanced options for this argument. Available are 'signal_freq', 'control_freq', 'mi', 'mcc', 'delta_freq', 'gtest', 'gtest_logp', 'gtest_logp_raw'.")
       ;
@@ -83,7 +80,7 @@ boost::program_options::options_description gen_plasma_options_description(Seedi
     (form_switch(prefix, "fix_mspace", false).c_str(), po::bool_switch(&options.fixed_motif_space_mode), "Deactivate dynamic motif space mode. Influences how the multiple-testing correction for the log-p value of the G-test is calculated.")
     (form_switch(prefix, "allowIUPAC", false).c_str(), po::bool_switch(&options.allow_iupac_wildcards), "Interpret IUPAC wildcard symbols in FASTA files. When this option is used e.g. S (strong) matches C and G, and so on. Importantly, N matches any character! Use non-IUPAC characters for positions where the sequence is unknown or masked, e.g. you could use '-' for this. By default, only A, C, G, and T characters (and their lower case variants) are encoded while all other characters are interpreted as masked.")
     ;
-  if(include_all)
+  if (include_all)
     desc.add_options()
       ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
       ("pcount,p", po::value<double>(&options.pseudo_count)->default_value(1), "The number of pseudo counts to add to each cell of contingency tables.")
@@ -103,7 +100,7 @@ boost::program_options::options_description gen_plasma_options_description(Seedi
     options.mcmc.random_salt = generate_rng_seed();
   }
 
-  if(include_all) {
+  if (include_all) {
     po::options_description mcmc_desc("MCMC seeding options", cols);
     string mcmc_prefix = "mcmc_";
     mcmc_desc.add_options()
@@ -114,7 +111,8 @@ boost::program_options::options_description gen_plasma_options_description(Seedi
     desc.add(mcmc_desc);
 
 #if CAIRO_FOUND
-    po::options_description logo_options = gen_logo_options_description(options.logo, Logo::CLI::IUPAC, cols);
+    po::options_description logo_options
+        = gen_logo_options_description(options.logo, Logo::CLI::IUPAC, cols);
     desc.add(logo_options);
 #endif
   } else {
@@ -122,7 +120,6 @@ boost::program_options::options_description gen_plasma_options_description(Seedi
     options.mcmc.n_parallel = 6;
     options.mcmc.max_iter = 1000;
   }
-
 
   return desc;
 }

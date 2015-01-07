@@ -39,8 +39,10 @@
 #include <map>
 
 namespace Measures {
-template <typename X> bool is_discriminative(X measure);
-template <typename X> bool is_two_by_two(X measure);
+template <typename X>
+bool is_discriminative(X measure);
+template <typename X>
+bool is_two_by_two(X measure);
 };
 
 namespace Specification {

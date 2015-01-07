@@ -57,21 +57,21 @@ using namespace std;
 Logo::matrix_t build_matrix(const string &motif, double absent) {
   const string nucls = "acgt";
   Logo::matrix_t matrix;
-  for(auto pos: motif) {
-    Logo::column_t col(4,0);
+  for (auto pos : motif) {
+    Logo::column_t col(4, 0);
     double z = 0;
-    for(size_t i = 0; i < nucls.size(); i++)
-      if(Seeding::iupac_included(nucls[i], pos)) {
+    for (size_t i = 0; i < nucls.size(); i++)
+      if (Seeding::iupac_included(nucls[i], pos)) {
         col[i] = 1;
         z++;
       }
-    if(z == 0)
-      for(size_t i = 0; i < nucls.size(); i++)
+    if (z == 0)
+      for (size_t i = 0; i < nucls.size(); i++)
         col[i] = 1.0 / 4;
     else {
-      for(size_t i = 0; i < nucls.size(); i++)
-        if(col[i] > 0)
-          col[i] = (1.0-(4-z)*absent) / z;
+      for (size_t i = 0; i < nucls.size(); i++)
+        if (col[i] > 0)
+          col[i] = (1.0 - (4 - z) * absent) / z;
         else
           col[i] = absent;
     }
@@ -92,7 +92,7 @@ void generate_logos(const Seeding::Results &results,
 }
 #endif
 
-int main(int argc, const char** argv) {
+int main(int argc, const char **argv) {
   Timer timer;
 
   Seeding::Options options;

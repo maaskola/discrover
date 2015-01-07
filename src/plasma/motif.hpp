@@ -41,7 +41,6 @@ namespace Seeding {
 double information_content(const std::string &motif);
 size_t motif_degeneracy(const std::string &motif);
 std::vector<seq_type> all_generalizations(const seq_type &motif);
-
 };
 
 #endif /* ----- #ifndef MOTIF_HPP ----- */

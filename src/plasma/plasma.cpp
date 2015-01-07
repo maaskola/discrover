@@ -599,8 +599,7 @@ Results Plasma::find_all(const Specification::Motif &motif,
         break;
 
       sort(begin(new_results), end(new_results),
-           [](const Result &a,
-              const Result &b) { return a.log_p <= b.log_p; });
+           [](const Result &a, const Result &b) { return a.log_p <= b.log_p; });
 
       for (auto &result : new_results) {
         results.push_back(result);
@@ -773,8 +772,7 @@ void viterbi_dump(const string &motif, const Set &dataset, ostream &out,
     out << ">" << seq.definition << endl << "Viterbi #sites = " << n_sites
         << " Expected #sites = " << n_sites
         << " P(#sites>=1) = " << ((n_sites > 0) ? 1 : 0)
-        << " Viterbi log-p = nan" << endl
-        << seq.sequence << endl;
+        << " Viterbi log-p = nan" << endl << seq.sequence << endl;
     auto pos_iter = begin(seq.sequence);
     match_iter = begin(seq.sequence);
     while ((match_iter = search(match_iter, end(seq.sequence), begin(motif),

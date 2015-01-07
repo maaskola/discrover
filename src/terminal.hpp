@@ -27,12 +27,11 @@
  * =====================================================================================
  */
 
-#ifndef  TERMINAL_HPP
-#define  TERMINAL_HPP
+#ifndef TERMINAL_HPP
+#define TERMINAL_HPP
 
 void get_terminal_size(size_t &columns, size_t &rows);
 size_t get_terminal_width();
 size_t get_terminal_height();
 
-#endif   /* ----- #ifndef TERMINAL_HPP_INC  ----- */
-
+#endif /* ----- #ifndef TERMINAL_HPP_INC  ----- */

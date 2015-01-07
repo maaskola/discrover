@@ -31,10 +31,10 @@ Logo::matrix_t read_matrix(const string &path) {
   Logo::matrix_t matrix;
   ifstream ifs(path);
   string line;
-  while(getline(ifs, line)) {
-    Logo::column_t col(4,0);
+  while (getline(ifs, line)) {
+    Logo::column_t col(4, 0);
     stringstream ss(line);
-    for(size_t i = 0; i < 4; i++)
+    for (size_t i = 0; i < 4; i++)
       ss >> col[i];
     matrix.push_back(col);
   }
@@ -44,21 +44,21 @@ Logo::matrix_t read_matrix(const string &path) {
 Logo::matrix_t build_matrix(const string &motif, double absent) {
   const string nucls = "acgt";
   Logo::matrix_t matrix;
-  for(auto pos: motif) {
-    Logo::column_t col(4,0);
+  for (auto pos : motif) {
+    Logo::column_t col(4, 0);
     double z = 0;
-    for(size_t i = 0; i < nucls.size(); i++)
-      if(Seeding::iupac_included(nucls[i], pos)) {
+    for (size_t i = 0; i < nucls.size(); i++)
+      if (Seeding::iupac_included(nucls[i], pos)) {
         col[i] = 1;
         z++;
       }
-    if(z == 0)
-      for(size_t i = 0; i < nucls.size(); i++)
+    if (z == 0)
+      for (size_t i = 0; i < nucls.size(); i++)
         col[i] = 1.0 / 4;
     else {
-      for(size_t i = 0; i < nucls.size(); i++)
-        if(col[i] > 0)
-          col[i] = (1.0-(4-z)*absent) / z;
+      for (size_t i = 0; i < nucls.size(); i++)
+        if (col[i] > 0)
+          col[i] = (1.0 - (4 - z) * absent) / z;
         else
           col[i] = absent;
     }
@@ -86,8 +86,9 @@ void draw_logos(const HMM &hmm, const Logo::Options &options,
     }
 }
 
-int main(int argc, const char**argv) {
-  const string default_error_msg = "Please inspect the command line help with -h or --help.";
+int main(int argc, const char **argv) {
+  const string default_error_msg
+      = "Please inspect the command line help with -h or --help.";
 
   namespace po = boost::program_options;
 
@@ -96,14 +97,15 @@ int main(int argc, const char**argv) {
   static const size_t MIN_COLS = 60;
   static const size_t MAX_COLS = 80;
   size_t cols = get_terminal_width();
-  if(cols < MIN_COLS)
+  if (cols < MIN_COLS)
     cols = MIN_COLS;
-  if(cols > MAX_COLS)
+  if (cols > MAX_COLS)
     cols = MAX_COLS;
 
   std::vector<string> hmm_paths, matrix_paths, iupacs;
   string label;
-  ExecutionInformation exec_info = generate_exec_info(argv[0], GIT_DESCRIPTION, cmdline(argc, argv));
+  ExecutionInformation exec_info
+      = generate_exec_info(argv[0], GIT_DESCRIPTION, cmdline(argc, argv));
 
   po::options_description basic_options("Basic options", cols);
 
@@ -116,80 +118,84 @@ int main(int argc, const char**argv) {
     ("version", "Print out the version.")
     ;
 
-  po::options_description logo_options = gen_logo_options_description(options, Logo::CLI::Full, cols);
+  po::options_description logo_options
+      = gen_logo_options_description(options, Logo::CLI::Full, cols);
 
   po::options_description all_options;
-  all_options
-    .add(basic_options)
-    .add(logo_options);
+  all_options.add(basic_options).add(logo_options);
 
   po::positional_options_description pos;
   pos.add("hmm", -1);
 
   po::variables_map vm;
   try {
-    po::store(po::command_line_parser(argc, argv).options(all_options).positional(pos).run(), vm);
-  } catch(po::unknown_option &e) {
+    po::store(po::command_line_parser(argc, argv)
+                  .options(all_options)
+                  .positional(pos)
+                  .run(),
+              vm);
+  } catch (po::unknown_option &e) {
+    cout << "Error while parsing command line options:" << endl << "Option "
+         << e.get_option_name() << " not known." << endl << default_error_msg
+         << endl;
+    return EXIT_FAILURE;
+  } catch (po::ambiguous_option &e) {
+    cout << "Error while parsing command line options:" << endl << "Option "
+         << e.get_option_name() << " is ambiguous." << endl << default_error_msg
+         << endl;
+    return EXIT_FAILURE;
+  } catch (po::multiple_values &e) {
+    cout << "Error while parsing command line options:" << endl << "Option "
+         << e.get_option_name() << " was specified multiple times." << endl
+         << default_error_msg << endl;
+    return EXIT_FAILURE;
+  } catch (po::multiple_occurrences &e) {
+    cout << "Error while parsing command line options:" << endl << "Option "
+         << e.get_option_name() << " was specified multiple times." << endl
+         << default_error_msg << endl;
+    return EXIT_FAILURE;
+  } catch (po::invalid_option_value &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Option " << e.get_option_name() << " not known." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::ambiguous_option &e) {
+         << "The value specified for option " << e.get_option_name()
+         << " has an invalid format." << endl << default_error_msg << endl;
+    return EXIT_FAILURE;
+  } catch (po::too_many_positional_options_error &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Option " << e.get_option_name() << " is ambiguous." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::multiple_values &e) {
+         << "Too many positional options were specified." << endl
+         << default_error_msg << endl;
+    return EXIT_FAILURE;
+  } catch (po::invalid_command_line_syntax &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Option " << e.get_option_name() << " was specified multiple times." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::multiple_occurrences &e) {
+         << "Invalid command line syntax." << endl << default_error_msg << endl;
+    return EXIT_FAILURE;
+  } catch (po::invalid_command_line_style &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Option " << e.get_option_name() << " was specified multiple times." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::invalid_option_value &e) {
+         << "There is a programming error related to command line style."
+         << endl << default_error_msg << endl;
+    return EXIT_FAILURE;
+  } catch (po::reading_file &e) {
     cout << "Error while parsing command line options:" << endl
-      << "The value specified for option " << e.get_option_name() << " has an invalid format." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::too_many_positional_options_error &e) {
+         << "The config file can not be read." << endl << default_error_msg
+         << endl;
+    return EXIT_FAILURE;
+  } catch (po::validation_error &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Too many positional options were specified." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::invalid_command_line_syntax &e) {
+         << "Validation of option " << e.get_option_name() << " failed." << endl
+         << default_error_msg << endl;
+    return EXIT_FAILURE;
+  } catch (po::error &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Invalid command line syntax." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::invalid_command_line_style &e) {
-    cout << "Error while parsing command line options:" << endl
-      << "There is a programming error related to command line style." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::reading_file &e) {
-    cout << "Error while parsing command line options:" << endl
-      << "The config file can not be read." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::validation_error &e) {
-    cout << "Error while parsing command line options:" << endl
-      << "Validation of option " << e.get_option_name() << " failed." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::error &e) {
-    cout << "Error while parsing command line options:" << endl
-      << "No further information as to the nature of this error is available, please check your command line arguments." << endl
-      << default_error_msg << endl;
-    return(-1);
+         << "No further information as to the nature of this error is "
+            "available, please check your command line arguments." << endl
+         << default_error_msg << endl;
+    return EXIT_FAILURE;
   }
 
-  if(vm.count("version") and not vm.count("help")) {
-    cout << exec_info.program_name << " " << exec_info.hmm_version << " [" << GIT_BRANCH << " branch]" << endl;
+  if (vm.count("version") and not vm.count("help")) {
+    cout << exec_info.program_name << " " << exec_info.hmm_version
+         << " [" << GIT_BRANCH << " branch]" << endl;
     cout << GIT_SHA1 << endl;
-    return(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
   }
 
   if (vm.count("help")) {
@@ -210,7 +216,7 @@ int main(int argc, const char**argv) {
     cout << "Error while parsing command line options:" << endl
          << "The required option " << e.get_option_name()
          << " was not specified." << endl << default_error_msg << endl;
-    return (-1);
+    return EXIT_FAILURE;
   }
 
   // generate an output path stem if the user did not specify one
