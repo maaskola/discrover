@@ -16,9 +16,9 @@ InvalidLengthsException::InvalidLengthsException(size_t s1, size_t s2)
     : exception(), min_size(s1), max_size(s2){};
 const char *InvalidLengthsException::InvalidLengthsException::what() const
     throw() {
-  return (("min_size (" + boost::lexical_cast<string>(min_size)
-           + ") is not smaller than max_size ("
-           + boost::lexical_cast<string>(max_size) + ").").c_str());
+  return ("min_size (" + boost::lexical_cast<string>(min_size)
+          + ") is not smaller than max_size ("
+          + boost::lexical_cast<string>(max_size) + ").").c_str();
 };
 
 list<pair<string, double>> parse_dreme_output(const string &dir) {
@@ -35,7 +35,7 @@ list<pair<string, double>> parse_dreme_output(const string &dir) {
       double score = 0;  // FIXME
       motifs.push_back(make_pair(motif, score));
     }
-  return (motifs);
+  return motifs;
 }
 
 list<pair<string, double>> run(const string &path1, const string &path2,
@@ -95,6 +95,6 @@ list<pair<string, double>> run(const string &path1, const string &path2,
     boost::filesystem::remove_all(dreme_output_dir);
   }
 
-  return (regexes);
+  return regexes;
 }
 }
