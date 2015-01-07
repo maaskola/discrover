@@ -177,7 +177,7 @@ void draw_letter_u(cairo_t *cr, const coord_t &coord, double width,
 }
 
 void draw_letter(cairo_t *cr, size_t letter, const coord_t &coord, double width,
-                 double height, const Options &options) {
+                 double height, const Options &options, double eps=1e-6) {
   palette_t palette;
   switch(options.palette) {
     case Palette::Default:
@@ -190,7 +190,7 @@ void draw_letter(cairo_t *cr, size_t letter, const coord_t &coord, double width,
       palette = tetrad_colors;
       break;
   }
-  if (height > 0)
+  if (height > eps)
     switch (letter) {
       case 0:
         draw_letter_a(cr, coord, width, height, palette.a);
