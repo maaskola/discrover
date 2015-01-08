@@ -11,7 +11,6 @@
  * =====================================================================================
  */
 
-
 #ifndef BITMASK_HPP
 #define BITMASK_HPP
 
@@ -25,4 +24,3 @@ bitmask_t make_mask(const std::vector<size_t> &v);
 std::vector<size_t> unpack_mask(const bitmask_t x);
 
 #endif
-

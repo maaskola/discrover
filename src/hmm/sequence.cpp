@@ -8,12 +8,11 @@
 
 using namespace std;
 
-vector<string> extract_seq_ids(const string &path, size_t nseq, Verbosity verbosity)
-{
-  if(verbosity >= Verbosity::info)
+vector<string> extract_seq_ids(const string &path, size_t nseq,
+                               Verbosity verbosity) {
+  if (verbosity >= Verbosity::info)
     cout << "Getting sequence IDs from " << path << endl;
-  if(not boost::filesystem::exists(path))
-  {
+  if (not boost::filesystem::exists(path)) {
     cout << "Error: " << path << " does not exist!" << endl;
     exit(-1);
   }
@@ -22,21 +21,19 @@ vector<string> extract_seq_ids(const string &path, size_t nseq, Verbosity verbos
   size_t idx = 0;
   auto parsing = [&](Fasta::Entry &&entry) {
     s.push_back(move(entry.definition));
-    return(nseq == 0 or idx++ < nseq);
+    return nseq == 0 or idx++ < nseq;
   };
   auto parser = Fasta::make_parser(parsing);
   f >> parser;
   f.close();
-  return(s);
+  return s;
 }
 
-string seq2string(const seq_t &seq)
-{
+string seq2string(const seq_t &seq) {
   string s;
   char c;
-  for(size_t i = 0; i < seq.size(); i++)
-  {
-    switch(seq[i]) {
+  for (size_t i = 0; i < seq.size(); i++) {
+    switch (seq[i]) {
       case 0:
         c = 'a';
         break;
@@ -58,6 +55,5 @@ string seq2string(const seq_t &seq)
     }
     s.push_back(c);
   }
-  return(s);
+  return s;
 }
-

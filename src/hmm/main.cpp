@@ -27,7 +27,7 @@
  * =====================================================================================
  */
 
-#include <sys/resource.h> // for getrusage
+#include <sys/resource.h>  // for getrusage
 #include <iostream>
 #include <fstream>
 #include <omp.h>
@@ -46,8 +46,7 @@
 
 using namespace std;
 
-string gen_usage_string(const string &program_name)
-{
+string gen_usage_string(const string &program_name) {
   string usage = "This program implements hidden Markov models for probabilistic sequence analysis, "
     "in particular for the purpose of discovering unknown binding site patterns in nucleic acid sequences. "
     "It may be used to train models using sequence data, evaluate models on sequence data. "
@@ -105,27 +104,30 @@ string gen_usage_string(const string &program_name)
     // // "OMP_NUM_THREADS=4 " + program_name + " signal.fa control.fa -m tgtanata\n"
     // "\n"
     "Various output files are generated, including the resulting parameters, summary information, motif occurrence tables, and the Viterbi parse. See the description of the option -o / --output below for details.";
-  return(usage);
+  return usage;
 }
 
 Measures::Discrete::Measure measure2iupac_objective(const Measure measure) {
-  if(Measures::is_generative(measure))
-    return(Measures::Discrete::Measure::SignalFrequency);
-  switch(measure) {
+  if (Measures::is_generative(measure))
+    return Measures::Discrete::Measure::SignalFrequency;
+  switch (measure) {
     case Measure::DeltaFrequency:
-      return(Measures::Discrete::Measure::DeltaFrequency);
+      return Measures::Discrete::Measure::DeltaFrequency;
     case Measure::MatthewsCorrelationCoefficient:
-      return(Measures::Discrete::Measure::MatthewsCorrelationCoefficient);
+      return Measures::Discrete::Measure::MatthewsCorrelationCoefficient;
     default:
-      return(Measures::Discrete::Measure::MutualInformation);
+      return Measures::Discrete::Measure::MutualInformation;
   }
 }
 
 void fixup_seeding_options(Options::HMM &options) {
-// TODO REACTIVATE if(set_objective)
-// TODO REACTIVATE    options.seeding.objective = {measure2iupac_objective(options.measure);
+  // TODO REACTIVATE if(set_objective)
+  // TODO REACTIVATE    options.seeding.objective =
+  // {measure2iupac_objective(options.measure);
   // options.seeding.objective = Seeding::Objective::corrected_logp_gtest;
-  if(options.seeding.objectives.size() == 1 and begin(options.seeding.objectives)->measure == Measures::Discrete::Measure::SignalFrequency)
+  if (options.seeding.objectives.size() == 1
+      and begin(options.seeding.objectives)->measure
+          == Measures::Discrete::Measure::SignalFrequency)
     options.seeding.plasma.rel_degeneracy = 0.2;
   options.seeding.paths = options.paths;
   options.seeding.n_threads = options.n_threads;
@@ -149,16 +151,16 @@ void fixup_seeding_options(Options::HMM &options) {
   options.seeding.mcmc.random_salt = options.random_salt;
 }
 
-
-int main(int argc, const char** argv)
-{
-  const string default_error_msg = "Please inspect the command line help with -h or --help.";
+int main(int argc, const char **argv) {
+  const string default_error_msg
+      = "Please inspect the command line help with -h or --help.";
   Timer timer;
 
   namespace po = boost::program_options;
 
   Options::HMM options;
-  options.exec_info = generate_exec_info(argv[0], GIT_DESCRIPTION, cmdline(argc, argv));
+  options.exec_info
+      = generate_exec_info(argv[0], GIT_DESCRIPTION, cmdline(argc, argv));
   options.class_model = false;
   options.random_salt = generate_rng_seed();
 
@@ -169,12 +171,12 @@ int main(int argc, const char** argv)
   static const size_t MIN_COLS = 60;
   static const size_t MAX_COLS = 80;
   size_t cols = get_terminal_width();
-  if(cols < MIN_COLS)
+  if (cols < MIN_COLS)
     cols = MIN_COLS;
-  if(cols > MAX_COLS)
+  if (cols > MAX_COLS)
     cols = MAX_COLS;
 
-   // Declare the supported options.
+  // Declare the supported options.
   po::options_description generic_options("Generic options", cols);
   po::options_description basic_options("Basic options, required", cols);
   po::options_description basic_options_optional("Basic options", cols);
@@ -188,10 +190,14 @@ int main(int argc, const char** argv)
   po::options_description termination_options("Termination options", cols);
   po::options_description hidden_options("Hidden options", cols);
 
-  po::options_description seeding_options = gen_plasma_options_description(options.seeding, "", "Seeding options for IUPAC regular expression finding", cols, false, false);
+  po::options_description seeding_options = gen_plasma_options_description(
+      options.seeding, "",
+      "Seeding options for IUPAC regular expression finding", cols, false,
+      false);
 
 #if CAIRO_FOUND
-  po::options_description logo_options = gen_logo_options_description(options.logo, Logo::CLI::HMM, cols);
+  po::options_description logo_options
+      = gen_logo_options_description(options.logo, Logo::CLI::HMM, cols);
 #endif
 
   generic_options.add_options()
@@ -370,89 +376,99 @@ int main(int argc, const char** argv)
 
   po::variables_map vm;
   try {
-    po::store(po::command_line_parser(argc, argv).options(cmdline_options).positional(pos).run(), vm);
-  } catch(po::unknown_option &e) {
+    po::store(po::command_line_parser(argc, argv)
+                  .options(cmdline_options)
+                  .positional(pos)
+                  .run(),
+              vm);
+  } catch (po::unknown_option &e) {
+    cout << "Error while parsing command line options:" << endl << "Option "
+         << e.get_option_name() << " not known." << endl << default_error_msg
+         << endl;
+    return EXIT_FAILURE;
+  } catch (po::ambiguous_option &e) {
+    cout << "Error while parsing command line options:" << endl << "Option "
+         << e.get_option_name() << " is ambiguous." << endl << default_error_msg
+         << endl;
+    return EXIT_FAILURE;
+  } catch (po::multiple_values &e) {
+    cout << "Error while parsing command line options:" << endl << "Option "
+         << e.get_option_name() << " was specified multiple times." << endl
+         << default_error_msg << endl;
+    return EXIT_FAILURE;
+  } catch (po::multiple_occurrences &e) {
+    cout << "Error while parsing command line options:" << endl << "Option "
+         << e.get_option_name() << " was specified multiple times." << endl
+         << default_error_msg << endl;
+    return EXIT_FAILURE;
+  } catch (po::invalid_option_value &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Option " << e.get_option_name() << " not known." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::ambiguous_option &e) {
+         << "The value specified for option " << e.get_option_name()
+         << " has an invalid format." << endl << default_error_msg << endl;
+    return EXIT_FAILURE;
+  } catch (po::too_many_positional_options_error &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Option " << e.get_option_name() << " is ambiguous." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::multiple_values &e) {
+         << "Too many positional options were specified." << endl
+         << default_error_msg << endl;
+    return EXIT_FAILURE;
+  } catch (po::invalid_command_line_syntax &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Option " << e.get_option_name() << " was specified multiple times." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::multiple_occurrences &e) {
+         << "Invalid command line syntax." << endl << default_error_msg << endl;
+    return EXIT_FAILURE;
+  } catch (po::invalid_command_line_style &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Option " << e.get_option_name() << " was specified multiple times." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::invalid_option_value &e) {
+         << "There is a programming error related to command line style."
+         << endl << default_error_msg << endl;
+    return EXIT_FAILURE;
+  } catch (po::reading_file &e) {
     cout << "Error while parsing command line options:" << endl
-      << "The value specified for option " << e.get_option_name() << " has an invalid format." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::too_many_positional_options_error &e) {
+         << "The config file can not be read." << endl << default_error_msg
+         << endl;
+    return EXIT_FAILURE;
+  } catch (po::validation_error &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Too many positional options were specified." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::invalid_command_line_syntax &e) {
+         << "Validation of option " << e.get_option_name() << " failed." << endl
+         << default_error_msg << endl;
+    return EXIT_FAILURE;
+  } catch (po::error &e) {
     cout << "Error while parsing command line options:" << endl
-      << "Invalid command line syntax." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::invalid_command_line_style &e) {
-    cout << "Error while parsing command line options:" << endl
-      << "There is a programming error related to command line style." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::reading_file &e) {
-    cout << "Error while parsing command line options:" << endl
-      << "The config file can not be read." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::validation_error &e) {
-    cout << "Error while parsing command line options:" << endl
-      << "Validation of option " << e.get_option_name() << " failed." << endl
-      << default_error_msg << endl;
-    return(-1);
-  } catch(po::error &e) {
-    cout << "Error while parsing command line options:" << endl
-      << "No further information as to the nature of this error is available, please check your command line arguments." << endl
-      << default_error_msg << endl;
-    return(-1);
+         << "No further information as to the nature of this error is "
+            "available, please check your command line arguments." << endl
+         << default_error_msg << endl;
+    return EXIT_FAILURE;
   }
 
   options.verbosity = Verbosity::info;
-  if(vm.count("verbose"))
+  if (vm.count("verbose"))
     options.verbosity = Verbosity::verbose;
-  if(vm.count("noisy"))
+  if (vm.count("noisy"))
     options.verbosity = Verbosity::debug;
 
-  if(vm.count("version") and not vm.count("help")) {
-    cout << options.exec_info.program_name << " " << options.exec_info.hmm_version << " [" << GIT_BRANCH << " branch]" << endl;
-    if(options.verbosity >= Verbosity::verbose)
+  if (vm.count("version") and not vm.count("help")) {
+    cout << options.exec_info.program_name << " "
+         << options.exec_info.hmm_version << " [" << GIT_BRANCH << " branch]"
+         << endl;
+    if (options.verbosity >= Verbosity::verbose)
       cout << GIT_SHA1 << endl;
-    return(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
   }
 
-  if(vm.count("help")) {
-    cout << options.exec_info.program_name << " " << options.exec_info.hmm_version << endl;
+  if (vm.count("help")) {
+    cout << options.exec_info.program_name << " "
+         << options.exec_info.hmm_version << endl;
     cout << "Copyright (C) 2011 Jonas Maaskola\n"
-      "Provided under GNU General Public License Version 3 or later.\n" 
-      "See the file COPYING provided with this software for details of the license.\n" << endl;
-    cout << limit_line_length(gen_usage_string(options.exec_info.program_name), cols) << endl << endl;
+            "Provided under GNU General Public License Version 3 or later.\n"
+            "See the file COPYING provided with this software for details of "
+            "the license.\n" << endl;
+    cout << limit_line_length(gen_usage_string(options.exec_info.program_name),
+                              cols) << endl << endl;
     cout << visible_options << endl;
-    switch(options.verbosity) {
+    switch (options.verbosity) {
       case Verbosity::nothing:
       case Verbosity::error:
       case Verbosity::info:
-        cout << "Advanced and hidden options not shown. Use -hv or -hV to show them." << endl;
+        cout << "Advanced and hidden options not shown. Use -hv or -hV to show "
+                "them." << endl;
         break;
       case Verbosity::verbose:
         cout << common_options << endl;
@@ -469,92 +485,115 @@ int main(int argc, const char** argv)
 
   try {
     po::notify(vm);
-  } catch(po::required_option &e) {
+  } catch (po::required_option &e) {
     cout << "Error while parsing command line options:" << endl
-      << "The required option " << e.get_option_name() << " was not specified." << endl
-      << default_error_msg << endl;
-    return(-1);
+         << "The required option " << e.get_option_name()
+         << " was not specified." << endl << default_error_msg << endl;
+    return EXIT_FAILURE;
   }
 
-  if(config_path != "") {
+  if (config_path != "") {
     ifstream ifs(config_path.c_str());
-    if(!ifs) {
+    if (!ifs) {
       cout << "Error: can not open config file: " << config_path << endl
-        << default_error_msg << endl;
-      return(-1);
+           << default_error_msg << endl;
+      return EXIT_FAILURE;
     } else {
-      try{
+      try {
         store(parse_config_file(ifs, config_file_options), vm);
-      } catch(po::multiple_occurrences e) {
+      } catch (po::multiple_occurrences e) {
+        cout << "Error while parsing config file:" << endl << "Option "
+             << e.get_option_name() << " was specified multiple times." << endl
+             << default_error_msg << endl;
+        return EXIT_FAILURE;
+      } catch (po::unknown_option e) {
+        cout << "Error while parsing config file:" << endl << "Option "
+             << e.get_option_name() << " not known." << endl
+             << default_error_msg << endl;
+        return EXIT_FAILURE;
+      } catch (po::invalid_option_value e) {
         cout << "Error while parsing config file:" << endl
-          << "Option " << e.get_option_name() << " was specified multiple times." << endl
-          << default_error_msg << endl;
-        return(-1);
-      } catch(po::unknown_option e) {
-        cout << "Error while parsing config file:" << endl
-          << "Option " << e.get_option_name() << " not known." << endl
-          << default_error_msg << endl;
-        return(-1);
-      } catch(po::invalid_option_value e) {
-        cout << "Error while parsing config file:" << endl
-          << "The value specified for option " << e.get_option_name() << " has an invalid format." << endl
-          << default_error_msg << endl;
-        return(-1);
+             << "The value specified for option " << e.get_option_name()
+             << " has an invalid format." << endl << default_error_msg << endl;
+        return EXIT_FAILURE;
       }
       notify(vm);
     }
   }
 
   // generate an output path stem if the user did not specify one
-  if(not vm.count("output")) {
-    options.label = generate_random_label(options.exec_info.program_name, 0, options.verbosity);
-    while(boost::filesystem::exists(options.label + ".hmm"))
-      options.label = generate_random_label(options.exec_info.program_name, 5, options.verbosity);
-    if(options.verbosity >= Verbosity::info)
-      cout << "Using \"" << options.label << "\" as label to generate output file names." << endl;
+  if (not vm.count("output")) {
+    options.label = generate_random_label(options.exec_info.program_name, 0,
+                                          options.verbosity);
+    while (boost::filesystem::exists(options.label + ".hmm"))
+      options.label = generate_random_label(options.exec_info.program_name, 5,
+                                            options.verbosity);
+    if (options.verbosity >= Verbosity::info)
+      cout << "Using \"" << options.label
+           << "\" as label to generate output file names." << endl;
   }
 
   // set the number of threads with OpenMP
-  if(vm.count("threads"))
+  if (vm.count("threads"))
     omp_set_num_threads(options.n_threads);
 
   // print information about specified motifs, paths, and objectives
-  if(options.verbosity >= Verbosity::debug) {
-    cout << "motif_specifications:"; for(auto &x: options.motif_specifications) cout << " " << x; cout << endl;
-    cout << "paths:"; for(auto &x: options.paths) cout << " " << x; cout << endl;
-    cout << "objectives:"; for(auto &x: options.objectives) cout << " " << x; cout << endl;
+  if (options.verbosity >= Verbosity::debug) {
+    cout << "motif_specifications:";
+    for (auto &x : options.motif_specifications)
+      cout << " " << x;
+    cout << endl;
+    cout << "paths:";
+    for (auto &x : options.paths)
+      cout << " " << x;
+    cout << endl;
+    cout << "objectives:";
+    for (auto &x : options.objectives)
+      cout << " " << x;
+    cout << endl;
   }
 
   // check and harmonize specified motifs, paths, and objectives
-  Specification::harmonize(options.motif_specifications, options.paths, options.objectives, false);
+  Specification::harmonize(options.motif_specifications, options.paths,
+                           options.objectives, false);
 
   // print information about specified motifs, paths, and objectives
-  if(options.verbosity >= Verbosity::debug) {
-    cout << "motif_specifications:"; for(auto &x: options.motif_specifications) cout << " " << x; cout << endl;
-    cout << "paths:"; for(auto &x: options.paths) cout << " " << x; cout << endl;
-    cout << "objectives:"; for(auto &x: options.objectives) cout << " " << x; cout << endl;
+  if (options.verbosity >= Verbosity::debug) {
+    cout << "motif_specifications:";
+    for (auto &x : options.motif_specifications)
+      cout << " " << x;
+    cout << endl;
+    cout << "paths:";
+    for (auto &x : options.paths)
+      cout << " " << x;
+    cout << endl;
+    cout << "objectives:";
+    for (auto &x : options.objectives)
+      cout << " " << x;
+    cout << endl;
   }
 
-  // ensure that the user specified a positive number, if anything, for sampling min_size
-  if(vm.count("smin")) {
-    if(options.sampling.min_size < 0) {
-      cout << "Please note that the minimal length for MCMC sampling must be non-negative." << endl
-        << default_error_msg << endl;
-      return(-1);
+  // ensure a positive number, if anything, is specified for sampling min_size
+  if (vm.count("smin")) {
+    if (options.sampling.min_size < 0) {
+      cout << "Please note that the minimal length for MCMC sampling must be "
+              "non-negative." << endl << default_error_msg << endl;
+      return EXIT_FAILURE;
     }
   } else
     options.sampling.min_size = -1;
 
-  // ensure that the user specified a positive number, if anything, for sampling max_size
-  if(vm.count("smax")) {
-    if(options.sampling.max_size < 0) {
-      cout << "Please note that the maximal length for MCMC sampling must be non-negative." << endl
-        << default_error_msg << endl;
-      return(-1);
-    } else if(options.sampling.max_size < options.sampling.min_size) {
-      cout << "Please note that the maximal length for MCMC sampling must be larger than the minimal size." << endl
-        << default_error_msg << endl;
-      return(-1);
+  // ensure a positive number, if anything, is specified for sampling max_size
+  if (vm.count("smax")) {
+    if (options.sampling.max_size < 0) {
+      cout << "Please note that the maximal length for MCMC sampling must be "
+              "non-negative." << endl << default_error_msg << endl;
+      return EXIT_FAILURE;
+    } else if (options.sampling.max_size < options.sampling.min_size) {
+      cout << "Please note that the maximal length for MCMC sampling must be "
+              "larger than the minimal size." << endl << default_error_msg
+           << endl;
+      return EXIT_FAILURE;
     }
   } else
     options.sampling.max_size = -1;
@@ -562,71 +601,77 @@ int main(int argc, const char** argv)
   // Initialize the plasma options
   fixup_seeding_options(options);
 
-  if(options.termination.past == 0) {
-    cout << "Error: the value of --past must be a number greater than 0." << endl;
+  if (options.termination.past == 0) {
+    cout << "Error: the value of --past must be a number greater than 0."
+         << endl;
   }
 
-  if(options.termination.max_iter == 0 and options.sampling.do_sampling) {
+  if (options.termination.max_iter == 0 and options.sampling.do_sampling) {
     options.termination.max_iter = 1000;
-    cout << "Note: did not specify the number of iterations to perform (--maxiter)." << endl
-      << "We will now do " << options.termination.max_iter << " iterations." << endl;
+    cout << "Note: did not specify the number of iterations to perform "
+            "(--maxiter)." << endl << "We will now do "
+         << options.termination.max_iter << " iterations." << endl;
   }
 
   bool any_named = false;
-  for(auto &x: options.paths)
-    if(not x.motifs.empty()) {
+  for (auto &x : options.paths)
+    if (not x.motifs.empty()) {
       any_named = true;
       break;
     }
-  if(not any_named)
-    for(auto &x: options.paths)
-      for(auto &s: options.motif_specifications)
+  if (not any_named)
+    for (auto &x : options.paths)
+      for (auto &s : options.motif_specifications)
         x.motifs.insert(s.name);
 
-  if(options.load_paths.empty() and options.motif_specifications.empty()) {
+  if (options.load_paths.empty() and options.motif_specifications.empty()) {
     cout << "Error: you must either specify at least one of:" << endl
-      << "1. a path from which to load HMM parameter (--load)" << endl
-      << "2. one or more motifs (--motif)" << endl
-      << default_error_msg << endl;
-    return(-1);
+         << "1. a path from which to load HMM parameter (--load)" << endl
+         << "2. one or more motifs (--motif)" << endl << default_error_msg
+         << endl;
+    return EXIT_FAILURE;
   }
 
-  if(not options.long_names) {
-    if(not options.seeding.only_best) {
-      cout << "Warning: you did not specify --best seed selection, but did not specify --longnames." << endl
-        << "Adding option --longnames." << endl;
+  if (not options.long_names) {
+    if (not options.seeding.only_best) {
+      cout << "Warning: you did not specify --best seed selection, but did not "
+              "specify --longnames." << endl << "Adding option --longnames."
+           << endl;
       options.long_names = true;
-    } else if(options.wiggle > 0) {
-      cout << "Warning: you specified wiggle variants, but did not specify --longnames." << endl
-        << "Adding option --longnames." << endl;
+    } else if (options.wiggle > 0) {
+      cout << "Warning: you specified wiggle variants, but did not specify "
+              "--longnames." << endl << "Adding option --longnames." << endl;
       options.long_names = true;
     }
   }
 
   // Ensure that the residual MI ratio cutoff is non-negative
-  if(options.multi_motif.residual_ratio < 0) {
-    cout << "Warning: negative value provided for residual mutual information ratio cutoff. Using 0 as value." << endl;
+  if (options.multi_motif.residual_ratio < 0) {
+    cout << "Warning: negative value provided for residual mutual information "
+            "ratio cutoff. Using 0 as value." << endl;
     options.multi_motif.residual_ratio = 0;
   }
 
   // Ensure that multiple mode is only used with objective function MICO
-  if(options.multi_motif.accept_multiple) {
-    for(auto &obj: options.objectives)
-      if(obj.measure != Measures::Continuous::Measure::MutualInformation) {
-        cout << "Error: multiple motif mode can only be used with the objective function MICO." << endl;
+  if (options.multi_motif.accept_multiple) {
+    for (auto &obj : options.objectives)
+      if (obj.measure != Measures::Continuous::Measure::MutualInformation) {
+        cout << "Error: multiple motif mode can only be used with the "
+                "objective function MICO." << endl;
         exit(-1);
       }
   }
 
-  if(options.line_search.eta <= options.line_search.mu) {
-    cout << "Error: the Moré-Thuente η parameter must be larger than the µ parameter." << endl;
+  if (options.line_search.eta <= options.line_search.mu) {
+    cout << "Error: the Moré-Thuente η parameter must be larger than the µ "
+            "parameter." << endl;
     exit(-1);
   }
 
-
   // initialize RNG
-  if(options.verbosity >= Verbosity::info)
-    cout << "Initializing random number generator with salt " << options.random_salt << "." << endl;
+  if (options.verbosity >= Verbosity::info)
+    cout << "Initializing random number generator with salt "
+         << options.random_salt << "." << endl;
   mt19937 rng;
   rng.seed(options.random_salt);
 
@@ -638,10 +683,10 @@ int main(int argc, const char** argv)
   // main routine
   perform_analysis(options);
 
-  if(options.verbosity >= Verbosity::info) {
+  if (options.verbosity >= Verbosity::info) {
     struct rusage usage;
-    if(getrusage(RUSAGE_SELF, &usage) != 0) {
-      cout << "getrusage failed" << endl ;
+    if (getrusage(RUSAGE_SELF, &usage) != 0) {
+      cout << "getrusage failed" << endl;
       exit(0);
     }
 
@@ -650,14 +695,12 @@ int main(int argc, const char** argv)
     double total_time = utime + stime;
     double elapsed_time = timer.tock() * 1e-6;
 
-    cerr
-      << "User time = " << utime << " sec" << endl
-      << "System time = " << stime << " sec" << endl
-      << "CPU time = " << total_time << " sec" << endl
-      << "Elapsed time = " << elapsed_time << " sec" << endl
-      << 100 * total_time / elapsed_time <<"\% CPU" << endl;
+    cerr << "User time = " << utime << " sec" << endl
+         << "System time = " << stime << " sec" << endl
+         << "CPU time = " << total_time << " sec" << endl
+         << "Elapsed time = " << elapsed_time << " sec" << endl
+         << 100 * total_time / elapsed_time << "\% CPU" << endl;
   }
 
-  return(EXIT_SUCCESS);
+  return EXIT_SUCCESS;
 }
-

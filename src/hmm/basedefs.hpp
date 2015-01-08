@@ -36,16 +36,23 @@
 #include "sequence.hpp"
 
 namespace Data {
-  using Seq = Fasta::IEntry;
-  using Set = Basic::Set<Seq>;
-  using Contrast = Basic::Contrast<Set>;
-  using Collection = Basic::Collection<Contrast>;
+using Seq = Fasta::IEntry;
+using Set = Basic::Set<Seq>;
+using Contrast = Basic::Contrast<Set>;
+using Collection = Basic::Collection<Contrast>;
 
-  using Seqs = std::vector<Seq>;
+using Seqs = std::vector<Seq>;
 }
 
-void prepare_cross_validation(const Data::Collection &col, Data::Collection &training_data, Data::Collection &test_data, double cross_validation_freq, Verbosity verbosity);
-void prepare_cross_validation(const Data::Contrast &contrast, Data::Contrast &training_data, Data::Contrast &test_data, double cross_validation_freq, Verbosity verbosity);
+void prepare_cross_validation(const Data::Collection &col,
+                              Data::Collection &training_data,
+                              Data::Collection &test_data,
+                              double cross_validation_freq,
+                              Verbosity verbosity);
+void prepare_cross_validation(const Data::Contrast &contrast,
+                              Data::Contrast &training_data,
+                              Data::Contrast &test_data,
+                              double cross_validation_freq,
+                              Verbosity verbosity);
 
 #endif
-

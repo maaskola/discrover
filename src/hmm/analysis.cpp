@@ -707,8 +707,8 @@ HMM doit(const Data::Collection &all_data,
 
           auto is_below_threshold =
               [&below_threshold](const pair<string, HMM> &x) {
-            return (find(begin(below_threshold), end(below_threshold), x.first)
-                    != end(below_threshold));
+            return find(begin(below_threshold), end(below_threshold), x.first)
+                   != end(below_threshold);
           };
 
           if (options.verbosity >= Verbosity::info) {

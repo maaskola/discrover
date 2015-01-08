@@ -37,11 +37,11 @@ class ConditionalDecoder {
   HMM hmm;
   std::vector<std::pair<std::string, std::vector<matrix_t>>> emission_matrices;
 
-  public:
+public:
   ConditionalDecoder(const HMM &hmm_);
   void decode(std::ostream &os, const Data::Seq &seq) const;
 
-  protected:
+protected:
 };
 
 #endif

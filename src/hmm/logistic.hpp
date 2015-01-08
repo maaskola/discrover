@@ -31,44 +31,30 @@
 #define LOGISTIC_HPP
 
 /** The well-known sigmoid function, alternative calculation. */
-inline double sigmoid_alternative(double x)
-{
+inline double sigmoid_alternative(double x) {
   double y = exp(x);
-  return(y / (1+y));
+  return y / (1 + y);
 }
 
 /** The well-known sigmoid function. */
-inline double sigmoid(double x)
-{
-  return(1 / (1 + exp(-x)));
-}
+inline double sigmoid(double x) { return 1 / (1 + exp(-x)); }
 
 /** This gives 1 - sigmoid(x) */
-inline double sigmoid_q(double x)
-{
-  return(1 / (1 + exp(x)));
-}
+inline double sigmoid_q(double x) { return 1 / (1 + exp(x)); }
 
-inline double sigmoid_derivative_simple(double x)
-{
+inline double sigmoid_derivative_simple(double x) {
   double y = sigmoid(x);
-  return(y * (1 - y));
+  return y * (1 - y);
 }
 
-inline double sigmoid_derivative(double x)
-{
-  return(1 / (exp(x) + 2 + exp(-x)));
+inline double sigmoid_derivative(double x) {
+  return 1 / (exp(x) + 2 + exp(-x));
 }
 
-inline double logit(double p)
-{
-  return(log(p) - log(1-p));
-}
+inline double logit(double p) { return log(p) - log(1 - p); }
 
-inline double logistic_transformation(double x, double alpha, double beta)
-{
-  return(sigmoid(alpha*x + beta));
+inline double logistic_transformation(double x, double alpha, double beta) {
+  return sigmoid(alpha * x + beta);
 }
 
 #endif
-

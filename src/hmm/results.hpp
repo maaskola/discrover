@@ -36,20 +36,19 @@
 
 namespace Training {
 
-  struct State {
-    State(size_t n=0);
-    int center;
-    std::vector<std::vector<double>> scores;
-  };
+struct State {
+  State(size_t n = 0);
+  int center;
+  std::vector<std::vector<double>> scores;
+};
 
-  struct Result {
-    Result();
-    State state;
-    double delta;
-    std::string parameter_file;
-    // bool success; // TODO add a flag to indicate training success
-  };
+struct Result {
+  Result();
+  State state;
+  double delta;
+  std::string parameter_file;
+  // bool success; // TODO add a flag to indicate training success
+};
 }
 
-#endif   /* ----- #ifndef RESULTS_HPP  ----- */
-
+#endif /* ----- #ifndef RESULTS_HPP  ----- */

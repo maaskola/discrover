@@ -184,9 +184,9 @@ double cor_pearson(const vector<X> &x, const vector<Y> &y) {
     denom_y += b * b;
   }
   if (num == 0)
-    return (0);
+    return 0;
   double r = num / sqrt(denom_x) / sqrt(denom_y);
-  return (r);
+  return r;
 }
 
 template <class X>
@@ -205,36 +205,36 @@ vector<double> tied_ranking(const vector<X> &x) {
   }
   for (size_t i = 0; i < n; i++)
     r[i] = counts[x[i]];
-  return (r);
+  return r;
 }
 
 template <class X, class Y>
 double cor_spearman(const vector<X> &x, const vector<Y> &y) {
-  return (cor_pearson(tied_ranking(x), tied_ranking(y)));
+  return cor_pearson(tied_ranking(x), tied_ranking(y));
 }
 
 template <class X>
 double cor_rank(const vector<X> &x) {
   vector<X> y(x.size());
   iota(y.begin(), y.end(), 0);
-  return (cor_pearson(tied_ranking(x), y));
+  return cor_pearson(tied_ranking(x), y);
 }
 
 double cor_fisher_z(double x, size_t n) {
   double z = sqrt((n - 3) / 1.06) * atanh(x);
-  return (z);
+  return z;
 }
 
 double cor_student_t(double x, size_t n) {
   double t = x * sqrt((n - 2) / (1 - x * x));
-  return (t);
+  return t;
 }
 
 string stars(double x) {
-  if (x < 0.001) return ("***");
-  if (x < 0.01) return ("**");
-  if (x < 0.05) return ("*");
-  return ("");
+  if (x < 0.001) return "***";
+  if (x < 0.01)  return "**";
+  if (x < 0.05)  return "*";
+  return "";
 }
 
 const boost::math::normal_distribution<double> standard_normal_distribution;
@@ -246,8 +246,6 @@ void correlation_report(const vector<T> &x, ostream &out, size_t width = 12,
   size_t n = x.size();
   double z = cor_fisher_z(rho, n);
   double t = cor_student_t(rho, n);
-  // out << "Rank correlation: rho = " << rho << " z = " << z << " t = " << t <<
-  // endl;
   double p_norm = 0, p_t = 0;
   {
     using namespace boost::math;
@@ -439,7 +437,7 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
          << " micro-seconds" << endl;
   ResultsCounts results
       = {n_sites, n_motifs, n_viterbi_sites, n_viterbi_motifs};
-  return (results);
+  return results;
 }
 
 Evaluator::Result Evaluator::report(const Data::Collection &collection,
@@ -655,5 +653,5 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
       }
     }
   }
-  return (result);
+  return result;
 }

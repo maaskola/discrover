@@ -49,12 +49,16 @@ enum class conditionalMI {
  *
  * See Cover & Thomas 2006 equations (2.60) and (2.61)
  */
-double calc_conditional_mutual_information(const Data::Contrast &contrast, const HMM::pair_posteriors_t &pair_posteriors, double ps, Verbosity verbosity, conditionalMI mode);
+double calc_conditional_mutual_information(
+    const Data::Contrast &contrast,
+    const HMM::pair_posteriors_t &pair_posteriors, double ps,
+    Verbosity verbosity, conditionalMI mode);
 
 /** The pair mutual information
  * This is the mutual information of the two motifs
  */
-double pair_mutual_information(const Data::Contrast &contrast, const HMM::pair_posteriors_t &pair_posteriors, double ps, Verbosity verbosity);
+double pair_mutual_information(const Data::Contrast &contrast,
+                               const HMM::pair_posteriors_t &pair_posteriors,
+                               double ps, Verbosity verbosity);
 
 #endif
-
