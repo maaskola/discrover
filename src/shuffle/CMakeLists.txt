@@ -1,20 +1,10 @@
-# build a shared library
-ADD_LIBRARY(discrovershuffle SHARED dinucleotide_shuffle.cpp "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA1.cpp")
+ADD_LIBRARY(discrover-shuffle OBJECT dinucleotide_shuffle.cpp)
 
-ADD_EXECUTABLE(dinucleotide_shuffle main.cpp ../plasma/fasta.cpp)
+ADD_EXECUTABLE(discrover-shuffle-bin main.cpp "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA1.cpp")
+SET_TARGET_PROPERTIES(discrover-shuffle-bin PROPERTIES OUTPUT_NAME discrover-shuffle)
+TARGET_LINK_LIBRARIES(discrover-shuffle-bin discrover)
 
-SET_TARGET_PROPERTIES(dinucleotide_shuffle
-  PROPERTIES OUTPUT_NAME discrover-shuffle)
-
-TARGET_LINK_LIBRARIES(dinucleotide_shuffle
-  ${Boost_PROGRAM_OPTIONS_LIBRARY}
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
-  ${Boost_IOSTREAMS_LIBRARY})
-
-TARGET_LINK_LIBRARIES(dinucleotide_shuffle discrovershuffle ${Boost_PROGRAM_OPTIONS_LIBRARY})
-
-INSTALL(TARGETS dinucleotide_shuffle discrovershuffle
+INSTALL(TARGETS discrover-shuffle-bin
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION ${LIBDIR}
   ARCHIVE DESTINATION ${LIBDIR}/static

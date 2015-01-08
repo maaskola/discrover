@@ -1,23 +1,14 @@
-# build a shared library
-ADD_LIBRARY(discroverlogo SHARED logo.cpp options.cpp cli.cpp ../aux.cpp "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA1.cpp")
+ADD_LIBRARY(discrover-logo OBJECT logo.cpp options.cpp cli.cpp)
 
-ADD_EXECUTABLE(discrover-logo main.cpp ../sha1.cpp ../terminal.cpp
-  ../executioninformation.cpp)
-
-TARGET_LINK_LIBRARIES(discroverlogo
-  ${CAIRO_LIBRARIES}
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
-  ${Boost_IOSTREAMS_LIBRARY})
-
-TARGET_LINK_LIBRARIES(discrover-logo discrover ${Boost_PROGRAM_OPTIONS_LIBRARY})
+ADD_EXECUTABLE(discrover-logo-bin main.cpp "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA1.cpp")
+SET_TARGET_PROPERTIES(discrover-logo-bin PROPERTIES OUTPUT_NAME discrover-logo)
+TARGET_LINK_LIBRARIES(discrover-logo-bin discrover)
 
 IF(GOOGLEPERFTOOLS_FOUND)
-  TARGET_LINK_LIBRARIES(discrover-logo ${PROFILER_LIBRARY} ${TCMALLOC_LIBRARY})
+  TARGET_LINK_LIBRARIES(discrover-logo-bin ${PROFILER_LIBRARY} ${TCMALLOC_LIBRARY})
 ENDIF()
 
-
-INSTALL(TARGETS discrover-logo discroverlogo
+INSTALL(TARGETS discrover-logo-bin
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION ${LIBDIR}
   ARCHIVE DESTINATION ${LIBDIR}/static
