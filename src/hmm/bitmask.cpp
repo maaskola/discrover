@@ -19,7 +19,7 @@ using namespace std;
 bitmask_t make_mask(const vector<size_t> &v) {
   bitmask_t x = 0;
   for (auto y : v) {
-    if (y > max_motifs) {
+    if (y >= max_motifs) {
       cout << "Error: trying to construct mask for too many motifs! The "
               "offending index was: " << y << ", and there may only be "
            << max_motifs << " motifs in this version." << endl;
