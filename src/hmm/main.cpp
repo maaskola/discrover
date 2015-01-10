@@ -436,6 +436,10 @@ int main(int argc, const char **argv) {
             "available, please check your command line arguments." << endl
          << default_error_msg << endl;
     return EXIT_FAILURE;
+  } catch (runtime_error &e) {
+    cout << "Error while parsing command line options:" << endl;
+    cout << e.what();
+    return EXIT_FAILURE;
   }
 
   options.verbosity = Verbosity::info;
@@ -681,7 +685,12 @@ int main(int argc, const char **argv) {
   MCMC::EntropySource::seed(r_unif(rng));
 
   // main routine
-  perform_analysis(options);
+  try {
+    perform_analysis(options);
+   } catch (exception &e) {
+    cout << e.what();
+    return EXIT_FAILURE;
+  }
 
   if (options.verbosity >= Verbosity::info) {
     struct rusage usage;

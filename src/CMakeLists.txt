@@ -9,7 +9,7 @@ ADD_SUBDIRECTORY(hmm)
 # uncommenting the next line
 # ADD_SUBDIRECTORY(mcmc)
 
-ADD_LIBRARY(discrover-common OBJECT aux.cpp executioninformation.cpp matrix.cpp
+ADD_LIBRARY(discrover-common OBJECT aux.cpp exception.cpp executioninformation.cpp matrix.cpp
   random_seed.cpp sha1.cpp terminal.cpp timer.cpp mcmc/montecarlo.cpp)
 
 LIST(APPEND DISCROVER_OBJECTS

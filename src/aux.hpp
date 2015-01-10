@@ -33,6 +33,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "exception.hpp"
 #include "matrix.hpp"
 
 /** Determine reverse complement of a nucleic acid sequence */

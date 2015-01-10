@@ -143,11 +143,10 @@ vector<size_t> shift_positions_right(const vector<size_t> original_inserts,
 }
 
 vector<size_t> parse_list(const string &s) {
-  if (s.find_first_not_of("0123456789,-") != string::npos) {
-    cout << "Please note that the format for the list specification only "
-            "allows digits, '-', and ','." << endl;
-    exit(-1);
-  }
+  size_t pos = s.find_first_not_of("0123456789,-");
+  if (pos != string::npos)
+    throw Exception::Parsing::NumberList::InvalidCharacter(s, pos);
+
   vector<string> strs;
   boost::split(strs, s, boost::is_any_of(","));
 
@@ -170,9 +169,7 @@ vector<size_t> parse_list(const string &s) {
             v.push_back(k);
           break;
         default:
-          cout << "List format error: only one '-' is allowed in any group."
-               << endl << "The offending group is '" << t << "'." << endl;
-          exit(-1);
+          throw Exception::Parsing::NumberList::MultipleRanges(t);
           break;
       }
     }
