@@ -19,17 +19,6 @@
 
 using namespace std;
 
-string readfile(const string &path) {
-  string s;
-  ifstream ifs(path.c_str());
-  while (ifs.good()) {
-    char c = ifs.get();
-    if (ifs.good())
-      s += c;
-  }
-  return s;
-}
-
 namespace Specification {
 
 Set::Set() : contrast(""), path(""), is_shuffle(false), motifs() {
