@@ -501,17 +501,17 @@ int main(int argc, const char **argv) {
     } else {
       try {
         store(parse_config_file(ifs, config_file_options), vm);
-      } catch (po::multiple_occurrences e) {
+      } catch (po::multiple_occurrences &e) {
         cout << "Error while parsing config file:" << endl << "Option "
              << e.get_option_name() << " was specified multiple times." << endl
              << default_error_msg << endl;
         return EXIT_FAILURE;
-      } catch (po::unknown_option e) {
+      } catch (po::unknown_option &e) {
         cout << "Error while parsing config file:" << endl << "Option "
              << e.get_option_name() << " not known." << endl
              << default_error_msg << endl;
         return EXIT_FAILURE;
-      } catch (po::invalid_option_value e) {
+      } catch (po::invalid_option_value &e) {
         cout << "Error while parsing config file:" << endl
              << "The value specified for option " << e.get_option_name()
              << " has an invalid format." << endl << default_error_msg << endl;
