@@ -62,10 +62,8 @@ istream &operator>>(istream &in, OccurrenceFilter &filter) {
     filter = OccurrenceFilter::RemoveSequences;
   else if (token == "mask")
     filter = OccurrenceFilter::MaskOccurrences;
-  else {
-    cout << "Couldn't parse occurrence filter type '" << token << "'." << endl;
-    exit(-1);
-  }
+  else
+    throw Exception::InvalidOccurrenceFilter(token);
   return in;
 }
 
@@ -92,13 +90,8 @@ Algorithm parse_algorithm(const string &token_) {
     return Algorithm::MCMC;
   else if (token == "all")
     return Algorithm::Plasma | Algorithm::ExternalDREME | Algorithm::MCMC;
-  else {
-    cout << "Seeding algorithm '" << token_ << "' unknown." << endl
-         << "Please use one of 'plasma', 'dreme', 'mcmc', or 'all'." << endl
-         << "It is also possible to use multiple algorithms by separating them "
-            "by comma." << endl;
-    exit(-1);
-  }
+  else
+    throw Exception::InvalidAlgorithm(token);
 }
 
 istream &operator>>(istream &in, Algorithm &algorithm) {
@@ -148,6 +141,31 @@ Objective objective_for_motif(const Objectives &objectives,
   for (auto objective : objectives)
     if (objective.motif_name == motif.name)
       return objective;
-  throw("bla");
+  throw Exception::NoMatchingObjectiveFound(motif.name);
+}
+
+namespace Exception {
+InvalidOccurrenceFilter::InvalidOccurrenceFilter(const string &token_)
+    : exception(), token(token_) {};
+const char *InvalidOccurrenceFilter::what() const noexcept {
+  string msg = "Error: invalid occurrence filter type '" + token + "'.";
+  return msg.c_str();
+}
+InvalidAlgorithm::InvalidAlgorithm(const string &token_)
+    : exception(), token(token_) {};
+const char *InvalidAlgorithm::what() const noexcept {
+  stringstream ss;
+  ss << "Error: invalid seeding algorithm '" << token << "'." << endl
+     << "Please use one of 'plasma', 'dreme', 'mcmc', or 'all'." << endl
+     << "It is also possible to use multiple algorithms by separating them by "
+        "comma.";
+  return ss.str().c_str();
+}
+NoMatchingObjectiveFound::NoMatchingObjectiveFound(const string &motif_)
+    : exception(), motif(motif_) {};
+const char *NoMatchingObjectiveFound::what() const noexcept {
+  string msg = "Error: no objective found for motif '" + motif + "'.";
+  return msg.c_str();
+}
 }
 }

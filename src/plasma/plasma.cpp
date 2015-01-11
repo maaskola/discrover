@@ -356,11 +356,8 @@ Results Plasma::find_external_dreme(size_t length, const Objective &objective,
   for (auto &contrast : collection)
     for (auto &dataset : contrast)
       paths.push_back(dataset.path);
-  if (paths.size() > 2) {
-    cerr << "Error: when using the external DREME program to find seeds no "
-            "more than two FASTA files may be used." << endl;
-    exit(-1);
-  }
+  if (paths.size() > 2)
+    throw Exception::Dreme::OnlyBinaryContrast();
 
   string path1 = paths[0];
   string path2 = "";
@@ -672,11 +669,9 @@ Results Plasma::find_motifs(const Specification::Motif &motif_spec,
   if (options.verbosity >= Verbosity::debug)
     cout << "motif_spec = " << motif_spec << " objective = " << objective
          << endl;
-  if (objective.motif_name != motif_spec.name) {
-    cout << "Error: no objective found for motif specification: "
-         << motif_spec.name << ":" << motif_spec.specification << endl;
-    exit(-1);
-  }
+  if (objective.motif_name != motif_spec.name)
+    throw Exception::Plasma::NoObjectiveForMotif(motif_spec.name + ":"
+                                                 + motif_spec.specification);
 
   Results results;
   if (motif_spec.kind == Specification::Motif::Kind::Seed) {
@@ -797,5 +792,22 @@ void viterbi_dump(const string &motif, const Collection &collection,
   for (auto &contrast : collection)
     for (auto &dataset : contrast)
       viterbi_dump(motif, dataset, out, options);
+}
+
+namespace Exception {
+namespace Dreme {
+const char *OnlyBinaryContrast::what() const noexcept {
+  string msg = "Error: DREME can only use binary contrasts to find seeds.";
+  return msg.c_str();
+}
+}
+namespace Plasma {
+NoObjectiveForMotif::NoObjectiveForMotif(const string &token_)
+    : exception(), token(token_) {};
+const char *NoObjectiveForMotif::what() const noexcept {
+  string msg = "Error: no objective for motif specification: " + token;
+  return msg.c_str();
+}
+}
 }
 }

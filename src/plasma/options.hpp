@@ -116,6 +116,24 @@ struct Options {
 
   std::string label;
 };
+
+namespace Exception {
+struct InvalidOccurrenceFilter : public std::exception {
+  InvalidOccurrenceFilter(const std::string &token);
+  const char *what() const noexcept;
+  std::string token;
+};
+struct InvalidAlgorithm : public std::exception {
+  InvalidAlgorithm(const std::string &token);
+  const char *what() const noexcept;
+  std::string token;
+};
+struct NoMatchingObjectiveFound : public std::exception {
+  NoMatchingObjectiveFound(const std::string &motif);
+  const char *what() const noexcept;
+  std::string motif;
+};
+}
 }
 
 #endif /* ----- #ifndef OPTIONS_HPP  ----- */

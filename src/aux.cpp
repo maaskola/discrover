@@ -44,7 +44,6 @@ string reverse_and_complement(const string &s) {
         break;
       default:
         throw Exception::NucleicAcids::InvalidNucleotideCode(*iter);
-        break;
     }
   return t;
 }
@@ -172,7 +171,6 @@ vector<size_t> parse_list(const string &s) {
           break;
         default:
           throw Exception::NumberList::MultipleRanges(t);
-          break;
       }
     }
   }

@@ -85,6 +85,21 @@ void report(std::ostream &os, const Result &result,
             const Collection &collection, const Options &options);
 void viterbi_dump(const std::string &motif, const Collection &collection,
                   std::ostream &out, const Options &options);
+
+namespace Exception {
+namespace Dreme {
+struct OnlyBinaryContrast : std::exception {
+  const char *what() const noexcept;
+};
+}
+namespace Plasma {
+struct NoObjectiveForMotif : std::exception {
+  NoObjectiveForMotif(const std::string &token);
+  const char *what() const noexcept;
+  std::string token;
+};
+}
+}
 }
 
 #endif /* ----- #ifndef FIND_HPP  ----- */

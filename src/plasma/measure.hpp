@@ -106,6 +106,19 @@ template <>
 bool is_two_by_two<Continuous::Measure>(Continuous::Measure measure);
 
 Discrete::Measure corresponding_measure(Continuous::Measure);
+
+namespace Exception {
+struct InvalidMeasure : public std::exception {
+  InvalidMeasure(const std::string &token);
+  const char *what() const noexcept;
+  std::string token;
+};
+struct NoCorrespondingMeasure : public std::exception {
+  NoCorrespondingMeasure(const Continuous::Measure &measure);
+  const char *what() const noexcept;
+  Continuous::Measure measure;
+};
+}
 }
 
 #endif /* ----- #ifndef MEASURE_HPP  ----- */

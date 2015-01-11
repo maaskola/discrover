@@ -194,10 +194,7 @@ void parse_measure(const string &token, Measure &measure) {
   } else if (token == "none" or token == "undefined") {
     measure = Measure::Undefined;
   } else {
-    cout << "Measure '" << token
-         << "' not implemented. See -h or --help for help." << endl;
-    assert(false);
-    exit(-1);
+    throw Exception::InvalidMeasure(token);
   }
 }
 
@@ -287,9 +284,24 @@ Discrete::Measure corresponding_measure(Continuous::Measure hmm_measure) {
     case Continuous::Measure::Undefined:
       return Discrete::Measure::Undefined;
     default:
-      cout << "Error: can't determine a corresponding measure for "
-           << hmm_measure << endl;
-      exit(-1);
+      throw Exception::NoCorrespondingMeasure(hmm_measure);
   }
+}
+
+namespace Exception {
+InvalidMeasure::InvalidMeasure(const string &token_)
+    : exception(), token(token_) {};
+const char *InvalidMeasure::what() const noexcept {
+  string msg = "Error: invalid measure '" + token + "'.";
+  return msg.c_str();
+}
+NoCorrespondingMeasure::NoCorrespondingMeasure(
+    const Continuous::Measure &measure_)
+    : exception(), measure(measure_) {};
+const char *NoCorrespondingMeasure::what() const noexcept {
+  string msg = "Error: no corresponding seeding measure for HMM measure "
+               + measure2string(measure) + ".";
+  return msg.c_str();
+}
 }
 }
