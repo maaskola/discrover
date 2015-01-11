@@ -54,22 +54,27 @@ size_t Entry::mask(vector<size_t> positions) {
   return masked_nucleotides;
 }
 
+/** Convert a string of nucleic acids into an IEntry::seq_t
+ * Note: characters other than 'acgt' are assigned random nucleotides
+ *       if n_enc < 0.
+ **/
 IEntry::seq_t string2seq(const string &s, int n_enc = -1) {
   std::uniform_int_distribution<size_t> r_nucl(0, 3);
   IEntry::seq_t seq(s.size());
   size_t idx = 0;
   for (auto iter : s) {
-    switch (iter) {
-      case 'a': case 'A':
+    switch (tolower(iter)) {
+      case 'a':
         seq[idx] = 0;
         break;
-      case 'c': case 'C':
+      case 'c':
         seq[idx] = 1;
         break;
-      case 'g': case 'G':
+      case 'g':
         seq[idx] = 2;
         break;
-      case 't': case 'T': case 'u': case 'U':
+      case 't':
+      case 'u':
         seq[idx] = 3;
         break;
       case '$':
@@ -80,7 +85,6 @@ IEntry::seq_t string2seq(const string &s, int n_enc = -1) {
           seq[idx] = r_nucl(EntropySource::random_nucl_rng);
         else
           seq[idx] = n_enc;
-        // throw("Wrong encoding");
     }
     idx++;
   }
