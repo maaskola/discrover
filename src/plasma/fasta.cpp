@@ -2,6 +2,7 @@
 #include <random>
 #include "fasta.hpp"
 #include "../shuffle/dinucleotide_shuffle.hpp"
+#include "../aux.hpp"
 #include "io.hpp"
 #include "../verbosity.hpp"
 
@@ -329,7 +330,7 @@ string reverse_complement(const string &s) {
         t += 'R';
         break;
       default:
-        throw("We have a problem reversing that string!");
+        throw Exception::NucleicAcids::InvalidNucleotideCode(*iter);
     }
   return t;
 }
