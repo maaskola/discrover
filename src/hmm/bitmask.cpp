@@ -20,7 +20,7 @@ using namespace std;
 bitmask_t make_mask(const vector<size_t> &v) {
   bitmask_t x = 0;
   for (auto y : v) {
-    if (y > max_motifs) {
+    if (y >= max_motifs) {
       throw Exception::BitMask::TooManyMotifs(y);
     }
     // TODO implement in terms of set() or operator[] methods
