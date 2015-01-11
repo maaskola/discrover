@@ -17,11 +17,15 @@ The required and optional dependencies include:
 
 ## A C++11 supporting compiler
 Discrover is written in C++11, so it is necessary to use an up-to-date version of your compiler.
-The GNU compiler collection supports all necessary features to compile this project as of version 4.6.
+The GNU compiler collection (GCC) supports all necessary features to compile this project as of version 4.6.
+
+Link-time optimization (LTO) will be used if your compiler is new enough.
+LTO support in GCC prior to version 4.8 is somewhat unreliable, and LTO is only enabled if you have at least version 4.8.
 
 
 ## CMake
 We use [CMake](http://www.cmake.org/) to construct Makefiles for building Discrover.
+As of version 1.5.0 of Discrover we require >= CMake 2.8.8.
 
 
 ### Boost C++ libraries
@@ -34,6 +38,7 @@ Version 1.48 and more recent versions are known to work.
 ### OpenMP
 We use OpenMP to support parallelization.
 As of version 4.2 the GCC supports OpenMP out of the box, so we suggest building with a recent compiler version.
+At the time of writing `clang++` from the LLVM project does not yet have full OpenMP support.
 
 
 ### Cairo
