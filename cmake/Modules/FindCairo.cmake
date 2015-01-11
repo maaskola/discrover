@@ -27,8 +27,8 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-find_package(PkgConfig)
-pkg_check_modules(PC_CAIRO cairo) # FIXME: After we require CMake 2.8.2 we can pass QUIET to this call.
+find_package(PkgConfig QUIET)
+pkg_check_modules(PC_CAIRO QUIET cairo)
 find_path(CAIRO_INCLUDE_DIRS
   NAMES cairo.h
   HINTS ${PC_CAIRO_INCLUDEDIR}
