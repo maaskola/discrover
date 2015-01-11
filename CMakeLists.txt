@@ -102,7 +102,11 @@ IF(Boost_FOUND)
 ENDIF()
 
 FIND_PACKAGE(OpenMP)
-FIND_PACKAGE(Ctags)
+IF(OPENMP_FOUND)
+  MESSAGE(STATUS "Enabled: OpenMP support")
+ELSE()
+  MESSAGE(FATAL_ERROR "Compiler does not support OpenMP. See http://openmp.org/wp/openmp-compilers/ for a list of OpenMP supporting compilers.")
+ENDIF()
 
 IF(NOT(DEFINED WITH_CAIRO) OR WITH_CAIRO)
   FIND_PACKAGE(Cairo)
@@ -242,6 +246,7 @@ ELSE()
   git_branch(GIT_BRANCH)
 ENDIF()
 
+FIND_PACKAGE(Ctags)
 IF(CTAGS_FOUND AND NOT(APPLE))
   ADD_CUSTOM_TARGET(ctags ALL
     COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q src/
