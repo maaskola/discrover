@@ -41,13 +41,13 @@ namespace IO {
 namespace Exception {
 namespace File {
 struct Existence : public std::runtime_error {
-  const std::string msg = "File does not exist: ";
+  const std::string msg = "Error: file does not exist: ";
   Existence(const std::string& path_)
       : std::runtime_error(msg + path_), path(path_){};
   std::string path;
 };
 struct Access : public std::runtime_error {
-  const std::string msg = "File access failed: ";
+  const std::string msg = "Error: file access failed: ";
   Access(const std::string& path_)
       : std::runtime_error(msg + path_), path(path_){};
   std::string path;
