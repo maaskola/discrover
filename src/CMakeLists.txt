@@ -1,5 +1,5 @@
 # add definitions, compiler switches, etc.
-ADD_DEFINITIONS(-Wall -funroll-loops -march=native -Wno-unused-local-typedefs -fPIC)
+ADD_DEFINITIONS(-Wall -funroll-loops -march=native -Wno-unused-local-typedefs)
 
 ADD_SUBDIRECTORY(shuffle)
 ADD_SUBDIRECTORY(plasma)
