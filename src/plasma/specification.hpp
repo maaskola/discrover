@@ -207,6 +207,85 @@ std::ostream &operator<<(std::ostream &out, Objective<X> &spec) {
   return out;
 }
 
+namespace Exception {
+namespace Discriminative {
+template <typename measure_t>
+struct UnaryContrast : public std::exception {
+  UnaryContrast(measure_t measure_, const std::string &name)
+      : exception(), measure(measure_), contrast(name){};
+  const char *what() const noexcept {
+    std::string msg = "Error: discriminative measure '"
+                      + measure2string(measure)
+                      + "' requires at least a binary contrast in contrast '"
+                      + contrast + "'.";
+    return msg.c_str();
+  }
+  measure_t measure;
+  std::string contrast;
+};
+template <typename measure_t>
+struct TwoByTwo : public std::exception {
+  TwoByTwo(measure_t measure_, const std::string &name)
+      : exception(), measure(measure_), contrast(name){};
+  const char *what() const noexcept {
+    std::string msg = "Error: 2x2 measure '" + measure2string(measure)
+                      + "' only works on binary contrasts, and contrast '"
+                      + contrast + "' is not binary.";
+    return msg.c_str();
+  }
+  measure_t measure;
+  std::string contrast;
+};
+}
+
+namespace Motif {
+struct NameNotUnique : public std::exception {
+  NameNotUnique(const std::string &name_) : exception(), name(name_){};
+  const char *what() const noexcept {
+    std::string msg = "Error: motif name '" + name + "' not unique.";
+    return msg.c_str();
+  }
+  std::string name;
+};
+struct MultiplicityZero : public std::exception {
+  MultiplicityZero(const std::string &name_) : exception(), name(name_){};
+  const char *what() const noexcept {
+    std::string msg = "Error: multiplicity of motif '" + name + "' is zero!";
+    return msg.c_str();
+  }
+  std::string name;
+};
+struct NameNotUniqueInObjective : public std::exception {
+  NameNotUniqueInObjective(const std::string &name_)
+      : exception(), name(name_){};
+  const char *what() const noexcept {
+    std::string msg = "Error: motif name '" + name
+                      + "'in objective not unique.";
+    return msg.c_str();
+  }
+  std::string name;
+};
+struct NoSpecfication : public std::exception {
+  NoSpecfication(const std::string &name_) : exception(), name(name_){};
+  const char *what() const noexcept {
+    std::string msg = std::string()
+                      + "Error: found a motif name in the objective for which "
+                      + "no motif specification is found: '" + name + "'.";
+    return msg.c_str();
+  }
+  std::string name;
+};
+struct WhenOneThenAll : public std::exception {
+  const char *what() const noexcept {
+    std::string msg = std::string()
+                      + "Error: when any objectives name motifs then all "
+                      + "objectives must define motifs.";
+    return msg.c_str();
+  }
+};
+}
+}
+
 /** A routine to interpret what the user has specified in terms of motifs, data
  * sets, and objectives.
  * Contrasts:
@@ -223,9 +302,9 @@ std::ostream &operator<<(std::ostream &out, Objective<X> &spec) {
  *   - give names to unnamed motifs, making sure not to overwrite given ones
  *   - more that needs to be documented
  */
-template <typename X>
+template <typename measure_t>
 void harmonize(Motifs &motifs, Sets &sets,
-               std::vector<Objective<X>> &objectives, bool demultiplex,
+               std::vector<Objective<measure_t>> &objectives, bool demultiplex,
                bool add_shuffles = true) {
   const bool debug = false;
 
@@ -298,20 +377,14 @@ void harmonize(Motifs &motifs, Sets &sets,
                 break;
               }
             sets.push_back(shuffle_spec);
-          } else {
-            std::cout << "Error: discriminative measure '" << objective.measure
-                      << "' requires at least a binary contrast in contrast '"
-                      << atom.contrast << "'." << std::endl;
-            exit(-1);
-          }
+          } else
+            throw Exception::Discriminative::UnaryContrast<measure_t>(
+                objective.measure, atom.contrast);
         }
       if (Measures::is_two_by_two(objective.measure))
-        if (contrast_size != 2) {
-          std::cout << "Error: 2x2 measure '" << objective.measure
-                    << "' only works on binary contrasts, and contrast '"
-                    << atom.contrast << "' is not binary." << std::endl;
-          exit(-1);
-        }
+        if (contrast_size != 2)
+          throw Exception::Discriminative::TwoByTwo<measure_t>(
+              objective.measure, atom.contrast);
     }
 
   // get all motif names and check that none are duplicated
@@ -319,11 +392,8 @@ void harmonize(Motifs &motifs, Sets &sets,
   for (auto &motif : motifs)
     if (motif.name != "") {
       auto pair = motif_names_in_motifs.insert(motif.name);
-      if (not pair.second) {  // there was already a motif of that name
-        std::cout << "Error: motif name not unique: '" << motif.name << "'."
-                  << std::endl;
-        exit(-1);
-      }
+      if (not pair.second) // there was already a motif of that name
+        throw Exception::Motif::NameNotUnique(motif.name);
     }
 
   // give names to unnamed motifs, making sure not to overwrite given ones
@@ -340,11 +410,8 @@ void harmonize(Motifs &motifs, Sets &sets,
 
   // check that no motifs have multiplicity zero
   for (auto &m : motifs)
-    if (m.multiplicity == 0) {
-      std::cout << "Error: multiplicity of motif \"" << m.name << "\" is zero!"
-                << std::endl;
-      exit(-1);
-    }
+    if (m.multiplicity == 0)
+      throw Exception::Motif::MultiplicityZero(m.name);
 
   // if desired (=yes for Discrover, =no for Plasma) create multiple motifs for
   // which multiplicity > 1
@@ -397,7 +464,7 @@ void harmonize(Motifs &motifs, Sets &sets,
     auto original_objective = *begin(objectives);
     objectives.clear();
     for (auto &name : motif_names_in_motifs) {
-      Objective<X> objective(original_objective);
+      Objective<measure_t> objective(original_objective);
       objective.motif_name = name;
       objectives.push_back(objective);
     }
@@ -419,7 +486,7 @@ void harmonize(Motifs &motifs, Sets &sets,
 
   // find objectives that mention demuxed motif, and replace by new ones
   if (demultiplex) {
-    std::vector<Objective<X>> objs;
+    std::vector<Objective<measure_t>> objs;
     for (auto &objective : objectives) {
       std::string motif_name = objective.motif_name;
       std::cout << "Check for Demuxing (obj): " << motif_name << std::endl;
@@ -445,25 +512,15 @@ void harmonize(Motifs &motifs, Sets &sets,
   std::set<std::string> motif_names_in_objectives;
   for (auto &objective : objectives) {
     auto pair = motif_names_in_objectives.insert(objective.motif_name);
-    if (not pair.second) {  // there was already a motif of that name
-      std::cout << "Error: motif name in objective not unique: '"
-                << objective.motif_name << "'." << std::endl;
-      exit(-1);
-    }
+    if (not pair.second) // there was already a motif of that name
+      throw Exception::Motif::NameNotUniqueInObjective(objective.motif_name);
     if (motif_names_in_motifs.find(objective.motif_name)
-        == end(motif_names_in_motifs)) {
-      std::cout << "Error: found a motif name in the objective for which no "
-                   "motif specification is found: '" << objective.motif_name
-                << "'." << std::endl;
-      exit(-1);
-    }
+        == end(motif_names_in_motifs))
+      throw Exception::Motif::NoSpecfication(objective.motif_name);
   }
   if (motif_names_in_objectives.find("") != end(motif_names_in_objectives)
-      and motif_names_in_objectives.size() > 1) {
-    std::cout << "Error: when any objectives name motifs then all objectives "
-                 "must define motifs." << std::endl;
-    exit(-1);
-  }
+      and motif_names_in_objectives.size() > 1)
+    throw Exception::Motif::WhenOneThenAll();
 
   if (debug) {
     std::cout << "Found motif name in objectives:";
@@ -472,5 +529,5 @@ void harmonize(Motifs &motifs, Sets &sets,
     std::cout << std::endl;
   }
 }
-};
+}
 #endif /* ----- #ifndef SPECIFICATION_HPP ----- */

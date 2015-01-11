@@ -46,6 +46,12 @@ struct Existence : public std::runtime_error {
       : std::runtime_error(msg + path_), path(path_){};
   std::string path;
 };
+struct NoRegularFile : public std::runtime_error {
+  const std::string msg = "Error: not a regular file: ";
+  NoRegularFile(const std::string& path_)
+      : std::runtime_error(msg + path_), path(path_){};
+  std::string path;
+};
 struct Access : public std::runtime_error {
   const std::string msg = "Error: file access failed: ";
   Access(const std::string& path_)

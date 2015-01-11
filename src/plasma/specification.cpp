@@ -16,6 +16,7 @@
 #include <boost/filesystem.hpp>
 #include "../aux.hpp"
 #include "specification.hpp"
+#include "io.hpp"
 
 using namespace std;
 
@@ -58,15 +59,10 @@ Set::Set(const string &token, bool is_shuffle_) : Set() {
   } else
     path = token;
 
-  if (boost::filesystem::exists(path)) {
-    if (not boost::filesystem::is_regular_file(path)) {
-      cout << "Error: FASTA file " << path << " is not a regular file." << endl;
-      exit(-1);
-    }
-  } else {
-    cout << "Error: FASTA file " << path << " does not exist." << endl;
-    exit(-1);
-  }
+  if (not boost::filesystem::exists(path))
+    throw IO::Exception::File::Existence(path);
+  else if (not boost::filesystem::is_regular_file(path))
+    throw IO::Exception::File::NoRegularFile(path);
 
   if (false) {
     cout << "Constructed Set:\npath = " << path << "\n"
@@ -134,9 +130,7 @@ Motif::Motif(const string &s)
     cout << "multiplicity = " << multiplicity << endl;
   }
 }
-}
 
-namespace Specification {
 namespace Contrast {
 
 Expression make_contrast(const string &path) {
