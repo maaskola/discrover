@@ -23,8 +23,7 @@ bitmask_t make_mask(const vector<size_t> &v) {
     if (y >= max_motifs) {
       throw Exception::BitMask::TooManyMotifs(y);
     }
-    // TODO implement in terms of set() or operator[] methods
-    x |= 1 << y;
+    x.set(y, 1);
   }
   return x;
 }
@@ -32,14 +31,13 @@ bitmask_t make_mask(const vector<size_t> &v) {
 vector<size_t> unpack_mask(const bitmask_t x) {
   vector<size_t> v;
   size_t z = 0;
-  bitmask_t y = 1;
-  while (x.to_ullong() >= y.to_ullong()) {
+  bitmask_t y;
+  do {
+    y.reset();
+    y.set(z, 1);
     if ((x & y) != 0)
       v.push_back(z);
-    // TODO implement in terms of test() or operator[] methods
-    y = y << 1;
-    z++;
-  }
+  } while (x.to_ullong() >= y.to_ullong() and ++z < max_motifs);
   return v;
 }
 
