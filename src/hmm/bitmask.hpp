@@ -17,8 +17,9 @@
 #include <stdexcept>
 #include <bitset>
 #include <vector>
+#include <climits>
 
-const static size_t max_motifs = 32;
+const static size_t max_motifs = sizeof(size_t) * CHAR_BIT;
 using bitmask_t = std::bitset<max_motifs>;
 
 bitmask_t make_mask(const std::vector<size_t> &v);
