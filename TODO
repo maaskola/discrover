@@ -40,3 +40,5 @@ CMake Warning (dev) at doc/CMakeLists.txt:19 (GET_PROPERTY):
   expression $<TARGET_FILE>, as appropriate.
 
 Either install hmm.rb into a proper location or merge into tikzlogo / hmm2meme
+TODO 2015-01-11 DREME exception non-zero: print return value
+TODO 2015-01-11 HMM insertions exception: more verbosity
