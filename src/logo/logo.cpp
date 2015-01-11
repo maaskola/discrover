@@ -173,7 +173,9 @@ void draw_letter_u(cairo_t *cr, const coord_t &coord, double width,
   cairo_fill(cr);
 }
 
-void draw_letter(cairo_t *cr, size_t letter, const coord_t &coord, double width,
+enum class Letter { A = 0, C = 1, G = 2, T = 3 };
+
+void draw_letter(cairo_t *cr, Letter letter, const coord_t &coord, double width,
                  double height, const Options &options, double eps = 1e-6) {
   palette_t palette;
   switch (options.palette) {
@@ -189,16 +191,16 @@ void draw_letter(cairo_t *cr, size_t letter, const coord_t &coord, double width,
   }
   if (height > eps)
     switch (letter) {
-      case 0:
+      case Letter::A:
         draw_letter_a(cr, coord, width, height, palette.a);
         break;
-      case 1:
+      case Letter::C:
         draw_letter_c(cr, coord, width, height, palette.c);
         break;
-      case 2:
+      case Letter::G:
         draw_letter_g(cr, coord, width, height, palette.g);
         break;
-      case 3:
+      case Letter::T:
         switch (options.alphabet) {
           case Alphabet::DNA:
             draw_letter_t(cr, coord, width, height, palette.t);
@@ -214,10 +216,6 @@ void draw_letter(cairo_t *cr, size_t letter, const coord_t &coord, double width,
             break;
         }
         break;
-      default:
-        cout << "Error: wrong nucleotide index specified in generating "
-                "sequence logo." << endl;
-        exit(-1);
     }
 }
 
@@ -246,13 +244,13 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
     if (options.type == Type::Sequence)
       col_height = information_content(col) / 2;
 
-    vector<size_t> order = {0, 1, 2, 3};
+    vector<Letter> order = {Letter::A, Letter::C, Letter::G, Letter::T};
     if (options.order == Order::Frequency)
       sort(begin(order), end(order),
-           [&](size_t a, size_t b) { return col[a] < col[b]; });
+           [&](Letter a, Letter b) { return col[size_t(a)] < col[size_t(b)]; });
 
     for (auto idx : order) {
-      double current_height = col[idx] * dims.node_height * col_height;
+      double current_height = col[size_t(idx)] * dims.node_height * col_height;
       draw_letter(cr, idx, current, dims.node_width, current_height, options);
       current.y -= current_height;
     }

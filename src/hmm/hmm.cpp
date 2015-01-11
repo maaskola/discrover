@@ -153,8 +153,6 @@ size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda,
 
   const size_t motif_idx = groups.size();
 
-  // size_t first = n_states;
-
   const size_t first_padded = n_states;
   // the last of the non-insertion states of this motif
   const size_t last_padded = first_padded + n_padded_states - 1;
