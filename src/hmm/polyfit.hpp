@@ -75,4 +75,18 @@ vector_t interpolate2(double x1, double x2, double f1, double f2, double g1,
                       Verbosity verbose);
 vector_t interpolate2(double x1, double x2, double g1, double g2);
 
+namespace Exception {
+namespace PolyFit {
+struct InsufficientData : public std::exception {
+  InsufficientData(size_t order, size_t num_data);
+  const char *what() const noexcept;
+  size_t order, num_data;
+};
+
+struct SingularMatrix : public std::exception {
+  const char *what() const noexcept;
+};
+}
+}
+
 #endif

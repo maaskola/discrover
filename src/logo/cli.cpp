@@ -31,11 +31,8 @@ istream &operator>>(istream &is, Type &type) {
     type = Type::Sequence;
   else if (word == "freq" or word == "frequency")
     type = Type::Frequency;
-  else {
-    cout << "Can't parse logo type '" << Word << "'." << endl;
-    cout << "Available are: 'seq' and 'freq'." << endl;
-    exit(-1);
-  }
+  else
+    throw Exception::InvalidType(Word);
   return is;
 }
 istream &operator>>(istream &is, Alphabet &alphabet) {
@@ -48,11 +45,8 @@ istream &operator>>(istream &is, Alphabet &alphabet) {
     alphabet = Alphabet::DNA;
   else if (word == "undef" or word == "undefined")
     alphabet = Alphabet::Undefined;
-  else {
-    cout << "Can't parse alphabet '" << Word << "'." << endl;
-    cout << "Available are: 'DNA' and 'RNA'." << endl;
-    exit(-1);
-  }
+  else
+    throw Exception::InvalidAlphabet(Word);
 
   return is;
 }
@@ -64,11 +58,8 @@ istream &operator>>(istream &is, Order &order) {
     order = Order::Alphabetic;
   else if (word == "freq" or word == "frequency")
     order = Order::Frequency;
-  else {
-    cout << "Can't parse order type '" << Word << "'." << endl;
-    cout << "Available are: 'alpha' and 'freq'." << endl;
-    exit(-1);
-  }
+  else
+    throw Exception::InvalidOrder(Word);
   return is;
 }
 istream &operator>>(istream &is, Palette &palette) {
@@ -81,14 +72,45 @@ istream &operator>>(istream &is, Palette &palette) {
     palette = Palette::Solarized;
   else if (word == "tetrad")
     palette = Palette::Tetrad;
-  else {
-    cout << "Can't parse color palette '" << Word << "'." << endl;
-    cout << "Available are: 'default', 'solarized', and 'tetrad'." << endl;
-    exit(-1);
-  }
+  else
+    throw Exception::InvalidPalette(Word);
   return is;
 }
+
+namespace Exception {
+
+InvalidType::InvalidType(const string &token_) : exception(), token(token_) {};
+const char *InvalidType::what() const noexcept {
+  string msg = "Error: invalid logo type '" + token + "'.\n"
+               + "Available are: 'seq' and 'freq'.";
+  return msg.c_str();
 }
+
+InvalidAlphabet::InvalidAlphabet(const string &token_)
+    : exception(), token(token_) {};
+const char *InvalidAlphabet::what() const noexcept {
+  string msg = "Error: invalid alphabet '" + token + "'.\n"
+    "Available are: 'DNA' and 'RNA'.";
+  return msg.c_str();
+}
+
+InvalidOrder::InvalidOrder(const string &token_) : exception(), token(token_) {};
+const char *InvalidOrder::what() const noexcept {
+  string msg = "Error: invalid order type '" + token + "'.\n"
+               + "Available are: 'alpha' and 'freq'.";
+  return msg.c_str();
+}
+
+InvalidPalette::InvalidPalette(const string &token_)
+    : exception(), token(token_) {};
+const char *InvalidPalette::what() const noexcept {
+  string msg = "Error: invalid color palette '" + token + "'.\n"
+               + "Available are: 'default', 'solarized', and 'tetrad'.";
+  return msg.c_str();
+}
+
+}  // namespace Exception
+}  // namespace Logo
 
 boost::program_options::options_description gen_logo_options_description(
     Logo::Options &options, Logo::CLI mode, size_t cols, const string &name) {

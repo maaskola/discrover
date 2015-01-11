@@ -260,7 +260,7 @@ int main(int argc, const char **argv) {
   if (options.motif_specifications.size() == 0) {
     cout << "Error: you must specify motif lengths of interest with the -m "
             "switch." << endl;
-    exit(-1);
+    return EXIT_FAILURE;
   }
 
   if (vm.count("threads"))
@@ -360,7 +360,7 @@ int main(int argc, const char **argv) {
     struct rusage usage;
     if (getrusage(RUSAGE_SELF, &usage) != 0) {
       cout << "getrusage failed" << endl;
-      exit(0);
+      return EXIT_FAILURE;
     }
 
     double utime = usage.ru_utime.tv_sec + 1e-6 * usage.ru_utime.tv_usec;

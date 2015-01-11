@@ -30,10 +30,10 @@
 #ifndef AUX_HPP
 #define AUX_HPP
 
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <iostream>
-#include "exception.hpp"
 #include "matrix.hpp"
 
 /** Determine reverse complement of a nucleic acid sequence */
@@ -104,5 +104,28 @@ inline double exp_diff(double x, double y) {
 std::vector<std::string> tokenize(const std::string &s,
                                   const std::string &delim);
 std::string sha1hash(const std::string &s);
+
+namespace Exception {
+namespace NumberList {
+struct InvalidCharacter : public std::exception {
+  InvalidCharacter(const std::string &spec, size_t pos);
+  std::string spec;
+  size_t pos;
+  const char *what() const noexcept;
+};
+struct MultipleRanges : public std::exception {
+  MultipleRanges(const std::string &group);
+  std::string group;
+  const char *what() const noexcept;
+};
+}
+namespace NucleicAcids {
+struct InvalidNucleotideCode : public std::exception {
+  InvalidNucleotideCode(char nucl);
+  char nucl;
+  const char *what() const noexcept;
+};
+}
+}
 
 #endif

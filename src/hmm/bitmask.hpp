@@ -14,6 +14,7 @@
 #ifndef BITMASK_HPP
 #define BITMASK_HPP
 
+#include <stdexcept>
 #include <bitset>
 #include <vector>
 
@@ -22,5 +23,15 @@ using bitmask_t = std::bitset<max_motifs>;
 
 bitmask_t make_mask(const std::vector<size_t> &v);
 std::vector<size_t> unpack_mask(const bitmask_t x);
+
+namespace Exception {
+namespace BitMask {
+struct TooManyMotifs : public std::exception {
+  TooManyMotifs(size_t num_motifs);
+  const char *what() const noexcept;
+  size_t num_motifs;
+};
+};
+};
 
 #endif

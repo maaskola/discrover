@@ -436,7 +436,7 @@ int main(int argc, const char **argv) {
             "available, please check your command line arguments." << endl
          << default_error_msg << endl;
     return EXIT_FAILURE;
-  } catch (runtime_error &e) {
+  } catch (exception &e) {
     cout << "Error while parsing command line options:" << endl;
     cout << e.what();
     return EXIT_FAILURE;
@@ -662,14 +662,14 @@ int main(int argc, const char **argv) {
       if (obj.measure != Measures::Continuous::Measure::MutualInformation) {
         cout << "Error: multiple motif mode can only be used with the "
                 "objective function MICO." << endl;
-        exit(-1);
+        return EXIT_FAILURE;
       }
   }
 
   if (options.line_search.eta <= options.line_search.mu) {
     cout << "Error: the Moré-Thuente η parameter must be larger than the µ "
             "parameter." << endl;
-    exit(-1);
+    return EXIT_FAILURE;
   }
 
   // initialize RNG
@@ -687,7 +687,7 @@ int main(int argc, const char **argv) {
   // main routine
   try {
     perform_analysis(options);
-   } catch (exception &e) {
+  } catch (exception &e) {
     cout << e.what();
     return EXIT_FAILURE;
   }
@@ -696,7 +696,7 @@ int main(int argc, const char **argv) {
     struct rusage usage;
     if (getrusage(RUSAGE_SELF, &usage) != 0) {
       cout << "getrusage failed" << endl;
-      exit(0);
+      return EXIT_FAILURE;
     }
 
     double utime = usage.ru_utime.tv_sec + 1e-6 * usage.ru_utime.tv_usec;

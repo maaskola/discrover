@@ -96,11 +96,8 @@ vector_t polyfit(const vector_t &x, const vector_t &y, size_t n,
                  Verbosity verbosity) {
   if (verbosity >= Verbosity::debug)
     cout << "Fitting " << n << "-th order polynomial." << endl;
-  if (n >= x.size()) {
-    cout << "Error in polynomial fitting: cannot fit " << n
-         << "-th order polynomial to " << x.size() << " data points." << endl;
-    exit(-1);
-  }
+  if (n >= x.size())
+    throw Exception::PolyFit::InsufficientData(n, x.size());
 
   using namespace boost::numeric::ublas;
   matrix_t X(x.size(), n + 1);
@@ -119,10 +116,9 @@ vector_t polyfit(const vector_t &x, const vector_t &y, size_t n,
   matrix_t Q(n + 1, n + 1);
   bool inverted = InvertMatrix(P, Q);
 
-  if (not inverted) {
-    cout << "Couldn't invert matrix." << endl;
-    exit(-1);
-  }
+  if (not inverted)
+    throw Exception::PolyFit::SingularMatrix();
+
   if (verbosity >= Verbosity::debug)
     cout << "Q = " << Q << endl;
 
@@ -183,4 +179,22 @@ vector_t interpolate2(double x1, double x2, double g1, double g2) {
   coeff(1) = g1 - 2 * coeff(2) * x1;
   coeff(0) = 0;
   return coeff;
+}
+
+namespace Exception {
+namespace PolyFit {
+InsufficientData::InsufficientData(size_t o, size_t n)
+    : exception(), order(o), num_data(n) {};
+
+const char *InsufficientData::what() const noexcept {
+  stringstream ss;
+  ss << "Error in polynomial fitting: cannot fit " << order
+     << "-th order polynomial to " << num_data << " data points.";
+  return ss.str().c_str();
+}
+
+const char *SingularMatrix::what() const noexcept {
+  return "Error in polynomial fitting: singular matrix can't be inverted.";
+}
+}
 }

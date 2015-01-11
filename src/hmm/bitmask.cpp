@@ -12,6 +12,7 @@
  */
 
 #include <iostream>
+#include <sstream>
 #include "bitmask.hpp"
 
 using namespace std;
@@ -20,10 +21,7 @@ bitmask_t make_mask(const vector<size_t> &v) {
   bitmask_t x = 0;
   for (auto y : v) {
     if (y > max_motifs) {
-      cout << "Error: trying to construct mask for too many motifs! The "
-              "offending index was: " << y << ", and there may only be "
-           << max_motifs << " motifs in this version." << endl;
-      exit(-1);
+      throw Exception::BitMask::TooManyMotifs(y);
     }
     // TODO implement in terms of set() or operator[] methods
     x |= 1 << y;
@@ -43,4 +41,18 @@ vector<size_t> unpack_mask(const bitmask_t x) {
     z++;
   }
   return v;
+}
+
+namespace Exception {
+namespace BitMask {
+TooManyMotifs::TooManyMotifs(size_t num_motifs_)
+    : exception(), num_motifs(num_motifs_) {};
+const char *TooManyMotifs::what() const noexcept {
+  stringstream ss;
+  ss << "Error: trying to construct mask for too many motifs! "
+     << "The offending index is: " << num_motifs
+     << ", and this version only supports " << max_motifs << " motifs." << endl;
+  return ss.str().c_str();
+}
+}
 }

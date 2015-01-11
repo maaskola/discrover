@@ -7,8 +7,9 @@
 #include <boost/lexical_cast.hpp>
 #include "logo.hpp"
 
-namespace Logo {
 using namespace std;
+
+namespace Logo {
 
 enum class output_t { PDF, PNG };
 
@@ -399,4 +400,4 @@ vector<string> draw_logo(const matrix_t &matrix, const string &out_path,
     return paths;
   }
 }
-};
+}  //  namespace Logo

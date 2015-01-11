@@ -8,18 +8,24 @@
 using namespace std;
 
 namespace Dreme {
-const char *BinaryNotFoundException::what() const throw() {
-  return "Could not find Dreme binary.";
+namespace Exception {
+const char *BinaryNotFound::what() const noexcept {
+  return "Error: DREME binary not found.";
 };
 
-InvalidLengthsException::InvalidLengthsException(size_t s1, size_t s2)
+InvalidLengths::InvalidLengths(size_t s1, size_t s2)
     : exception(), min_size(s1), max_size(s2){};
-const char *InvalidLengthsException::InvalidLengthsException::what() const
-    throw() {
-  return ("min_size (" + boost::lexical_cast<string>(min_size)
-          + ") is not smaller than max_size ("
-          + boost::lexical_cast<string>(max_size) + ").").c_str();
+const char *InvalidLengths::InvalidLengths::what() const noexcept {
+  stringstream ss;
+  ss << "min_size (" << min_size << ") is not smaller than max_size ("
+     << max_size << ").";
+  return ss.str().c_str();
 };
+
+const char *ReturnValueNonZero::what() const noexcept {
+  return "There was a problem executing DREME.";
+};
+}
 
 list<pair<string, double>> parse_dreme_output(const string &dir) {
   list<pair<string, double>> motifs;
@@ -59,7 +65,7 @@ list<pair<string, double>> run(const string &path1, const string &path2,
       str << " -k " << len;
   } else {
     if (min_size > max_size)
-      throw InvalidLengthsException(min_size, max_size);
+      throw Exception::InvalidLengths(min_size, max_size);
     str << " -mink " << min_size << " -maxk " << max_size;
   }
 
@@ -82,10 +88,8 @@ list<pair<string, double>> run(const string &path1, const string &path2,
   cout << "Command for running DREME = " << command << endl;
 
   int res = system(command.c_str());
-  if (res != 0) {
-    cout << "There was a problem executing DREME. Exiting." << endl;
-    exit(res);
-  }
+  if (res != 0)
+    throw Exception::ReturnValueNonZero();
 
   auto regexes = parse_dreme_output(dreme_output_dir);
 

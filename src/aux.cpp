@@ -1,4 +1,5 @@
 #include <cstring>
+#include <sstream>
 #include <boost/algorithm/string.hpp>
 #include "aux.hpp"
 
@@ -42,7 +43,8 @@ string reverse_and_complement(const string &s) {
         t += "N";
         break;
       default:
-        throw("We have a problem reversing that string!");
+        throw Exception::NucleicAcids::InvalidNucleotideCode(*iter);
+        break;
     }
   return t;
 }
@@ -145,7 +147,7 @@ vector<size_t> shift_positions_right(const vector<size_t> original_inserts,
 vector<size_t> parse_list(const string &s) {
   size_t pos = s.find_first_not_of("0123456789,-");
   if (pos != string::npos)
-    throw Exception::Parsing::NumberList::InvalidCharacter(s, pos);
+    throw Exception::NumberList::InvalidCharacter(s, pos);
 
   vector<string> strs;
   boost::split(strs, s, boost::is_any_of(","));
@@ -169,7 +171,7 @@ vector<size_t> parse_list(const string &s) {
             v.push_back(k);
           break;
         default:
-          throw Exception::Parsing::NumberList::MultipleRanges(t);
+          throw Exception::NumberList::MultipleRanges(t);
           break;
       }
     }
@@ -246,4 +248,37 @@ vector<string> tokenize(const string &s, const string &delim) {
   vector<string> strs;
   boost::split(strs, s, boost::is_any_of(delim));
   return strs;
+}
+
+namespace Exception {
+namespace NumberList {
+InvalidCharacter::InvalidCharacter(const string &spec_, size_t pos_)
+    : exception(), spec(spec_), pos(pos_) {};
+const char *InvalidCharacter::what() const noexcept {
+  stringstream ss;
+  ss << "Error: found invalid character '" << spec[pos]
+     << "' in number list specification '" << spec << "'." << endl;
+  ss << "Please note that the format for the list specification only allows "
+        "digits, '-', and ','." << endl;
+  return ss.str().c_str();
+}
+
+MultipleRanges::MultipleRanges(const string &group_)
+    : exception(), group(group_) {};
+const char *MultipleRanges::what() const noexcept {
+  stringstream ss;
+  ss << "List format error: only one '-' is allowed in any group." << endl
+     << "The offending group is '" << group << "'." << endl;
+  return ss.str().c_str();
+}
+}
+namespace NucleicAcids {
+InvalidNucleotideCode::InvalidNucleotideCode(char nucl_)
+    : exception(), nucl(nucl_) {};
+const char *InvalidNucleotideCode::what() const noexcept {
+  stringstream ss;
+  ss << "Error: found invalid nucleotide code '" << nucl << "'." << endl;
+  return ss.str().c_str();
+}
+}
 }

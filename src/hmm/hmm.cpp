@@ -37,6 +37,25 @@ const size_t HMM::bg_state;
 
 using namespace std;
 
+Exception::HMM::ParameterFile::Existence::Existence(const string &path_)
+    : exception(), path(path_) {};
+const char *Exception::HMM::ParameterFile::Existence::what() const noexcept {
+  string msg = "Error: HMM parameter file " + path + " does not exist.";
+  return msg.c_str();
+}
+
+Exception::HMM::ParameterFile::ReadError::ReadError(const string &path_)
+    : exception(), path(path_) {};
+const char *Exception::HMM::ParameterFile::ReadError::what() const noexcept {
+  string msg = "Error: can't read from parameter file " + path + ".";
+  return msg.c_str();
+}
+
+const char *Exception::HMM::Insertions::NotInsideMotif::what() const noexcept {
+  string msg = "Error: insertion positions must be within the motif.";
+  return msg.c_str();
+}
+
 HMM::HMM(const string &path, Verbosity verbosity_, double pseudo_count)
     : verbosity(verbosity_),
       store_intermediate(false),
@@ -52,17 +71,11 @@ HMM::HMM(const string &path, Verbosity verbosity_, double pseudo_count)
       registration() {
   if (verbosity >= Verbosity::debug)
     cout << "Called HMM constructor 1." << endl;
-  if (not boost::filesystem::exists(path)) {
-    cout << "Error: HMM parameter file " << path << " does not exist. Aborting."
-         << endl;
-    exit(-1);
-  }
+  if (not boost::filesystem::exists(path))
+    throw Exception::HMM::ParameterFile::Existence(path);
   ifstream ifs(path.c_str());
-  if (not ifs.good()) {
-    cout << "Error: can't read from parameter file " << path << ". Aborting."
-         << endl;
-    exit(-1);
-  }
+  if (not ifs.good())
+    throw Exception::HMM::ParameterFile::ReadError(path);
   try {
     deserialize(ifs);
   } catch (...) {
@@ -201,11 +214,9 @@ size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda,
   if (n_insertions > 0) {
     sort(begin(insertions), end(insertions));
     for (auto &i : insertions)
-      if (i == 0 or i >= e.size1()) {
+      if (i == 0 or i >= e.size1())
         // insertions are currently only allowed between motif states
-        cout << "Error: insertion positions must be within the motif." << endl;
-        exit(-1);
-      }
+        throw Exception::HMM::Insertions::NotInsideMotif();
 
     const double insert_transition_probability = 0.5;
 

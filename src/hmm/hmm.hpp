@@ -685,6 +685,28 @@ protected:
   Training::Range complementary_states_mask(bitmask_t present) const;
 };
 
+namespace Exception {
+namespace HMM {
+namespace ParameterFile {
+struct Existence : public std::exception {
+  Existence(const std::string &path);
+  const char *what() const noexcept;
+  std::string path;
+};
+struct ReadError : public std::exception {
+  ReadError(const std::string &path);
+  const char *what() const noexcept;
+  std::string path;
+};
+}
+namespace Insertions {
+struct NotInsideMotif : public std::exception {
+  const char *what() const noexcept;
+};
+}
+}
+}
+
 HMM::pair_posterior_t &operator+=(HMM::pair_posterior_t &one,
                                   const HMM::pair_posterior_t &two);
 std::ostream &operator<<(std::ostream &os, const HMM::pair_posterior_t &one);

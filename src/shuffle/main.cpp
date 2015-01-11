@@ -229,7 +229,7 @@ int main(int argc, const char **argv) {
         shuffle(ifs, n, seed++);
       } else {
         cerr << "Error: " << path << " does not exist." << endl;
-        exit(-1);
+        return EXIT_FAILURE;
       }
     }
 
