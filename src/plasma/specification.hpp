@@ -294,9 +294,9 @@ struct WhenOneThenAll : public std::exception {
  *   - find all contrast names occurring in objective specifications
  *   - find all contrast names given in either data or objective specification
  *   - add all contrasts to those objectives that don't have any contrast
- * annotated
+ *     annotated
  *   - check that the contrasts for the 2x2 measures are binary and that all
- * discriminative ones are at least binary
+ *     discriminative ones are at least binary
  * Motifs:
  *   - get all motif names and check that none are duplicated
  *   - give names to unnamed motifs, making sure not to overwrite given ones
@@ -306,46 +306,46 @@ template <typename measure_t>
 void harmonize(Motifs &motifs, Sets &sets,
                std::vector<Objective<measure_t>> &objectives, bool demultiplex,
                bool add_shuffles = true) {
+  using namespace std;
   const bool debug = false;
 
   // find all contrast names occurring in data set specifications
-  std::set<std::string> contrast_names_in_data;
+  set<string> contrast_names_in_data;
   for (auto &spec : sets)
     if (spec.contrast != "")
       contrast_names_in_data.insert(spec.contrast);
 
   // give a name to unnamed contrasts, making sure not to overwrite given ones
   size_t contrast_idx = 0;
-  std::string unnamed_name = "contrast"
-                             + boost::lexical_cast<std::string>(contrast_idx++);
+  string unnamed_name = "contrast"
+                        + boost::lexical_cast<string>(contrast_idx++);
   while (contrast_names_in_data.find(unnamed_name)
          != end(contrast_names_in_data))
-    unnamed_name = "contrast"
-                   + boost::lexical_cast<std::string>(contrast_idx++);
+    unnamed_name = "contrast" + boost::lexical_cast<string>(contrast_idx++);
   contrast_names_in_data.insert(unnamed_name);
   for (auto &spec : sets)
     if (spec.contrast == "")
       spec.contrast = unnamed_name;
 
   // find all contrast names occurring in objective specifications
-  std::set<std::string> contrast_names_in_objectives;
+  set<string> contrast_names_in_objectives;
   for (auto &objective : objectives)
     for (auto &atom : objective)
       contrast_names_in_objectives.insert(atom.contrast);
 
   if (debug) {
-    std::cout << "Found contrast name in data specifications:";
+    cout << "Found contrast name in data specifications:";
     for (auto &s : contrast_names_in_data)
-      std::cout << " '" << s << "'";
-    std::cout << std::endl;
-    std::cout << "Found contrast name in objectives:";
+      cout << " '" << s << "'";
+    cout << endl;
+    cout << "Found contrast name in objectives:";
     for (auto &s : contrast_names_in_objectives)
-      std::cout << " '" << s << "'";
-    std::cout << std::endl;
+      cout << " '" << s << "'";
+    cout << endl;
   }
 
   // find all contrast names
-  std::set<std::string> all_contrast_names;
+  set<string> all_contrast_names;
   for (auto &s : contrast_names_in_data)
     all_contrast_names.insert(s);
   for (auto &s : contrast_names_in_objectives)
@@ -388,11 +388,11 @@ void harmonize(Motifs &motifs, Sets &sets,
     }
 
   // get all motif names and check that none are duplicated
-  std::set<std::string> motif_names_in_motifs;
+  set<string> motif_names_in_motifs;
   for (auto &motif : motifs)
     if (motif.name != "") {
       auto pair = motif_names_in_motifs.insert(motif.name);
-      if (not pair.second) // there was already a motif of that name
+      if (not pair.second)  // there was already a motif of that name
         throw Exception::Motif::NameNotUnique(motif.name);
     }
 
@@ -400,10 +400,9 @@ void harmonize(Motifs &motifs, Sets &sets,
   size_t motif_idx = 0;
   for (auto &motif : motifs)
     if (motif.name == "") {
-      std::string name = "motif"
-                         + boost::lexical_cast<std::string>(motif_idx++);
+      string name = "motif" + boost::lexical_cast<string>(motif_idx++);
       while (motif_names_in_motifs.find(name) != end(motif_names_in_motifs))
-        name = "motif" + boost::lexical_cast<std::string>(motif_idx++);
+        name = "motif" + boost::lexical_cast<string>(motif_idx++);
       motif.name = name;
       motif_names_in_motifs.insert(name);
     }
@@ -415,10 +414,10 @@ void harmonize(Motifs &motifs, Sets &sets,
 
   // if desired (=yes for Discrover, =no for Plasma) create multiple motifs for
   // which multiplicity > 1
-  std::map<std::string, std::list<std::string>> demux_motif_map;
+  map<string, list<string>> demux_motif_map;
   if (demultiplex) {
     Motifs new_motifs;
-    // std::vector<Specification::Motif> new_motifs;
+    // vector<Specification::Motif> new_motifs;
     for (auto &motif : motifs) {
       if (motif.multiplicity == 1)
         new_motifs.push_back(motif);
@@ -426,15 +425,14 @@ void harmonize(Motifs &motifs, Sets &sets,
         for (size_t i = 0; i < motif.multiplicity; i++) {
           auto m = motif;
           m.multiplicity = 1;
-          m.name += "_" + boost::lexical_cast<std::string>(i);
+          m.name += "_" + boost::lexical_cast<string>(i);
 
           new_motifs.push_back(m);
 
           demux_motif_map[motif.name].push_back(m.name);
 
           motif_names_in_motifs.insert(m.name);
-          std::cout << "Demuxing: " << motif.name << " -> " << m.name
-                    << std::endl;
+          cout << "Demuxing: " << motif.name << " -> " << m.name << endl;
         }
         motif_names_in_motifs.erase(motif.name);
       }
@@ -444,22 +442,20 @@ void harmonize(Motifs &motifs, Sets &sets,
 
   // TODO make sure that where motif names are mentioned they should be updated
   // for the demultiplexed motif names
-
   //
-  //      rg. objectives with empty contrast... they should be taken to mean all
-  //      contrasts
+  // rg. objectives with empty contrast: they are taken to mean all contrasts
 
   if (debug) {
-    std::cout << "Found motif name in motif specification:";
+    cout << "Found motif name in motif specification:";
     for (auto &s : motif_names_in_motifs)
-      std::cout << " '" << s << "'";
-    std::cout << std::endl;
+      cout << " '" << s << "'";
+    cout << endl;
   }
 
-  //    if only -m mi is given then mi should be used for all motifs; i.e.
-  //    objectives need to be constructed for each motif
-  //      otherwise, if there is -m "":mi and any other -m XYZ:mi statement it
-  //      is an error
+  // If only -m mi is given then mi should be used for all motifs;
+  // i.e. objectives need to be constructed for each motif.
+  // Otherwise, if there is -m "":mi and any other -m XYZ:mi statement, then
+  // it is an error.
   if (objectives.size() == 1 and objectives[0].motif_name == "") {
     auto original_objective = *begin(objectives);
     objectives.clear();
@@ -472,13 +468,13 @@ void harmonize(Motifs &motifs, Sets &sets,
 
   // find sequence sets that mention demuxed motif, and replace by new ones
   for (auto &spec : sets) {
-    std::set<std::string> present_motifs;
+    set<string> present_motifs;
     for (auto &m : spec.motifs)
       if (demux_motif_map.find(m) == end(demux_motif_map))
         present_motifs.insert(m);
       else
         for (auto &n : demux_motif_map.find(m)->second) {
-          std::cout << "Demuxing (sets): " << m << " -> " << n << std::endl;
+          cout << "Demuxing (sets): " << m << " -> " << n << endl;
           present_motifs.insert(n);
         }
     spec.motifs = present_motifs;
@@ -486,20 +482,19 @@ void harmonize(Motifs &motifs, Sets &sets,
 
   // find objectives that mention demuxed motif, and replace by new ones
   if (demultiplex) {
-    std::vector<Objective<measure_t>> objs;
+    vector<Objective<measure_t>> objs;
     for (auto &objective : objectives) {
-      std::string motif_name = objective.motif_name;
-      std::cout << "Check for Demuxing (obj): " << motif_name << std::endl;
+      string motif_name = objective.motif_name;
+      cout << "Check for Demuxing (obj): " << motif_name << endl;
       auto demux_motif_iter = demux_motif_map.find(motif_name);
       if (demux_motif_iter == end(demux_motif_map)) {
         objs.push_back(objective);
-        std::cout << "Demuxing (obj): " << motif_name << " ok!" << std::endl;
+        cout << "Demuxing (obj): " << motif_name << " ok!" << endl;
       } else
         for (auto &demuxed : demux_motif_iter->second) {
           auto obj = objective;
           obj.motif_name = demuxed;
-          std::cout << "Demuxing (obj): " << motif_name << " -> " << demuxed
-                    << std::endl;
+          cout << "Demuxing (obj): " << motif_name << " -> " << demuxed << endl;
           objs.push_back(obj);
         }
     }
@@ -509,10 +504,10 @@ void harmonize(Motifs &motifs, Sets &sets,
   // check that no more than one objective exists for each motif, and that each
   // objective refers to an existing motif
   // i.e. check that the relation between objective and motifs is one-to-one
-  std::set<std::string> motif_names_in_objectives;
+  set<string> motif_names_in_objectives;
   for (auto &objective : objectives) {
     auto pair = motif_names_in_objectives.insert(objective.motif_name);
-    if (not pair.second) // there was already a motif of that name
+    if (not pair.second)  // there was already a motif of that name
       throw Exception::Motif::NameNotUniqueInObjective(objective.motif_name);
     if (motif_names_in_motifs.find(objective.motif_name)
         == end(motif_names_in_motifs))
@@ -523,10 +518,10 @@ void harmonize(Motifs &motifs, Sets &sets,
     throw Exception::Motif::WhenOneThenAll();
 
   if (debug) {
-    std::cout << "Found motif name in objectives:";
+    cout << "Found motif name in objectives:";
     for (auto &s : motif_names_in_objectives)
-      std::cout << " '" << s << "'";
-    std::cout << std::endl;
+      cout << " '" << s << "'";
+    cout << endl;
   }
 }
 }
