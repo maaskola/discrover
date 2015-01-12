@@ -3,7 +3,6 @@
 #include <fstream>
 #include <vector>
 #include <numeric>
-#include <boost/lexical_cast.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>

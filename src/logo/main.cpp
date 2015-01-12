@@ -79,9 +79,8 @@ void draw_logos(const HMM &hmm, const Logo::Options &options,
           col[i] = hmm.emission(state, i);
         matrix.push_back(col);
       }
-      Logo::draw_logo(
-          matrix, label + ".motif" + boost::lexical_cast<string>(motif_idx++),
-          options);
+      Logo::draw_logo(matrix, label + ".motif" + to_string(motif_idx++),
+                      options);
       motif_idx++;
     }
 }
@@ -232,17 +231,13 @@ int main(int argc, const char **argv) {
   for (auto iupac : iupacs) {
     cout << "=> IUPAC motif " << iupac << endl;
     Logo::matrix_t matrix = build_matrix(iupac, options.absent);
-    Logo::draw_logo(matrix,
-                    label + ".motif" + boost::lexical_cast<string>(motif_idx++),
-                    options);
+    Logo::draw_logo(matrix, label + ".motif" + to_string(motif_idx++), options);
   }
 
   for (auto path : matrix_paths) {
     cout << "=> matrix file " << path << endl;
     Logo::matrix_t matrix = read_matrix(path);
-    Logo::draw_logo(matrix,
-                    label + ".motif" + boost::lexical_cast<string>(motif_idx++),
-                    options);
+    Logo::draw_logo(matrix, label + ".motif" + to_string(motif_idx++), options);
   }
 
   for (auto path : hmm_paths) {

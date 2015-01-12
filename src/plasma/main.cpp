@@ -85,8 +85,7 @@ void generate_logos(const Seeding::Results &results,
   size_t motif_idx = 0;
   for (auto &result : results) {
     Logo::matrix_t matrix = build_matrix(result.motif, options.logo.absent);
-    Logo::draw_logo(matrix, options.label + ".motif"
-                            + boost::lexical_cast<string>(motif_idx++),
+    Logo::draw_logo(matrix, options.label + ".motif" + to_string(motif_idx++),
                     options.logo);
   }
 }

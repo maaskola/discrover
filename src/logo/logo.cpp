@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <cairo.h>
 #include <cairo-pdf.h>
-#include <boost/lexical_cast.hpp>
 #include "logo.hpp"
 
 using namespace std;
@@ -287,8 +286,8 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
       cairo_select_font_face(cr, font_face.c_str(), CAIRO_FONT_SLANT_NORMAL,
                              CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size(cr, dims.axis_font_size);
-      string label = boost::lexical_cast<string>(
-          (1.0 - pos) * (options.type == Type::Sequence ? 2 : 1));
+      string label
+          = to_string((1.0 - pos) * (options.type == Type::Sequence ? 2 : 1));
       if (label == "0.5")
         label = "½";
       cairo_text_extents(cr, label.c_str(), &te);
@@ -307,8 +306,7 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
     cairo_select_font_face(cr, font_face.c_str(), CAIRO_FONT_SLANT_NORMAL,
                            CAIRO_FONT_WEIGHT_NORMAL);
     cairo_set_font_size(cr, dims.axis_font_size);
-    const string label = boost::lexical_cast<string>(
-        options.type == Type::Sequence ? "IC [bit]" : "Freq.");
+    const string label = options.type == Type::Sequence ? "IC [bit]" : "Freq.";
     cairo_text_extents(cr, label.c_str(), &te);
     cairo_move_to(cr, axis_label_basecol - te.height / 2 - te.y_bearing,
                   dims.node_height * dims.axis_rel_ext + dims.node_height * 0.5

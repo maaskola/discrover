@@ -3,7 +3,6 @@
 #include <iomanip>
 #include <fstream>
 #include <vector>
-#include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
@@ -768,8 +767,7 @@ vector<HMM> cross_validation(const Data::Collection &all_data,
     Options::HMM opt = options;
 
     if (options.cross_validation_freq < 1)
-      opt.label += ".cv"
-                   + boost::lexical_cast<string>(cross_validation_iteration);
+      opt.label += ".cv" + to_string(cross_validation_iteration);
 
     Data::Collection training_data, test_data;
     prepare_cross_validation(all_data, training_data, test_data,

@@ -1,5 +1,4 @@
 #include <fstream>
-#include <boost/lexical_cast.hpp>
 #include "aux.hpp"
 
 using namespace std;
@@ -145,15 +144,14 @@ confusion_matrix operator+(const confusion_matrix &m, double x) {
 }
 
 string vec2string(const count_vector_t &v) {
-  string s = "[" + boost::lexical_cast<string>(v.size());
-  s += "](";
+  string s = "[" + to_string(v.size()) + "](";
   bool first = true;
   for (auto &x : v) {
     if (first)
       first = false;
     else
       s += ",";
-    s += boost::lexical_cast<string>(x);
+    s += to_string(x);
   }
   s += ")";
   return s;

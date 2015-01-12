@@ -197,8 +197,7 @@ struct Contrast {
     std::vector<std::string> paths;
     for (auto dataset : sets)
       if (dataset.is_shuffle) {
-        std::string path = stem + "_shuffle"
-                           + boost::lexical_cast<std::string>(idx++) + ".fa";
+        std::string path = stem + "_shuffle" + std::to_string(idx++) + ".fa";
         paths.push_back(path);
         std::ofstream ofs(path.c_str());
         for (auto &seq : dataset)

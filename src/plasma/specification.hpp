@@ -31,7 +31,6 @@
 #define SPECIFICATION_HPP
 
 #include <iostream>  // TODO remove
-#include <boost/lexical_cast.hpp>
 #include <string>
 #include <vector>
 #include <list>
@@ -317,11 +316,10 @@ void harmonize(Motifs &motifs, Sets &sets,
 
   // give a name to unnamed contrasts, making sure not to overwrite given ones
   size_t contrast_idx = 0;
-  string unnamed_name = "contrast"
-                        + boost::lexical_cast<string>(contrast_idx++);
+  string unnamed_name = "contrast" + std::to_string(contrast_idx++);
   while (contrast_names_in_data.find(unnamed_name)
          != end(contrast_names_in_data))
-    unnamed_name = "contrast" + boost::lexical_cast<string>(contrast_idx++);
+    unnamed_name = "contrast" + std::to_string(contrast_idx++);
   contrast_names_in_data.insert(unnamed_name);
   for (auto &spec : sets)
     if (spec.contrast == "")
@@ -400,9 +398,9 @@ void harmonize(Motifs &motifs, Sets &sets,
   size_t motif_idx = 0;
   for (auto &motif : motifs)
     if (motif.name == "") {
-      string name = "motif" + boost::lexical_cast<string>(motif_idx++);
+      string name = "motif" + std::to_string(motif_idx++);
       while (motif_names_in_motifs.find(name) != end(motif_names_in_motifs))
-        name = "motif" + boost::lexical_cast<string>(motif_idx++);
+        name = "motif" + std::to_string(motif_idx++);
       motif.name = name;
       motif_names_in_motifs.insert(name);
     }
@@ -425,7 +423,7 @@ void harmonize(Motifs &motifs, Sets &sets,
         for (size_t i = 0; i < motif.multiplicity; i++) {
           auto m = motif;
           m.multiplicity = 1;
-          m.name += "_" + boost::lexical_cast<string>(i);
+          m.name += "_" + std::to_string(i);
 
           new_motifs.push_back(m);
 

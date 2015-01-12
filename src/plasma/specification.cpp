@@ -219,11 +219,11 @@ string to_string(const Motif &spec) {
       first = false;
     else
       s += ",";
-    s += boost::lexical_cast<string>(l);
+    s += std::to_string(l);
   }
   s += spec.specification;
   if (spec.multiplicity > 1)
-    s += "x" + boost::lexical_cast<string>(spec.multiplicity);
+    s += "x" + std::to_string(spec.multiplicity);
   return s;
 }
 

@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <map>
+#include <cstring>
 #include "../aux.hpp"
 #include "data.hpp"
 #include "../verbosity.hpp"
