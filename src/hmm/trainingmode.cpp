@@ -13,11 +13,8 @@ istream& operator>>(istream& in, Method& method) {
     method = Method::Reestimation;
   else if (token == "gradient" or token == "discriminative" or token == "disc")
     method = Method::Gradient;
-  else {
-    cout << "Training method '" << token
-         << "' not implemented. See -h or --help for help." << endl;
-    exit(-1);
-  }
+  else
+    throw Exception::HMM::InvalidTrainingMethod(token);
   return in;
 }
 
@@ -68,5 +65,16 @@ Seeding::Objectives corresponding_objectives(const Objectives& x,
   for (auto& z : x)
     y.push_back(corresponding_objective(z, use_mi_to_seed));
   return y;
+}
+}
+
+namespace Exception {
+namespace HMM {
+InvalidTrainingMethod::InvalidTrainingMethod(const string& token_)
+    : exception(), token(token_){};
+const char* InvalidTrainingMethod::what() const noexcept {
+  string msg = "Error: found invalid training method '" + token + "'.";
+  return msg.c_str();
+}
 }
 }

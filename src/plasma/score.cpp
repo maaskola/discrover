@@ -23,6 +23,7 @@ const bool excessive_debug = false;
 using std::cout;
 using std::endl;
 using std::string;
+using std::vector;
 
 vector_t row_sums(const matrix_t &m) {
   size_t n = m.size1();
@@ -215,12 +216,10 @@ double compute_score(const Seeding::Collection &collection,
   for (auto &expr : objective) {
     auto contrast_iter = collection.find(expr.contrast);
     if (contrast_iter == end(collection)) {
-      cout
-          << "Error: couldn't find contrast for objective contrast expression: "
-          << expr << endl;
+      vector<string> names;
       for (auto &x : collection)
-        cout << "This contrast is present: " << x.name << std::endl;
-      exit(-1);
+        names.push_back(x.name);
+      throw Exception::Plasma::NoContrastForObjective(to_string(expr), names);
     } else {
       auto counts_ = reduce_count(counts, collection, expr.contrast);
       double w = options.weighting ? contrast_iter->set_size : 1;
@@ -246,11 +245,8 @@ double compute_score(const Seeding::Contrast &contrast,
                      Measures::Discrete::Measure measure, size_t length,
                      size_t degeneracy, const string &motif_name,
                      bool do_correction) {
-  if (measure == Measures::Discrete::Measure::Undefined) {
-    cout << "Error in compute_score: Measures::Discrete::Measure::undefined."
-         << endl;
-    exit(-1);
-  }
+  if (measure == Measures::Discrete::Measure::Undefined)
+    throw Exception::Plasma::UndefinedMeasure();
   if (measure != Measures::Discrete::Measure::SignalFrequency
       and contrast.sets.size() < 2)
     return -std::numeric_limits<double>::infinity();
@@ -339,4 +335,25 @@ double compute_score(const Seeding::Contrast &contrast,
   }
 
   return score;
+}
+
+namespace Exception {
+namespace Plasma {
+const char *UndefinedMeasure::what() const noexcept {
+  string msg
+      = "Error: undefined score (Measures::Discrete::Measure::undefined).";
+  return msg.c_str();
+}
+NoContrastForObjective::NoContrastForObjective(
+    const std::string &expr_, const std::vector<std::string> &names_)
+    : exception(), expr(expr_), names(names_){};
+const char *NoContrastForObjective::what() const noexcept {
+  string msg
+      = "Error: couldn't find contrast for objective contrast expression: '"
+        + expr + "'.\n";
+  for (auto &name : names)
+    msg += "\nThis contrast is present: " + name;
+  return msg.c_str();
+}
+}
 }

@@ -5,6 +5,7 @@
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
 #include "sequence.hpp"
+#include "../plasma/io.hpp"
 
 using namespace std;
 
@@ -12,10 +13,8 @@ vector<string> extract_seq_ids(const string &path, size_t nseq,
                                Verbosity verbosity) {
   if (verbosity >= Verbosity::info)
     cout << "Getting sequence IDs from " << path << endl;
-  if (not boost::filesystem::exists(path)) {
-    cout << "Error: " << path << " does not exist!" << endl;
-    exit(-1);
-  }
+  if (not boost::filesystem::exists(path))
+    throw IO::Exception::File::Existence(path);
   vector<string> s;
   ifstream f(path.c_str());
   size_t idx = 0;

@@ -30,6 +30,7 @@
 #ifndef SCORE_HPP
 #define SCORE_HPP
 
+#include <vector>
 #include "plasma_stats.hpp"
 #include "options.hpp"
 #include "results.hpp"
@@ -74,5 +75,20 @@ double compute_score(const Seeding::Contrast &contrast,
 double approximate_score(const std::string &motif,
                          const Seeding::hash_map_t &counts,
                          const Seeding::Options &options);
+
+namespace Exception {
+namespace Plasma {
+struct UndefinedMeasure : public std::exception {
+  const char *what() const noexcept;
+};
+struct NoContrastForObjective : public std::exception {
+  NoContrastForObjective(const std::string &expr,
+                         const std::vector<std::string> &names);
+  const char *what() const noexcept;
+  std::string expr;
+  std::vector<std::string> names;
+};
+}
+}
 
 #endif /* ----- #ifndef SCORE_HPP  ----- */

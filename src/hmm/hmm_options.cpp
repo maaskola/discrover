@@ -38,26 +38,22 @@ istream &operator>>(istream &in, Compression &compression) {
     compression = Compression::gzip;
   else if (token == "bzip2" or token == "bz2")
     compression = Compression::bzip2;
-  else {
-    cout << "Error: can not parse compression type '" << token << "'." << endl;
-    exit(-1);
-  }
+  else
+    throw Exception::HMM::InvalidCompression(token);
   return in;
 }
 
 istream &operator>>(istream &is, MultiMotif::Relearning &relearning) {
-  string word;
-  is >> word;
-  if (word == "none")
+  string token;
+  is >> token;
+  if (token == "none")
     relearning = MultiMotif::Relearning::None;
-  else if (word == "reest")
+  else if (token == "reest")
     relearning = MultiMotif::Relearning::Reestimation;
-  else if (word == "full")
+  else if (token == "full")
     relearning = MultiMotif::Relearning::Full;
-  else {
-    cout << "Error: can not parse relearning mode '" << word << "'." << endl;
-    exit(-1);
-  }
+  else
+    throw Exception::HMM::InvalidRelearning(token);
   return is;
 }
 
@@ -217,3 +213,20 @@ ostream &operator<<(ostream &os, const HMM &options) {
   return os;
 }
 };
+
+namespace Exception {
+namespace HMM {
+InvalidCompression::InvalidCompression(const string &token_)
+    : exception(), token(token_){};
+const char *InvalidCompression::what() const noexcept {
+  string msg = "Error: found invalid parse compression type '" + token + "'.";
+  return msg.c_str();
+}
+InvalidRelearning::InvalidRelearning(const string &token_)
+    : exception(), token(token_){};
+const char *InvalidRelearning::what() const noexcept {
+  string msg = "Error: found invalid relearning mode '" + token + "'.";
+  return msg.c_str();
+}
+}
+}
