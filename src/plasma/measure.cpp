@@ -290,14 +290,14 @@ Discrete::Measure corresponding_measure(Continuous::Measure hmm_measure) {
 
 namespace Exception {
 InvalidMeasure::InvalidMeasure(const string &token_)
-    : exception(), token(token_) {};
+    : exception(), token(token_){};
 const char *InvalidMeasure::what() const noexcept {
   string msg = "Error: invalid measure '" + token + "'.";
   return msg.c_str();
 }
 NoCorrespondingMeasure::NoCorrespondingMeasure(
     const Continuous::Measure &measure_)
-    : exception(), measure(measure_) {};
+    : exception(), measure(measure_){};
 const char *NoCorrespondingMeasure::what() const noexcept {
   string msg = "Error: no corresponding seeding measure for HMM measure "
                + measure2string(measure) + ".";

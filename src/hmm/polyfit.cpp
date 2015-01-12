@@ -184,7 +184,7 @@ vector_t interpolate2(double x1, double x2, double g1, double g2) {
 namespace Exception {
 namespace PolyFit {
 InsufficientData::InsufficientData(size_t o, size_t n)
-    : exception(), order(o), num_data(n) {};
+    : exception(), order(o), num_data(n){};
 
 const char *InsufficientData::what() const noexcept {
   string msg = "Error in polynomial fitting: cannot fit polynomial of order "

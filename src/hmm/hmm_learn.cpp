@@ -1033,7 +1033,7 @@ const char *TrainBgTooLate::what() const noexcept {
 }
 GradientNotImplemented::GradientNotImplemented(
     Measures::Continuous::Measure measure_)
-    : exception(), measure(measure_) {};
+    : exception(), measure(measure_){};
 const char *GradientNotImplemented::what() const noexcept {
   string msg = "Calculation of " + measure2string(measure)
                + " gradient is currently not implemented.";

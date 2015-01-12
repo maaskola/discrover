@@ -50,18 +50,18 @@ RemovalReport operator+(const RemovalReport &a, const RemovalReport &b) {
 }
 
 namespace Seeding {
-Set::Set() : Data::Basic::Set<Fasta::Entry>() {}
+Set::Set() : Data::Basic::Set<Fasta::Entry>(){}
 
 Set::Set(const Specification::Set &s, bool revcomp, size_t n_seq)
     : Data::Basic::Set<Fasta::Entry>(s, revcomp, n_seq){};
 
-Contrast::Contrast() : Data::Basic::Contrast<Set>() {}
+Contrast::Contrast() : Data::Basic::Contrast<Set>(){}
 
 Contrast::Contrast(const string &name, const Specification::Sets &paths,
                    bool revcomp, size_t n_seq)
-    : Data::Basic::Contrast<Set>(name, paths, revcomp, n_seq) {}
+    : Data::Basic::Contrast<Set>(name, paths, revcomp, n_seq){}
 
 Collection::Collection(const Specification::Sets &paths, bool revcomp,
                        size_t n_seq)
-    : Data::Basic::Collection<Contrast>(paths, revcomp, n_seq) {}
+    : Data::Basic::Collection<Contrast>(paths, revcomp, n_seq){}
 }

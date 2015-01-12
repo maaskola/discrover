@@ -38,14 +38,14 @@ const size_t HMM::bg_state;
 using namespace std;
 
 Exception::HMM::ParameterFile::Existence::Existence(const string &path_)
-    : exception(), path(path_) {};
+    : exception(), path(path_){};
 const char *Exception::HMM::ParameterFile::Existence::what() const noexcept {
   string msg = "Error: HMM parameter file " + path + " does not exist.";
   return msg.c_str();
 }
 
 Exception::HMM::ParameterFile::ReadError::ReadError(const string &path_)
-    : exception(), path(path_) {};
+    : exception(), path(path_){};
 const char *Exception::HMM::ParameterFile::ReadError::what() const noexcept {
   string msg = "Error: can't read from parameter file " + path + ".";
   return msg.c_str();

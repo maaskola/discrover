@@ -146,13 +146,13 @@ Objective objective_for_motif(const Objectives &objectives,
 
 namespace Exception {
 InvalidOccurrenceFilter::InvalidOccurrenceFilter(const string &token_)
-    : exception(), token(token_) {};
+    : exception(), token(token_){};
 const char *InvalidOccurrenceFilter::what() const noexcept {
   string msg = "Error: invalid occurrence filter type '" + token + "'.";
   return msg.c_str();
 }
 InvalidAlgorithm::InvalidAlgorithm(const string &token_)
-    : exception(), token(token_) {};
+    : exception(), token(token_){};
 const char *InvalidAlgorithm::what() const noexcept {
   string msg = "Error: invalid seeding algorithm '" + token + "'.\n"
      + "Please use one of 'plasma', 'dreme', 'mcmc', or 'all'.\n"
@@ -160,7 +160,7 @@ const char *InvalidAlgorithm::what() const noexcept {
   return msg.c_str();
 }
 NoMatchingObjectiveFound::NoMatchingObjectiveFound(const string &motif_)
-    : exception(), motif(motif_) {};
+    : exception(), motif(motif_){};
 const char *NoMatchingObjectiveFound::what() const noexcept {
   string msg = "Error: no objective found for motif '" + motif + "'.";
   return msg.c_str();

@@ -25,5 +25,5 @@ Options::Options()
       order(Order::Frequency),
       palette(Palette::Default),
       absent(0.03),
-      scale(1.0) {}
+      scale(1.0){}
 }

@@ -79,7 +79,7 @@ istream &operator>>(istream &is, Palette &palette) {
 
 namespace Exception {
 
-InvalidType::InvalidType(const string &token_) : exception(), token(token_) {};
+InvalidType::InvalidType(const string &token_) : exception(), token(token_){};
 const char *InvalidType::what() const noexcept {
   string msg = "Error: invalid logo type '" + token + "'.\n"
                + "Available are: 'seq' and 'freq'.";
@@ -87,14 +87,14 @@ const char *InvalidType::what() const noexcept {
 }
 
 InvalidAlphabet::InvalidAlphabet(const string &token_)
-    : exception(), token(token_) {};
+    : exception(), token(token_){};
 const char *InvalidAlphabet::what() const noexcept {
   string msg = "Error: invalid alphabet '" + token + "'.\n"
     "Available are: 'DNA' and 'RNA'.";
   return msg.c_str();
 }
 
-InvalidOrder::InvalidOrder(const string &token_) : exception(), token(token_) {};
+InvalidOrder::InvalidOrder(const string &token_) : exception(), token(token_){};
 const char *InvalidOrder::what() const noexcept {
   string msg = "Error: invalid order type '" + token + "'.\n"
                + "Available are: 'alpha' and 'freq'.";
@@ -102,7 +102,7 @@ const char *InvalidOrder::what() const noexcept {
 }
 
 InvalidPalette::InvalidPalette(const string &token_)
-    : exception(), token(token_) {};
+    : exception(), token(token_){};
 const char *InvalidPalette::what() const noexcept {
   string msg = "Error: invalid color palette '" + token + "'.\n"
                + "Available are: 'default', 'solarized', and 'tetrad'.";

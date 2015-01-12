@@ -96,14 +96,14 @@ double Registration::get_class_prior(const string &sha1) const {
 namespace Exception {
 namespace Registration {
 UnregisteredMotifGroup::UnregisteredMotifGroup(const bitmask_t &present_)
-    : exception(), present(present_) {};
+    : exception(), present(present_){};
 const char *UnregisteredMotifGroup::what() const noexcept {
   string msg = "Error: could not find class parameters for motif group:"
                + present.to_string() + ".";
   return msg.c_str();
 }
 UnregisteredDataSet::UnregisteredDataSet(const string &sha1_)
-    : exception(), sha1(sha1_) {};
+    : exception(), sha1(sha1_){};
 const char *UnregisteredDataSet::what() const noexcept {
   string msg = "Error: could not find class parameters of sequences with sha1 "
                + sha1 + ".";

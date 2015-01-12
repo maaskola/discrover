@@ -81,7 +81,7 @@ Motif::Motif(const Motif &s)
       name(s.name),
       insertions(s.insertions),
       lengths(s.lengths),
-      multiplicity(s.multiplicity) {}
+      multiplicity(s.multiplicity){}
 
 Motif::Motif(const string &s)
     : kind(Motif::Kind::Seed),
