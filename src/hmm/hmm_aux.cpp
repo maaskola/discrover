@@ -115,8 +115,7 @@ void HMM::serialize(ostream &os, const ExecutionInformation &exec_info,
       }
       break;
     default:
-      throw("Format not supported!");
-      break;
+      throw Exception::HMM::ParameterFile::UnsupportedVersion(format_version);
   }
 };
 
@@ -847,4 +846,18 @@ pair<HMM, map<size_t, size_t>> HMM::add_revcomp_motifs() const {
       assoc[i] = groups.size() + idx++;
 
   return make_pair(hmm, assoc);
+}
+
+namespace Exception {
+namespace HMM {
+namespace ParameterFile {
+UnsupportedVersion::UnsupportedVersion(size_t version_)
+    : exception(), version(version_){};
+const char *UnsupportedVersion::what() const noexcept {
+  stringstream ss;
+  ss << "Error: parameter file format version " << version << " not supported!";
+  return ss.str().c_str();
+}
+}
+}
 }

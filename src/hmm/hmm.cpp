@@ -329,8 +329,7 @@ size_t HMM::add_motif(const string &seq, double alpha, double exp_seq_len,
         these = {0, 1, 2, 3};
         break;
       default:
-        cout << "Error: unknown encoding!" << endl;
-        throw("Unknown encoding");
+        throw Exception::NucleicAcids::InvalidNucleotideCode(c);
     }
     set_emissions(i, these, e, alpha);
   }

@@ -46,11 +46,9 @@ void Registration::add_bitmask(const std::string name, bitmask_t present,
 
 double Registration::Sample::get_motif_prior(bitmask_t present) const {
   auto x = motif_prior.find(present);
-  if (x == end(motif_prior)) {
-    cout << "Error: could not find motif prior for motif group:" << present
-         << "." << endl;
-    throw;
-  } else
+  if (x == end(motif_prior))
+    throw Exception::Registration::UnregisteredMotifGroup(present);
+  else
     return x->second;
 }
 
@@ -71,19 +69,11 @@ double Registration::get_class_motif_prior(const string &sha1,
          << ")" << endl;
 
   auto cparms = datasets.find(sha1);
-  if (cparms == end(datasets)) {
-    cout
-        << "Error: failed trying to access class parameters of path with sha1: "
-        << sha1 << "." << endl;
-    throw("Could not find registered data set.");
-  }
+  if (cparms == end(datasets))
+    throw Exception::Registration::UnregisteredDataSet(sha1);
   auto x = cparms->second.motif_prior.find(present);
-  if (x == end(cparms->second.motif_prior)) {
-    cout << "Error: failed trying to access class conditional motif prior "
-            "parameters of path with sha1: " << sha1
-         << " for the motif with index " << present << "." << endl;
-    throw("Could not find conditional motif prior for registered data set.");
-  }
+  if (x == end(cparms->second.motif_prior))
+    throw Exception::Registration::UnregisteredMotifGroup(present);
   if (verbosity >= Verbosity::debug)
     cout << "get_class_motif_prior(sha1=" << sha1 << ", present=" << present
          << ") = " << x->second << endl;
@@ -95,14 +85,29 @@ double Registration::get_class_prior(const string &sha1) const {
     cout << "get_class_prior(sha1=" << sha1 << ")" << endl;
 
   auto cparms = datasets.find(sha1);
-  if (cparms == end(datasets)) {
-    cout
-        << "Error: failed trying to access class parameters of path with sha1: "
-        << sha1 << "." << endl;
-    throw("Could not find registered data set.");
-  }
+  if (cparms == end(datasets))
+    throw Exception::Registration::UnregisteredDataSet(sha1);
   double x = cparms->second.class_prior;
   if (verbosity >= Verbosity::debug)
     cout << "get_class_prior(sha1=" << sha1 << ") = " << x << endl;
   return x;
+}
+
+namespace Exception {
+namespace Registration {
+UnregisteredMotifGroup::UnregisteredMotifGroup(const bitmask_t &present_)
+    : exception(), present(present_) {};
+const char *UnregisteredMotifGroup::what() const noexcept {
+  string msg = "Error: could not find class parameters for motif group:"
+               + present.to_string() + ".";
+  return msg.c_str();
+}
+UnregisteredDataSet::UnregisteredDataSet(const string &sha1_)
+    : exception(), sha1(sha1_) {};
+const char *UnregisteredDataSet::what() const noexcept {
+  string msg = "Error: could not find class parameters of sequences with sha1 "
+               + sha1 + ".";
+  return msg.c_str();
+}
+}
 }

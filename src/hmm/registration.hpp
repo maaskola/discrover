@@ -49,4 +49,19 @@ struct Registration {
                    double motif_p2);
 };
 
+namespace Exception {
+namespace Registration {
+struct UnregisteredMotifGroup : public std::exception {
+  UnregisteredMotifGroup(const bitmask_t &present);
+  const char *what() const noexcept;
+  bitmask_t present;
+};
+struct UnregisteredDataSet: public std::exception {
+  UnregisteredDataSet(const std::string &sha1);
+  const char *what() const noexcept;
+  std::string sha1;
+};
+}
+}
+
 #endif

@@ -73,7 +73,7 @@ private:
       // four nucleotide wildcard
       case 'n': c = "bdhv"[rand4()]; break;
       default:
-        throw("Error: character not recognized.");
+        throw Exception::NucleicAcids::InvalidNucleotideCode(c);
     }
   }
   void replace_arbitrary(char &c) const {
@@ -97,7 +97,7 @@ private:
       case 'v': c = "acgtmrwsykbdhn"[r]; break;
       case 'n': c = "acgtmrwsykbdhv"[r]; break;
       default:
-        throw("Error: character not recognized.");
+        throw Exception::NucleicAcids::InvalidNucleotideCode(c);
     }
   }
 
