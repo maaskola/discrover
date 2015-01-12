@@ -130,10 +130,8 @@ void HMM::deserialize(istream &is) {
       and line.substr(0, param_format_string.length()) == param_format_string) {
     size_t format_version
         = atoi(line.substr(param_format_string.length()).c_str());
-    if (format_version < 4) {
-      cout << "Error loading HMM parameters: format version " << format_version
-           << " is not supported." << endl;
-    }
+    if (format_version < 4)
+      throw Exception::HMM::ParameterFile::UnsupportedVersion(format_version);
     while (is.good() and line[0] == '#')
       safeGetline(is, line);
 
@@ -177,12 +175,11 @@ void HMM::deserialize(istream &is) {
     if (verbosity >= Verbosity::debug)
       cerr << "line = " << line << endl;
     size_t n_emis = atoi(line.c_str());
-    if (n_emis != n_emissions) {
-      cout << "Error: this version only works with " << n_emissions
-           << " emissions, while the .hmm file specifies " << n_emis << "."
-           << endl;
-      exit(-1);
-    }
+    if (n_emis != n_emissions)
+      throw Exception::HMM::ParameterFile::SyntaxError(
+          "this version only works with " + to_string(n_emissions)
+          + " emissions, while the .hmm file specifies " + to_string(n_emis)
+          + ".");
 
     if (verbosity >= Verbosity::debug)
       cout << "n_states = " << n_states << " n_emissions " << n_emissions
@@ -225,11 +222,9 @@ void HMM::deserialize(istream &is) {
     }
 
     // safeGetline(is, line);
-    if (line.substr(0, 11) != "State class") {
-      cout << "Error loading HMM parameters: expected \"State class\" but "
-              "found instead: \"" << line << "\"." << endl;
-      exit(-1);
-    }
+    if (line.substr(0, 11) != "State class")
+      throw Exception::HMM::ParameterFile::SyntaxError(
+          "expected \"State class\" but found instead: \"" + line + "\".");
 
     line = line.substr(12);
     while (line != "") {
@@ -254,11 +249,10 @@ void HMM::deserialize(istream &is) {
         size_t start = line.find(" ");
         if (start > 0) {
           size_t o = atoi(line.substr(0, start).c_str());
-          if (o != 0) {
-            cout << "Error: Found a non-zero state order. This version version "
-                    "only works for zeroth order." << endl;
-            exit(-1);
-          }
+          if (o != 0)
+            throw Exception::HMM::ParameterFile::SyntaxError(
+                "found a non-zero state order. This version version only works "
+                "for zeroth order.");
         }
         if (start == string::npos)
           break;
@@ -273,11 +267,10 @@ void HMM::deserialize(istream &is) {
     transition.resize(n_states, n_states);
     emission.resize(n_states, n_emissions);
 
-    if (line != "Transition matrix") {
-      cout << "Error: expecting line \"Transition matrix\", but got instead \""
-           << line << "\"." << endl;
-      exit(-1);
-    }
+    if (line != "Transition matrix")
+      throw Exception::HMM::ParameterFile::SyntaxError(
+                                 "expecting line \"Transition matrix\", "
+                                 "but got instead \"" + line + "\".");
     for (size_t i = 0; i < n_states; i++) {
       size_t tmp;
       is >> tmp;
@@ -286,11 +279,10 @@ void HMM::deserialize(istream &is) {
     }
     safeGetline(is, line);
     safeGetline(is, line);
-    if (line != "Emission matrix") {
-      cout << "Error: expecting line \"Emission matrix\", but got instead \""
-           << line << "\"." << endl;
-      exit(-1);
-    }
+    if (line != "Emission matrix")
+      throw Exception::HMM::ParameterFile::SyntaxError(
+          "expecting line \"Emission matrix\", but got instead \"" + line
+          + "\".");
     for (size_t i = 0; i < n_states; i++) {
       size_t tmp;
       is >> tmp;
@@ -302,10 +294,8 @@ void HMM::deserialize(istream &is) {
     is >> emission;
     last_state = transition.size1() - 1;
   }
-  if (n_states != transition.size1()) {
-    cout << "Inconsistent number of states." << endl;
-    exit(-1);
-  }
+  if (n_states != transition.size1())
+      throw Exception::HMM::ParameterFile::SyntaxError("inconsistent number of states.");
 
   finalize_initialization();
 };
@@ -851,12 +841,18 @@ pair<HMM, map<size_t, size_t>> HMM::add_revcomp_motifs() const {
 namespace Exception {
 namespace HMM {
 namespace ParameterFile {
+SyntaxError::SyntaxError(const string &token_)
+    : exception(), token(token_){};
+const char *SyntaxError::what() const noexcept {
+  string msg = "Syntax error: " + token;
+  return msg.c_str();
+}
 UnsupportedVersion::UnsupportedVersion(size_t version_)
     : exception(), version(version_){};
 const char *UnsupportedVersion::what() const noexcept {
-  stringstream ss;
-  ss << "Error: parameter file format version " << version << " not supported!";
-  return ss.str().c_str();
+  string msg = "Error: parameter file format version " + to_string(version)
+               + " not supported!";
+  return msg.c_str();
 }
 }
 }

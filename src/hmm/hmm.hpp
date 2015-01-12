@@ -698,6 +698,11 @@ struct ReadError : public std::exception {
   const char *what() const noexcept;
   std::string path;
 };
+struct SyntaxError : public std::exception {
+  SyntaxError(const std::string &token);
+  const char *what() const noexcept;
+  std::string token;
+};
 struct UnsupportedVersion : public std::exception {
   UnsupportedVersion(size_t version);
   const char *what() const noexcept;
