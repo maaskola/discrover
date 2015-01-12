@@ -125,60 +125,59 @@ int main(int argc, const char **argv) {
   } catch (po::unknown_option &e) {
     cout << "Error while parsing command line options:" << endl << "Option "
          << e.get_option_name() << " not known." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::ambiguous_option &e) {
     cout << "Error while parsing command line options:" << endl << "Option "
          << e.get_option_name() << " is ambiguous." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::multiple_values &e) {
     cout << "Error while parsing command line options:" << endl << "Option "
          << e.get_option_name() << " was specified multiple times." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::multiple_occurrences &e) {
     cout << "Error while parsing command line options:" << endl << "Option --"
          << e.get_option_name() << " was specified multiple times." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::invalid_option_value &e) {
     cout << "Error while parsing command line options:" << endl
          << "The value specified for option " << e.get_option_name()
          << " has an invalid format." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::too_many_positional_options_error &e) {
     cout << "Error while parsing command line options:" << endl
          << "Too many positional options were specified." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::invalid_command_line_syntax &e) {
     cout << "Error while parsing command line options:" << endl
          << "Invalid command line syntax." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::invalid_command_line_style &e) {
     cout << "Error while parsing command line options:" << endl
          << "There is a programming error related to command line style."
-         << endl << "Please inspect the command line help with -h or --help."
-         << endl;
+         << endl << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::reading_file &e) {
     cout << "Error while parsing command line options:" << endl
          << "The configuration file can not be read." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::validation_error &e) {
     cout << "Error while parsing command line options:" << endl
          << "Validation of option " << e.get_option_name() << " failed." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::error &e) {
     cout << "Error while parsing command line options:" << endl
          << "No further information as to the nature of this error is "
             "available, please check your command line arguments." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (exception &e) {
     cout << "An error occurred while parsing command line options." << endl
@@ -216,51 +215,50 @@ int main(int argc, const char **argv) {
   } catch (po::multiple_values &e) {
     cout << "Error while parsing command line options:" << endl << "Option "
          << e.get_option_name() << " was specified multiple times." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::invalid_option_value &e) {
     cout << "Error while parsing command line options:" << endl
          << "The value specified for option " << e.get_option_name()
          << " has an invalid format." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::too_many_positional_options_error &e) {
     cout << "Error while parsing command line options:" << endl
          << "Too many positional options were specified." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::invalid_command_line_syntax &e) {
     cout << "Error while parsing command line options:" << endl
          << "Invalid command line syntax." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::invalid_command_line_style &e) {
     cout << "Error while parsing command line options:" << endl
          << "There is a programming error related to command line style."
-         << endl << "Please inspect the command line help with -h or --help."
-         << endl;
+         << endl << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::reading_file &e) {
     cout << "Error while parsing command line options:" << endl
          << "The configuration file can not be read." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::required_option &e) {
     cout << "Error while parsing command line options:" << endl
          << "The required option " << e.get_option_name()
          << " was not specified." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::validation_error &e) {
     cout << "Error while parsing command line options:" << endl
          << "Validation of option " << e.get_option_name() << " failed." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (po::error &e) {
     cout << "Error while parsing command line options:" << endl
          << "No further information as to the nature of this error is "
             "available, please check your command line arguments." << endl
-         << "Please inspect the command line help with -h or --help." << endl;
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   }
 

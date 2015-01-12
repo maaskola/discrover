@@ -437,8 +437,9 @@ int main(int argc, const char **argv) {
          << default_error_msg << endl;
     return EXIT_FAILURE;
   } catch (exception &e) {
-    cout << "Error while parsing command line options:" << endl;
-    cout << e.what();
+    cout << "An error occurred while parsing command line options." << endl
+         << e.what() << endl
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   }
 
@@ -492,7 +493,8 @@ int main(int argc, const char **argv) {
   } catch (po::required_option &e) {
     cout << "Error while parsing command line options:" << endl
          << "The required option " << e.get_option_name()
-         << " was not specified." << endl << default_error_msg << endl;
+         << " was not specified." << endl
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   }
 
@@ -518,7 +520,8 @@ int main(int argc, const char **argv) {
       } catch (po::invalid_option_value &e) {
         cout << "Error while parsing config file:" << endl
              << "The value specified for option " << e.get_option_name()
-             << " has an invalid format." << endl << default_error_msg << endl;
+             << " has an invalid format." << endl
+             << default_error_msg << endl;
         return EXIT_FAILURE;
       }
       notify(vm);
@@ -595,8 +598,8 @@ int main(int argc, const char **argv) {
       return EXIT_FAILURE;
     } else if (options.sampling.max_size < options.sampling.min_size) {
       cout << "Please note that the maximal length for MCMC sampling must be "
-              "larger than the minimal size." << endl << default_error_msg
-           << endl;
+              "larger than the minimal size." << endl
+              << default_error_msg << endl;
       return EXIT_FAILURE;
     }
   } else
@@ -631,8 +634,8 @@ int main(int argc, const char **argv) {
   if (options.load_paths.empty() and options.motif_specifications.empty()) {
     cout << "Error: you must either specify at least one of:" << endl
          << "1. a path from which to load HMM parameter (--load)" << endl
-         << "2. one or more motifs (--motif)" << endl << default_error_msg
-         << endl;
+         << "2. one or more motifs (--motif)" << endl
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   }
 
