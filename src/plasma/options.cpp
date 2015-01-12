@@ -154,12 +154,10 @@ const char *InvalidOccurrenceFilter::what() const noexcept {
 InvalidAlgorithm::InvalidAlgorithm(const string &token_)
     : exception(), token(token_) {};
 const char *InvalidAlgorithm::what() const noexcept {
-  stringstream ss;
-  ss << "Error: invalid seeding algorithm '" << token << "'." << endl
-     << "Please use one of 'plasma', 'dreme', 'mcmc', or 'all'." << endl
-     << "It is also possible to use multiple algorithms by separating them by "
-        "comma.";
-  return ss.str().c_str();
+  string msg = "Error: invalid seeding algorithm '" + token + "'.\n"
+     + "Please use one of 'plasma', 'dreme', 'mcmc', or 'all'.\n"
+     + "It is also possible to use multiple algorithms by separating them by comma.";
+  return msg.c_str();
 }
 NoMatchingObjectiveFound::NoMatchingObjectiveFound(const string &motif_)
     : exception(), motif(motif_) {};

@@ -187,10 +187,10 @@ InsufficientData::InsufficientData(size_t o, size_t n)
     : exception(), order(o), num_data(n) {};
 
 const char *InsufficientData::what() const noexcept {
-  stringstream ss;
-  ss << "Error in polynomial fitting: cannot fit " << order
-     << "-th order polynomial to " << num_data << " data points.";
-  return ss.str().c_str();
+  string msg = "Error in polynomial fitting: cannot fit polynomial of order "
+               + to_string(order) + " to " + to_string(num_data)
+               + " data points.";
+  return msg.c_str();
 }
 
 const char *SingularMatrix::what() const noexcept {

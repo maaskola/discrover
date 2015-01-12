@@ -16,10 +16,9 @@ const char *BinaryNotFound::what() const noexcept {
 InvalidLengths::InvalidLengths(size_t s1, size_t s2)
     : exception(), min_size(s1), max_size(s2){};
 const char *InvalidLengths::InvalidLengths::what() const noexcept {
-  stringstream ss;
-  ss << "min_size (" << min_size << ") is not smaller than max_size ("
-     << max_size << ").";
-  return ss.str().c_str();
+  string msg = "min_size (" + to_string(min_size) + ") "
+               + "is not smaller than max_size (" + to_string(max_size) + ").";
+  return msg.c_str();
 };
 
 const char *ReturnValueNonZero::what() const noexcept {

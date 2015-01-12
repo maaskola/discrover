@@ -12,7 +12,6 @@
  */
 
 #include <iostream>
-#include <sstream>
 #include "bitmask.hpp"
 
 using namespace std;
@@ -45,11 +44,10 @@ namespace BitMask {
 TooManyMotifs::TooManyMotifs(size_t num_motifs_)
     : exception(), num_motifs(num_motifs_) {};
 const char *TooManyMotifs::what() const noexcept {
-  stringstream ss;
-  ss << "Error: trying to construct mask for too many motifs! "
-     << "The offending index is: " << num_motifs
-     << ", and this version only supports " << max_motifs << " motifs." << endl;
-  return ss.str().c_str();
+  string msg = "Error: trying to construct mask for too many motifs! "
+     "The offending index is: " + to_string(num_motifs)
+     + ", and this version only supports " + to_string(max_motifs) + " motifs.";
+  return msg.c_str();
 }
 }
 }

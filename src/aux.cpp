@@ -1,5 +1,4 @@
 #include <cstring>
-#include <sstream>
 #include <boost/algorithm/string.hpp>
 #include "aux.hpp"
 
@@ -253,30 +252,27 @@ namespace NumberList {
 InvalidCharacter::InvalidCharacter(const string &spec_, size_t pos_)
     : exception(), spec(spec_), pos(pos_) {};
 const char *InvalidCharacter::what() const noexcept {
-  stringstream ss;
-  ss << "Error: found invalid character '" << spec[pos]
-     << "' in number list specification '" << spec << "'." << endl;
-  ss << "Please note that the format for the list specification only allows "
-        "digits, '-', and ','." << endl;
-  return ss.str().c_str();
+  string msg = string("Error: found invalid character '") + spec[pos]
+    + "' in number list specification '" + spec + "'.\n"
+    + "Please note that the format for the list specification only allows "
+    + "digits, '-', and ','.";
+  return msg.c_str();
 }
 
 MultipleRanges::MultipleRanges(const string &group_)
     : exception(), group(group_) {};
 const char *MultipleRanges::what() const noexcept {
-  stringstream ss;
-  ss << "List format error: only one '-' is allowed in any group." << endl
-     << "The offending group is '" << group << "'." << endl;
-  return ss.str().c_str();
+  string msg = "List format error: only one '-' is allowed in any group.\n"
+    "The offending group is '" + group + "'.";
+  return msg.c_str();
 }
 }
 namespace NucleicAcids {
 InvalidNucleotideCode::InvalidNucleotideCode(char nucl_)
     : exception(), nucl(nucl_) {};
 const char *InvalidNucleotideCode::what() const noexcept {
-  stringstream ss;
-  ss << "Error: found invalid nucleotide code '" << nucl << "'." << endl;
-  return ss.str().c_str();
+  string msg = string("Error: found invalid nucleotide code '") + nucl + "'.";
+  return msg.c_str();
 }
 }
 }
