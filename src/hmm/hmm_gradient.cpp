@@ -452,11 +452,8 @@ double HMM::class_likelihood_gradient(const Data::Set &dataset,
         }
         x += res.log_likelihood;
       }
-      if (not isfinite(x)) {
-        cout << "Error in class likelihood gradient calculation; x is not "
-                "finite: x = " << x << endl;
-        exit(-1);
-      }
+      if (not isfinite(x))
+        throw Exception::HMM::Calculation::Infinity();
       l += x;
     }
 
@@ -807,8 +804,6 @@ double HMM::rank_information_gradient(const Data::Set &dataset,
            << g.emission << endl;
   }
 
-  //  cout << "TODO: implement." << endl;
-  //  exit(-1);
   double ri = calc_rank_information(counts, pseudo_count);
   return ri;
 }
@@ -1085,4 +1080,16 @@ HMM::posterior_t HMM::posterior_gradient(const Data::Set &dataset,
          << endl;
   posterior_t result = {l, posterior};
   return result;
+}
+
+namespace Exception {
+namespace HMM {
+namespace Calculation {
+const char *Infinity::what() const noexcept {
+  string msg
+      = "Error in class likelihood gradient calculation: value is not finite.";
+  return msg.c_str();
+}
+}
+}
 }

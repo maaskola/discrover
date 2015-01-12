@@ -8,7 +8,7 @@
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
 #include "../aux.hpp"
-#include "hmm.hpp"
+#include "analysis.hpp"
 #include "report.hpp"
 #include "../timer.hpp"
 #include "../plasma/plasma.hpp"
@@ -27,11 +27,8 @@ void recreate_symlink(const string &source, const string &target) {
   if (exists(target)) {
     if (is_symlink(target))
       remove(target);
-    else {
-      cout << "Error: file " << target << " exists and is not a symlink. "
-           << "File will not be overwritten; aborting." << endl;
-      exit(-1);
-    }
+    else
+      throw Exception::Analysis::NotASymlink(target);
   }
   create_symlink(absolute(source), target);
 }
@@ -130,19 +127,6 @@ void check_data(const Data::Collection &collection,
             cout << ">" << seq.definition << endl << seq.sequence << endl;
       }
     }
-
-  // TODO re-enable warning
-  //  if(options.training_method != Training::Method::none and not
-  //  is_generative(options.objective.measure) and options.objective.measure !=
-  //  Measure::rank_information) {
-  //    for(auto &contrast: collection) {
-  //      if(contrast.sets.size() < 2) {
-  //        cout << "Please note that for discriminative training you need to
-  //        specify multiple sequence sets using -f." << endl;
-  //        exit(-1);
-  //      }
-  //    }
-  //  }
 }
 
 AnalysisResult train_evaluate(HMM &hmm, const Data::Collection &all_data,
@@ -317,10 +301,7 @@ bool check_pairwise_with_previous_motifs(
           ok = log_pvalue <= log_pvalue_threshold;
         } break;
         default:
-          cout << "Error: measure " << measure
-               << " is not implemented for filtering in multiple motif mode."
-               << endl;
-          exit(-1);
+        throw Exception::Analysis::MeasureNotForMultiple(filtering_measure);
       }
 
       if (not ok) {
@@ -620,10 +601,7 @@ HMM doit(const Data::Collection &all_data,
                         scoring_present_groups, scoring_previous_groups);
                     break;
                   default:
-                    cout << "Error: measure " << filtering_measure
-                         << " is not implemented for filtering in multiple "
-                            "motif mode." << endl;
-                    exit(-1);
+                    throw Exception::Analysis::MeasureNotForMultiple(filtering_measure);
                 }
 
                 if (options.verbosity >= Verbosity::info)
@@ -798,4 +776,23 @@ void perform_analysis(Options::HMM &options) {
     options.cross_validation_iterations = 1;
   }
   vector<HMM> hmms = cross_validation(collection, options);
+}
+
+namespace Exception {
+namespace Analysis {
+NotASymlink::NotASymlink(const string &path_) : exception(), path(path_){};
+const char *NotASymlink::what() const noexcept {
+  string msg = "Error: file " + path + " exists and is not a symlink.\n"
+               + "File will not be overwritten; aborting.";
+  return msg.c_str();
+}
+MeasureNotForMultiple::MeasureNotForMultiple(
+    Measures::Continuous::Measure measure_)
+    : exception(), measure(measure_){};
+const char *MeasureNotForMultiple::what() const noexcept {
+  string msg = "Error: measure " + measure2string(filtering_measure)
+               + " is not implemented for filtering in multiple motif mode.";
+  return msg.c_str();
+}
+}
 }

@@ -715,9 +715,22 @@ struct MultipleTasks : public std::exception {
   const char *what() const noexcept;
   std::string which;
 };
+struct TrainBgTooLate : public std::exception {
+  const char *what() const noexcept;
+};
+struct GradientNotImplemented: public std::exception {
+  GradientNotImplemented(Measures::Continuous::Measure measure);
+  const char *what() const noexcept;
+  Measures::Continuous::Measure measure;
+};
 }
 namespace Insertions {
 struct NotInsideMotif : public std::exception {
+  const char *what() const noexcept;
+};
+}
+namespace Calculation {
+struct Infinity : public std::exception {
   const char *what() const noexcept;
 };
 }

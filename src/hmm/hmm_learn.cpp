@@ -92,12 +92,8 @@ void HMM::train_background(const Data::Collection &collection,
     for (size_t j = 0; j < bg_hmm.emission.size2(); j++)
       emission(i, j) = bg_hmm.emission(i, j);
 
-  if (transition.size1() > bg_hmm.transition.size1()) {
-    cout << "In train_background(); this should not be called after motifs are "
-            "already present." << endl;
-    assert(0);
-    exit(-1);
-  }
+  if (transition.size1() > bg_hmm.transition.size1())
+    throw Exception::HMM::Learning::TrainBgTooLate();
 
   if (options.verbosity >= Verbosity::debug)
     cout << *this << endl;
@@ -598,9 +594,7 @@ double HMM::compute_gradient(const Data::Contrast &contrast, Gradient &gradient,
       score = class_likelihood_gradient(contrast, task, present, gradient);
       break;
     default:
-      cout << "Calculation of " << measure2string(task.measure)
-           << " gradient is currently not implemented." << endl;
-      exit(-1);
+      throw Exception::HMM::Learning::GradientNotImplemented(task.measure);
   }
 
   if (verbosity >= Verbosity::verbose)
@@ -1027,4 +1021,24 @@ bool HMM::perform_training_iteration_gradient(
   }
 
   return done;
+}
+
+namespace Exception {
+namespace HMM {
+namespace Learning {
+const char *TrainBgTooLate::what() const noexcept {
+  string msg = string() + "Error: train_background() should not be called "
+    "after motifs have been added.";
+  return msg.c_str();
+}
+GradientNotImplemented::GradientNotImplemented(
+    Measures::Continuous::Measure measure_)
+    : exception(), measure(measure_) {};
+const char *GradientNotImplemented::what() const noexcept {
+  string msg = "Calculation of " + measure2string(measure)
+               + " gradient is currently not implemented.";
+  return msg.c_str();
+}
+}
+}
 }

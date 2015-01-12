@@ -32,6 +32,21 @@
 
 #include "hmm.hpp"
 
-int perform_analysis(Options::HMM &options);
+void perform_analysis(Options::HMM &options);
+
+namespace Exception {
+namespace Analysis {
+struct NotASymlink : public std::exception {
+  NotASymlink(const std::string &path);
+  const char *what() const noexcept;
+  std::string path;
+};
+struct MeasureNotForMultiple : public std::exception {
+  MeasureNotForMultiple(Measures::Continuous::Measure measure);
+  const char *what() const noexcept;
+  Measures::Continuous::Measure measure;
+};
+}
+}
 
 #endif
