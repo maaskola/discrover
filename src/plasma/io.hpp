@@ -40,22 +40,28 @@
 namespace IO {
 namespace Exception {
 namespace File {
-struct Existence : public std::runtime_error {
-  const std::string msg = "Error: file does not exist: ";
-  Existence(const std::string& path_)
-      : std::runtime_error(msg + path_), path(path_){};
+struct Existence : public std::exception {
+  Existence(const std::string& path_) : std::exception(), path(path_){};
+  const char* what() const noexcept {
+    std::string msg = "Error: file does not exist: '" + path + "'.";
+    return msg.c_str();
+  }
   std::string path;
 };
-struct NoRegularFile : public std::runtime_error {
-  const std::string msg = "Error: not a regular file: ";
-  NoRegularFile(const std::string& path_)
-      : std::runtime_error(msg + path_), path(path_){};
+struct NoRegularFile : public std::exception {
+  NoRegularFile(const std::string& path_) : std::exception(), path(path_){};
+  const char* what() const noexcept {
+    std::string msg = "Error: not a regular file: '" + path + "'.";
+    return msg.c_str();
+  }
   std::string path;
 };
-struct Access : public std::runtime_error {
-  const std::string msg = "Error: file access failed: ";
-  Access(const std::string& path_)
-      : std::runtime_error(msg + path_), path(path_){};
+struct Access : public std::exception {
+  Access(const std::string& path_) : std::exception(), path(path_){};
+  const char* what() const noexcept {
+    std::string msg = "Error: file access failed: '" + path + "'.";
+    return msg.c_str();
+  }
   std::string path;
 };
 }
