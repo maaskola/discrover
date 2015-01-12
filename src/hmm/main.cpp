@@ -691,7 +691,7 @@ int main(int argc, const char **argv) {
   try {
     perform_analysis(options);
   } catch (exception &e) {
-    cout << e.what();
+    cout << e.what() << endl;
     return EXIT_FAILURE;
   }
 
