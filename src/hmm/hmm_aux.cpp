@@ -569,19 +569,13 @@ Training::Tasks HMM::define_training_tasks(const Options::HMM &options) const {
   for (auto &task : tasks) {
     for (auto &e_state : task.targets.emission) {
       auto pair = e_states.insert(e_state);
-      if (not pair.second) {
-        cout << "Error: some emission parameters are supposed to be "
-                "simultaneously subjected to multiple learning tasks." << endl;
-        exit(-1);
-      }
+      if (not pair.second)
+        throw Exception::HMM::Learning::MultipleTasks("emission");
     }
     for (auto &t_state : task.targets.transition) {
       auto pair = t_states.insert(t_state);
-      if (not pair.second) {
-        cout << "Error: some transition parameters are supposed to be "
-                "simultaneously subjected to multiple learning tasks." << endl;
-        exit(-1);
-      }
+      if (not pair.second)
+        throw Exception::HMM::Learning::MultipleTasks("transition");
     }
   }
 
@@ -852,6 +846,15 @@ UnsupportedVersion::UnsupportedVersion(size_t version_)
 const char *UnsupportedVersion::what() const noexcept {
   string msg = "Error: parameter file format version " + to_string(version)
                + " not supported!";
+  return msg.c_str();
+}
+}
+namespace Learning {
+MultipleTasks::MultipleTasks(const string &which_)
+    : exception(), which(which_){};
+const char *MultipleTasks::what() const noexcept {
+  string msg = "Error: some " + which + " parameters are simultaneously "
+    + "assigned to multiple learning tasks.";
   return msg.c_str();
 }
 }

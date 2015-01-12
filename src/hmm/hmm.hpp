@@ -709,6 +709,13 @@ struct UnsupportedVersion : public std::exception {
   size_t version;
 };
 }
+namespace Learning {
+struct MultipleTasks : public std::exception {
+  MultipleTasks(const std::string &which);
+  const char *what() const noexcept;
+  std::string which;
+};
+}
 namespace Insertions {
 struct NotInsideMotif : public std::exception {
   const char *what() const noexcept;
