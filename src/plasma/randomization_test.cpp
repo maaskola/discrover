@@ -36,6 +36,7 @@ count_vector_t generate_sample(const Seeding::Collection &collection,
     size_t k = 0;
     for (auto &dataset : contrast) {
       for (auto &seq : dataset) {
+        (void) seq; // ignore the loop variable
         double r = 1.0 * rand() / RAND_MAX;
         if (r < 1.0 * successes / remaining) {
           successes--;
