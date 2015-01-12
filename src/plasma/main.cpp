@@ -93,6 +93,8 @@ void generate_logos(const Seeding::Results &results,
 #endif
 
 int main(int argc, const char **argv) {
+  const string default_error_msg
+      = "Please inspect the command line help with -h or --help.";
   Timer timer;
 
   Seeding::Options options;
@@ -177,6 +179,11 @@ int main(int argc, const char **argv) {
          << "No further information as to the nature of this error is "
             "available, please check your command line arguments." << endl
          << "Please inspect the command line help with -h or --help." << endl;
+    return EXIT_FAILURE;
+  } catch (exception &e) {
+    cout << "An error occurred while parsing command line options." << endl
+         << e.what() << endl
+         << default_error_msg << endl;
     return EXIT_FAILURE;
   }
 
