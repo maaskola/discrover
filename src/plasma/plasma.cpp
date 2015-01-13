@@ -293,7 +293,7 @@ rev_map_t Plasma::determine_initial_candidates(
   hash_map_t word_counts = get_word_counts(collection, length, options);
   if (options.measure_runtime) {
     cerr << "Got words for length " << length << " in " << my_timer.tock()
-         << " \u00b5s." << endl;
+         << " µs." << endl;
     my_timer.tick();
   }
 
@@ -341,7 +341,7 @@ rev_map_t Plasma::determine_initial_candidates(
 
   if (options.measure_runtime) {
     cerr << "Initial scoring for length " << length << " took "
-         << my_timer.tock() << " \u00b5s." << endl;
+         << my_timer.tock() << " µs." << endl;
     my_timer.tick();
   }
 
@@ -529,7 +529,7 @@ Results Plasma::find_plasma(size_t length, const Objective &objective,
       }
       if (options.measure_runtime) {
         cerr << "Degeneracy " << degeneracy << " took " << my_timer.tock()
-             << " \u00b5s." << endl;
+             << " µs." << endl;
         my_timer.tick();
       }
     }
@@ -753,7 +753,7 @@ void Plasma::rebuild_index() {
     index = NucleotideIndex<size_t, size_t>(
         collection, options.allow_iupac_wildcards, options.verbosity);
     if (options.measure_runtime)
-      cerr << "Built index in " << my_timer.tock() << " \u00b5s." << endl;
+      cerr << "Built index in " << my_timer.tock() << " µs." << endl;
     index_ready = true;
   });
   t.detach();
