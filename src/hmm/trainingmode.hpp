@@ -73,10 +73,8 @@ using Tasks = std::vector<Task>;
 
 namespace Exception {
 namespace HMM {
-struct InvalidTrainingMethod : public std::exception {
+struct InvalidTrainingMethod : public std::runtime_error {
   InvalidTrainingMethod(const std::string& token);
-  const char* what() const noexcept;
-  std::string token;
 };
 }
 }

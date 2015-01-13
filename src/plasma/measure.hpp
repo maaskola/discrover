@@ -31,6 +31,7 @@
 #define MEASURE_HPP
 
 #include <string>
+#include <stdexcept>
 #include <iostream>
 
 namespace Measures {
@@ -108,15 +109,11 @@ bool is_two_by_two<Continuous::Measure>(Continuous::Measure measure);
 Discrete::Measure corresponding_measure(Continuous::Measure);
 
 namespace Exception {
-struct InvalidMeasure : public std::exception {
+struct InvalidMeasure : public std::runtime_error {
   InvalidMeasure(const std::string &token);
-  const char *what() const noexcept;
-  std::string token;
 };
-struct NoCorrespondingMeasure : public std::exception {
+struct NoCorrespondingMeasure : public std::runtime_error {
   NoCorrespondingMeasure(const Continuous::Measure &measure);
-  const char *what() const noexcept;
-  Continuous::Measure measure;
 };
 }
 }

@@ -209,78 +209,47 @@ std::ostream &operator<<(std::ostream &out, Objective<X> &spec) {
 namespace Exception {
 namespace Discriminative {
 template <typename measure_t>
-struct UnaryContrast : public std::exception {
-  UnaryContrast(measure_t measure_, const std::string &name)
-      : exception(), measure(measure_), contrast(name){};
-  const char *what() const noexcept {
-    std::string msg = "Error: discriminative measure '"
+struct UnaryContrast : public std::runtime_error {
+  UnaryContrast(measure_t measure, const std::string &contrast)
+      : runtime_error("Error: discriminative measure '"
                       + measure2string(measure)
                       + "' requires at least a binary contrast in contrast '"
-                      + contrast + "'.";
-    return msg.c_str();
-  }
-  measure_t measure;
-  std::string contrast;
+                      + contrast + "'."){};
 };
 template <typename measure_t>
-struct TwoByTwo : public std::exception {
-  TwoByTwo(measure_t measure_, const std::string &name)
-      : exception(), measure(measure_), contrast(name){};
-  const char *what() const noexcept {
-    std::string msg = "Error: 2x2 measure '" + measure2string(measure)
+struct TwoByTwo : public std::runtime_error {
+  TwoByTwo(measure_t measure, const std::string &contrast)
+      : runtime_error("Error: 2x2 measure '" + measure2string(measure)
                       + "' only works on binary contrasts, and contrast '"
-                      + contrast + "' is not binary.";
-    return msg.c_str();
-  }
-  measure_t measure;
-  std::string contrast;
+                      + contrast + "' is not binary."){};
 };
 }
 
 namespace Motif {
-struct NameNotUnique : public std::exception {
-  NameNotUnique(const std::string &name_) : exception(), name(name_){};
-  const char *what() const noexcept {
-    std::string msg = "Error: motif name '" + name + "' not unique.";
-    return msg.c_str();
-  }
-  std::string name;
+struct NameNotUnique : public std::runtime_error {
+  NameNotUnique(const std::string &name)
+      : runtime_error("Error: motif name '" + name + "' not unique."){};
 };
-struct MultiplicityZero : public std::exception {
-  MultiplicityZero(const std::string &name_) : exception(), name(name_){};
-  const char *what() const noexcept {
-    std::string msg = "Error: multiplicity of motif '" + name + "' is zero!";
-    return msg.c_str();
-  }
-  std::string name;
+struct MultiplicityZero : public std::runtime_error {
+  MultiplicityZero(const std::string &name)
+      : runtime_error("Error: multiplicity of motif '" + name + "' is zero!"){};
 };
-struct NameNotUniqueInObjective : public std::exception {
-  NameNotUniqueInObjective(const std::string &name_)
-      : exception(), name(name_){};
-  const char *what() const noexcept {
-    std::string msg = "Error: motif name '" + name
-                      + "'in objective not unique.";
-    return msg.c_str();
-  }
-  std::string name;
+struct NameNotUniqueInObjective : public std::runtime_error {
+  NameNotUniqueInObjective(const std::string &name)
+      : runtime_error("Error: motif name '" + name
+                      + "'in objective not unique."){};
 };
-struct NoSpecfication : public std::exception {
-  NoSpecfication(const std::string &name_) : exception(), name(name_){};
-  const char *what() const noexcept {
-    std::string msg = std::string()
-                      + "Error: found a motif name in the objective for which "
-                      + "no motif specification is found: '" + name + "'.";
-    return msg.c_str();
-  }
-  std::string name;
+struct NoSpecfication : public std::runtime_error {
+  NoSpecfication(const std::string &name)
+      : runtime_error(
+            "Error: found a motif name in the objective for which "
+            "no motif specification is found: '" + name + "'."){};
 };
-struct WhenOneThenAll : public std::exception {
-  const char *what() const noexcept {
-    std::string msg = std::string()
-                      + "Error: when any objectives name motifs then all "
-                      + "objectives must define motifs.";
-    return msg.c_str();
-  }
+struct WhenOneThenAll : public std::runtime_error {
+  WhenOneThenAll()
+      : runtime_error(
+            "Error: when any objectives name motifs then all "
+            "objectives must define motifs."){};
 };
 }
 }

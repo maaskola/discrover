@@ -14,7 +14,7 @@ vector<string> extract_seq_ids(const string &path, size_t nseq,
   if (verbosity >= Verbosity::info)
     cout << "Getting sequence IDs from " << path << endl;
   if (not boost::filesystem::exists(path))
-    throw IO::Exception::File::Existence(path);
+    throw Exception::File::Existence(path);
   vector<string> s;
   ifstream f(path.c_str());
   size_t idx = 0;

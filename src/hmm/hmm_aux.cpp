@@ -835,28 +835,16 @@ pair<HMM, map<size_t, size_t>> HMM::add_revcomp_motifs() const {
 namespace Exception {
 namespace HMM {
 namespace ParameterFile {
-SyntaxError::SyntaxError(const string &token_)
-    : exception(), token(token_){};
-const char *SyntaxError::what() const noexcept {
-  string msg = "Syntax error: " + token;
-  return msg.c_str();
-}
-UnsupportedVersion::UnsupportedVersion(size_t version_)
-    : exception(), version(version_){};
-const char *UnsupportedVersion::what() const noexcept {
-  string msg = "Error: parameter file format version " + to_string(version)
-               + " not supported!";
-  return msg.c_str();
-}
+SyntaxError::SyntaxError(const string &token)
+    : runtime_error("Syntax error: " + token) {}
+UnsupportedVersion::UnsupportedVersion(size_t version)
+    : runtime_error("Error: parameter file format version " + to_string(version)
+                    + " not supported!") {}
 }
 namespace Learning {
-MultipleTasks::MultipleTasks(const string &which_)
-    : exception(), which(which_){};
-const char *MultipleTasks::what() const noexcept {
-  string msg = "Error: some " + which + " parameters are simultaneously "
-    + "assigned to multiple learning tasks.";
-  return msg.c_str();
-}
+MultipleTasks::MultipleTasks(const string &which)
+    : runtime_error("Error: some " + which + " parameters are simultaneously "
+                    + "assigned to multiple learning tasks.") {}
 }
 }
 }

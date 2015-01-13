@@ -9,21 +9,14 @@ using namespace std;
 
 namespace Dreme {
 namespace Exception {
-const char *BinaryNotFound::what() const noexcept {
-  return "Error: DREME binary not found.";
-};
-
-InvalidLengths::InvalidLengths(size_t s1, size_t s2)
-    : exception(), min_size(s1), max_size(s2){};
-const char *InvalidLengths::InvalidLengths::what() const noexcept {
-  string msg = "min_size (" + to_string(min_size) + ") "
-               + "is not smaller than max_size (" + to_string(max_size) + ").";
-  return msg.c_str();
-};
-
-const char *ReturnValueNonZero::what() const noexcept {
-  return "There was a problem executing DREME.";
-};
+BinaryNotFound::BinaryNotFound()
+    : runtime_error("Error: DREME binary not found.") {}
+InvalidLengths::InvalidLengths(size_t min_size, size_t max_size)
+    : runtime_error("min_size (" + to_string(min_size) + ") "
+                    + "is not smaller than max_size (" + to_string(max_size)
+                    + ").") {}
+ReturnValueNonZero::ReturnValueNonZero()
+    : runtime_error("There was a problem executing DREME.") {}
 }
 
 list<pair<string, double>> parse_dreme_output(const string &dir) {

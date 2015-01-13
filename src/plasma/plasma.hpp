@@ -89,15 +89,13 @@ void viterbi_dump(const std::string &motif, const Collection &collection,
 
 namespace Exception {
 namespace Dreme {
-struct OnlyBinaryContrast : std::exception {
-  const char *what() const noexcept;
+struct OnlyBinaryContrast : std::runtime_error {
+  OnlyBinaryContrast();
 };
 }
 namespace Plasma {
-struct NoObjectiveForMotif : std::exception {
+struct NoObjectiveForMotif : std::runtime_error {
   NoObjectiveForMotif(const std::string &token);
-  const char *what() const noexcept;
-  std::string token;
 };
 }
 }

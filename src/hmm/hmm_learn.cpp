@@ -1026,19 +1026,14 @@ bool HMM::perform_training_iteration_gradient(
 namespace Exception {
 namespace HMM {
 namespace Learning {
-const char *TrainBgTooLate::what() const noexcept {
-  string msg = string() + "Error: train_background() should not be called "
-    "after motifs have been added.";
-  return msg.c_str();
-}
+TrainBgTooLate::TrainBgTooLate()
+    : runtime_error(
+          "Error: train_background() should not be called after motifs have "
+          "been added.") {}
 GradientNotImplemented::GradientNotImplemented(
-    Measures::Continuous::Measure measure_)
-    : exception(), measure(measure_){};
-const char *GradientNotImplemented::what() const noexcept {
-  string msg = "Calculation of " + measure2string(measure)
-               + " gradient is currently not implemented.";
-  return msg.c_str();
-}
+    Measures::Continuous::Measure measure)
+    : runtime_error("Calculation of " + measure2string(measure)
+                    + " gradient is currently not implemented.") {}
 }
 }
 }

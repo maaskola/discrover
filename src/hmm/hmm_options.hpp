@@ -168,15 +168,11 @@ std::ostream &operator<<(std::ostream &os, const HMM &options);
 
 namespace Exception {
 namespace HMM {
-struct InvalidCompression : public std::exception {
+struct InvalidCompression : public std::runtime_error {
   InvalidCompression(const std::string &token);
-  const char *what() const noexcept;
-  std::string token;
 };
-struct InvalidRelearning : public std::exception {
+struct InvalidRelearning : public std::runtime_error {
   InvalidRelearning(const std::string &token);
-  const char *what() const noexcept;
-  std::string token;
 };
 }
 }

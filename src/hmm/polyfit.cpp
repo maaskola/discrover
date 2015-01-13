@@ -183,18 +183,13 @@ vector_t interpolate2(double x1, double x2, double g1, double g2) {
 
 namespace Exception {
 namespace PolyFit {
-InsufficientData::InsufficientData(size_t o, size_t n)
-    : exception(), order(o), num_data(n){};
-
-const char *InsufficientData::what() const noexcept {
-  string msg = "Error in polynomial fitting: cannot fit polynomial of order "
-               + to_string(order) + " to " + to_string(num_data)
-               + " data points.";
-  return msg.c_str();
+InsufficientData::InsufficientData(size_t order, size_t num_data)
+    : runtime_error(
+          "Error in polynomial fitting: cannot fit polynomial of order "
+          + to_string(order) + " to " + to_string(num_data) + " data points.") {
 }
-
-const char *SingularMatrix::what() const noexcept {
-  return "Error in polynomial fitting: singular matrix can't be inverted.";
-}
+SingularMatrix::SingularMatrix()
+    : runtime_error(
+          "Error in polynomial fitting: singular matrix can't be inverted.") {}
 }
 }

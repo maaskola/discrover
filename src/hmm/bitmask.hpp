@@ -27,12 +27,10 @@ std::vector<size_t> unpack_mask(const bitmask_t x);
 
 namespace Exception {
 namespace BitMask {
-struct TooManyMotifs : public std::exception {
+struct TooManyMotifs : public std::runtime_error {
   TooManyMotifs(size_t num_motifs);
-  const char *what() const noexcept;
-  size_t num_motifs;
 };
-};
-};
+}
+}
 
 #endif

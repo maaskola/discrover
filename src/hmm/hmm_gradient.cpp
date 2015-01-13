@@ -1085,11 +1085,10 @@ HMM::posterior_t HMM::posterior_gradient(const Data::Set &dataset,
 namespace Exception {
 namespace HMM {
 namespace Calculation {
-const char *Infinity::what() const noexcept {
-  string msg
-      = "Error in class likelihood gradient calculation: value is not finite.";
-  return msg.c_str();
-}
+Infinity::Infinity()
+    : runtime_error(
+          "Error in class likelihood gradient calculation: "
+          "value is not finite.") {}
 }
 }
 }

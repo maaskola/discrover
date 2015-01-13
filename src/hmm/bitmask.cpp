@@ -41,13 +41,11 @@ vector<size_t> unpack_mask(const bitmask_t x) {
 
 namespace Exception {
 namespace BitMask {
-TooManyMotifs::TooManyMotifs(size_t num_motifs_)
-    : exception(), num_motifs(num_motifs_){};
-const char *TooManyMotifs::what() const noexcept {
-  string msg = "Error: trying to construct mask for too many motifs! "
-     "The offending index is: " + to_string(num_motifs)
-     + ", and this version only supports " + to_string(max_motifs) + " motifs.";
-  return msg.c_str();
-}
+TooManyMotifs::TooManyMotifs(size_t num_motifs)
+    : runtime_error(
+          "Error: trying to construct mask for too many motifs!\n"
+          "The offending index is: " + to_string(num_motifs)
+          + ", and this version only supports " + to_string(max_motifs)
+          + " motifs.") {}
 }
 }

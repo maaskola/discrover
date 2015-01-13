@@ -260,30 +260,19 @@ string to_pretty_string(double x) {
 
 namespace Exception {
 namespace NumberList {
-InvalidCharacter::InvalidCharacter(const string &spec_, size_t pos_)
-    : exception(), spec(spec_), pos(pos_){};
-const char *InvalidCharacter::what() const noexcept {
-  string msg = string("Error: found invalid character '") + spec[pos]
-    + "' in number list specification '" + spec + "'.\n"
-    + "Please note that the format for the list specification only allows "
-    + "digits, '-', and ','.";
-  return msg.c_str();
-}
-
-MultipleRanges::MultipleRanges(const string &group_)
-    : exception(), group(group_){};
-const char *MultipleRanges::what() const noexcept {
-  string msg = "List format error: only one '-' is allowed in any group.\n"
-    "The offending group is '" + group + "'.";
-  return msg.c_str();
-}
+InvalidCharacter::InvalidCharacter(const string &spec, size_t pos)
+    : runtime_error(string("Error: found invalid character '") + spec[pos]
+          + "' in number list specification '" + spec + "'.\n"
+          + "Please note that the format for the list specification only "
+            "allows " + "digits, '-', and ','.") {}
+MultipleRanges::MultipleRanges(const string &group)
+    : runtime_error(
+          "List format error: only one '-' is allowed in any group.\n"
+          "The offending group is '" + group + "'.") {}
 }
 namespace NucleicAcids {
-InvalidNucleotideCode::InvalidNucleotideCode(char nucl_)
-    : exception(), nucl(nucl_){};
-const char *InvalidNucleotideCode::what() const noexcept {
-  string msg = string("Error: found invalid nucleotide code '") + nucl + "'.";
-  return msg.c_str();
-}
+InvalidNucleotideCode::InvalidNucleotideCode(char nucl)
+    : runtime_error(string("Error: found invalid nucleotide code '") + nucl
+                    + "'.") {}
 }
 }

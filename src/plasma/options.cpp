@@ -145,25 +145,13 @@ Objective objective_for_motif(const Objectives &objectives,
 }
 
 namespace Exception {
-InvalidOccurrenceFilter::InvalidOccurrenceFilter(const string &token_)
-    : exception(), token(token_){};
-const char *InvalidOccurrenceFilter::what() const noexcept {
-  string msg = "Error: invalid occurrence filter type '" + token + "'.";
-  return msg.c_str();
-}
-InvalidAlgorithm::InvalidAlgorithm(const string &token_)
-    : exception(), token(token_){};
-const char *InvalidAlgorithm::what() const noexcept {
-  string msg = "Error: invalid seeding algorithm '" + token + "'.\n"
+InvalidOccurrenceFilter::InvalidOccurrenceFilter(const string &token)
+    : runtime_error("Error: invalid occurrence filter type '" + token + "'."){};
+InvalidAlgorithm::InvalidAlgorithm(const string &token)
+    : runtime_error( "Error: invalid seeding algorithm '" + token + "'.\n"
      + "Please use one of 'plasma', 'dreme', 'mcmc', or 'all'.\n"
-     + "It is also possible to use multiple algorithms by separating them by comma.";
-  return msg.c_str();
-}
-NoMatchingObjectiveFound::NoMatchingObjectiveFound(const string &motif_)
-    : exception(), motif(motif_){};
-const char *NoMatchingObjectiveFound::what() const noexcept {
-  string msg = "Error: no objective found for motif '" + motif + "'.";
-  return msg.c_str();
-}
+     + "It is also possible to use multiple algorithms by separating them by comma."){};
+NoMatchingObjectiveFound::NoMatchingObjectiveFound(const string &motif)
+    : runtime_error("Error: no objective found for motif '" + motif + "'."){};
 }
 }

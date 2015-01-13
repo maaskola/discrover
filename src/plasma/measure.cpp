@@ -12,7 +12,6 @@
  */
 
 #include <iostream>
-#include <cassert>
 #include "measure.hpp"
 
 using namespace std;
@@ -289,19 +288,11 @@ Discrete::Measure corresponding_measure(Continuous::Measure hmm_measure) {
 }
 
 namespace Exception {
-InvalidMeasure::InvalidMeasure(const string &token_)
-    : exception(), token(token_){};
-const char *InvalidMeasure::what() const noexcept {
-  string msg = "Error: invalid measure '" + token + "'.";
-  return msg.c_str();
-}
+InvalidMeasure::InvalidMeasure(const string &token)
+    : runtime_error("Error: invalid measure '" + token + "'.") {}
 NoCorrespondingMeasure::NoCorrespondingMeasure(
-    const Continuous::Measure &measure_)
-    : exception(), measure(measure_){};
-const char *NoCorrespondingMeasure::what() const noexcept {
-  string msg = "Error: no corresponding seeding measure for HMM measure "
-               + measure2string(measure) + ".";
-  return msg.c_str();
-}
+    const Continuous::Measure &measure)
+    : runtime_error("Error: no corresponding seeding measure for HMM measure "
+                    + measure2string(measure) + ".") {}
 }
 }

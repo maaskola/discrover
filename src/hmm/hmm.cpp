@@ -37,24 +37,14 @@ const size_t HMM::bg_state;
 
 using namespace std;
 
-Exception::HMM::ParameterFile::Existence::Existence(const string &path_)
-    : exception(), path(path_){};
-const char *Exception::HMM::ParameterFile::Existence::what() const noexcept {
-  string msg = "Error: HMM parameter file " + path + " does not exist.";
-  return msg.c_str();
-}
+Exception::HMM::ParameterFile::Existence::Existence(const string &path)
+    : runtime_error("Error: HMM parameter file " + path + " does not exist.") {}
 
-Exception::HMM::ParameterFile::ReadError::ReadError(const string &path_)
-    : exception(), path(path_){};
-const char *Exception::HMM::ParameterFile::ReadError::what() const noexcept {
-  string msg = "Error: can't read from parameter file " + path + ".";
-  return msg.c_str();
-}
+Exception::HMM::ParameterFile::ReadError::ReadError(const string &path)
+    : runtime_error("Error: can't read from parameter file " + path + ".") {}
 
-const char *Exception::HMM::Insertions::NotInsideMotif::what() const noexcept {
-  string msg = "Error: insertion positions must be within the motif.";
-  return msg.c_str();
-}
+Exception::HMM::Insertions::NotInsideMotif::NotInsideMotif()
+    : runtime_error("Error: insertion positions must be within the motif.") {}
 
 HMM::HMM(const string &path, Verbosity verbosity_, double pseudo_count)
     : verbosity(verbosity_),

@@ -78,15 +78,12 @@ double approximate_score(const std::string &motif,
 
 namespace Exception {
 namespace Plasma {
-struct UndefinedMeasure : public std::exception {
-  const char *what() const noexcept;
+struct UndefinedMeasure : public std::runtime_error {
+  UndefinedMeasure();
 };
-struct NoContrastForObjective : public std::exception {
+struct NoContrastForObjective : public std::runtime_error {
   NoContrastForObjective(const std::string &expr,
                          const std::vector<std::string> &names);
-  const char *what() const noexcept;
-  std::string expr;
-  std::vector<std::string> names;
 };
 }
 }

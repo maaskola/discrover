@@ -78,37 +78,19 @@ istream &operator>>(istream &is, Palette &palette) {
 }
 
 namespace Exception {
-
-InvalidType::InvalidType(const string &token_) : exception(), token(token_){};
-const char *InvalidType::what() const noexcept {
-  string msg = "Error: invalid logo type '" + token + "'.\n"
-               + "Available are: 'seq' and 'freq'.";
-  return msg.c_str();
-}
-
-InvalidAlphabet::InvalidAlphabet(const string &token_)
-    : exception(), token(token_){};
-const char *InvalidAlphabet::what() const noexcept {
-  string msg = "Error: invalid alphabet '" + token + "'.\n"
-    "Available are: 'DNA' and 'RNA'.";
-  return msg.c_str();
-}
-
-InvalidOrder::InvalidOrder(const string &token_) : exception(), token(token_){};
-const char *InvalidOrder::what() const noexcept {
-  string msg = "Error: invalid order type '" + token + "'.\n"
-               + "Available are: 'alpha' and 'freq'.";
-  return msg.c_str();
-}
-
-InvalidPalette::InvalidPalette(const string &token_)
-    : exception(), token(token_){};
-const char *InvalidPalette::what() const noexcept {
-  string msg = "Error: invalid color palette '" + token + "'.\n"
-               + "Available are: 'default', 'solarized', and 'tetrad'.";
-  return msg.c_str();
-}
-
+InvalidType::InvalidType(const string &token)
+    : runtime_error("Error: invalid logo type '" + token + "'.\n"
+                    + "Available are: 'seq' and 'freq'.") {}
+InvalidAlphabet::InvalidAlphabet(const string &token)
+    : runtime_error( "Error: invalid alphabet '" + token + "'.\n"
+    "Available are: 'DNA' and 'RNA'."){
+    }
+InvalidOrder::InvalidOrder(const string &token)
+    : runtime_error("Error: invalid order type '" + token + "'.\n"
+                    + "Available are: 'alpha' and 'freq'.") {}
+InvalidPalette::InvalidPalette(const string &token)
+    : runtime_error("Error: invalid color palette '" + token + "'.\n"
+                    + "Available are: 'default', 'solarized', and 'tetrad'.") {}
 }  // namespace Exception
 }  // namespace Logo
 

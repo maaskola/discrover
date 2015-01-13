@@ -339,21 +339,19 @@ double compute_score(const Seeding::Contrast &contrast,
 
 namespace Exception {
 namespace Plasma {
-const char *UndefinedMeasure::what() const noexcept {
-  string msg
-      = "Error: undefined score (Measures::Discrete::Measure::undefined).";
-  return msg.c_str();
-}
-NoContrastForObjective::NoContrastForObjective(
-    const std::string &expr_, const std::vector<std::string> &names_)
-    : exception(), expr(expr_), names(names_){};
-const char *NoContrastForObjective::what() const noexcept {
-  string msg
-      = "Error: couldn't find contrast for objective contrast expression: '"
-        + expr + "'.\n";
+UndefinedMeasure::UndefinedMeasure()
+    : runtime_error(
+          "Error: undefined score (Measures::Discrete::Measure::undefined)."){};
+string concat(const vector<string> &names) {
+  string msg;
   for (auto &name : names)
     msg += "\nThis contrast is present: " + name;
-  return msg.c_str();
+  return msg;
 }
+NoContrastForObjective::NoContrastForObjective(const string &expr,
+                                               const vector<string> &names)
+    : runtime_error(
+          "Error: can't find contrast for objective contrast expression: '"
+          + expr + "'.\n" + concat(names)) {}
 }
 }

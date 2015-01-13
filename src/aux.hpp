@@ -112,23 +112,16 @@ std::string to_pretty_string(double x);
 
 namespace Exception {
 namespace NumberList {
-struct InvalidCharacter : public std::exception {
+struct InvalidCharacter : public std::runtime_error {
   InvalidCharacter(const std::string &spec, size_t pos);
-  std::string spec;
-  size_t pos;
-  const char *what() const noexcept;
 };
-struct MultipleRanges : public std::exception {
+struct MultipleRanges : public std::runtime_error {
   MultipleRanges(const std::string &group);
-  std::string group;
-  const char *what() const noexcept;
 };
 }
 namespace NucleicAcids {
-struct InvalidNucleotideCode : public std::exception {
+struct InvalidNucleotideCode : public std::runtime_error {
   InvalidNucleotideCode(char nucl);
-  char nucl;
-  const char *what() const noexcept;
 };
 }
 }

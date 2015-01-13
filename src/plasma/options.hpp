@@ -118,20 +118,14 @@ struct Options {
 };
 
 namespace Exception {
-struct InvalidOccurrenceFilter : public std::exception {
+struct InvalidOccurrenceFilter : public std::runtime_error {
   InvalidOccurrenceFilter(const std::string &token);
-  const char *what() const noexcept;
-  std::string token;
 };
-struct InvalidAlgorithm : public std::exception {
+struct InvalidAlgorithm : public std::runtime_error {
   InvalidAlgorithm(const std::string &token);
-  const char *what() const noexcept;
-  std::string token;
 };
-struct NoMatchingObjectiveFound : public std::exception {
+struct NoMatchingObjectiveFound : public std::runtime_error {
   NoMatchingObjectiveFound(const std::string &motif);
-  const char *what() const noexcept;
-  std::string motif;
 };
 }
 }

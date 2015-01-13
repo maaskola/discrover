@@ -51,15 +51,11 @@ struct Registration {
 
 namespace Exception {
 namespace Registration {
-struct UnregisteredMotifGroup : public std::exception {
+struct UnregisteredMotifGroup : public std::runtime_error {
   UnregisteredMotifGroup(const bitmask_t &present);
-  const char *what() const noexcept;
-  bitmask_t present;
 };
-struct UnregisteredDataSet: public std::exception {
+struct UnregisteredDataSet: public std::runtime_error {
   UnregisteredDataSet(const std::string &sha1);
-  const char *what() const noexcept;
-  std::string sha1;
 };
 }
 }

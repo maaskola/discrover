@@ -36,15 +36,11 @@ void perform_analysis(Options::HMM &options);
 
 namespace Exception {
 namespace Analysis {
-struct NotASymlink : public std::exception {
+struct NotASymlink : public std::runtime_error {
   NotASymlink(const std::string &path);
-  const char *what() const noexcept;
-  std::string path;
 };
-struct MeasureNotForMultiple : public std::exception {
+struct MeasureNotForMultiple : public std::runtime_error {
   MeasureNotForMultiple(Measures::Continuous::Measure measure);
-  const char *what() const noexcept;
-  Measures::Continuous::Measure measure;
 };
 }
 }

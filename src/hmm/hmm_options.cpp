@@ -216,17 +216,10 @@ ostream &operator<<(ostream &os, const HMM &options) {
 
 namespace Exception {
 namespace HMM {
-InvalidCompression::InvalidCompression(const string &token_)
-    : exception(), token(token_){};
-const char *InvalidCompression::what() const noexcept {
-  string msg = "Error: found invalid parse compression type '" + token + "'.";
-  return msg.c_str();
-}
-InvalidRelearning::InvalidRelearning(const string &token_)
-    : exception(), token(token_){};
-const char *InvalidRelearning::what() const noexcept {
-  string msg = "Error: found invalid relearning mode '" + token + "'.";
-  return msg.c_str();
-}
+InvalidCompression::InvalidCompression(const string &token)
+    : runtime_error("Error: found invalid parse compression type '" + token
+                    + "'.") {}
+InvalidRelearning::InvalidRelearning(const string &token)
+    : runtime_error("Error: found invalid relearning mode '" + token + "'.") {}
 }
 }

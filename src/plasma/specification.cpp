@@ -60,9 +60,9 @@ Set::Set(const string &token, bool is_shuffle_) : Set() {
     path = token;
 
   if (not boost::filesystem::exists(path))
-    throw IO::Exception::File::Existence(path);
+    throw ::Exception::File::Existence(path);
   else if (not boost::filesystem::is_regular_file(path))
-    throw IO::Exception::File::NoRegularFile(path);
+    throw ::Exception::File::NoRegularFile(path);
 
   if (false) {
     cout << "Constructed Set:\npath = " << path << "\n"

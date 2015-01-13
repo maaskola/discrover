@@ -805,18 +805,14 @@ void viterbi_dump(const string &motif, const Collection &collection,
 
 namespace Exception {
 namespace Dreme {
-const char *OnlyBinaryContrast::what() const noexcept {
-  string msg = "Error: DREME can only use binary contrasts to find seeds.";
-  return msg.c_str();
-}
+OnlyBinaryContrast::OnlyBinaryContrast()
+    : runtime_error(
+          "Error: DREME can only use binary contrasts to find seeds.") {}
 }
 namespace Plasma {
-NoObjectiveForMotif::NoObjectiveForMotif(const string &token_)
-    : exception(), token(token_){};
-const char *NoObjectiveForMotif::what() const noexcept {
-  string msg = "Error: no objective for motif specification: " + token;
-  return msg.c_str();
-}
+NoObjectiveForMotif::NoObjectiveForMotif(const string &token)
+    : runtime_error("Error: no objective for motif specification '" + token
+                    + "'.") {}
 }
 }
 }

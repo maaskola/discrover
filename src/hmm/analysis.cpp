@@ -780,19 +780,13 @@ void perform_analysis(Options::HMM &options) {
 
 namespace Exception {
 namespace Analysis {
-NotASymlink::NotASymlink(const string &path_) : exception(), path(path_){};
-const char *NotASymlink::what() const noexcept {
-  string msg = "Error: file " + path + " exists and is not a symlink.\n"
-               + "File will not be overwritten; aborting.";
-  return msg.c_str();
-}
+NotASymlink::NotASymlink(const string &path)
+    : runtime_error("Error: file " + path + " exists and is not a symlink.\n"
+                    + "File will not be overwritten; aborting.") {}
 MeasureNotForMultiple::MeasureNotForMultiple(
-    Measures::Continuous::Measure measure_)
-    : exception(), measure(measure_){};
-const char *MeasureNotForMultiple::what() const noexcept {
-  string msg = "Error: measure " + measure2string(filtering_measure)
-               + " is not implemented for filtering in multiple motif mode.";
-  return msg.c_str();
-}
+    Measures::Continuous::Measure measure)
+    : runtime_error(
+          "Error: measure " + measure2string(filtering_measure)
+          + " is not implemented for filtering in multiple motif mode.") {}
 }
 }

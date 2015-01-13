@@ -37,43 +37,27 @@
 #include <boost/iostreams/filter/bzip2.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 
-namespace IO {
 namespace Exception {
 namespace File {
-struct Existence : public std::exception {
-  Existence(const std::string& path_) : std::exception(), path(path_){};
-  const char* what() const noexcept {
-    std::string msg = "Error: file does not exist: '" + path + "'.";
-    return msg.c_str();
-  }
-  std::string path;
+struct Existence : public std::runtime_error {
+  Existence(const std::string& path)
+      : std::runtime_error("Error: file does not exist: '" + path + "'."){};
 };
-struct NoRegularFile : public std::exception {
-  NoRegularFile(const std::string& path_) : std::exception(), path(path_){};
-  const char* what() const noexcept {
-    std::string msg = "Error: not a regular file: '" + path + "'.";
-    return msg.c_str();
-  }
-  std::string path;
+struct NoRegularFile : public std::runtime_error {
+  NoRegularFile(const std::string& path)
+      : std::runtime_error("Error: not a regular file: '" + path + "'."){};
 };
-struct Access : public std::exception {
-  Access(const std::string& path_) : std::exception(), path(path_){};
-  const char* what() const noexcept {
-    std::string msg = "Error: file access failed: '" + path + "'.";
-    return msg.c_str();
-  }
-  std::string path;
+struct Access : public std::runtime_error {
+  Access(const std::string& path)
+      : std::runtime_error("Error: file access failed: '" + path + "'."){};
 };
-}
 }
 }
 
 template <typename X>
-void parse_file(const std::string& path,
-                X fnc) throw(IO::Exception::File::Existence,
-                             IO::Exception::File::Access) {
+void parse_file(const std::string& path, X fnc) {
   if (not boost::filesystem::exists(path))
-    throw(IO::Exception::File::Existence(path));
+    throw(Exception::File::Existence(path));
 
   bool use_gzip = path.substr(path.size() - 3, 3) == ".gz";
   bool use_bzip2 = path.substr(path.size() - 4, 4) == ".bz2";
@@ -83,7 +67,7 @@ void parse_file(const std::string& path,
 
   std::ifstream file(path, flags);
   if (not file)
-    throw(IO::Exception::File::Access(path));
+    throw(Exception::File::Access(path));
   boost::iostreams::filtering_stream<boost::iostreams::input> in;
   if (use_gzip)
     in.push(boost::iostreams::gzip_decompressor());

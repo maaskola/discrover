@@ -688,50 +688,38 @@ protected:
 namespace Exception {
 namespace HMM {
 namespace ParameterFile {
-struct Existence : public std::exception {
+struct Existence : public std::runtime_error {
   Existence(const std::string &path);
-  const char *what() const noexcept;
-  std::string path;
 };
-struct ReadError : public std::exception {
+struct ReadError : public std::runtime_error {
   ReadError(const std::string &path);
-  const char *what() const noexcept;
-  std::string path;
 };
-struct SyntaxError : public std::exception {
+struct SyntaxError : public std::runtime_error {
   SyntaxError(const std::string &token);
-  const char *what() const noexcept;
-  std::string token;
 };
-struct UnsupportedVersion : public std::exception {
+struct UnsupportedVersion : public std::runtime_error {
   UnsupportedVersion(size_t version);
-  const char *what() const noexcept;
-  size_t version;
 };
 }
 namespace Learning {
-struct MultipleTasks : public std::exception {
+struct MultipleTasks : public std::runtime_error {
   MultipleTasks(const std::string &which);
-  const char *what() const noexcept;
-  std::string which;
 };
-struct TrainBgTooLate : public std::exception {
-  const char *what() const noexcept;
+struct TrainBgTooLate : public std::runtime_error {
+  TrainBgTooLate();
 };
-struct GradientNotImplemented: public std::exception {
+struct GradientNotImplemented : public std::runtime_error {
   GradientNotImplemented(Measures::Continuous::Measure measure);
-  const char *what() const noexcept;
-  Measures::Continuous::Measure measure;
 };
 }
 namespace Insertions {
-struct NotInsideMotif : public std::exception {
-  const char *what() const noexcept;
+struct NotInsideMotif : public std::runtime_error {
+  NotInsideMotif();
 };
 }
 namespace Calculation {
-struct Infinity : public std::exception {
-  const char *what() const noexcept;
+struct Infinity : public std::runtime_error {
+  Infinity();
 };
 }
 }

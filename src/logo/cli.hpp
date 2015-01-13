@@ -37,28 +37,17 @@ namespace Logo {
 enum class CLI { HMM, IUPAC, Full };
 
 namespace Exception {
-struct InvalidType : public std::exception {
+struct InvalidType : public std::runtime_error {
   InvalidType(const std::string &token);
-  std::string token;
-  const char *what() const noexcept;
 };
-
-struct InvalidAlphabet : public std::exception {
+struct InvalidAlphabet : public std::runtime_error {
   InvalidAlphabet(const std::string &token);
-  std::string token;
-  const char *what() const noexcept;
 };
-
-struct InvalidOrder : public std::exception {
+struct InvalidOrder : public std::runtime_error {
   InvalidOrder(const std::string &token);
-  std::string token;
-  const char *what() const noexcept;
 };
-
-struct InvalidPalette : public std::exception {
+struct InvalidPalette : public std::runtime_error {
   InvalidPalette(const std::string &token);
-  std::string token;
-  const char *what() const noexcept;
 };
 }
 }

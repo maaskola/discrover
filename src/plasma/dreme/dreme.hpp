@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <list>
 #include <string>
-#include <exception>
+#include <stdexcept>
 
 namespace Dreme {
 std::list<std::pair<std::string, double>> parse_dreme_output(
@@ -16,19 +16,14 @@ std::list<std::pair<std::string, double>> run(
     size_t n_motifs = 0, bool remove_temp_dir = true);
 
 namespace Exception {
-struct BinaryNotFound : public std::exception {
-  const char *what() const noexcept;
+struct BinaryNotFound : public std::runtime_error {
+  BinaryNotFound();
 };
-
-struct InvalidLengths : public std::exception {
+struct InvalidLengths : public std::runtime_error {
   InvalidLengths(size_t s1, size_t s2);
-  const char *what() const noexcept;
-  size_t min_size, max_size;
 };
-
-struct ReturnValueNonZero : public std::exception {
-  const char *what() const noexcept;
-  size_t return_value;
+struct ReturnValueNonZero : public std::runtime_error {
+  ReturnValueNonZero();
 };
 }
 }

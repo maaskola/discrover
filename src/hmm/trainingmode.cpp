@@ -70,11 +70,7 @@ Seeding::Objectives corresponding_objectives(const Objectives& x,
 
 namespace Exception {
 namespace HMM {
-InvalidTrainingMethod::InvalidTrainingMethod(const string& token_)
-    : exception(), token(token_){};
-const char* InvalidTrainingMethod::what() const noexcept {
-  string msg = "Error: found invalid training method '" + token + "'.";
-  return msg.c_str();
-}
+InvalidTrainingMethod::InvalidTrainingMethod(const string& token)
+    : runtime_error("Error: found invalid training method '" + token + "'.") {}
 }
 }
