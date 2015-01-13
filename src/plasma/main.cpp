@@ -357,7 +357,12 @@ int main(int argc, const char **argv) {
       r2.counts = count_motif(ds, r.motif, options);
       report(cerr, r2, ds, options);
       cout << endl;
-      Seeding::apply_mask(ds, r.motif, opts);
+      try {
+        Seeding::apply_mask(ds, r.motif, opts);
+      } catch (exception &e) {
+        cout << e.what() << endl;
+        return EXIT_FAILURE;
+      }
     }
   }
 
