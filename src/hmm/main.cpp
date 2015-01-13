@@ -222,8 +222,12 @@ int main(int argc, const char **argv) {
      "3. \tBy specifying the path to a file with a PWM.\n"
      "Regardless of the way a motif is specified, it may be given a name, and an insertions string. The syntax is [NAME:[INSERT:]]MOTIFSPEC. If MOTIFSPEC is a path and contains at least one colon please just prepend two colons. The insertions string is a comma separated list of positions after which to add an insertion state. Positions are 1 indexed, and must be greater 1 and less than the motif length.")
    ;
+
+  Training::Objective default_objective;
+  default_objective.measure = Measure::MutualInformation;
+
   basic_options_optional.add_options()
-    ("score", po::value<Training::Objectives>(&options.objectives)->default_value(Training::Objectives(1,Training::Objective("mi")), "mi"), "The significance measure. May be one of\n"
+    ("score", po::value<Training::Objectives>(&options.objectives)->default_value(Training::Objectives(1,default_objective), "mi"), "The significance measure. May be one of\n"
      "none    \tDo not perform learning\n"
      "bw      \tLikelihood using Baum-Welch\n"
      "viterbi \tViterbi learning\n"
