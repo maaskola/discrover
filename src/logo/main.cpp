@@ -242,8 +242,13 @@ int main(int argc, const char **argv) {
 
   for (auto path : hmm_paths) {
     cout << "=> .hmm file " << path << endl;
-    HMM hmm(path, Verbosity::info);
-    draw_logos(hmm, options, label, motif_idx);
+    try {
+      HMM hmm(path, Verbosity::info);
+      draw_logos(hmm, options, label, motif_idx);
+    } catch (runtime_error &e) {
+      cout << e.what() << endl;
+      return EXIT_FAILURE;
+    }
   }
 
   if (motif_idx == 0)
