@@ -287,8 +287,9 @@ double compute_score(const Seeding::Contrast &contrast,
     }
     sample_idx++;
   }
-  double signal_rel_freq = signal_freq / signal_size;
-  double control_rel_freq = control_freq / control_size;
+
+  double signal_rel_freq = signal_size > 0 ? signal_freq / signal_size : 0;
+  double control_rel_freq = control_size > 0 ? control_freq / control_size : 0;
 
   if (excessive_debug and options.verbosity >= Verbosity::debug)
     std::cerr << "options.no_enrichment_filter = "
