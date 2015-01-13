@@ -34,7 +34,6 @@ namespace Seeding {
 Plasma::Plasma(const Options &opt)
     : options(opt),
       collection(options.paths, options.revcomp, options.n_seq),
-      index_ready(false),
       needs_rebuilding(false) {
   if (options.verbosity >= Verbosity::verbose)
     cerr << "Data loaded - constructor 1." << endl;
@@ -71,7 +70,6 @@ Plasma::Plasma(const Options &opt)
 Plasma::Plasma(const Collection &collection_, const Options &opt)
     : options(opt),
       collection(collection_),
-      index_ready(false),
       needs_rebuilding(false) {
   if (options.verbosity >= Verbosity::verbose)
     cerr << "Data loaded - constructor 2." << endl;
@@ -191,13 +189,14 @@ Results Plasma::find_seeds(size_t length, const Objective &objective,
     for (size_t i = 0; i <= max_degeneracy; i++)
       degeneracies.insert(i);
 
+  future<void> rebuilding_done;
   if (needs_rebuilding and max_degeneracy > 0)
-    rebuild_index();
+    rebuilding_done = rebuild_index();
 
   Results plasma_results;
   if ((algorithm & Algorithm::Plasma) == Algorithm::Plasma)
-    plasma_results
-        = find_plasma(length, objective, max_degeneracy, degeneracies);
+    plasma_results = find_plasma(length, objective, max_degeneracy,
+                                 degeneracies, rebuilding_done);
 
   Results external_dreme_results;
   if ((algorithm & Algorithm::ExternalDREME) == Algorithm::ExternalDREME)
@@ -397,7 +396,8 @@ Results Plasma::find_external_dreme(size_t length, const Objective &objective,
  */
 Results Plasma::find_plasma(size_t length, const Objective &objective,
                             size_t max_degeneracy,
-                            const set<size_t> &degeneracies) const {
+                            const set<size_t> &degeneracies,
+                            future<void> &index_rebuilt) const {
   Results results;
   if (options.verbosity >= Verbosity::verbose)
     cout << "Finding motif of length " << length << " using top "
@@ -418,11 +418,8 @@ Results Plasma::find_plasma(size_t length, const Objective &objective,
   bool best_motif_changed = true;
 
   if (max_degeneracy > 0) {
-    while (not index_ready) {
-      if (options.verbosity >= Verbosity::verbose)
-        cerr << "Index still not ready." << endl;
-      sleep(1);
-    }
+    index_rebuilt.wait();
+
     Timer my_timer;
     while ((not candidates.empty()) and degeneracy < max_degeneracy) {
       degeneracy++;
@@ -744,9 +741,9 @@ void Plasma::apply_mask(const vector<Result> &results) {
     apply_mask(result);
 }
 
-void Plasma::rebuild_index() {
-  index_ready = false;
-  thread t([&]() {
+future<void> Plasma::rebuild_index() {
+  // wrap index rebuilding into a task
+  packaged_task<void()> task([&]() {
     Timer my_timer;
     if (options.verbosity >= Verbosity::verbose)
       cerr << "Starting building of index." << endl;
@@ -755,9 +752,13 @@ void Plasma::rebuild_index() {
     if (options.measure_runtime)
       cerr << "Built index in " + to_pretty_string(my_timer.tock()) + " µs."
            << endl;
-    index_ready = true;
   });
-  t.detach();
+  // get a future
+  future<void> fut = task.get_future();
+  // launch on a thread
+  thread(move(task)).detach();
+  // return the future
+  return(fut);
 }
 
 void viterbi_dump(const string &motif, const Set &dataset, ostream &out,

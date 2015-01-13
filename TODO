@@ -51,3 +51,4 @@ TODO 2015-01-12 Apparently, when running with a FASTA file with just one sequenc
 TODO 2015-01-12 Bad stuff happens when the supplied file is not in FASTA format
 TODO 2015-01-12 Warn if FASTA files are empty
 TODO 2015-01-12 In motif specifications: seemingly, when there are non-IUPAC characters it's taken to be a length spec
+TODO 2015-01-13 Revisit the conditions when Plasma's index needs to be rebuilt

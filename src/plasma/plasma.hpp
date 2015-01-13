@@ -30,6 +30,7 @@
 #ifndef FIND_HPP
 #define FIND_HPP
 
+#include <future>
 #include "options.hpp"
 #include "plasma_stats.hpp"
 #include "results.hpp"
@@ -43,7 +44,6 @@ public:
   Collection collection;
 
 private:
-  bool index_ready;
   bool needs_rebuilding;
   NucleotideIndex<size_t, size_t> index;
 
@@ -59,7 +59,8 @@ private:
                      Algorithm algorithm);
   Results find_plasma(size_t length, const Objective &objective,
                       size_t max_degeneracy,
-                      const std::set<size_t> &degeneracies) const;
+                      const std::set<size_t> &degeneracies,
+                      std::future<void> &index_rebuilt) const;
   Results find_external_dreme(size_t length, const Objective &objective,
                               size_t max_degeneracy,
                               const std::set<size_t> &degeneracies) const;
@@ -75,7 +76,7 @@ private:
                         const Objective &objective) const;
   void apply_mask(const std::string &motif);
   void apply_mask(const Result &result);
-  void rebuild_index();
+  std::future<void> rebuild_index();
 };
 
 void report(std::ostream &os, const Objective &objective,
