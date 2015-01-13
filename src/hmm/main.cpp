@@ -560,9 +560,14 @@ int main(int argc, const char **argv) {
     cout << endl;
   }
 
-  // check and harmonize specified motifs, paths, and objectives
-  Specification::harmonize(options.motif_specifications, options.paths,
-                           options.objectives, false);
+  try {
+    // check and harmonize specified motifs, paths, and objectives
+    Specification::harmonize(options.motif_specifications, options.paths,
+                             options.objectives, false);
+  } catch (runtime_error &e) {
+    cout << e.what() << endl;
+    return EXIT_FAILURE;
+  }
 
   // print information about specified motifs, paths, and objectives
   if (options.verbosity >= Verbosity::debug) {
