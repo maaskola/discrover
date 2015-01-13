@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <cmath>
 #include <vector>
 #include <algorithm>
@@ -286,9 +287,11 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
       cairo_select_font_face(cr, font_face.c_str(), CAIRO_FONT_SLANT_NORMAL,
                              CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size(cr, dims.axis_font_size);
-      string label
-          = to_string((1.0 - pos) * (options.type == Type::Sequence ? 2 : 1));
-      if (label == "0.5")
+      double annot = (1.0 - pos) * (options.type == Type::Sequence ? 2 : 1);
+      stringstream label_stream;
+      label_stream << annot;
+      string label =  label_stream.str();
+      if (annot == 0.5)
         label = "½";
       cairo_text_extents(cr, label.c_str(), &te);
       cairo_move_to(cr, axis_annot_basecol - te.width / 2 - te.x_bearing,
