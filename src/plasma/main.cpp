@@ -333,14 +333,19 @@ int main(int argc, const char **argv) {
   Seeding::Results results;
   using res_t = Seeding::Result;
 
-  size_t n = options.motif_specifications.size();
-  for (auto &motif : options.motif_specifications) {
-    for (auto &r : plasma.find_motifs(
-             motif, Seeding::objective_for_motif(options.objectives, motif),
-             false))
-      results.push_back(r);
-    if (--n > 0)
-      plasma.apply_mask(results);
+  try {
+    size_t n = options.motif_specifications.size();
+    for (auto &motif : options.motif_specifications) {
+      for (auto &r : plasma.find_motifs(
+               motif, Seeding::objective_for_motif(options.objectives, motif),
+               false))
+        results.push_back(r);
+      if (--n > 0)
+        plasma.apply_mask(results);
+    }
+  } catch (exception &e) {
+    cout << e.what() << endl;
+    return EXIT_FAILURE;
   }
 
   if (results.size() == 1)
