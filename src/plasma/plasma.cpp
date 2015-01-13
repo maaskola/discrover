@@ -284,7 +284,8 @@ rev_map_t Plasma::determine_initial_candidates(
   rev_map_t candidates;
 
   best_motif = encode("");
-  max_score = -numeric_limits<double>::infinity();
+  const double initial_score = -numeric_limits<double>::infinity();
+  max_score = initial_score;
 
   Timer my_timer;
   if (options.verbosity >= Verbosity::verbose)
@@ -322,7 +323,8 @@ rev_map_t Plasma::determine_initial_candidates(
     }
   }
 
-  if (degeneracies.find(degeneracy) != end(degeneracies)) {
+  if (degeneracies.find(degeneracy) != end(degeneracies)
+      and max_score > initial_score) {
     count_vector_t best_contrast
         = count_motif(collection, decode(best_motif), options);
     double log_p
@@ -406,7 +408,8 @@ Results Plasma::find_plasma(size_t length, const Objective &objective,
 
   seq_type best_motif;
   size_t n_candidates = 0;
-  double max_score;
+  double initial_score = -numeric_limits<double>::infinity();
+  double max_score = initial_score;
 
   rev_map_t candidates = determine_initial_candidates(
       length, objective, best_motif, n_candidates, max_score, results,
@@ -531,7 +534,7 @@ Results Plasma::find_plasma(size_t length, const Objective &objective,
       }
     }
 
-    if (best_motif_changed
+    if (best_motif_changed and max_score > initial_score
         and degeneracies.find(degeneracy) == end(degeneracies)) {
       count_vector_t best_contrast
           = count_motif(collection, decode(best_motif), options);
