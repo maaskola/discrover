@@ -526,7 +526,10 @@ double HMM::site_frequency_difference_gradient(const Data::Contrast &contrast,
       cout << "Summary posterior emission gradient = " << g.emission << endl;
   }
 
-  double delta_freq = signal_counts / n_signal - control_counts / n_control;
+  double signal_freq = n_signal > 0 ? signal_counts / n_signal : 0;
+  double control_freq = n_control > 0 ? control_counts / n_control : 0;
+  double delta_freq = signal_freq - control_freq;
+
   return delta_freq;
 }
 
