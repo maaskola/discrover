@@ -105,6 +105,11 @@ std::vector<std::string> tokenize(const std::string &s,
                                   const std::string &delim);
 std::string sha1hash(const std::string &s);
 
+/** Use to_string and remove trailing zeros.
+ * If the number is integral, then also remove the decimal point.
+ */
+std::string to_pretty_string(double x);
+
 namespace Exception {
 namespace NumberList {
 struct InvalidCharacter : public std::exception {

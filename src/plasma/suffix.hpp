@@ -38,6 +38,7 @@
 #include <numeric>
 #include <algorithm>
 #include "../timer.hpp"
+#include "../aux.hpp"
 #include "construction.hpp"
 #include "../verbosity.hpp"
 
@@ -54,7 +55,7 @@ std::vector<idx_t> gen_suffix_array_slow(Iter begin, Iter end,
   std::sort(sa.begin(), sa.end(), cmp);
   double time = timer.tock();
   if (verbosity >= Verbosity::verbose)
-    std::cerr << "Slow building SA took " << time << " µs." << std::endl;
+    std::cerr << "Slow building SA took " + to_pretty_string(time) + " µs." << std::endl;
   return sa;
 }
 
@@ -86,7 +87,7 @@ std::vector<idx_t> gen_suffix_array(Iter begin, const Iter end,
   suffixArray(v.begin(), v.end(), sa, n, K + (shift ? 1 : 0));
   double time = timer.tock();
   if (verbosity >= Verbosity::verbose)
-    std::cerr << "Fast building SA took " << time << " µs." << std::endl;
+    std::cerr << "Fast building SA took " + to_pretty_string(time) + " µs." << std::endl;
   return sa;
 }
 
@@ -106,7 +107,7 @@ std::vector<lcp_t> gen_lcp_slow(Iter begin, Iter end,
   }
   double time = timer.tock();
   if (verbosity >= Verbosity::verbose)
-    std::cerr << "Slow building LCP took " << time << " µs." << std::endl;
+    std::cerr << "Slow building LCP took " + to_pretty_string (time) + " µs." << std::endl;
   return lcp;
 }
 
@@ -151,7 +152,7 @@ std::vector<lcp_t> gen_lcp(Iter begin, Iter end, const std::vector<idx_t> &sa,
     }
   double time = timer.tock();
   if (verbosity >= Verbosity::verbose)
-    std::cerr << "Fast building LCP took " << time << " µs." << std::endl;
+    std::cerr << "Fast building LCP took " + to_pretty_string(time) + " µs." << std::endl;
   return lcp;
 }
 
@@ -172,7 +173,7 @@ std::vector<idx_t> gen_jmp(const std::vector<lcp_t> &lcp, Verbosity verbosity) {
   }
   double time = timer.tock();
   if (verbosity >= Verbosity::verbose)
-    std::cerr << "Building JMP took " << time << " µs." << std::endl;
+    std::cerr << "Building JMP took " + to_pretty_string(time) + " µs." << std::endl;
   return jmp;
 }
 
@@ -268,7 +269,7 @@ std::vector<idx_t> match(Iter qbegin, Iter qend, Iter begin, Iter end,
   }
   double time = timer.tock();
   if (do_debug) {
-    std::cerr << "Getting matches took " << time << " µs." << std::endl;
+    std::cerr << "Getting matches took " + to_pretty_string(time) + " µs." << std::endl;
     std::cerr << "Got " << hits.size() << " results." << std::endl;
   }
   return hits;

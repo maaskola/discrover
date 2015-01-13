@@ -1,11 +1,11 @@
 #include <iostream>
-#include <sstream>
 #include <cmath>
 #include <vector>
 #include <algorithm>
 #include <cairo.h>
 #include <cairo-pdf.h>
 #include "logo.hpp"
+#include "../aux.hpp"
 
 using namespace std;
 
@@ -288,9 +288,7 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
                              CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size(cr, dims.axis_font_size);
       double annot = (1.0 - pos) * (options.type == Type::Sequence ? 2 : 1);
-      stringstream label_stream;
-      label_stream << annot;
-      string label =  label_stream.str();
+      string label =  to_pretty_string(annot);
       if (annot == 0.5)
         label = "½";
       cairo_text_extents(cr, label.c_str(), &te);

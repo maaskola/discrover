@@ -247,6 +247,17 @@ vector<string> tokenize(const string &s, const string &delim) {
   return strs;
 }
 
+/** Use to_string and remove trailing zeros.
+ * If the number is integral, then also remove the decimal point.
+ */
+string to_pretty_string(double x) {
+  string s = to_string(x);
+  s.erase(s.find_last_not_of("0.") + 1, string::npos);
+  if(s == "")
+    return "0";
+  return s;
+}
+
 namespace Exception {
 namespace NumberList {
 InvalidCharacter::InvalidCharacter(const string &spec_, size_t pos_)

@@ -292,8 +292,8 @@ rev_map_t Plasma::determine_initial_candidates(
     cerr << "Starting to get word counts." << endl;
   hash_map_t word_counts = get_word_counts(collection, length, options);
   if (options.measure_runtime) {
-    cerr << "Got words for length " << length << " in " << my_timer.tock()
-         << " µs." << endl;
+    cerr << "Got words for length " + to_string(length) + " in "
+            + to_pretty_string(my_timer.tock()) + " µs." << endl;
     my_timer.tick();
   }
 
@@ -340,8 +340,8 @@ rev_map_t Plasma::determine_initial_candidates(
   }
 
   if (options.measure_runtime) {
-    cerr << "Initial scoring for length " << length << " took "
-         << my_timer.tock() << " µs." << endl;
+    cerr << "Initial scoring for length " + to_string(length) + " took "
+            + to_pretty_string(my_timer.tock()) + " µs." << endl;
     my_timer.tick();
   }
 
@@ -528,8 +528,8 @@ Results Plasma::find_plasma(size_t length, const Objective &objective,
         best_motif_changed = false;
       }
       if (options.measure_runtime) {
-        cerr << "Degeneracy " << degeneracy << " took " << my_timer.tock()
-             << " µs." << endl;
+        cerr << "Degeneracy " + to_string(degeneracy) + " took "
+                + to_pretty_string(my_timer.tock()) + " µs." << endl;
         my_timer.tick();
       }
     }
@@ -728,7 +728,7 @@ Results Plasma::find_motifs(const Specification::Motif &motif_spec,
 
   double time = t.tock() * 1e-6;
   if (options.measure_runtime)
-    cerr << "Processing took " << time << " seconds." << endl;
+    cerr << "Processing took " + to_pretty_string(time) + " seconds." << endl;
   return results;
 }
 
@@ -753,7 +753,8 @@ void Plasma::rebuild_index() {
     index = NucleotideIndex<size_t, size_t>(
         collection, options.allow_iupac_wildcards, options.verbosity);
     if (options.measure_runtime)
-      cerr << "Built index in " << my_timer.tock() << " µs." << endl;
+      cerr << "Built index in " + to_pretty_string(my_timer.tock()) + " µs."
+           << endl;
     index_ready = true;
   });
   t.detach();

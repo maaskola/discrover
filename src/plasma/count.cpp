@@ -42,10 +42,9 @@ hash_map_t get_word_counts(const Collection &collection, size_t length,
     for (auto &dataset : contrast)
       add_counts(dataset, length, counts, idx++, default_stats, options);
 
-  double time = t.tock() * 1e-6;
   if (options.measure_runtime)
-    cerr << "Getting word counts of length " << length << " took " << time
-         << " seconds." << endl;
+    cerr << "Getting word counts of length " + to_string(length) + " took "
+            + to_pretty_string(t.tock()) + " µs." << endl;
 
   return counts;
 }
