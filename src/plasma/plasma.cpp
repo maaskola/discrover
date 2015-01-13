@@ -722,6 +722,10 @@ Results Plasma::find_motifs(const Specification::Motif &motif_spec,
         report(cout, result, collection, options);
     }
 
+  if (results.empty() and options.verbosity >= Verbosity::info)
+    cout << "Warning: no IUPAC regular expression motifs found for motif "
+            "specification '" << motif_spec << "'." << endl;
+
   double time = t.tock() * 1e-6;
   if (options.measure_runtime)
     cerr << "Processing took " << time << " seconds." << endl;
