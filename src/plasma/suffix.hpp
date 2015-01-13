@@ -55,7 +55,7 @@ std::vector<idx_t> gen_suffix_array_slow(Iter begin, Iter end,
   std::sort(sa.begin(), sa.end(), cmp);
   double time = timer.tock();
   if (verbosity >= Verbosity::verbose)
-    std::cerr << "Slow building SA took " + to_pretty_string(time) + " µs." << std::endl;
+    std::cerr << "Building SA took " + to_pretty_string(time) + " µs." << std::endl;
   return sa;
 }
 
@@ -87,7 +87,7 @@ std::vector<idx_t> gen_suffix_array(Iter begin, const Iter end,
   suffixArray(v.begin(), v.end(), sa, n, K + (shift ? 1 : 0));
   double time = timer.tock();
   if (verbosity >= Verbosity::verbose)
-    std::cerr << "Fast building SA took " + to_pretty_string(time) + " µs." << std::endl;
+    std::cerr << "Building SA took " + to_pretty_string(time) + " µs." << std::endl;
   return sa;
 }
 
@@ -107,7 +107,7 @@ std::vector<lcp_t> gen_lcp_slow(Iter begin, Iter end,
   }
   double time = timer.tock();
   if (verbosity >= Verbosity::verbose)
-    std::cerr << "Slow building LCP took " + to_pretty_string (time) + " µs." << std::endl;
+    std::cerr << "Building LCP took " + to_pretty_string (time) + " µs." << std::endl;
   return lcp;
 }
 
@@ -152,7 +152,7 @@ std::vector<lcp_t> gen_lcp(Iter begin, Iter end, const std::vector<idx_t> &sa,
     }
   double time = timer.tock();
   if (verbosity >= Verbosity::verbose)
-    std::cerr << "Fast building LCP took " + to_pretty_string(time) + " µs." << std::endl;
+    std::cerr << "Building LCP took " + to_pretty_string(time) + " µs." << std::endl;
   return lcp;
 }
 
