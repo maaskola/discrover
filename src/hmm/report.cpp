@@ -52,7 +52,7 @@ void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast,
     ofs << right << setw(width) << "Percent";
   ofs << endl;
 
-  size_t prev_prec = ofs.precision();
+  const streamsize prev_prec = ofs.precision();
   for (size_t i = 0; i < m.size1(); i++) {
     ofs << left << setw(w) << contrast.sets[i].path;
     for (size_t j = 0; j < m.size2(); j++)
@@ -257,7 +257,7 @@ void correlation_report(const vector<T> &x, ostream &out, size_t width = 12,
       p_t = cdf(complement(students_t_dist, t));
     }
   }
-  size_t prev_prec = out.precision();
+  const streamsize prev_prec = out.precision();
   out << setw(width) << fixed << right << setprecision(prec) << rho
       << setw(width) << fixed << right << setprecision(2) << z << setw(width)
       << fixed << right << setprecision(2) << log(p_norm) << setw(4) << right

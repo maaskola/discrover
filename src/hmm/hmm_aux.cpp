@@ -68,7 +68,8 @@ void HMM::serialize(ostream &os, const ExecutionInformation &exec_info,
   const string param_format_string = "# HMM parameter format version ";
   const string transition_matrix_string = "Transition matrix";
   const string emission_matrix_string = "Emission matrix";
-  const size_t output_precision = 15;
+  const streamsize output_precision = 15;
+  const streamsize prev_precision = os.precision();
   switch (format_version) {
     // TODO bump version because no order is stored?
     case 6:
@@ -117,6 +118,7 @@ void HMM::serialize(ostream &os, const ExecutionInformation &exec_info,
     default:
       throw Exception::HMM::ParameterFile::UnsupportedVersion(format_version);
   }
+  os.precision(prev_precision);
 };
 
 void HMM::deserialize(istream &is) {
