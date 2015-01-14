@@ -328,12 +328,12 @@ int main(int argc, const char **argv) {
   Fasta::EntropySource::seed(r_unif(rng));
   MCMC::EntropySource::seed(r_unif(rng));
 
-  Seeding::Plasma plasma(options);
-  Seeding::Collection ds = plasma.collection;
-  Seeding::Results results;
-  using res_t = Seeding::Result;
-
   try {
+    Seeding::Plasma plasma(options);
+    Seeding::Collection ds = plasma.collection;
+    Seeding::Results results;
+    using res_t = Seeding::Result;
+
     size_t n = options.motif_specifications.size();
     for (auto &motif : options.motif_specifications) {
       for (auto &r : plasma.find_motifs(
@@ -343,56 +343,52 @@ int main(int argc, const char **argv) {
       if (--n > 0)
         plasma.apply_mask(results);
     }
+
+    if (results.size() == 1)
+      report(cout, results[0], ds, options);
+    else {
+      sort(begin(results), end(results),
+           [](const res_t &a, const res_t &b) { return a.log_p <= b.log_p; });
+      Seeding::Collection original_ds = ds;
+      Seeding::Options opts = options;
+      opts.occurrence_filter = Seeding::OccurrenceFilter::RemoveSequences;
+      for (auto &r : results) {
+        report(cout, r, original_ds, options);
+        res_t r2 = r;
+        r2.counts = count_motif(ds, r.motif, options);
+        report(cerr, r2, ds, options);
+        cout << endl;
+        Seeding::apply_mask(ds, r.motif, opts);
+      }
+    }
+
+#if CAIRO_FOUND
+    options.logo.revcomp = options.revcomp;
+    generate_logos(results, options);
+#endif
+
+    if (options.verbosity >= Verbosity::info) {
+      struct rusage usage;
+      if (getrusage(RUSAGE_SELF, &usage) != 0) {
+        cout << "getrusage failed" << endl;
+        return EXIT_FAILURE;
+      }
+
+      double utime = usage.ru_utime.tv_sec + 1e-6 * usage.ru_utime.tv_usec;
+      double stime = usage.ru_stime.tv_sec + 1e-6 * usage.ru_stime.tv_usec;
+      double total_time = utime + stime;
+      double elapsed_time = timer.tock() * 1e-6;
+
+      cerr << "User time = " << utime << " sec" << endl
+           << "System time = " << stime << " sec" << endl
+           << "CPU time = " << total_time << " sec" << endl
+           << "Elapsed time = " << elapsed_time << " sec" << endl
+           << 100 * total_time / elapsed_time << "\% CPU" << endl;
+    }
   } catch (exception &e) {
     cout << e.what() << endl;
     return EXIT_FAILURE;
   }
 
-  if (results.size() == 1)
-    report(cout, results[0], ds, options);
-  else {
-    sort(begin(results), end(results),
-         [](const res_t &a, const res_t &b) { return a.log_p <= b.log_p; });
-    Seeding::Collection original_ds = ds;
-    Seeding::Options opts = options;
-    opts.occurrence_filter = Seeding::OccurrenceFilter::RemoveSequences;
-    for (auto &r : results) {
-      report(cout, r, original_ds, options);
-      res_t r2 = r;
-      r2.counts = count_motif(ds, r.motif, options);
-      report(cerr, r2, ds, options);
-      cout << endl;
-      try {
-        Seeding::apply_mask(ds, r.motif, opts);
-      } catch (exception &e) {
-        cout << e.what() << endl;
-        return EXIT_FAILURE;
-      }
-    }
-  }
-
-#if CAIRO_FOUND
-  options.logo.revcomp = options.revcomp;
-  generate_logos(results, options);
-#endif
-
-  if (options.verbosity >= Verbosity::info) {
-    struct rusage usage;
-    if (getrusage(RUSAGE_SELF, &usage) != 0) {
-      cout << "getrusage failed" << endl;
-      return EXIT_FAILURE;
-    }
-
-    double utime = usage.ru_utime.tv_sec + 1e-6 * usage.ru_utime.tv_usec;
-    double stime = usage.ru_stime.tv_sec + 1e-6 * usage.ru_stime.tv_usec;
-    double total_time = utime + stime;
-    double elapsed_time = timer.tock() * 1e-6;
-
-    cerr << "User time = " << utime << " sec" << endl
-         << "System time = " << stime << " sec" << endl
-         << "CPU time = " << total_time << " sec" << endl
-         << "Elapsed time = " << elapsed_time << " sec" << endl
-         << 100 * total_time / elapsed_time << "\% CPU" << endl;
-  }
   return EXIT_SUCCESS;
 }
