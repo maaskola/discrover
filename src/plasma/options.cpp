@@ -107,13 +107,9 @@ istream &operator>>(istream &in, Algorithm &algorithm) {
       algorithm = algo;
     } else
       algorithm = algorithm | algo;
-    algorithms = algorithms.substr(pos + 1);
+    if (pos != string::npos)
+      algorithms = algorithms.substr(pos + 1);
   } while (pos != string::npos);
-  Algorithm algo = parse_algorithm(algorithms);
-  if (first)
-    algorithm = algo;
-  else
-    algorithm = algorithm | algo;
   return in;
 }
 ostream &operator<<(ostream &os, const Algorithm &algorithm) {
