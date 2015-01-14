@@ -21,6 +21,7 @@
 #include "../GitSHA1.hpp"
 #include "../verbosity.hpp"
 #include "../plasma/fasta.hpp"
+#include "../plasma/io.hpp"
 #include "dinucleotide_shuffle.hpp"
 
 const std::string program_name = "discrover-shuffle";
@@ -220,18 +221,21 @@ int main(int argc, const char **argv) {
   if (not vm.count("seed"))
     seed = random_device()();
 
-  if (paths.empty()) {
-    shuffle(cin, n, seed);
-  } else
-    for (auto &path : paths) {
-      if (boost::filesystem::exists(path)) {
-        ifstream ifs(path.c_str());
-        shuffle(ifs, n, seed++);
-      } else {
-        cerr << "Error: " << path << " does not exist." << endl;
-        return EXIT_FAILURE;
+  try {
+    if (paths.empty()) {
+      shuffle(cin, n, seed);
+    } else
+      for (auto &path : paths) {
+        if (boost::filesystem::exists(path)) {
+          ifstream ifs(path.c_str());
+          shuffle(ifs, n, seed++);
+        } else
+          throw Exception::File::Existence(path);
       }
-    }
+  } catch (runtime_error &e) {
+    cout << e.what() << endl;
+    return EXIT_FAILURE;
+  }
 
   return EXIT_SUCCESS;
 }
