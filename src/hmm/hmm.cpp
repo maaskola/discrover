@@ -68,7 +68,7 @@ HMM::HMM(const string &path, Verbosity verbosity_, double pseudo_count)
     throw Exception::HMM::ParameterFile::ReadError(path);
   try {
     deserialize(ifs);
-  } catch (exception &e) {
+  } catch (runtime_error &e) {
     cout << "Error while loading parameters from parameter file " << path << "."
          << endl;
     throw e;
