@@ -34,24 +34,38 @@ ExecutionInformation generate_exec_info(const string &name,
 
 string generate_random_label(const string &prefix, size_t n_rnd_char,
                              Verbosity verbosity) {
-  // NOTE: this could use boost::filesystem::unique_path
   random_device rng;
   uniform_int_distribution<char> r_char('a', 'z');
   using namespace boost::posix_time;
-  ptime t = microsec_clock::universal_time();
-  string datetime = to_iso_extended_string(t) + "Z";
+
+  string label = prefix;
 
   // TODO perhaps add the process ID -> getpid()
   if (verbosity >= Verbosity::debug)
     cout << "Generating random label with prefix " << prefix << " and "
          << n_rnd_char << " random characters." << endl;
-  string label = prefix + "_" + datetime;
+
+  try {
+    ptime t = microsec_clock::universal_time();
+    string datetime = to_iso_extended_string(t) + "Z";
+    label += "_" + datetime;
+  } catch (...) {
+    cout << "WARNING: An error occurred while generating the date part of a label." << endl
+         << "Although this shouldn't occur (something weird is going on with your system!)," << endl
+         << "you can likely circumvent this issue by using the --output command line switch)" << endl
+         << "to provide you own output label." << endl;
+    if(n_rnd_char < 5)
+      n_rnd_char = 5;
+  }
+
   if (n_rnd_char > 0) {
     label += "_";
     for (size_t i = 0; i < n_rnd_char; i++)
       label += r_char(rng);
   }
+
   if (verbosity >= Verbosity::debug)
     cout << "Generated random label " << label << endl;
+
   return label;
 }
