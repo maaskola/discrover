@@ -192,8 +192,8 @@ istream &operator>>(istream &is, IEntry &ientry) {
 istream &operator>>(istream &is, vector<Entry> &seqs) {
   while (is.good()) {
     Entry entry;
-    is >> entry;
-    seqs.push_back(move(entry));
+    if (is >> entry)
+      seqs.push_back(move(entry));
   }
   return is;
 }
@@ -201,8 +201,8 @@ istream &operator>>(istream &is, vector<Entry> &seqs) {
 istream &operator>>(istream &is, vector<IEntry> &seqs) {
   while (is.good()) {
     IEntry entry;
-    is >> entry;
-    seqs.push_back(move(entry));
+    if (is >> entry)
+      seqs.push_back(move(entry));
   }
   return is;
 }
