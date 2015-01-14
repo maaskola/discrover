@@ -51,6 +51,14 @@ struct Access : public std::runtime_error {
   Access(const std::string& path)
       : std::runtime_error("Error: file access failed: '" + path + "'."){};
 };
+struct Reading : public std::runtime_error {
+  Reading(const std::string& path)
+      : std::runtime_error("Error: reading from file failed: '" + path + "'."){};
+};
+struct Parsing : public std::runtime_error {
+  Parsing(const std::string& path)
+      : std::runtime_error("Error: parsing file failed: '" + path + "'."){};
+};
 }
 }
 
@@ -76,6 +84,10 @@ void parse_file(const std::string& path, X fnc) {
   in.push(file);
 
   fnc(in);
+  if (in.bad())
+    throw Exception::File::Reading(path);
+  if (in.fail())
+    throw Exception::File::Parsing(path);
 };
 
 #endif

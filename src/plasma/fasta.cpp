@@ -10,6 +10,18 @@ using namespace std;
 
 namespace Fasta {
 
+/* Valid nucleic acid codes according to
+ * http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml
+ *  A  adenosine          C  cytidine             G  guanine
+ *  T  thymidine          N  A/G/C/T (any)        U  uridine
+ *  K  G/T (keto)         S  G/C (strong)         Y  T/C (pyrimidine)
+ *  M  A/C (amino)        W  A/T (weak)           R  G/A (purine)
+ *  B  G/T/C              D  G/A/T                H  A/C/T
+ *  V  G/C/A              -  gap of indeterminate length
+ */
+// Disallow gaps of indeterminate length '-'
+static const string valid_nucleotides = "acgtnuksymwrbdhy";
+
 mt19937 Fasta::EntropySource::shuffling_rng;
 mt19937 Fasta::EntropySource::random_nucl_rng;
 uniform_int_distribution<size_t> r_unif;
@@ -154,66 +166,95 @@ ostream &operator<<(ostream &os, const Entry &entry) {
 }
 
 istream &operator>>(istream &is, Entry &entry) {
-  if (not is.good())
-    return is;
   // consume until '>'
   char c;
-  is.get(c);
-  while (c != '>') {
-    if (not is.good())
-      return is;
-    is.get(c);
-  }
+  while (is >> c)
+    if (c == '>')
+      break;
+
+  if (not is.good())
+    return is;
 
   // read the definition
   getline(is, entry.definition);
 
+  if (is.eof() or not is.good()) {
+    is.setstate(ios_base::failbit);
+    return is;
+  }
+
   // consume the sequence
   entry.sequence = "";
-  while (is.good()) {
-    is.get(c);
+  while (is >> c) {
     if (c == '>') {
       is.putback(c);
       break;
-    } else if (c >= ' '
-               and c <= '~')  // the least and largest printable ASCII codes
+    } else if (valid_nucleotides.find(tolower(c)) != string::npos)
       entry.sequence += c;
+    else if (not isspace(c))
+      throw Exception::NucleicAcids::InvalidNucleotideCode(c);
   }
+
+  // the while loop may end because of reaching end-of-file
+  // in this case we want to clear the fail bit
+  is.clear((is.eof() ? ios_base::eofbit : ios_base::goodbit)
+         | (is.bad() ? ios_base::badbit : ios_base::goodbit));
+
   return is;
 }
 
 istream &operator>>(istream &is, IEntry &ientry) {
   Entry entry;
-  is >> entry;
-  ientry = IEntry(entry);
+  if (is >> entry)
+    ientry = IEntry(entry);
   return is;
 }
 
 istream &operator>>(istream &is, vector<Entry> &seqs) {
-  while (is.good()) {
-    Entry entry;
-    if (is >> entry)
-      seqs.push_back(move(entry));
-  }
+  Entry entry;
+  while (is >> entry)
+    seqs.push_back(move(entry));
+
+  // vector<Entry> is defined as zero or more sequences
+  // so if no entries are read and end-of-file is reached, we clear the fail bit
+  is.clear((is.eof() ? ios_base::eofbit : ios_base::goodbit)
+         | (is.bad() ? ios_base::badbit : ios_base::goodbit));
+
   return is;
 }
 
 istream &operator>>(istream &is, vector<IEntry> &seqs) {
-  while (is.good()) {
-    IEntry entry;
-    if (is >> entry)
-      seqs.push_back(move(entry));
-  }
+  IEntry entry;
+  while (is >> entry)
+    seqs.push_back(move(entry));
+
+  // vector<IEntry> is defined as zero or more sequences
+  // so if no entries are read and end-of-file is reached, we clear the fail bit
+  is.clear((is.eof() ? ios_base::eofbit : ios_base::goodbit)
+         | (is.bad() ? ios_base::badbit : ios_base::goodbit));
+
   return is;
 }
 
 void read_fasta(const string &path, vector<Entry> &sequences, bool revcomp,
                 size_t n_seq, bool shuffled) {
-  parse_file(path, [&](istream &is) { is >> sequences; });
+  try {
+    parse_file(path, [&](istream &is) { is >> sequences; });
+  } catch (runtime_error &e) {
+    std::cout << "Error while reading FASTA file " << path << "." << std::endl;
+    throw e;
+  }
+
   if (n_seq > 0 and sequences.size() > n_seq)  // TODO: improve efficiency by
                                                // only reading in n_seq
                                                // sequences
     sequences.resize(n_seq);
+
+  if (sequences.size() == 0)
+    // TODO: throw exception?
+    cout << "Warning: no sequences found while parsing " << path << " as FASTA format file." << endl
+         << "Please check the format of this file or whether it is the correct one." << endl;
+
   if (shuffled)
     for (auto &s : sequences) {
       s.definition = "Shuffle of " + s.definition;
