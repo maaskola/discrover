@@ -132,17 +132,17 @@ public:
 
 protected:
   /** The number of emissions. */
-  const static size_t n_emissions = 4;
+  static const size_t n_emissions = 4;
   /** Level of output verbosity. */
   Verbosity verbosity;
   /** Whether to save intermediate parameters on disc during learning. */
   bool store_intermediate;
   /** The index of the start state. */
-  const static size_t start_state = 0;
+  static const size_t start_state = 0;
   /** The index of the bg state. */
-  const static size_t bg_state = 1;
+  static const size_t bg_state = 1;
   /** The index of the first motif state. */
-  const static size_t first_state = 2;
+  static const size_t first_state = 2;
   /** The index of the last motif state. */
   size_t last_state;
   /** The number of states. */

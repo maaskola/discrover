@@ -185,7 +185,7 @@ nucl_vector_type build_pure_nucl_vector() {
   return v;
 }
 
-const static nucl_vector_type pure_nucl_vector = build_pure_nucl_vector();
+static const nucl_vector_type pure_nucl_vector = build_pure_nucl_vector();
 
 bool pure_nucleotide(symbol_t s) { return pure_nucl_vector[s]; }
 
@@ -209,7 +209,7 @@ vector<seq_type::value_type> build_complement_table() {
   return t;
 }
 
-const static vector<seq_type::value_type> complement_table
+static const vector<seq_type::value_type> complement_table
     = build_complement_table();
 
 seq_type iupac_reverse_complement(const seq_type &s) {

@@ -96,7 +96,7 @@ matrix_t compute_zeta_table() {
   return z;
 };
 
-const static matrix_t zeta_table = compute_zeta_table();
+static const matrix_t zeta_table = compute_zeta_table();
 
 double compute_correction(size_t length, size_t degeneracy) {
   double z = log(zeta_table(length, degeneracy));
