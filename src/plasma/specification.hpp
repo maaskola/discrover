@@ -33,6 +33,7 @@
 #include <iostream>  // TODO remove
 #include <string>
 #include <vector>
+#include <stdexcept>
 #include <list>
 #include <set>
 #include <map>
