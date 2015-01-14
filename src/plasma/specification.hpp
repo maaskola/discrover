@@ -399,7 +399,8 @@ void harmonize(Motifs &motifs, Sets &sets,
           demux_motif_map[motif.name].push_back(m.name);
 
           motif_names_in_motifs.insert(m.name);
-          cout << "Demuxing: " << motif.name << " -> " << m.name << endl;
+          if (debug)
+            cout << "Demuxing: " << motif.name << " -> " << m.name << endl;
         }
         motif_names_in_motifs.erase(motif.name);
       }
@@ -441,7 +442,8 @@ void harmonize(Motifs &motifs, Sets &sets,
         present_motifs.insert(m);
       else
         for (auto &n : demux_motif_map.find(m)->second) {
-          cout << "Demuxing (sets): " << m << " -> " << n << endl;
+          if (debug)
+            cout << "Demuxing (sets): " << m << " -> " << n << endl;
           present_motifs.insert(n);
         }
     spec.motifs = present_motifs;
@@ -452,16 +454,19 @@ void harmonize(Motifs &motifs, Sets &sets,
     vector<Objective<measure_t>> objs;
     for (auto &objective : objectives) {
       string motif_name = objective.motif_name;
-      cout << "Check for Demuxing (obj): " << motif_name << endl;
+      if (debug)
+        cout << "Check for Demuxing (obj): " << motif_name << endl;
       auto demux_motif_iter = demux_motif_map.find(motif_name);
       if (demux_motif_iter == end(demux_motif_map)) {
         objs.push_back(objective);
-        cout << "Demuxing (obj): " << motif_name << " ok!" << endl;
+        if (debug)
+          cout << "Demuxing (obj): " << motif_name << " ok!" << endl;
       } else
         for (auto &demuxed : demux_motif_iter->second) {
           auto obj = objective;
           obj.motif_name = demuxed;
-          cout << "Demuxing (obj): " << motif_name << " -> " << demuxed << endl;
+          if (debug)
+            cout << "Demuxing (obj): " << motif_name << " -> " << demuxed << endl;
           objs.push_back(obj);
         }
     }
