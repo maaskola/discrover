@@ -110,6 +110,6 @@ private:
                          bool revcomp, size_t n_seq, bool shuffled);
   friend IEntry::seq_t string2seq(const std::string &s, int n_enc);
 };
-};
+}
 
 #endif

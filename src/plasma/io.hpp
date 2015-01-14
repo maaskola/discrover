@@ -57,7 +57,7 @@ struct Access : public std::runtime_error {
 template <typename X>
 void parse_file(const std::string& path, X fnc) {
   if (not boost::filesystem::exists(path))
-    throw(Exception::File::Existence(path));
+    throw Exception::File::Existence(path);
 
   bool use_gzip = path.size() >= 3 and path.substr(path.size() - 3, 3) == ".gz";
   bool use_bzip2 = path.size() >= 4 and path.substr(path.size() - 4, 4) == ".bz2";
@@ -67,7 +67,7 @@ void parse_file(const std::string& path, X fnc) {
 
   std::ifstream file(path, flags);
   if (not file)
-    throw(Exception::File::Access(path));
+    throw Exception::File::Access(path);
   boost::iostreams::filtering_stream<boost::iostreams::input> in;
   if (use_gzip)
     in.push(boost::iostreams::gzip_decompressor());
