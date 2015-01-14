@@ -114,6 +114,8 @@ private:
 };
 
 string dinucleotideShuffle(const string &s_, size_t seed) {
+  if (s_.size() < 2)
+    return s_;
   mt19937 rng;
   rng.seed(seed);
   string s(s_);
