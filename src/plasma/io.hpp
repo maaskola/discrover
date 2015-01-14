@@ -59,8 +59,8 @@ void parse_file(const std::string& path, X fnc) {
   if (not boost::filesystem::exists(path))
     throw(Exception::File::Existence(path));
 
-  bool use_gzip = path.substr(path.size() - 3, 3) == ".gz";
-  bool use_bzip2 = path.substr(path.size() - 4, 4) == ".bz2";
+  bool use_gzip = path.size() >= 3 and path.substr(path.size() - 3, 3) == ".gz";
+  bool use_bzip2 = path.size() >= 4 and path.substr(path.size() - 4, 4) == ".bz2";
   std::ios_base::openmode flags = std::ios_base::in;
   if (use_gzip or use_bzip2)
     flags |= std::ios_base::binary;
