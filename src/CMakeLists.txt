@@ -5,10 +5,6 @@ ADD_SUBDIRECTORY(shuffle)
 ADD_SUBDIRECTORY(plasma)
 ADD_SUBDIRECTORY(hmm)
 
-# The directory mcmc contains a demo application that can be built by
-# uncommenting the next line
-# ADD_SUBDIRECTORY(mcmc)
-
 ADD_LIBRARY(discrover-common OBJECT aux.cpp executioninformation.cpp matrix.cpp
   random_seed.cpp sha1.cpp terminal.cpp timer.cpp mcmc/montecarlo.cpp)
 

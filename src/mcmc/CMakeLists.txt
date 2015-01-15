@@ -1,1 +1,0 @@
-ADD_EXECUTABLE(sqmin_mcmc_demo sqmin_mcmc_demo.cpp)
