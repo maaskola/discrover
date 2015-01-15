@@ -59,15 +59,22 @@ SET(DISCROVER_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MI
 INCLUDE(CheckCXX11Features)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX11_FLAGS}")
 
+# Check whether the compiler supports position-independent code
+
+CHECK_CXX_COMPILER_FLAG("-fPIC" COMPILER_SUPPORTS_PIC)
+IF(COMPILER_SUPPORTS_PIC)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+ENDIF()
+
 # Check whether the compiler supports link-time optimization
 IF(NOT(DEFINED WITH_LTO) OR WITH_LTO)
   INCLUDE(CheckCXXCompilerFlag)
-  CHECK_CXX_COMPILER_FLAG("-flto -fPIC" COMPILER_SUPPORTS_LTO)
+  CHECK_CXX_COMPILER_FLAG("-flto" COMPILER_SUPPORTS_LTO)
   IF(COMPILER_SUPPORTS_LTO)
     INCLUDE(CheckGCCVersion)
     IF(GCC_SUPPORTS_LTO)
       MESSAGE(STATUS "Enabled: link-time optimization")
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto -fPIC")
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
     ELSE()
       IF(WITH_LTO)
         MESSAGE(FATAL_ERROR "Disabled: link-time optimization - LTO support in GCC version < 4.8 is unreliable")
