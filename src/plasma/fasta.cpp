@@ -111,52 +111,17 @@ size_t IEntry::mask(vector<size_t> positions) {
   // uses random nucleotides;
   // const char mask_symbol = 'n';
   // const Verbosity verbosity = Verbosity::info;
-  const Verbosity verbosity = Verbosity::debug;
-  if (verbosity >= Verbosity::debug) {
-    cout << "Masking IEntry " << definition << endl << sequence << endl;
-    size_t idx = 0;
-    for (auto pos : positions) {
-      while (idx < pos) {
-        cout << "-";
-        idx++;
-      }
-      cout << "X";
-      idx++;
-      masked_nucleotides++;
-    }
-    while (idx < sequence.size()) {
-      cout << "-";
-      idx++;
-    }
-    cout << endl;
-  }
   size_t dollar_position = sequence.find("$");
-  // cout << "dollar_position = " << dollar_position << endl;
-  // cout << "string::npos = " << string::npos << endl;
   for (auto pos : positions) {
     size_t nucl_idx
         = rand()
           % 4;  // TODO do something more sensible than random nucleotides
     sequence[pos] = "acgt"[nucl_idx];
-    // cout << "Masked pos " << pos << endl;
-    if (dollar_position != string::npos) {
-      // if(pos > dollar_position)
-      //   sequence[sequence.size() - pos] = "tgca"[nucl_idx];
-      // else
+    if (dollar_position != string::npos)
       sequence[sequence.size() - pos - 1] = "tgca"[nucl_idx];
-      // cout << "Masked pos " << (sequence.size() - pos - 1) << endl;
-    }
-    // if(pos >= sequence.size())
-    //   pos = 2 * sequence.size() - pos;
-    // sequence[pos] = mask_symbol;
-    // sequence[pos] = "acgt"[rand() % 4]; // TODO do something more sensible
-    // than random nucleotides
   }
 
   isequence = string2seq(sequence);
-  if (verbosity >= Verbosity::debug)
-    cout << sequence << endl;
-  // cout << "Masked  " << definition << endl << sequence << endl;
   return masked_nucleotides;
 }
 
