@@ -49,7 +49,7 @@ struct Eulerian {
   EdgeList edges;
   Nucls nucls;
   char lastChar;
-  std::uniform_real_distribution<double> r_unif;
+  uniform_real_distribution<double> r_unif;
 
   Eulerian() : valid(false), edges(), nucls(), lastChar('X'){};
 
@@ -133,7 +133,8 @@ string dinucleotideShuffle(const string &s_, size_t seed) {
   // the removed edges at end of vertex lists.
   for (Edge x : eulerian.edges) {
     auto &iter = nl.find(x.first)->second;
-    iter.erase(std::find(begin(iter), end(iter), x.second));
+    auto to_erase = find(begin(iter), end(iter), x.second);
+    iter.erase(to_erase);
   }
   for (Nucl x : eulerian.nucls)
     shuffle(begin(nl[x]), end(nl[x]), rng);
