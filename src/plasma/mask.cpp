@@ -12,8 +12,6 @@
  */
 
 #include <iostream>
-#include <fstream>
-#include <boost/program_options.hpp>
 #include "../aux.hpp"
 #include "code.hpp"
 #include "score.hpp"
