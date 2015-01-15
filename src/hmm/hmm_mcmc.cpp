@@ -158,14 +158,14 @@ void HMM::swap_columns(mt19937 &rng) {
 void HMM::add_column(size_t n, const vector<double> &e) {
   n_states += 1;
   last_state += 1;
-  matrix_t new_emission(n_states, emission.size2());
+  matrix_t new_emission(n_states, n_emissions);
   for (size_t i = 0; i < n; i++)
-    for (size_t j = 0; j < new_emission.size2(); j++)
+    for (size_t j = 0; j < n_emissions; j++)
       new_emission(i, j) = emission(i, j);
-  for (size_t j = 0; j < new_emission.size2(); j++)
+  for (size_t j = 0; j < n_emissions; j++)
     new_emission(n, j) = e[j];
   for (size_t i = n + 1; i < n_states; i++)
-    for (size_t j = 0; j < new_emission.size2(); j++)
+    for (size_t j = 0; j < n_emissions; j++)
       new_emission(i, j) = emission(i - 1, j);
 
   matrix_t new_transition(n_states, n_states);
@@ -186,9 +186,8 @@ void HMM::add_column(size_t n, const vector<double> &e) {
   emission = new_emission;
   transition = new_transition;
 
-  group_ids.insert(
-      group_ids.begin() + n,
-      1);  // TODO make this compatible with the next motif_idx semantics
+  // TODO make this compatible with the next motif_idx semantics
+  group_ids.insert(group_ids.begin() + n, 1);
 }
 
 void HMM::add_columns(size_t n, mt19937 &rng) {
@@ -197,8 +196,7 @@ void HMM::add_columns(size_t n, mt19937 &rng) {
     cout << "Adding " << n << " columns at the "
          << (pos == 0 ? "beginning" : "end") << "." << endl;
   for (size_t j = 0; j < n; j++) {
-    size_t n = n_emissions;
-    vector<double> e(n + 1, 0);  // FIXME: why + 1 ?
+    vector<double> e(n_emissions, 0);
     for (size_t i = 0; i < n_emissions; i++)
       e[i] = RandomDistribution::Probability(rng);
 
