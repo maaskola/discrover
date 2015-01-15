@@ -5,14 +5,13 @@
   - chain of states with manual insertion states - done
   - chain of states with all insertion states
   - chain of states with insertion and deletion states / Eddy's plan 7
-* Use other regular expression based motif finding tools for seeding
+* Use further regular expression based motif finding tools for seeding
 * Search one strand against the other
 * Find localized motifs
-* Parallelize parallel tempering
-* Add RNG seed specification for all parts requiring randomization
-  - MCMC
-* MCMC seeding can sample across motif lengths
-* Collect rejection statistics for MCMC chains
+* MCMC
+  * Parallelize parallel tempering
+  * MCMC seeding can sample across motif lengths
+  * Collect rejection statistics for MCMC chains
 * Improve naming of shuffled sequences in HMM
 * Should only the new dynamic padding be used, or should also the old, fixed n-padding be kept?
   - perhaps for simplicity of the interface it would be good to dispose of the old style
@@ -23,10 +22,10 @@
 * Viterbi decoding occurrence counting is broken when using --padl > 0
 * Provide the discovered motifs as .HMM files with the software distribution
 * Specifying the number of threads with the environment variable OMP_NUM_THREADS doesn't work
-* test to see if the numerical issues due to MT persist, and if they due whether they can be ameliorated
+* test to see if the numerical issues due to MT persist, and if they can be ameliorated
 * print out MCC, DIPS, log likelihood difference for individual contrast eval
 
-Update INSTALL and README.md regarding the default installation directory (and fix the layout issue with the headings)
+Update INSTALL and README.md regarding the default installation directory
 
 In the manual explain syntax of motif and contrast specification
 
