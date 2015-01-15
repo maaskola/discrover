@@ -25,6 +25,7 @@ static const string valid_nucleotides = "acgtnuksymwrbdhy";
 mt19937 Fasta::EntropySource::shuffling_rng;
 mt19937 Fasta::EntropySource::random_nucl_rng;
 uniform_int_distribution<size_t> r_unif;
+uniform_int_distribution<size_t> r_nucl(0, 3);
 
 Entry::Entry() : definition(), sequence(){};
 Entry::Entry(const Entry &entry)
@@ -34,7 +35,7 @@ Entry::Entry(const IEntry &ientry) : definition(ientry.definition), sequence() {
   sequence = ientry.sequence.substr(0, pos);
 }
 
-size_t Entry::mask(vector<size_t> positions) {
+size_t Entry::mask(const vector<size_t> &positions) {
   size_t masked_nucleotides = 0;
   const char mask_symbol = 'n';
   const Verbosity verbosity = Verbosity::info;
@@ -71,7 +72,6 @@ size_t Entry::mask(vector<size_t> positions) {
  *       if n_enc < 0.
  **/
 IEntry::seq_t string2seq(const string &s, int n_enc = -1) {
-  std::uniform_int_distribution<size_t> r_nucl(0, 3);
   IEntry::seq_t seq(s.size());
   size_t idx = 0;
   for (auto iter : s) {
@@ -106,16 +106,15 @@ IEntry::seq_t string2seq(const string &s, int n_enc = -1) {
 IEntry::IEntry(const Entry &entry)
     : Entry(entry), isequence(string2seq(entry.sequence)){};
 
-size_t IEntry::mask(vector<size_t> positions) {
+size_t IEntry::mask(const vector<size_t> &positions) {
   size_t masked_nucleotides = 0;
   // uses random nucleotides;
   // const char mask_symbol = 'n';
   // const Verbosity verbosity = Verbosity::info;
   size_t dollar_position = sequence.find("$");
   for (auto pos : positions) {
-    size_t nucl_idx
-        = rand()
-          % 4;  // TODO do something more sensible than random nucleotides
+    // TODO do something more sensible than random nucleotides
+    size_t nucl_idx = r_nucl(EntropySource::random_nucl_rng);
     sequence[pos] = "acgt"[nucl_idx];
     if (dollar_position != string::npos)
       sequence[sequence.size() - pos - 1] = "tgca"[nucl_idx];

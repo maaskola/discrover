@@ -50,7 +50,7 @@ struct Entry {
   std::string reverse_complement() const {
     return ::reverse_complement(sequence);
   };
-  size_t mask(std::vector<size_t> pos);
+  size_t mask(const std::vector<size_t> &pos);
 };
 struct IEntry : public Entry {
   using alphabet_idx_t = unsigned char;
@@ -59,7 +59,7 @@ struct IEntry : public Entry {
   static const alphabet_idx_t empty_symbol = 5;
   seq_t isequence;
   IEntry(const Entry &entry = Entry());
-  size_t mask(std::vector<size_t> pos);
+  size_t mask(const std::vector<size_t> &pos);
 };
 
 template <typename X>
@@ -109,6 +109,7 @@ private:
   friend void read_fasta(const std::string &path, std::vector<IEntry> &entries,
                          bool revcomp, size_t n_seq, bool shuffled);
   friend IEntry::seq_t string2seq(const std::string &s, int n_enc);
+  friend struct IEntry;
 };
 }
 
