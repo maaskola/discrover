@@ -30,7 +30,6 @@
 #include <iomanip>
 #include <set>
 #include "../aux.hpp"
-#include "../GitSHA1.hpp"
 #include "hmm.hpp"
 
 using namespace std;

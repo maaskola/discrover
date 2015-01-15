@@ -1,6 +1,6 @@
 ADD_LIBRARY(discrover-logo OBJECT logo.cpp options.cpp cli.cpp)
 
-ADD_EXECUTABLE(discrover-logo-bin main.cpp "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA1.cpp")
+ADD_EXECUTABLE(discrover-logo-bin main.cpp)
 SET_TARGET_PROPERTIES(discrover-logo-bin PROPERTIES OUTPUT_NAME discrover-logo)
 TARGET_LINK_LIBRARIES(discrover-logo-bin discrover)
 

@@ -6,7 +6,7 @@ ADD_LIBRARY(discrover-plasma OBJECT options.cpp measure.cpp align.cpp fasta.cpp
 # un-comment to build a test program for the DREME driver code
 # ADD_SUBDIRECTORY(dreme)
 
-ADD_EXECUTABLE(plasma main.cpp "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA1.cpp")
+ADD_EXECUTABLE(plasma main.cpp)
 TARGET_LINK_LIBRARIES(plasma discrover)
 
 IF(GOOGLEPERFTOOLS_FOUND)

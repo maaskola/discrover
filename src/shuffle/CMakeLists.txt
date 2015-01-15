@@ -1,6 +1,6 @@
 ADD_LIBRARY(discrover-shuffle OBJECT dinucleotide_shuffle.cpp)
 
-ADD_EXECUTABLE(discrover-shuffle-bin main.cpp "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA1.cpp")
+ADD_EXECUTABLE(discrover-shuffle-bin main.cpp)
 SET_TARGET_PROPERTIES(discrover-shuffle-bin PROPERTIES OUTPUT_NAME discrover-shuffle)
 TARGET_LINK_LIBRARIES(discrover-shuffle-bin discrover)
 

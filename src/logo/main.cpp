@@ -6,7 +6,6 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "../terminal.hpp"
 #include "../verbosity.hpp"
-#include "../GitSHA1.hpp"
 #include "../executioninformation.hpp"
 #include "../aux.hpp"
 #include "../plasma/code.hpp"

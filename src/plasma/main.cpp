@@ -25,7 +25,6 @@
 #include "../timer.hpp"
 #include "cli.hpp"
 #include "../executioninformation.hpp"
-#include "../GitSHA1.hpp"
 #include "../mcmc/montecarlo.hpp"
 
 const std::string header = "# How to interpret this file:\n"

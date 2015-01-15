@@ -18,12 +18,12 @@
 #include <boost/filesystem.hpp>
 #include <string>
 #include <vector>
-#include "../GitSHA1.hpp"
 #include "../random_distributions.hpp"
 #include "../verbosity.hpp"
 #include "../plasma/fasta.hpp"
 #include "../plasma/io.hpp"
 #include "dinucleotide_shuffle.hpp"
+#include <discrover_config.hpp>
 
 const std::string program_name = "discrover-shuffle";
 

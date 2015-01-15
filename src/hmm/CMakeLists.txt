@@ -7,7 +7,7 @@ ADD_LIBRARY(discrover-hmm OBJECT association.cpp basedefs.cpp
   polyfit.cpp registration.cpp report.cpp results.cpp
   sequence.cpp subhmm.cpp trainingmode.cpp )
 
-ADD_EXECUTABLE(discrover-bin main.cpp "${CMAKE_CURRENT_BINARY_DIR}/../GitSHA1.cpp")
+ADD_EXECUTABLE(discrover-bin main.cpp)
 SET_TARGET_PROPERTIES(discrover-bin PROPERTIES OUTPUT_NAME discrover)
 TARGET_LINK_LIBRARIES(discrover-bin discrover)
 

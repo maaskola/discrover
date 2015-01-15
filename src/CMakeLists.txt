@@ -52,7 +52,6 @@ IF(LIBR_FOUND AND LIBR_MATHLIB_LIBRARY)
   TARGET_LINK_LIBRARIES(discrover ${LIBR_LIBRARIES})
 ENDIF()
 
-CONFIGURE_FILE(GitSHA1.cpp.in GitSHA1.cpp)
 CONFIGURE_FILE(discrover_config.hpp.in discrover_config.hpp)
 
 INSTALL(TARGETS discrover

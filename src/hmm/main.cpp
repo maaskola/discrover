@@ -37,13 +37,13 @@
 #include "../random_distributions.hpp"
 #include "../plasma/cli.hpp"
 #include "../logo/cli.hpp"
-#include "../GitSHA1.hpp"
 #include "analysis.hpp"
 #include "../aux.hpp"
 #include "../terminal.hpp"
 #include "../random_seed.hpp"
 #include "../mcmc/montecarlo.hpp"
 #include "../timer.hpp"
+#include <discrover_config.hpp>
 
 using namespace std;
 
