@@ -15,7 +15,6 @@
 #include "score.hpp"
 #include "count.hpp"
 #include "code.hpp"
-#include "randomization_test.hpp"
 #include <iostream>
 #include <fstream>
 #include <set>
