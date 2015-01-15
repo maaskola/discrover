@@ -23,31 +23,23 @@ using namespace std;
 
 const char MASK_SYMBOL = '-';
 
+const bool update_sizes_on_removal = true;
+
 namespace Seeding {
 void remove_seqs_with_motif(const string &motif, Set &dataset,
                             const Options &options) {
-  vector<size_t> to_be_deleted;
-
-  auto iter = begin(dataset.sequences);
-  while (iter != end(dataset.sequences)) {
-    if (search(begin(iter->sequence), end(iter->sequence), begin(motif),
-               end(motif), iupac_included) != end(iter->sequence))
-      to_be_deleted.push_back(distance(begin(dataset.sequences), iter));
-    iter++;
-  }
-  if (options.verbosity >= Verbosity::verbose)
-    cout << "Removing " << to_be_deleted.size()
-         << " sequences that contain the motif." << endl;
-  reverse(begin(to_be_deleted), end(to_be_deleted));
-  for (auto &x : to_be_deleted) {
-    dataset.set_size -= 1;
-    dataset.seq_size -= dataset.sequences[x].sequence.size();
-    if (options.verbosity >= Verbosity::debug)
-      cout << "removing sequence " << x << " "
-           << dataset.sequences[x].definition << " "
-           << dataset.sequences[x].sequence
-           << endl;  //" " << dataset.sequences[x] << endl;
-    dataset.sequences.erase(begin(dataset.sequences) + x);
+  auto pred = [&motif](const Fasta::Entry &entry) {
+    return search(begin(entry.sequence), end(entry.sequence), begin(motif),
+                  end(motif), iupac_included) != end(entry.sequence);
+  };
+  dataset.sequences.erase(
+      remove_if(begin(dataset.sequences), end(dataset.sequences), pred),
+      end(dataset.sequences));
+  if (update_sizes_on_removal) {
+    dataset.set_size = dataset.sequences.size();
+    dataset.seq_size = 0;
+    for (auto &entry : dataset.sequences)
+      dataset.seq_size += entry.sequence.size();
   }
 }
 
@@ -102,6 +94,14 @@ void remove_seqs_with_motif(const string &motif, Contrast &contrast,
                             const Options &options) {
   for (auto &dataset : contrast)
     remove_seqs_with_motif(motif, dataset, options);
+  if (update_sizes_on_removal) {
+    contrast.seq_size = 0;
+    contrast.set_size = 0;
+    for (auto &dataset : contrast) {
+      contrast.seq_size += dataset.seq_size;
+      contrast.set_size += dataset.set_size;
+    }
+  }
 }
 
 void apply_mask(Collection &d, const string &motif, const Options &options) {
@@ -111,6 +111,14 @@ void apply_mask(Collection &d, const string &motif, const Options &options) {
         cout << "Removing sequences with " << motif << " occurrences." << endl;
       for (auto &contrast : d)
         remove_seqs_with_motif(motif, contrast, options);
+      if (update_sizes_on_removal) {
+        d.seq_size = 0;
+        d.set_size = 0;
+        for (auto &contrast : d) {
+          d.seq_size += contrast.seq_size;
+          d.set_size += contrast.set_size;
+        }
+      }
       break;
     case OccurrenceFilter::MaskOccurrences:
       if (options.verbosity >= Verbosity::verbose)
