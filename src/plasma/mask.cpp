@@ -35,7 +35,9 @@ void remove_seqs_with_motif(const string &motif, Set &dataset,
     return search(begin(entry.sequence), end(entry.sequence), begin(motif),
                   end(motif), iupac_included) != end(entry.sequence);
   };
-  remove_if(begin(dataset.sequences), end(dataset.sequences), pred);
+  dataset.sequences.erase(
+      remove_if(begin(dataset.sequences), end(dataset.sequences), pred),
+      end(dataset.sequences));
   if (update_sizes_on_removal) {
     dataset.set_size = dataset.sequences.size();
     dataset.seq_size = 0;
