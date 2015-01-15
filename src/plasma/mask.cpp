@@ -23,10 +23,7 @@ using namespace std;
 
 const char MASK_SYMBOL = '-';
 
-// NOTE: we do not want to reduce the sizes upon removing sequences
-// Reason: statistics of later-found motifs may seem more extreme than initial
-// ones when container sizes are updated.
-const bool update_sizes_on_removal = false;
+const bool update_sizes_on_removal = true;
 
 namespace Seeding {
 void remove_seqs_with_motif(const string &motif, Set &dataset,
