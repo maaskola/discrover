@@ -210,15 +210,21 @@ void read_fasta(const string &path, vector<Entry> &sequences, bool revcomp,
     throw e;
   }
 
-  if (n_seq > 0 and sequences.size() > n_seq)  // TODO: improve efficiency by
-                                               // only reading in n_seq
-                                               // sequences
+  // TODO: improve efficiency by only reading in n_seq sequences
+  if (n_seq > 0 and sequences.size() > n_seq)
     sequences.resize(n_seq);
 
-  if (sequences.size() == 0)
+  if (sequences.size() == 0) {
     // TODO: throw exception?
-    cout << "Warning: no sequences found while parsing " << path << " as FASTA format file." << endl
-         << "Please check the format of this file or whether it is the correct one." << endl;
+    if (not shuffled)
+      cout << "Warning while parsing FASTA format file " << path
+           << ": no sequences found." << endl;
+    else
+      cout << "Warning while creating shuffles for FASTA format file " << path
+           << ": no sequences found." << endl;
+    cout << "Please check the format of this file and whether it is the right "
+            "file." << endl;
+  }
 
   if (shuffled)
     for (auto &s : sequences) {
