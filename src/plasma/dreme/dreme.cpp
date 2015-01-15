@@ -1,6 +1,5 @@
 #include "dreme.hpp"
 #include "../../hmm/basedefs.hpp"
-#include "../../dreme_config.hpp"
 #include <sstream>
 #include <fstream>
 #include <boost/filesystem.hpp>

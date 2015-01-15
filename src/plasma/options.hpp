@@ -35,7 +35,7 @@
 #include "measure.hpp"
 #include "specification.hpp"
 #include "../verbosity.hpp"
-#include "../logo_config.hpp"
+#include <discrover_config.hpp>
 #include "../logo/options.hpp"
 
 namespace Seeding {

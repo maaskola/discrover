@@ -13,10 +13,16 @@
 
 #include <cmath>
 #include <iostream>
-#include "../stats_config.hpp"
 #include "correction.hpp"
 #include "motif.hpp"
 #include "score.hpp"
+
+#if LIBR_FOUND
+  #define MATHLIB_STANDALONE
+  #include <Rmath.h>
+#else
+  #include "stats/pgamma.hpp"
+#endif
 
 const bool excessive_debug = false;
 

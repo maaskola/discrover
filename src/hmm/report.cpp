@@ -13,11 +13,19 @@
 #include "conditional_decoder.hpp"
 #include "../timer.hpp"
 #include "../plasma/plasma.hpp"
-#include "../stats_config.hpp"
+
+#if LIBR_FOUND
+  #define MATHLIB_STANDALONE
+  #include <Rmath.h>
+#else
+  #include "stats/pgamma.hpp"
+#endif
 
 using namespace std;
 
 #if CAIRO_FOUND
+#include "../logo/logo.hpp"
+
 vector<string> Evaluator::generate_logos(const string &path_stem,
                                          const Options::HMM &options) const {
   vector<string> paths;

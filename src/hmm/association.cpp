@@ -3,7 +3,14 @@
 #include <cassert>
 #include <boost/math/distributions/chi_squared.hpp>
 #include "association.hpp"
-#include "../stats_config.hpp"
+
+#include <discrover_config.hpp>
+#if LIBR_FOUND
+  #define MATHLIB_STANDALONE
+  #include <Rmath.h>
+#else
+  #include "stats/pgamma.hpp"
+#endif
 
 using namespace std;
 

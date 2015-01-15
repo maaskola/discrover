@@ -1,6 +1,9 @@
 # add definitions, compiler switches, etc.
 ADD_DEFINITIONS(-Wall -funroll-loops -march=native -Wno-unused-local-typedefs)
 
+# Allow to #include <discrover_config.hpp>, if doing out-of-source build.
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+
 ADD_SUBDIRECTORY(shuffle)
 ADD_SUBDIRECTORY(plasma)
 ADD_SUBDIRECTORY(hmm)
@@ -49,17 +52,8 @@ IF(LIBR_FOUND AND LIBR_MATHLIB_LIBRARY)
   TARGET_LINK_LIBRARIES(discrover ${LIBR_LIBRARIES})
 ENDIF()
 
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp" @ONLY)
-
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/stats_config.hpp.in"
-  "${CMAKE_CURRENT_SOURCE_DIR}/stats_config.hpp" @ONLY)
-
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/logo_config.hpp.in"
-  "${CMAKE_CURRENT_SOURCE_DIR}/logo_config.hpp" @ONLY)
-
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/dreme_config.hpp.in"
-  "${CMAKE_CURRENT_SOURCE_DIR}/dreme_config.hpp" @ONLY)
+CONFIGURE_FILE(GitSHA1.cpp.in GitSHA1.cpp)
+CONFIGURE_FILE(discrover_config.hpp.in discrover_config.hpp)
 
 INSTALL(TARGETS discrover
     RUNTIME DESTINATION bin

@@ -54,6 +54,8 @@ std::string gen_usage_string() {
 using namespace std;
 
 #if CAIRO_FOUND
+#include "../logo/logo.hpp"
+
 Logo::matrix_t build_matrix(const string &motif, double absent) {
   const string nucls = "acgt";
   Logo::matrix_t matrix;
