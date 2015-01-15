@@ -316,7 +316,7 @@ rev_map_t Plasma::determine_initial_candidates(
       candidates.insert({score, iter.first});
       n_candidates++;
       if (n_candidates > options.plasma.max_candidates) {
-        candidates.erase(--end(candidates));
+        candidates.erase(prev(end(candidates)));
         n_candidates--;
       }
     }
@@ -494,7 +494,7 @@ Results Plasma::find_plasma(size_t length, const Objective &objective,
             candidates.insert({generalization_score, generalization});
             n_candidates++;
             if (n_candidates > options.plasma.max_candidates) {
-              candidates.erase(--end(candidates));
+              candidates.erase(prev(end(candidates)));
               n_candidates--;
             }
             if (generalization_score > max_score) {
