@@ -29,12 +29,10 @@
 
 #include "hmm.hpp"
 #include "../mcmc/mcmchmm.hpp"
+#include "../random_distributions.hpp"
 #include <random>
 
 using namespace std;
-
-uniform_int_distribution<size_t> r_binary(0, 1);
-uniform_real_distribution<double> r_unif(0, 1);
 
 void HMM::modify_column(mt19937 &rng) {
   uniform_int_distribution<size_t> r_state(first_state, last_state);
@@ -48,7 +46,7 @@ void HMM::modify_column(mt19937 &rng) {
   if (verbosity >= Verbosity::verbose)
     cout << "Modifying emissions " << i << " and " << j << " in column " << col
          << endl;
-  double rel_amount = r_unif(rng);
+  double rel_amount = RandomDistribution::Probability(rng);
   double amount = emission(col, i) * rel_amount;
   emission(col, i) -= amount;
   emission(col, j) += amount;
@@ -78,7 +76,7 @@ void HMM::modify_transition(mt19937 &rng, double eps) {
   if (verbosity >= Verbosity::verbose)
     cout << "Modifying transitions " << present[i] << " and " << present[j]
          << " in column " << col << endl;
-  double rel_amount = r_unif(rng);
+  double rel_amount = RandomDistribution::Probability(rng);
   double amount = transition(col, present[i]) * rel_amount;
   transition(col, present[i]) -= amount;
   transition(col, present[j]) += amount - eps;
@@ -194,7 +192,7 @@ void HMM::add_column(size_t n, const vector<double> &e) {
 }
 
 void HMM::add_columns(size_t n, mt19937 &rng) {
-  size_t pos = r_binary(rng);
+  size_t pos = RandomDistribution::Binary(rng);
   if (verbosity >= Verbosity::verbose)
     cout << "Adding " << n << " columns at the "
          << (pos == 0 ? "beginning" : "end") << "." << endl;
@@ -202,7 +200,7 @@ void HMM::add_columns(size_t n, mt19937 &rng) {
     size_t n = n_emissions;
     vector<double> e(n + 1, 0);  // FIXME: why + 1 ?
     for (size_t i = 0; i < n_emissions; i++)
-      e[i] = r_unif(rng);
+      e[i] = RandomDistribution::Probability(rng);
 
     if (pos == 0)
       add_column(first_state + j, e);
@@ -256,7 +254,7 @@ void HMM::del_column(size_t n) {
 }
 
 void HMM::del_columns(size_t n, mt19937 &rng) {
-  size_t i = r_binary(rng);
+  size_t i = RandomDistribution::Binary(rng);
   if (verbosity >= Verbosity::verbose)
     cout << "Deleting " << n << " columns at the "
          << (i == 0 ? "beginning" : "end") << "." << endl;

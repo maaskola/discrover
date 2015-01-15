@@ -35,8 +35,8 @@
 #include <list>
 #include <vector>
 #include <cmath>
-#include <random>
 #include "../verbosity.hpp"
+#include "../random_distributions.hpp"
 
 namespace MCMC {
 struct EntropySource {
@@ -88,11 +88,10 @@ public:
 
 private:
   bool GibbsStep(double temp, T &state, double &G) const {
-    std::uniform_real_distribution<double> r_unif(0, 1);
     T nextstate = generator.generate(state);
     double nextG = evaluator.evaluate(nextstate);
     double dG = nextG - G;
-    double r = r_unif(EntropySource::rng);
+    double r = RandomDistribution::Probability(EntropySource::rng);
     double p = std::min<double>(1.0, boltzdist(-dG, temp));
     if (verbosity >= Verbosity::verbose)
       std::cerr << "T = " << temp << " next state = " << nextstate << std::endl
@@ -113,8 +112,7 @@ private:
 
   bool swap(double temp1, double temp2, T &state1, T &state2, double &G1,
             double &G2) const {
-    std::uniform_real_distribution<double> r_unif(0, 1);
-    double r = r_unif(EntropySource::rng);
+    double r = RandomDistribution::Probability(EntropySource::rng);
     double p = std::min<double>(
         1.0, exp(-(G1 / temp1 + G2 / temp2 - G1 / temp2 - G2 / temp1)));
     if (verbosity >= Verbosity::verbose)

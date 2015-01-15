@@ -732,7 +732,7 @@ HMM doit(const Data::Collection &all_data,
 }
 
 vector<HMM> cross_validation(const Data::Collection &all_data,
-                             const Options::HMM &options) {
+                             const Options::HMM &options, mt19937 &rng) {
   vector<HMM> hmms;
   for (size_t cross_validation_iteration = 0;
        cross_validation_iteration < options.cross_validation_iterations;
@@ -749,14 +749,15 @@ vector<HMM> cross_validation(const Data::Collection &all_data,
 
     Data::Collection training_data, test_data;
     prepare_cross_validation(all_data, training_data, test_data,
-                             options.cross_validation_freq, options.verbosity);
+                             options.cross_validation_freq, rng,
+                             options.verbosity);
     HMM hmm = doit(all_data, training_data, test_data, opt);
     hmms.push_back(hmm);
   }
   return hmms;
 }
 
-void perform_analysis(Options::HMM &options) {
+void perform_analysis(Options::HMM &options, mt19937 &rng) {
   if (options.verbosity >= Verbosity::verbose)
     cout << "Loading sequences." << endl;
 
@@ -775,7 +776,7 @@ void perform_analysis(Options::HMM &options) {
     options.cross_validation_freq = 1;
     options.cross_validation_iterations = 1;
   }
-  vector<HMM> hmms = cross_validation(collection, options);
+  vector<HMM> hmms = cross_validation(collection, options, rng);
 }
 
 namespace Exception {

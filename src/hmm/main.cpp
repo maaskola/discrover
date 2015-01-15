@@ -34,6 +34,7 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include "../random_distributions.hpp"
 #include "../plasma/cli.hpp"
 #include "../logo/cli.hpp"
 #include "../GitSHA1.hpp"
@@ -691,14 +692,12 @@ int main(int argc, const char **argv) {
   mt19937 rng;
   rng.seed(options.random_salt);
 
-  uniform_int_distribution<size_t> r_unif;
-
-  Fasta::EntropySource::seed(r_unif(rng));
-  MCMC::EntropySource::seed(r_unif(rng));
+  Fasta::EntropySource::seed(RandomDistribution::Uniform(rng));
+  MCMC::EntropySource::seed(RandomDistribution::Uniform(rng));
 
   // main routine
   try {
-    perform_analysis(options);
+    perform_analysis(options, rng);
   } catch (exception &e) {
     cout << e.what() << endl;
     return EXIT_FAILURE;

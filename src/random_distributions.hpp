@@ -1,5 +1,5 @@
 /* =====================================================================================
- * Copyright (c) 2011, Jonas Maaskola
+ * Copyright (c) 2015, Jonas Maaskola
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,40 +16,27 @@
  *
  * =====================================================================================
  *
- *       Filename:  basedefs.hpp
+ *       Filename:  random_distributions.cpp
  *
- *    Description:  Basic classes and type definitions for sets of sequence sets
+ *    Description:  Shared random distriubtions
  *
- *        Created:  Thu Aug 4 22:12:31 2011 +0200
+ *        Created:  Thu Jan 15 06:44:43 2015 +0200
  *
  *         Author:  Jonas Maaskola <jonas@maaskola.de>
  *
  * =====================================================================================
  */
 
-#ifndef BASEDEFS_HPP
-#define BASEDEFS_HPP
+#ifndef RANDOM_DISTRIBUTIONS_HPP
+#define RANDOM_DISTRIBUTIONS_HPP
 
-#include <string>
 #include <random>
-#include "../plasma/data.hpp"
-#include "trainingmode.hpp"
-#include "sequence.hpp"
 
-namespace Data {
-using Seq = Fasta::IEntry;
-using Set = Basic::Set<Seq>;
-using Contrast = Basic::Contrast<Set>;
-using Collection = Basic::Collection<Contrast>;
-
-using Seqs = std::vector<Seq>;
-}
-
-void prepare_cross_validation(const Data::Collection &col,
-                              Data::Collection &training_data,
-                              Data::Collection &test_data,
-                              double cross_validation_freq,
-                              std::mt19937 &rng,
-                              Verbosity verbosity);
+struct RandomDistribution {
+  static std::uniform_int_distribution<size_t> Uniform;
+  static std::uniform_int_distribution<size_t> Binary;
+  static std::uniform_int_distribution<size_t> Nucleotide;
+  static std::uniform_real_distribution<double> Probability;
+};
 
 #endif

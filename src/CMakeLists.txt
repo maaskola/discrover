@@ -6,7 +6,8 @@ ADD_SUBDIRECTORY(plasma)
 ADD_SUBDIRECTORY(hmm)
 
 ADD_LIBRARY(discrover-common OBJECT aux.cpp executioninformation.cpp matrix.cpp
-  random_seed.cpp sha1.cpp terminal.cpp timer.cpp mcmc/montecarlo.cpp)
+  random_distributions.cpp random_seed.cpp sha1.cpp terminal.cpp timer.cpp
+  mcmc/montecarlo.cpp)
 
 LIST(APPEND DISCROVER_OBJECTS
   $<TARGET_OBJECTS:discrover-common>

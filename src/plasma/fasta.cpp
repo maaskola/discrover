@@ -1,6 +1,7 @@
 
 #include <random>
 #include "fasta.hpp"
+#include "../random_distributions.hpp"
 #include "../shuffle/dinucleotide_shuffle.hpp"
 #include "../aux.hpp"
 #include "io.hpp"
@@ -24,8 +25,6 @@ static const string valid_nucleotides = "acgtnuksymwrbdhy";
 
 mt19937 Fasta::EntropySource::shuffling_rng;
 mt19937 Fasta::EntropySource::random_nucl_rng;
-uniform_int_distribution<size_t> r_unif;
-uniform_int_distribution<size_t> r_nucl(0, 3);
 
 Entry::Entry() : definition(), sequence(){};
 Entry::Entry(const Entry &entry)
@@ -94,7 +93,8 @@ IEntry::seq_t string2seq(const string &s, int n_enc = -1) {
         break;
       default:
         if (n_enc < 0)
-          seq[idx] = r_nucl(EntropySource::random_nucl_rng);
+          seq[idx]
+              = RandomDistribution::Nucleotide(EntropySource::random_nucl_rng);
         else
           seq[idx] = n_enc;
     }
@@ -114,7 +114,8 @@ size_t IEntry::mask(const vector<size_t> &positions) {
   size_t dollar_position = sequence.find("$");
   for (auto pos : positions) {
     // TODO do something more sensible than random nucleotides
-    size_t nucl_idx = r_nucl(EntropySource::random_nucl_rng);
+    size_t nucl_idx
+        = RandomDistribution::Nucleotide(EntropySource::random_nucl_rng);
     sequence[pos] = "acgt"[nucl_idx];
     if (dollar_position != string::npos)
       sequence[sequence.size() - pos - 1] = "tgca"[nucl_idx];
@@ -222,8 +223,9 @@ void read_fasta(const string &path, vector<Entry> &sequences, bool revcomp,
   if (shuffled)
     for (auto &s : sequences) {
       s.definition = "Shuffle of " + s.definition;
-      s.sequence = dinucleotideShuffle(s.sequence,
-                                       r_unif(EntropySource::shuffling_rng));
+      s.sequence = dinucleotideShuffle(
+          s.sequence,
+          RandomDistribution::Uniform(EntropySource::shuffling_rng));
     }
 };
 

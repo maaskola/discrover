@@ -323,10 +323,8 @@ int main(int argc, const char **argv) {
   mt19937 rng;
   rng.seed(options.mcmc.random_salt);
 
-  uniform_int_distribution<size_t> r_unif;
-
-  Fasta::EntropySource::seed(r_unif(rng));
-  MCMC::EntropySource::seed(r_unif(rng));
+  Fasta::EntropySource::seed(RandomDistribution::Uniform(rng));
+  MCMC::EntropySource::seed(RandomDistribution::Uniform(rng));
 
   try {
     Seeding::Plasma plasma(options);

@@ -1,4 +1,5 @@
 #include "dinucleotide_shuffle.hpp"
+#include "../random_distributions.hpp"
 #include <cassert>
 #include <vector>
 #include <map>
@@ -49,12 +50,11 @@ struct Eulerian {
   EdgeList edges;
   Nucls nucls;
   char lastChar;
-  uniform_real_distribution<double> r_unif;
 
   Eulerian() : valid(false), edges(), nucls(), lastChar('X'){};
 
   Eulerian(const string &s, T &rng)
-      : valid(false), edges(), nucls(), lastChar(s.back()), r_unif(0, 1) {
+      : valid(false), edges(), nucls(), lastChar(s.back()) {
     NuclCount nuclCnt;
     DinuclCount dinuclCnt;
     NuclList nl;
@@ -91,7 +91,7 @@ private:
   };
 
   Nucl chooseEdge(Nucl x, DinuclCount dinuclCnt, T &rng) {
-    double z = r_unif(rng);
+    double z = RandomDistribution::Probability(rng);
     double denom = 0;
     for (auto y : "ACGTN") {
       auto iter = dinuclCnt.find({x, y});

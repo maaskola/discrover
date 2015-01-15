@@ -1,9 +1,8 @@
 #include "random_seed.hpp"
-#include <random>
+#include "random_distributions.hpp"
 
 using namespace std;
 size_t generate_rng_seed() {
-  uniform_int_distribution<size_t> r_unif;
   random_device rng;
-  return r_unif(rng);
+  return RandomDistribution::Uniform(rng);
 }

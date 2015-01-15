@@ -30,9 +30,10 @@
 #ifndef ANALYSIS_HPP
 #define ANALYSIS_HPP
 
+#include <random>
 #include "hmm.hpp"
 
-void perform_analysis(Options::HMM &options);
+void perform_analysis(Options::HMM &options, std::mt19937 &rng);
 
 namespace Exception {
 namespace Analysis {

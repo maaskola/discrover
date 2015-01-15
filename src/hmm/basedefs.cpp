@@ -8,6 +8,7 @@
 #include "../plasma/fasta.hpp"
 #include "../aux.hpp"
 #include "basedefs.hpp"
+#include "../random_distributions.hpp"
 
 using namespace std;
 
@@ -22,6 +23,7 @@ void prepare_cross_validation(const Data::Contrast &contrast,
                               Data::Contrast &training_data,
                               Data::Contrast &test_data,
                               double cross_validation_freq,
+                              mt19937 &rng,
                               Verbosity verbosity) {
   if (cross_validation_freq == 1)
     training_data = contrast;
@@ -45,7 +47,7 @@ void prepare_cross_validation(const Data::Contrast &contrast,
       test.contrast = dataset.contrast;
 
       for (auto &seq : dataset) {
-        double p = 1.0 * rand() / RAND_MAX;
+        double p = RandomDistribution::Probability(rng);
         if (p >= cross_validation_freq) {
           test.sequences.push_back(seq);
           test.set_size += 1;
@@ -78,6 +80,7 @@ void prepare_cross_validation(const Data::Collection &collection,
                               Data::Collection &training_data,
                               Data::Collection &test_data,
                               double cross_validation_freq,
+                              mt19937 &rng,
                               Verbosity verbosity) {
   for (auto &contrast : collection) {
     Data::Contrast training, test;
@@ -85,7 +88,7 @@ void prepare_cross_validation(const Data::Collection &collection,
     test.name = contrast.name;
 
     prepare_cross_validation(contrast, training, test, cross_validation_freq,
-                             verbosity);
+                             rng, verbosity);
 
     training_data.contrasts.push_back(training);
     training_data.seq_size += training.seq_size;
