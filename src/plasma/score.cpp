@@ -21,7 +21,7 @@
   #define MATHLIB_STANDALONE
   #include <Rmath.h>
 #else
-  #include "stats/pgamma.hpp"
+  #include "../stats/pgamma.hpp"
 #endif
 
 const bool excessive_debug = false;

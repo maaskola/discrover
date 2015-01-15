@@ -9,7 +9,7 @@
   #define MATHLIB_STANDALONE
   #include <Rmath.h>
 #else
-  #include "stats/pgamma.hpp"
+  #include "../stats/pgamma.hpp"
 #endif
 
 using namespace std;
