@@ -316,7 +316,8 @@ rev_map_t Plasma::determine_initial_candidates(
       candidates.insert({score, iter.first});
       n_candidates++;
       if (n_candidates > options.plasma.max_candidates) {
-        candidates.erase(prev(end(candidates)));
+        auto to_erase = prev(end(candidates));
+        candidates.erase(to_erase);
         n_candidates--;
       }
     }
