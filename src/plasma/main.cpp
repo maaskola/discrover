@@ -34,20 +34,20 @@ const std::string header = "# How to interpret this file:\n"
 const std::string program_name = "plasma";
 
 std::string gen_usage_string() {
-  const std::string usage = "This program executes a progressive algorithm, which in each iteration\n"
-    "determines the IUPAC word with the highest residual score that is enriched,\n"
-    "in signal.fa, accepts it, and masks all occurrences or removes all data samples\n"
-    "in which it occurs, before proceeding.\n"
+  const std::string usage = "This program runs a progressive algorithm, which in each iteration determines\n"
+    "the IUPAC word with the highest residual score that is enriched in the signal\n"
+    "sequences, accepts it, and masks all occurrences or removes all sequences in\n"
+    "which it occurs, before proceeding.\n"
     "\n"
     "Some example calls:\n" +
-    program_name + " -f signal.fa -f control.fa -m 8 > analysis.txt\n" +
-    program_name + " -f signal.fa -f control.fa -m 4-12 > analysis.txt\n" +
-    program_name + " -f signal.fa -f control.fa -m 4-12 -d 0 > analysis.txt\n" +
-    program_name + " -f signal.fa -f control.fa -m 4-12 -s freq -d 0 > analysis.txt\n" +
-    program_name + " -f signal.fa -f control.fa -m 4-12 -s freq -d 2 > analysis.txt\n" +
-    program_name + " -f signal.fa -f control.fa -m 4-12 -d 2 > analysis.txt\n" +
-    program_name + " -f signal.fa -f control.fa -m 4-12 --rdeg 0.2 > analysis.txt\n" +
-    program_name + " -f signal:signal.fa -f control.fa -m signal:8 > analysis.txt\n";
+    program_name + " signal.fa control.fa -m 8 > analysis.txt\n" +
+    program_name + " signal.fa control.fa -m 4-12 > analysis.txt\n" +
+    program_name + " signal.fa control.fa -m 4-12 -d 0 > analysis.txt\n" +
+    program_name + " signal.fa control.fa -m 4-12 --score freq -d 0 > analysis.txt\n" +
+    program_name + " signal.fa control.fa -m 4-12 --score freq -d 2 > analysis.txt\n" +
+    program_name + " signal.fa control.fa -m 4-12 -d 2 > analysis.txt\n" +
+    program_name + " signal.fa control.fa -m 4-12 --rdeg 0.2 > analysis.txt\n" +
+    program_name + " signal:signal.fa control.fa -m signal:8 > analysis.txt\n";
   return usage;
 }
 
