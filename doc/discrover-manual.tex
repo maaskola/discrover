@@ -35,7 +35,10 @@
   The package provides programs for discriminative motif discovery of protein binding sites in nucleic acid sequences.
   It is available as free software under the GNU General Public License v3 from \theurl{}.
 
-  This document briefly describes the purpose of this motif finding package, explains important concepts, and details usage of the programs that are part of this package.
+  This document briefly describes the purpose of this motif finding package and discusses important concepts.
+  A tutorial explains the basic usage of the programs that are part of this package.
+  Then, recipes are given that can be used to perform motif analysis for CLIP-Seq and ChIP-Seq data.
+  Finally, some further details of the program usage are given.
 \end{abstract}
 
 \tableofcontents
@@ -252,6 +255,90 @@ In both cases, dinucleotide shuffles will be generated using the same routines a
 
 Note that also in this case for the purpose of reproducibility, you can provide a seed (\verb|--salt|) for the random shuffle generation.
 
+
+\section{Recipes}
+The following section gives some recipes for the analysis of RNA-binding protein data and of ChIP-Seq data.
+While the recipes are written for \discrover{}, they can be easily modified to work for \plasma{}:
+simply leave out the options \verb|--multiple| and \verb|--wiggle|, which are not supported by \plasma{}.
+
+\subsection{Analysing RNA-binding proteins}
+First, let us find a motif that is differential between a simple analysis of set of PAR-CLIP signal sequences \verb|rbm10.signal.fa| and a set of matching control sequences \verb|rbm10.control.fa|.
+\\
+\begin{verbbox}
+discrover \
+RBM10:rbm10.signal.fa \
+control:rbm10.control.fa \
+-m RBM10:5-10x3 --multiple --wiggle 1
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+\subsubsection{Using repeat experiments}
+If a repeat experiment is available, we can define two contrasts \verb|Exp1| and \verb|Exp2|.
+Notice how we modify the sequence set definitions to group the sets of sequences into these two contrasts.
+\\
+\begin{verbbox}
+discrover \
+RBM10:Exp1:rbm10-experiment1.signal.fa \
+control:Exp1:rbm10-experiment1.control.fa \
+RBM10:Exp2:rbm10-experiment2.signal.fa \
+control:Exp2:rbm10-experiment2.control.fa \
+-m RBM10:5-10x3 --multiple --wiggle 1
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+
+\subsection{Analysing ChIP-Seq data}
+The first ChIP-Seq recipe finds multiple motifs in a pair sequence sets, a set of Nanog ChIP-Seq signal sequences \verb|nanog-chen.signal.fa| and a set of matching control sequences \verb|nanog-chen.control.fa|.
+It uses the best three seeds for each length between 5 and 16 nucleotides.
+We also consider one-nucleotide-shifted variants of each seed.
+Thus, in total $11\times3\times3=108$ HMMs will be initialized and individually trained, before the \verb|--multiple| mode begins to build HMMs consisting of multiple motifs.
+\\
+\begin{verbbox}
+discrover -r \
+Nanog:nanog-chen.signal.fa \
+control:nanog-chen.control.fa \
+-m Nanog:5-16x3 --multiple --wiggle 1
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+\subsubsection{Using repeat experiments}
+In the following recipe we make use of a set of repeat experiments, a set of Nanog ChIP-Seq signal sequences \verb|nanog-marson.signal.fa| produced by a different group, as well as matching control sequences \verb|nanog-marson.control.fa|.
+Notice, that the sequence sets used above are grouped into the contrast \verb|Nanog-Chen|, while the second of sequence sets are grouped into the contrast \verb|Nanog-Marson|.
+\\
+\begin{verbbox}
+discrover -r \
+Nanog:Nanog-Chen:nanog-chen.signal.fa \
+control:Nanog-Chen:nanog-chen.control.fa \
+Nanog:Nanog-Marson:nanog-marson.signal.fa \
+control:Nanog-Marson:nanog-marson.control.fa \
+-m Nanog:5-16x3 --multiple --wiggle 1
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+\subsubsection{Using repeat experiments}
+Aside from repeat experiments, we can also search for motifs that are differential in one contrast (or in multiple contrasts if data of repeat experiments are available) but that are not differential in other contrasts.
+The following recipe demonstrates this.
+
+In addition to the two contrasts defined in the preceding recipes, it defines two further contrasts of sets of sequences coming from ChIP-Seq experiments for another protein.
+Notice how the argument for the \verb|--score| command line switch defines the prior two contrasts to act positively, while the latter two contrasts are taken to act negatively.
+\\
+\begin{verbbox}
+discrover -r \
+Nanog:Nanog_Chen:nanog-chen.signal.fa \
+control:Nanog_Chen:nanog-chen.control.fa \
+Nanog:Nanog_Marson:nanog-marson.signal.fa \
+control:Nanog_Marson:nanog-marson.control.fa
+Oct4:Oct4_Chen:oct4-chen.signal.fa \
+control:Oct4_Chen:oct4-chen.control.fa \
+Oct4:Oct4_Marson:oct4-marson.signal.fa \
+control:Oct4_Marson:oct4-marson.control.fa \
+-m Nanog:5-16x3 --multiple --wiggle 1 --score \
+Nanog:+Nanog_Chen+Nanog_Marson-Oct4_Chen-Oct4_Marson:mi
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+Notice also that the preceding recipe mentions a motif named \verb|Oct4| to be enriched in the Oct4 signal sequence sets, but does not actually define or train it!
+A slight modification of this recipe (replace the motif \verb|Nanog| by \verb|Oct4| in the arguments of \verb|-m| and \verb|--score|, and swap the signs in front of the contrasts in the argument of \verb|--score|) would search for motifs that are differential in the Oct4 contrasts but not differential in the Nanog contrasts.
 
 
 \section{Usage}
