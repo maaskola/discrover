@@ -47,13 +47,13 @@ Aside from structural cues, binding of regulators is guided by sequence informat
 
 Motif discovery is the problem of unraveling motifs recognized by a given nucleic acid binding protein from sequences known to harbor occurrences of the motif.
 Classically, motif finding was marked by scarcity of data when only few sequences were available.
-The introduction of microarray based technologies like ChIP-chip \cite{Ren2000,Iyer2001} and RIP-Chip \cite{Tenenbaum2000,Keene2006} allowed to assay \textit{in vivo} sequence binding specificity on a genome-wide scale.
+The introduction of microarray based technologies like ChIP-chip \cite{Ren2000,Iyer2001} and RIP-Chip \cite{Tenenbaum2000,Keene2006} made it possible to assay \textit{in vivo} sequence binding specificity on a genome-wide scale.
 More recently sequencing based technologies, such as ChIP-Seq \cite{Robertson2007, Johnson2007} and CLIP-Seq \cite{Licatalosi2008,Sanford2009,Hafner2010} further increased the amounts of data yielded by single experiments and simultaneously improved the spatial resolution, reducing uncertainty about the exact location of \textit{in vivo} binding sites.
 SELEX \cite{Ellington1990,Tuerk1990} and related sequencing based technologies \cite{Jolma2010}, and protein-binding microarrays (PBMs) \cite{Bulyk2001,Berger2006a} are targeted assays for the \textit{in vitro} sequence binding specificity of nucleic acid binding proteins.
 
 Due to the central importance of the motif discovery problem in computational biology many algorithms addressing it have been developed over the last two decades \cite{Das2007}.
 These algorithms employ  a variety of models for the sequence binding specificity of nucleic acid binding proteins, including discrete word-based models, as well as probabilistic models such as position weight matrices (PWM) \cite{Stormo1998}, and hidden Markov models (HMM) \cite{Rabiner1989}.
-Word based approaches tend to be computationally efficient and allow fast global optimization, but may fail for motifs that include weak positions \cite{Das2007}.
+Word based approaches tend to be computationally efficient and allow for fast global optimization, but may fail for motifs that include weak positions \cite{Das2007}.
 PWMs can be motivated from biophysical principles \cite{Berg1987,Stormo2000,Foat2006}.
 General inference methods for HMMs offer a unified framework for biological sequence modeling \cite{Durbin1998}.
 HMMs flexibly model both binding sites and their surrounding sequence context, may account for dependence of neighboring positions via higher order emissions, and length variability of motifs is idiomatically realized via non-constitutive states in the HMM topology.
@@ -99,7 +99,9 @@ In particular the following objective functions are available:
 \end{itemize}
 The publication describing this method, \cite{Maaskola2014}, presents experiments based on synthetic data that suggest that the objective functions MCC, MICO, and MMIE have higher motif discovery performance than the other objective functions analyzed.
 \subsection{Seeding}
+To be written.
 \subsection{Binding site HMM optimization}
+To be written.
 
 \section{Tutorial}
 This tutorial demonstrates the basic usage of the motif discovery tools in this package.
@@ -160,7 +162,7 @@ discrover signal.fa control.fa -m tgtanatw
 
 \subsection{Finding multiple motifs}
 For some applications it is interesting to discover multiple motifs in a datasets.
-This allows to reveal motifs of co-factors of the assayed factor.
+This may reveal motifs of co-factors of the assayed factor.
 This is for example of relevance in analyzing ChIP-Seq data, where a given IP'ed transcription factor often acts in conjunction with other factors, whose binding sites are often found nearby, and thus are also frequently enriched in ChIP-Seq sequences.
 
 Discrover has two ways of dealing with multiple motifs, depending on whether or not the switch \verb|--multiple| is used, as described next.
@@ -269,7 +271,8 @@ The command line switch \verb|--version| displays the version of \plasma{}.
 If additionally the switch \verb|-v| or its long variant \verb|--verbose| is given, then additionally the full SHA1-string of the version is displayed.
 
 \subsubsection{Seed discovery algorithms}
-There are multiple algorithms implemented in \plasma{} that allow to find IUPAC regular expression type seeds.
+\label{section:plasma-MCMC}
+There are multiple algorithms implemented in \plasma{} that allow you to find IUPAC regular expression type seeds.
 You can select between them with the switch \verb|--algo|.
 It takes one argument, which specifies which algorithm to use.
 The following algorithms are provided:
@@ -294,7 +297,7 @@ An overview of the available command line options is available with the switch \
 See section~\ref{appendix:discrover-cli-help} for a listing of the output of this command with \discrover{} in version \version{}.
 
 Note that by default not all options are shown.
-To display some infrequently used options please specify \verb|-hv| or \verb|--help --verbose|.
+To display more comprehensive usage options please specify \verb|-hv| or \verb|--help --verbose|.
 
 In addition, some advanced options are only shown when the option \verb|-V| or \verb|--noisy| is used.
 Thus, to display all options please specify \verb|-hV| or their long variants \verb|--help --noisy|.
@@ -303,6 +306,26 @@ Thus, to display all options please specify \verb|-hV| or their long variants \v
 The command line switch \verb|--version| displays the version of \discrover{}.
 If additionally the switch \verb|-v| or its long variant \verb|--verbose| is given, then additionally the full SHA1-string of the version is displayed.
 
+\subsubsection{Hybrid learning and alternative learning modes}
+By default, \discrover{} the hybrid learning mode that is described in the paper.
+In short, hybrid learning optimizes the emission parameters so as to increase the chosen objective function, while the transition parameters are optimized for the likelihood.
+
+Aside from the hybrid learning mode, \discrover{} offers two other modes, determined by the \verb|--bglearn| command line switch.
+With \verb|--bglearn fixed| the transition parameters are left in their initial state and not optimized, while with \verb|--bglearn gradient| the transition parameters are optimized for the same chosen objective function.
+Although the hybrid learning mode is used by default, you may explicitly specify its usage with \verb|--bglearn em|.
+
+This option is only shown in the full command line help, available with \verb|discrover -hV|.
+
+\subsubsection{Gradient and Monte-Carlo Markov chain optimization}
+Gradient optimization is the default learning mode for \discrover{}.
+Aside from gradient learning, it is also possible---with the command line switch \verb|--sampling|---to use Monte-Carlo Markov chain optimization to learn HMM parameters.
+Like the MCMC optimization mode of \plasma{} (see section~\ref{section:plasma-MCMC}), also that of \discrover{} uses parallel tempering.
+
+The MCMC learning mode of \discrover{} does not support multiple objective learning as in the hybrid learning mode.
+For this reason, MCMC learning in \discrover{} optimizes all parameters, including the transition parameters, for the chosen objective function.
+
+There are several options available to determine the way \discrover{} performs MCMC
+For these, please refer to the \emph{Gibbs learning options} section of the extended command line help, available via \verb|discrover --help --verbose|.
 
 \section{Appendix}
 \subsection{Command line help of \plasma{}}
