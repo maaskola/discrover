@@ -1,29 +1,27 @@
 IF(NOT(PDFLATEX_COMPILER STREQUAL "PDFLATEX_COMPILER-NOTFOUND"))
-  ADD_LATEX_DOCUMENT(manual.tex
-    CONFIGURE manual.tex
-    BIBFILES documentation.bib
+
+  include(${CMAKE_BINARY_DIR}/discrover-targets.cmake)
+
+  ADD_CUSTOM_COMMAND(
+    OUTPUT plasma-cli-help.txt
+    COMMENT "Rebuilding plasma CLI help"
+    COMMAND plasma -h > plasma-cli-help.txt && echo Success || echo Failure
+    DEPENDS plasma)
+
+  ADD_CUSTOM_COMMAND(
+    OUTPUT discrover-cli-help.txt
+    COMMENT "Rebuilding discrover CLI help"
+    COMMAND discrover-bin -hv > discrover-cli-help.txt && echo Success || echo Failure
+    DEPENDS discrover-bin)
+
+  ADD_LATEX_DOCUMENT(discrover-manual.tex
+    CONFIGURE discrover-manual.tex
+    BIBFILES references.bib
     # IMAGE_DIRS images
-    DEFAULT_PDF
-  )
+    DEPENDS plasma-cli-help.txt discrover-cli-help.txt
+    DEFAULT_PDF)
 
-  ADD_CUSTOM_COMMAND(TARGET pdf POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-    ${CMAKE_CURRENT_BINARY_DIR}/manual.pdf
-    ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME}-manual.pdf
-  )
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/discrover-manual.pdf
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/share/doc/${PROJECT_NAME}")
 
-  INSTALL(FILES ${CMAKE_BINARY_DIR}/doc/${PROJECT_NAME}-manual.pdf
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/share/doc/${PROJECT_NAME}"
-  )
-
-  GET_PROPERTY(PLASMA_BINARY_PATH TARGET plasma PROPERTY LOCATION)
-  GET_PROPERTY(DISCROVER_BINARY_PATH TARGET discrover-bin PROPERTY LOCATION)
-
-  ADD_CUSTOM_TARGET(GenCLIHelp
-    COMMAND ${PLASMA_BINARY_PATH} -h > plasma-cli-help.txt
-    COMMAND ${DISCROVER_BINARY_PATH} -hv > discrover-cli-help.txt
-    DEPENDS plasma discrover-bin
-  )
-
-  ADD_DEPENDENCIES(pdf GenCLIHelp)
 ENDIF()

@@ -55,9 +55,4 @@ ENDIF()
 CONFIGURE_FILE(discrover_config.hpp.in discrover_config.hpp)
 CONFIGURE_FILE(git_config.hpp.in git_config.hpp)
 
-INSTALL(TARGETS discrover
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION ${LIBDIR}
-    ARCHIVE DESTINATION ${LIBDIR}/static
-    DESTINATION "${CMAKE_INSTALL_PREFIX}"
-    )
+INSTALL(TARGETS discrover DESTINATION ${LIBDIR})
