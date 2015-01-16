@@ -12,6 +12,7 @@
 #include "../hmm/hmm.hpp"
 #include "logo.hpp"
 #include "cli.hpp"
+#include <git_config.hpp>
 
 using namespace std;
 

@@ -43,7 +43,7 @@
 #include "../random_seed.hpp"
 #include "../mcmc/montecarlo.hpp"
 #include "../timer.hpp"
-#include <discrover_config.hpp>
+#include <git_config.hpp>
 
 using namespace std;
 

@@ -39,9 +39,9 @@ Dir.mktmpdir("discrover-source-archive"){|dir|
 
     # hard-code some variables that would ordinarily be set during configuration using git routines
     "cd #{dir} && sed -i -e \"s/@GIT_DESCRIPTION@/#{version}/\" #{rel_path}/doc/manual.tex",
-    "cd #{dir} && sed -i -e \"s/@GIT_DESCRIPTION@/#{version}/\" #{rel_path}/src/GitSHA1.cpp.in",
-    "cd #{dir} && sed -i -e \"s/@GIT_SHA1@/#{sha1}/\" #{rel_path}/src/GitSHA1.cpp.in",
-    "cd #{dir} && sed -i -e \"s/@GIT_BRANCH@/#{branch}/\" #{rel_path}/src/GitSHA1.cpp.in",
+    "cd #{dir} && sed -i -e \"s/@GIT_DESCRIPTION@/#{version}/\" #{rel_path}/src/git_config.hpp.in",
+    "cd #{dir} && sed -i -e \"s/@GIT_SHA1@/#{sha1}/\" #{rel_path}/src/git_config.hpp.in",
+    "cd #{dir} && sed -i -e \"s/@GIT_BRANCH@/#{branch}/\" #{rel_path}/src/git_config.hpp.in",
 
     "cd #{dir} && tar -czvf #{out_path} #{rel_path}"
   ].each{|cmd|

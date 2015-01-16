@@ -26,6 +26,7 @@
 #include "cli.hpp"
 #include "../executioninformation.hpp"
 #include "../mcmc/montecarlo.hpp"
+#include <git_config.hpp>
 
 const std::string header = "# How to interpret this file:\n"
 "# The program proceeds iteratively, at each step determining the single most discriminative word.";

@@ -31,6 +31,7 @@
 #include <set>
 #include "../aux.hpp"
 #include "hmm.hpp"
+#include <git_config.hpp>
 
 using namespace std;
 

@@ -23,7 +23,7 @@
 #include "../plasma/fasta.hpp"
 #include "../plasma/io.hpp"
 #include "dinucleotide_shuffle.hpp"
-#include <discrover_config.hpp>
+#include <git_config.hpp>
 
 const std::string program_name = "discrover-shuffle";
 

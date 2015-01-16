@@ -53,6 +53,7 @@ IF(LIBR_FOUND AND LIBR_MATHLIB_LIBRARY)
 ENDIF()
 
 CONFIGURE_FILE(discrover_config.hpp.in discrover_config.hpp)
+CONFIGURE_FILE(git_config.hpp.in git_config.hpp)
 
 INSTALL(TARGETS discrover
     RUNTIME DESTINATION bin
