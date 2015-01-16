@@ -292,20 +292,20 @@ int main(int argc, const char **argv) {
   advanced_options.add_options()
     ("output,o", po::value<string>(&options.label), (
       "Output file names are generated from this label. If not given, the output label will be '" + options.exec_info.program_name + "_XXX' where XXX is a string to make the label unique. The output files comprise:\n"
-     ".hmm     \tParameter of the trained HMM. May be loaded later with --learn.\n"
-     ".summary \tSummary information with number of occurrences of the motifs in each sample, and various generative and discriminative statistics.\n"
-     ".viterbi \tFASTA sequences annotated with the Viterbi path, and sequence level statistics.\n"
-     ".table   \tCoordinates and sequences of matches to the motifs in all sequences.\n"
-     "Note that, depending on the argument of --compress, the latter two files may be compressed, and require decompression for inspection.\n"
-     "Also, sequence logos of the found motifs are generated with file names based on this output label."
+      ".hmm     \tParameter of the trained HMM. May be loaded later with --learn.\n"
+      ".summary \tSummary information with number of occurrences of the motifs in each sample, and various generative and discriminative statistics.\n"
+      ".viterbi \tFASTA sequences annotated with the Viterbi path, and sequence level statistics.\n"
+      ".table   \tCoordinates and sequences of matches to the motifs in all sequences.\n"
+      "Note that, depending on the argument of --compress, the latter two files may be compressed, and require decompression for inspection.\n"
+      "Also, sequence logos of the found motifs are generated with file names based on this output label."
      ).c_str())
     ("threads", po::value<size_t>(&options.n_threads), "Number of threads. If not given, as many are used as there are CPU cores on this machine.")
     ("time", po::bool_switch(&options.timing_information), "Output information about how long certain parts take to execute.")
     ("cv", po::value<size_t>(&options.cross_validation_iterations)->default_value(0), "Number of cross validation iterations to do.")
     ("cv_freq", po::value<double>(&options.cross_validation_freq)->default_value(0.9, "0.9"), "Fraction of data samples for training in cross validation.")
-    ("nseq", po::value<size_t>(&options.n_seq)->default_value(0), "Only consider the top sequences of each FASTA file. Specify 0 to indicate all.")
+    ("nseq", po::value<size_t>(&options.n_seq)->default_value(0), "Use only the first N sequences of each file. Use 0 to indicate all sequences.")
     ("iter", po::value<size_t>(&options.termination.max_iter)->default_value(1000), "Maximal number of iterations to perform in training. A value of 0 means no limit, and that the training is only terminated by the tolerance.")
-    ("salt", po::value<unsigned int>(&options.random_salt), "Seed for the random number generator.")
+    ("salt", po::value<unsigned int>(&options.random_salt), "Seed for the pseudo random number generator (used e.g. for sequence shuffle generation and MCMC sampling). Set this to get reproducible results.")
     ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
     ;
 

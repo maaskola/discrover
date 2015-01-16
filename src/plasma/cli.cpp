@@ -37,11 +37,46 @@ boost::program_options::options_description gen_plasma_options_description(
     size_t cols, bool include_all, bool allow_short) {
   namespace po = boost::program_options;
   po::options_description desc(name, cols);
+
+  Seeding::Objective default_objective;
+  default_objective.measure = Measures::Discrete::Measure::MutualInformation;
+
   if (include_all)
     desc.add_options()
-      ("fasta,f", po::value<vector<Specification::Set>>(&options.paths)->required(), "FASTA file(s) with nucleic acid sequences.")
-      ("motif,m", po::value<vector<Specification::Motif>>(&options.motif_specifications)->required(), "Motif specification. "
-       "May be given multiple times, and can be specified in multiple ways:\n"
+      ("fasta,f", po::value<vector<Specification::Set>>(&options.paths)->required(),
+       "FASTA file definition. "
+       "May be given multiple times. "
+       "Syntax as follows:\n"
+       "\n"
+       "[NAMES:[CONTRAST:]]PATH\n"
+       "\n"
+       "NAMES    \tcomma-separated list of names of motifs enriched in this file\n"
+       "CONTRAST \tname of a contrast this file belongs to\n"
+       "PATH     \tpath of FASTA file with sequences\n"
+       "\n"
+       "NAMES and CONTRAST are optional.\n"
+       "\n"
+       "FASTA files can be grouped into contrasts on which the --score definitions (see below) can act.\n"
+       "\n"
+       "If the path contains at least one colon, please prepend with colons to disambiguate.\n"
+       "\n"
+       "Note: usage of -f / --fasta is optional; all free arguments are taken to be paths of FASTA files."
+       "\n"
+       // TODO note usage of the 'control' motif name
+      )
+      ("motif,m", po::value<vector<Specification::Motif>>(&options.motif_specifications),
+       "Motif definition. "
+       "May be given multiple times. "
+       "Syntax as follows:\n"
+       "\n"
+       "[NAME:]MOTIFSPEC\n"
+       "\n"
+       "NAME      \tname of the motif\n"
+       "MOTIFSPEC \tmotif specification; see below\n"
+       "\n"
+       "NAME is optional.\n"
+       "\n"
+       "MOTIFSPEC can be given in multiple ways:\n"
        "1. \tUsing the IUPAC code for nucleic acids.\n"
        "2. \tA length specification. "
        "Motifs of the indicated lengths are sought. "
@@ -49,9 +84,40 @@ boost::program_options::options_description gen_plasma_options_description(
        "where a length range is either a single length, or an expression of the form 'x-y' to indicate lengths x up to y. "
        "A length specification also allows to specify a multiplicity separated by an 'x'. "
        "Thus examples are '8' for just length 8, '5-7' for lengths 5, 6, and 7, '5-8x2' for two motifs of lengths 5 to 8, '5-8,10x3' for three motifs of lengths 5, 6, 7, 8, and 10.\n"
-       "Regardless of the way the motif is specified, it may be given a name. The syntax is [NAME:]MOTIFSPEC.")
-      ("score", po::value<Seeding::Objectives>(&options.objectives)->default_value(Seeding::Objectives(1,Seeding::Objective("mi")), "mi"), "Which objective function to evaluate. TODO: documentation needs updating to reflect more advanced options for this argument. Available are 'signal_freq', 'control_freq', 'mi', 'mcc', 'delta_freq', 'gtest', 'gtest_logp', 'gtest_logp_raw'.")
-      ("revcomp,r", po::bool_switch(&options.revcomp), "Also consider the reverse complements of the sequences.")
+       "3. \tBy specifying the path to a file with a PWM. "
+       "If the path contains at least one colon, please prepend colons to disambiguate.")
+       ("score", po::value<Seeding::Objectives>(&options.objectives)->default_value(Seeding::Objectives(1,default_objective), "mi"),
+        "Score definition. "
+        "May be given multiple times. "
+        "Syntax as follows:\n"
+        "\n"
+        "[MOTIF:[CONTRASTS:]]MEASURE\n"
+        "\n"
+        "MOTIF     \tname of the motif to optimize\n"
+        "CONTRASTS \tcontrast specification\n"
+        "MEASURE   \tsignificance measure to use\n"
+        "See below for details.\n"
+        "\n"
+        "MOTIF and CONTRASTS are optional.\n"
+        "\n"
+        "If no motif name is given, all motifs are optimized with this score specification. "
+        "It is an error when more than one score specification is given for any motif.\n"
+        "\n"
+        "The contrast specification is a set of contrast names prefixed by '+' or '-' to indicate whether the score on the contrast is to count positively or negatively. "
+        "The first contrast name, if lacking a '+' or '-', is taken to count positively.\n"
+        "\n"
+        "The following significance measures are available:\n"
+        "none    \tDo not perform learning\n"
+        "bw      \tLikelihood using Baum-Welch\n"
+        "viterbi \tViterbi learning\n"
+        "mi      \tMutual information of condition and motif occurrence (MICO)\n"
+        "ri      \tRank mutual information\n"
+        "mmie    \tMaximum mutual information estimation (MMIE), a.k.a. posterior classification probability\n"
+        "mcc     \tMatthews correlation coefficient\n"
+        "dlogl   \tLog-likelihood difference, like DME, see doi: 10.1073/pnas.0406123102\n"
+        "dfreq   \tDifference of frequency of sequences with motif occurrences, similar to DIPS and DECOD, see doi: 10.1093/bioinformatics/btl227 and 10.1093/bioinformatics/btr412"
+        "\n")
+      ("revcomp,r", po::bool_switch(&options.revcomp), "Respect motif occurrences on the reverse complementary strand. Useful for DNA sequence motif analysis. Default is to consider only occurrence on the forward strand.")
       ("nseq", po::value<size_t>(&options.n_seq)->default_value(0), "Use only the first N sequences of each file. Use 0 to indicate all sequences.")
       ;
   else {
@@ -85,10 +151,12 @@ boost::program_options::options_description gen_plasma_options_description(
       ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
       ("pcount", po::value<double>(&options.pseudo_count)->default_value(1), "The number of pseudo counts to add to each cell of contingency tables.")
       ("word,w", po::bool_switch(&options.word_stats), "Perform nucleotide level statistics instead of on sequence level.")
-      ("time,t", po::bool_switch(&options.measure_runtime), "Report running times.")
+      ("time", po::bool_switch(&options.measure_runtime), "Output information about how long certain parts take to execute.")
       ("print", po::bool_switch(&options.dump_viterbi), "Print out sequences annotated with motif occurrences.")
       ("threads", po::value<size_t>(&options.n_threads), "Number of threads. If not given, as many are used as there are CPU cores on this machine.")
-      ("output,o", po::value<string>(&options.label), "Output file names are generated from this label. If this option is not specified the output label will be 'plasma_XXX' where XXX is a string to make the label unique.")
+      ("output,o", po::value<string>(&options.label),
+       "Output file names are generated from this label. If not given, the output label will be 'plasma_XXX' where XXX is a string to make the label unique. The output files comprise:\n"
+       "If --pdf or -png are used, sequence logos of the found motifs are generated with file names based on this output label.")
       ("salt", po::value<unsigned int>(&options.mcmc.random_salt), "Seed for the pseudo random number generator (used e.g. for sequence shuffle generation and MCMC sampling). Set this to get reproducible results.")
       ;
   else {
