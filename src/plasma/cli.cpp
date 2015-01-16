@@ -68,7 +68,7 @@ boost::program_options::options_description gen_plasma_options_description(
       ;
 
   desc.add_options()
-    (form_switch(prefix, "algo", allow_short).c_str(), po::value<Seeding::Algorithm>(&options.algorithm)->default_value(Seeding::Algorithm::Plasma, "plasma"), (string() + "Which algorithm to use for seeding. Available are 'plasma', 'mcmc', " + (DREME_FOUND ? "'dreme', " : "") + "and 'all'. Multiple algorithms can be used by separating them by comma.").c_str())
+    (form_switch(prefix, "algo", allow_short).c_str(), po::value<Seeding::Algorithm>(&options.algorithm)->default_value(Seeding::Algorithm::Plasma, "plasma"), (string() + "Seeding algorithm. Available are 'plasma', 'mcmc', " + (DREME_FOUND ? "'dreme', " : "") + "and 'all'. Multiple algorithms can be used by separating them by comma.").c_str())
     (form_switch(prefix, "any", false).c_str(), po::bool_switch(&options.no_enrichment_filter), "Whether to allow motifs enriched in the opposite direction.")
     (form_switch(prefix, "filter", false).c_str(), po::value<Seeding::OccurrenceFilter>(&options.occurrence_filter)->default_value(Seeding::OccurrenceFilter::MaskOccurrences, "mask"), "How to filter motif occurrences upon identifying a motif. Available are 'remove' and 'mask'.")
     (form_switch(prefix, "cand", allow_short).c_str(), po::value<size_t>(&options.plasma.max_candidates)->default_value(100), "How many candidates to maintain.")
@@ -87,7 +87,7 @@ boost::program_options::options_description gen_plasma_options_description(
       ("word,w", po::bool_switch(&options.word_stats), "Perform nucleotide level statistics instead of on sequence level.")
       ("time,t", po::bool_switch(&options.measure_runtime), "Report running times.")
       ("print", po::bool_switch(&options.dump_viterbi), "Print out sequences annotated with motif occurrences.")
-      ("threads", po::value<size_t>(&options.n_threads), "The number of threads to use. If not given, as many are used as there are CPU cores on this machine.")
+      ("threads", po::value<size_t>(&options.n_threads), "Number of threads. If not given, as many are used as there are CPU cores on this machine.")
       ("output,o", po::value<string>(&options.label), "Output file names are generated from this label. If this option is not specified the output label will be 'plasma_XXX' where XXX is a string to make the label unique.")
       ("salt", po::value<unsigned int>(&options.mcmc.random_salt), "Seed for the pseudo random number generator (used e.g. for sequence shuffle generation and MCMC sampling). Set this to get reproducible results.")
       ;

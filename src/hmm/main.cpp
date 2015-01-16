@@ -269,10 +269,10 @@ int main(int argc, const char **argv) {
      ".viterbi \tFASTA sequences annotated with the Viterbi path, and sequence level statistics.\n"
      ".table   \tCoordinates and sequences of matches to the motifs in all sequences.\n"
      "Note that, depending on the argument of --compress, the latter two files may be compressed, and require decompression for inspection.").c_str())
-    ("threads", po::value<size_t>(&options.n_threads), "The number of threads to use. If not given, as many are used as there are CPU cores on this machine.")
+    ("threads", po::value<size_t>(&options.n_threads), "Number of threads. If not given, as many are used as there are CPU cores on this machine.")
     ("time", po::bool_switch(&options.timing_information), "Output information about how long certain parts take to execute.")
     ("cv", po::value<size_t>(&options.cross_validation_iterations)->default_value(0), "Number of cross validation iterations to do.")
-    ("cv_freq", po::value<double>(&options.cross_validation_freq)->default_value(0.9, "0.9"), "Fraction of data samples to use for training in cross validation.")
+    ("cv_freq", po::value<double>(&options.cross_validation_freq)->default_value(0.9, "0.9"), "Fraction of data samples for training in cross validation.")
     ("nseq", po::value<size_t>(&options.n_seq)->default_value(0), "Only consider the top sequences of each FASTA file. Specify 0 to indicate all.")
     ("iter", po::value<size_t>(&options.termination.max_iter)->default_value(1000), "Maximal number of iterations to perform in training. A value of 0 means no limit, and that the training is only terminated by the tolerance.")
     ("salt", po::value<unsigned int>(&options.random_salt), "Seed for the random number generator.")
@@ -282,7 +282,7 @@ int main(int argc, const char **argv) {
   multi_motif_options.add_options()
     ("multiple", po::bool_switch(&options.multi_motif.accept_multiple), "Accept multiple motifs as long as the score increases. This can only be used with the objective function MICO.")
     ("relearn", po::value<Options::MultiMotif::Relearning>(&options.multi_motif.relearning)->default_value(Options::MultiMotif::Relearning::Full, "full"), "When accepting multiple motifs, whether and how to re-learn the model after a new motif is added. Choices: 'none', 'reest', 'full'.")
-    ("resratio", po::value<double>(&options.multi_motif.residual_ratio)->default_value(5.0), "Cutoff to use to discard new motifs in multi motif mode. The cutoff is applied on the ratio of conditional mutual information of the new motif and the conditions given the previous motifs. Must be non-negative. High values discard more motifs, and lead to less redundant motifs.")
+    ("resratio", po::value<double>(&options.multi_motif.residual_ratio)->default_value(5.0), "Cutoff to discard new motifs in multi motif mode. The cutoff is applied on the ratio of conditional mutual information of the new motif and the conditions given the previous motifs. Must be non-negative. High values discard more motifs, and lead to less redundant motifs.")
     ;
 
   mmie_options.add_options()
@@ -316,7 +316,7 @@ int main(int argc, const char **argv) {
     ("smax", po::value<int>(&options.sampling.max_size), "Maximal length for Gibbs sampling. When unspecified defaults to initial motif length.")
     ("nindel", po::value<size_t>(&options.sampling.n_indels)->default_value(5), "Maximal number of positions that may be added or removed at a time. Adding and removing of happens at and from the ends of the motif.")
     ("nshift", po::value<size_t>(&options.sampling.n_shift)->default_value(5), "Maximal number of positions that the motif may be shifted by.")
-    ("partemp", po::value<size_t>(&options.sampling.n_parallel)->default_value(6), "Number of chains to use in parallel tempering.")
+    ("partemp", po::value<size_t>(&options.sampling.n_parallel)->default_value(6), "Number of chains in parallel tempering.")
     ;
 
   hidden_options.add_options()
@@ -325,7 +325,7 @@ int main(int argc, const char **argv) {
     ("pscnt", po::value<double>(&options.contingency_pseudo_count)->default_value(1.0, "1"), "The pseudo count to be added to the contingency tables in the discriminative algorithms.")
     ("pscntE", po::value<double>(&options.emission_pseudo_count)->default_value(1.0, "1"), "The pseudo count to be added to the expected emission probabilities before normalization in the Baum-Welch algorithm.")
     ("pscntT", po::value<double>(&options.transition_pseudo_count)->default_value(0.0, "0"), "The pseudo count to be added to the expected transition probabilities before normalization in the Baum-Welch algorithm.")
-    ("compress", po::value<Options::Compression>(&options.output_compression)->default_value(Options::Compression::gzip, "gz"), "Compression method to use for larger output files. Available are: 'none', 'gz' or 'gzip', 'bz2' or 'bzip2'.") // TODO make the code conditional on the presence of zlib
+    ("compress", po::value<Options::Compression>(&options.output_compression)->default_value(Options::Compression::gzip, "gz"), "Compression method for larger output files. Available are: 'none', 'gz' or 'gzip', 'bz2' or 'bzip2'.") // TODO make the code conditional on the presence of zlib
     ("miseeding", po::bool_switch(&options.use_mi_to_seed), "Disregard automatic seeding choice and use MICO for seeding.")
     ("absthresh", po::bool_switch(&options.termination.absolute_improvement), "Whether improvement should be gauged by absolute value. Default is relative to the current score.")
     ("intermediate", po::bool_switch(&options.store_intermediate), "Write out intermediate parameters during training.")
