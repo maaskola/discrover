@@ -423,7 +423,7 @@ double HMM::reestimationIteration(const Data::Collection &collection,
                                   const Options::HMM &options) {
   double log_likel = -numeric_limits<double>::infinity();
   if (store_intermediate)
-    serialize(cerr, ExecutionInformation());
+    serialize(cerr, options.exec_info);
   matrix_t T, E;
   if (not task.targets.transition.empty())
     T = zero_matrix(n_states, n_states);
@@ -663,7 +663,7 @@ bool HMM::perform_training_iteration(const Data::Collection &collection,
     double score = -numeric_limits<double>::infinity();
     if (task.measure != Measure::Undefined) {
       if (store_intermediate)
-        serialize(cerr, ExecutionInformation());
+        serialize(cerr, options.exec_info);
 
       if (verbosity >= Verbosity::verbose)
         cerr << "Current parameters: " << *this << endl;
@@ -722,7 +722,7 @@ bool HMM::perform_training_iteration(const Data::Collection &collection,
   }
 
   if (store_intermediate)
-    serialize(cerr, ExecutionInformation());
+    serialize(cerr, options.exec_info);
 
   return not done;
 }
@@ -880,7 +880,7 @@ bool HMM::perform_training_iteration_gradient(
   bool done = false;
 
   if (store_intermediate)
-    serialize(cerr, ExecutionInformation());
+    serialize(cerr, options.exec_info);
 
   if (verbosity >= Verbosity::verbose)
     cerr << "Current parameters: " << *this << endl;
