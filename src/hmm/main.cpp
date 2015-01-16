@@ -179,7 +179,7 @@ int main(int argc, const char **argv) {
   po::options_description multi_motif_options("Multiple motif mode options", cols);
   po::options_description mmie_options("MMIE options", cols);
   po::options_description linesearching_options("Line searching options", cols);
-  po::options_description sampling_options("Gibbs sampling options", cols);
+  po::options_description sampling_options("MCMC optimization options", cols);
   po::options_description termination_options("Termination options", cols);
   po::options_description hidden_options("Hidden options", cols);
 

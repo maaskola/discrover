@@ -394,11 +394,14 @@ The command line switch \verb|--version| displays the version of \discrover{}.
 If additionally the switch \verb|-v| or its long variant \verb|--verbose| is given, then additionally the full SHA1-string of the version is displayed.
 
 \subsubsection{Hybrid learning and alternative learning modes}
+\label{section:hybrid-learning}
 By default, \discrover{} the hybrid learning mode that is described in the paper.
-In short, hybrid learning optimizes the emission parameters so as to increase the chosen objective function, while the transition parameters are optimized for the likelihood.
+Here, we refer to the emission parameters of the motif states as signal parameters.
+All other parameters, including the transition parameters and the emission parameters of the background states, are referred to as context parameters.
+In short, hybrid learning optimizes the emission parameters of the motifs so as to increase the chosen objective function, while the context parameters are optimized for the likelihood.
 
 Aside from the hybrid learning mode, \discrover{} offers two other modes, determined by the \verb|--bglearn| command line switch.
-With \verb|--bglearn fixed| the transition parameters are left in their initial state and not optimized, while with \verb|--bglearn gradient| the transition parameters are optimized for the same chosen objective function.
+With \verb|--bglearn fixed| the context parameters are left in their initial state and not optimized, while with \verb|--bglearn gradient| the context parameters are optimized for the same chosen objective function.
 Although the hybrid learning mode is used by default, you may explicitly specify its usage with \verb|--bglearn em|.
 
 This option is only shown in the full command line help, available with \verb|discrover -hV|.
@@ -409,10 +412,10 @@ Aside from gradient learning, it is also possible---with the command line switch
 Like the MCMC optimization mode of \plasma{} (see section~\ref{section:plasma-MCMC}), also that of \discrover{} uses parallel tempering.
 
 The MCMC learning mode of \discrover{} does not support multiple objective learning as in the hybrid learning mode.
-For this reason, MCMC learning in \discrover{} optimizes all parameters, including the transition parameters, for the chosen objective function.
+For this reason, MCMC learning in \discrover{} optimizes all parameters, including the context parameters\footnote{Transition parameters and the emission parameters of the background states, see section~\ref{section:hybrid-learning}.}, for the chosen objective function.
 
 There are several options available to determine the way \discrover{} performs MCMC
-For these, please refer to the \emph{Gibbs learning options} section of the extended command line help, available via \verb|discrover --help --verbose|.
+For these, please refer to the \emph{MCMC optimization options} section of the extended command line help, available via \verb|discrover --help --verbose|.
 
 \section{Appendix}
 \subsection{Command line help of \plasma{}}

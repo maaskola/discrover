@@ -169,7 +169,7 @@ boost::program_options::options_description gen_plasma_options_description(
   }
 
   if (include_all) {
-    po::options_description mcmc_desc("MCMC seeding options", cols);
+    po::options_description mcmc_desc("MCMC optimization options", cols);
     string mcmc_prefix = "mcmc_";
     mcmc_desc.add_options()
       ("temp", po::value<double>(&options.mcmc.temperature)->default_value(1e-3), "When performing Gibbs sampling use this temperature. The temperatures of parallel chains is decreasing by factors of two.")
