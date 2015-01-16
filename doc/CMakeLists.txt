@@ -11,7 +11,7 @@ IF(NOT(PDFLATEX_COMPILER STREQUAL "PDFLATEX_COMPILER-NOTFOUND"))
   ADD_CUSTOM_COMMAND(
     OUTPUT discrover-cli-help.txt
     COMMENT "Rebuilding discrover CLI help"
-    COMMAND discrover-bin -hv > discrover-cli-help.txt && echo Success || echo Failure
+    COMMAND discrover-bin -hV > discrover-cli-help.txt && echo Success || echo Failure
     DEPENDS discrover-bin)
 
   ADD_LATEX_DOCUMENT(discrover-manual.tex
