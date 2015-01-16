@@ -153,7 +153,7 @@ int main(int argc, const char **argv) {
   Options::HMM options;
   options.n_threads = omp_get_num_procs();
   options.exec_info
-      = generate_exec_info(argv[0], GIT_DESCRIPTION, cmdline(argc, argv));
+      = ExecutionInformation(argv[0], GIT_DESCRIPTION, GIT_BRANCH, argc, argv);
   options.class_model = false;
   options.random_salt = generate_rng_seed();
 

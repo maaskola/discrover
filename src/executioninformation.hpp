@@ -34,17 +34,19 @@
 #include "verbosity.hpp"
 
 struct ExecutionInformation {
+  ExecutionInformation();
+  ExecutionInformation(const std::string &name, const std::string &hmm_version,
+                       const std::string &git_branch, int argc, const char **argv);
+  ExecutionInformation(const std::string &name, const std::string &hmm_version,
+                       const std::string &git_branch, const std::string &cmdline);
   std::string program_name;
   std::string hmm_version;
+  std::string git_branch;
   std::string cmdline;
   std::string datetime;
   std::string directory;
 };
 
-std::string cmdline(int argc, const char **argv);
-ExecutionInformation generate_exec_info(const std::string &name,
-                                        const std::string &hmm_version,
-                                        const std::string &cmdline);
 std::string generate_random_label(const std::string &prefix,
                                   size_t n_rnd_char = 5,
                                   Verbosity verbosity = Verbosity::info);

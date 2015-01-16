@@ -7,29 +7,37 @@
 
 using namespace std;
 
-string cmdline(int argc, const char **argv) {
+string reconstitute_cmdline(int argc, const char **argv) {
   string cmd;
   for (int i = 0; i < argc; i++)
     cmd += (i != 0 ? " " : "") + string(argv[i]);
   return cmd;
 }
 
-ExecutionInformation generate_exec_info(const string &name,
-                                        const string &hmm_version,
-                                        const string &cmdline) {
+ExecutionInformation::ExecutionInformation()
+    : ExecutionInformation("discrover", "unknown", "unknown", "") {}
+
+ExecutionInformation::ExecutionInformation(const string &name,
+                                           const string &version,
+                                           const string &branch, int argc,
+                                           const char **argv)
+    : ExecutionInformation(name, version, branch,
+                           reconstitute_cmdline(argc, argv)) {}
+
+ExecutionInformation::ExecutionInformation(const string &name,
+                                           const string &version,
+                                           const string &branch,
+                                           const string &cmd)
+    : program_name(boost::filesystem::path(name).filename().string()),
+      hmm_version(version),
+      git_branch(branch),
+      cmdline(cmd),
+      datetime(),
+      directory(boost::filesystem::initial_path().string()) {
   time_t rawtime;
   time(&rawtime);
-
-  string datetime = ctime(&rawtime);
+  datetime = ctime(&rawtime);
   datetime = datetime.substr(0, datetime.size() - 1);
-
-  string dir = boost::filesystem::initial_path().string();
-
-  string program_name = boost::filesystem::path(name).filename().string();
-
-  ExecutionInformation exec_info
-      = {program_name, hmm_version, cmdline, datetime, dir};
-  return exec_info;
 }
 
 string generate_random_label(const string &prefix, size_t n_rnd_char,

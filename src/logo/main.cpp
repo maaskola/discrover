@@ -103,8 +103,8 @@ int main(int argc, const char **argv) {
 
   std::vector<string> hmm_paths, matrix_paths, iupacs;
   string label;
-  ExecutionInformation exec_info
-      = generate_exec_info(argv[0], GIT_DESCRIPTION, cmdline(argc, argv));
+
+  ExecutionInformation exec_info(argv[0], GIT_DESCRIPTION, GIT_BRANCH, argc, argv);
 
   po::options_description basic_options("Basic options", cols);
 
