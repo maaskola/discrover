@@ -38,6 +38,8 @@ list<pair<string, double>> parse_dreme_output(const string &dir) {
 list<pair<string, double>> run(const string &path1, const string &path2,
                                size_t min_size, size_t max_size, bool revcomp,
                                size_t n_motifs, bool remove_temp_dir) {
+  if (not DREME_FOUND)
+    throw Exception::BinaryNotFound;
   if (path2 == "")
     cout << "Running DREME for one FASTA file: " << path1 << endl;
   else

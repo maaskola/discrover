@@ -1,5 +1,6 @@
 
 #ifndef DREME_HPP
+#define DREME_HPP
 
 #include <cstddef>
 #include <list>
