@@ -87,7 +87,7 @@ boost::program_options::options_description gen_plasma_options_description(
       ("word,w", po::bool_switch(&options.word_stats), "Perform nucleotide level statistics instead of on sequence level.")
       ("time,t", po::bool_switch(&options.measure_runtime), "Report running times.")
       ("print", po::bool_switch(&options.dump_viterbi), "Print out sequences annotated with motif occurrences.")
-      ("threads,T", po::value<size_t>(&options.n_threads)->default_value(omp_get_num_procs()), "The number of threads to use. If this in not specified, the value of the environment variable OMP_NUM_THREADS is used if that is defined, otherwise it will use as many as there are CPU cores on this machine.")
+      ("threads", po::value<size_t>(&options.n_threads), "The number of threads to use. If not given, as many are used as there are CPU cores on this machine.")
       ("output,o", po::value<string>(&options.label), "Output file names are generated from this label. If this option is not specified the output label will be 'plasma_XXX' where XXX is a string to make the label unique.")
       ("salt", po::value<unsigned int>(&options.mcmc.random_salt), "Seed for the pseudo random number generator (used e.g. for sequence shuffle generation and MCMC sampling). Set this to get reproducible results.")
       ;

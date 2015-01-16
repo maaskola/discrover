@@ -98,6 +98,7 @@ int main(int argc, const char **argv) {
   Timer timer;
 
   Seeding::Options options;
+  options.n_threads = omp_get_num_procs();
 
   namespace po = boost::program_options;
 
@@ -268,8 +269,7 @@ int main(int argc, const char **argv) {
     return EXIT_FAILURE;
   }
 
-  if (vm.count("threads"))
-    omp_set_num_threads(options.n_threads);
+  omp_set_num_threads(options.n_threads);
 
   if (not vm.count("output")) {
     options.label = generate_random_label(program_name, 0, options.verbosity);

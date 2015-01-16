@@ -160,6 +160,7 @@ int main(int argc, const char **argv) {
   namespace po = boost::program_options;
 
   Options::HMM options;
+  options.n_threads = omp_get_num_procs();
   options.exec_info
       = generate_exec_info(argv[0], GIT_DESCRIPTION, cmdline(argc, argv));
   options.class_model = false;
@@ -268,7 +269,7 @@ int main(int argc, const char **argv) {
      ".viterbi \tFASTA sequences annotated with the Viterbi path, and sequence level statistics.\n"
      ".table   \tCoordinates and sequences of matches to the motifs in all sequences.\n"
      "Note that, depending on the argument of --compress, the latter two files may be compressed, and require decompression for inspection.").c_str())
-    ("threads", po::value<size_t>(&options.n_threads)->default_value(omp_get_num_procs()), "The number of threads to use. If this in not specified, the value of the environment variable OMP_NUM_THREADS is used if that is defined, otherwise it will use as many as there are CPU cores on this machine.")
+    ("threads", po::value<size_t>(&options.n_threads), "The number of threads to use. If not given, as many are used as there are CPU cores on this machine.")
     ("time", po::bool_switch(&options.timing_information), "Output information about how long certain parts take to execute.")
     ("cv", po::value<size_t>(&options.cross_validation_iterations)->default_value(0), "Number of cross validation iterations to do.")
     ("cv_freq", po::value<double>(&options.cross_validation_freq)->default_value(0.9, "0.9"), "Fraction of data samples to use for training in cross validation.")
@@ -546,8 +547,7 @@ int main(int argc, const char **argv) {
   }
 
   // set the number of threads with OpenMP
-  if (vm.count("threads"))
-    omp_set_num_threads(options.n_threads);
+  omp_set_num_threads(options.n_threads);
 
   // print information about specified motifs, paths, and objectives
   if (options.verbosity >= Verbosity::debug) {

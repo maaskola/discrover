@@ -21,7 +21,6 @@
   - unfortunately, this does not seem to mesh well with hybrid learning
 * Viterbi decoding occurrence counting is broken when using --padl > 0
 * Provide the discovered motifs as .HMM files with the software distribution
-* Specifying the number of threads with the environment variable OMP_NUM_THREADS doesn't work
 * test to see if the numerical issues due to MT persist, and if they can be ameliorated
 * print out MCC, DIPS, log likelihood difference for individual contrast eval
 
@@ -51,3 +50,4 @@ TODO 2015-01-12 Bad stuff happens when the supplied file is not in FASTA format
 TODO 2015-01-12 Warn if FASTA files are empty
 TODO 2015-01-12 In motif specifications: seemingly, when there are non-IUPAC characters it's taken to be a length spec
 TODO 2015-01-13 Revisit the conditions when Plasma's index needs to be rebuilt
+TODO 2015-01-16 Re-enable specifying the number of threads with the environment variable OMP_NUM_THREADS?
