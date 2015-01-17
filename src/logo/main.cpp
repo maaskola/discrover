@@ -109,10 +109,10 @@ int main(int argc, const char **argv) {
   po::options_description basic_options("Basic options", cols);
 
   basic_options.add_options()
-    ("hmm", po::value<vector<string>>(&hmm_paths), "Path to .hmm file. May be given multiple times. Note: free arguments are also interpreted as .hmm files.")
-    ("iupac,i", po::value<vector<string>>(&iupacs), "A motif given as a IUPAC regular expression. May be given multiple times.")
-    ("matrix,m", po::value<vector<string>>(&matrix_paths), "Path to a file with a motif in matrix form. May be given multiple times.")
-    ("output,o", po::value<string>(&label), string("Output file names are generated from this label. If this option is not specified the output label will be '" + exec_info.program_name + "_XXX' where XXX is a string to make the label unique.").c_str())
+    ("hmm", po::value(&hmm_paths), "Path to .hmm file. May be given multiple times. Note: free arguments are also interpreted as .hmm files.")
+    ("iupac,i", po::value(&iupacs), "A motif given as a IUPAC regular expression. May be given multiple times.")
+    ("matrix,m", po::value(&matrix_paths), "Path to a file with a motif in matrix form. May be given multiple times.")
+    ("output,o", po::value(&label), string("Output file names are generated from this label. If this option is not specified the output label will be '" + exec_info.program_name + "_XXX' where XXX is a string to make the label unique.").c_str())
     ("help,h", "Produce help message.")
     ("version", "Print out the version.")
     ;
