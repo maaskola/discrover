@@ -363,11 +363,10 @@ int main(int argc, const char **argv) {
     ;
 
   sampling_options.add_options()
-    ("sampling", po::bool_switch(&options.sampling.do_sampling), "Perform Gibbs sampling for parameter inference instead of re-estimation or gradient learning.")
-    ("temp", po::value<double>(&options.sampling.temperature)->default_value(1e-3), "When performing Gibbs sampling use this temperature. The temperatures of parallel chains is decreasing by factors of two.")
-//    ("anneal", po::value<double>(&options.sampling.anneal_factor)->default_value(0.98,"0.98"), "When performing Gibbs sampling multiply the temperature by this term in each iteration.")
-    ("smin", po::value<int>(&options.sampling.min_size), "Minimal length for Gibbs sampling. When unspecified defaults to initial motif length.")
-    ("smax", po::value<int>(&options.sampling.max_size), "Maximal length for Gibbs sampling. When unspecified defaults to initial motif length.")
+    ("sampling", po::bool_switch(&options.sampling.do_sampling), "Perform Monte-Carlo Markov chain (MCMC) sampling for parameter inference instead of re-estimation or gradient learning.")
+    ("temp", po::value<double>(&options.sampling.temperature)->default_value(1e-3), "When performing MCMC sampling use this temperature. The temperatures of parallel chains is decreasing by factors of two.")
+    ("smin", po::value<int>(&options.sampling.min_size), "Minimal motif length for MCMC sampling. When unspecified defaults to initial motif length.")
+    ("smax", po::value<int>(&options.sampling.max_size), "Maximal motif length for MCMC sampling. When unspecified defaults to initial motif length.")
     ("nindel", po::value<size_t>(&options.sampling.n_indels)->default_value(5), "Maximal number of positions that may be added or removed at a time. Adding and removing of happens at and from the ends of the motif.")
     ("nshift", po::value<size_t>(&options.sampling.n_shift)->default_value(5), "Maximal number of positions that the motif may be shifted by.")
     ("partemp", po::value<size_t>(&options.sampling.n_parallel)->default_value(6), "Number of chains in parallel tempering.")
