@@ -2,6 +2,13 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
 
+IF("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+  MESSAGE(FATAL_ERROR "Do not build in-source. "
+    "Please remove CMakeCache.txt and the CMakeFiles/ directory. "
+    "Then build out-of-source. "
+    "For instructions, please refer to BUILDING.md.")
+ENDIF()
+
 IF(COMMAND cmake_policy)
   CMAKE_POLICY(SET CMP0003 NEW)
 ENDIF(COMMAND cmake_policy)
@@ -292,7 +299,7 @@ ELSE()
 ENDIF()
 MESSAGE(STATUS "Libraries will be installed into ${CMAKE_INSTALL_PREFIX}/${LIBDIR}")
 
-ADD_SUBDIRECTORY(src build)
+ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(scripts)
 
 IF(BUILD_MANUAL)
@@ -307,7 +314,7 @@ IF(BUILD_MANUAL)
    DEPENDS plasma-cli-help.txt discrover-cli-help.txt
  )
 
- ADD_SUBDIRECTORY(doc build/doc)
+ ADD_SUBDIRECTORY(doc)
 
  ADD_DEPENDENCIES(pdf generate-cli-help-files)
 ENDIF()
