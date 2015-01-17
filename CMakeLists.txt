@@ -9,10 +9,6 @@ IF("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     "For instructions, please refer to BUILDING.md.")
 ENDIF()
 
-IF(COMMAND cmake_policy)
-  CMAKE_POLICY(SET CMP0003 NEW)
-ENDIF(COMMAND cmake_policy)
-
 PROJECT(discrover)
 
 # if you want the full compiler output, uncomment the following line
