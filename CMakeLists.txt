@@ -276,14 +276,6 @@ ELSE()
   git_branch(GIT_BRANCH)
 ENDIF()
 
-FIND_PACKAGE(Ctags)
-IF(CTAGS_FOUND AND NOT(APPLE))
-  ADD_CUSTOM_TARGET(ctags ALL
-    COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q src/
-    COMMENT "Creating Ctags."
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} )
-ENDIF()
-
 # Set LIB_SUFFIX if you want to install libraries into a specific directory.
 # By default, lib is used.
 # This is useful if your distribution prefers 64bit to go into lib64.
