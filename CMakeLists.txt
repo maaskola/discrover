@@ -293,8 +293,8 @@ ADD_SUBDIRECTORY(scripts)
 IF(BUILD_MANUAL)
   ADD_CUSTOM_COMMAND(
      OUTPUT plasma-cli-help.txt discrover-cli-help.txt
-     COMMAND plasma -hv > plasma-cli-help.txt
-     COMMAND discrover-bin -hv > discrover-cli-help.txt
+     COMMAND plasma -h > plasma-cli-help.txt
+     COMMAND discrover-bin -hV > discrover-cli-help.txt
      DEPENDS plasma discrover-bin
    )
 
