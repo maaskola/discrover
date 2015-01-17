@@ -408,7 +408,8 @@ This option is only shown in the full command line help, available with \verb|di
 
 \subsubsection{Gradient and Monte-Carlo Markov chain optimization}
 Gradient optimization is the default learning mode for \discrover{}.
-Aside from gradient learning, it is also possible---with the command line switch \verb|--sampling|---to use Monte-Carlo Markov chain optimization to learn HMM parameters.
+Aside from gradient learning, it is also possible to use Monte-Carlo Markov chain optimization to learn HMM parameters.
+This is done with the command line switch \verb|--sampling|.
 Like the MCMC optimization mode of \plasma{} (see section~\ref{section:plasma-MCMC}), also that of \discrover{} uses parallel tempering.
 
 The MCMC learning mode of \discrover{} does not support multiple objective learning as in the hybrid learning mode.
