@@ -13,4 +13,4 @@ install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
   - g++ --version
 before_script: mkdir build && cd build && cmake ../
-script: cd build && make
+script: make
