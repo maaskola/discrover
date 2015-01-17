@@ -165,16 +165,18 @@ After this variable has been adapted to your system, you may proceed with the ne
 
 ### <a name="step2"></a> Step 2: Execute the CMake build script
 
-Change to the root directory of the package and execute
+The software needs to be built out-of-source.
+For this, Change to the root directory of the package, create a new subdirectory (e.g. name it `build`), change into it and run `cmake` from there:
 
 ```sh
-cmake .
+cd <discrover_directory>
+mkdir build && cd build && cmake ..
 ```
 
 Alternatively, you can execute
 
 ```sh
-cmake -DCMAKE_INSTALL_PREFIX:PATH=/desired/installation/path .
+mkdir build && cd build && cmake -DCMAKE_INSTALL_PREFIX:PATH=/desired/installation/path ..
 ```
 
 where you would replace ```/desired/installation/path``` by the path to which you to install the package.
@@ -186,6 +188,7 @@ This will search for the paths to the required headers and libraries, create a d
 It will also check if your compiler supports the required features (C++11 and OpenMP support).
 
 If anything fails at this step please have a look at [CMakeLists.txt](CMakeLists.txt) and see if some of the commented-out statements may help you.
+Note again, that only out-of-source builds are supported, and for this reason it is necessary for you to create a subdirectory, change into it, and run `cmake` from there.
 If difficulties persists, please contact the author of this software.
 
 
