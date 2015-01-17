@@ -201,7 +201,7 @@ int main(int argc, const char **argv) {
 #endif
 
   generic_options.add_options()
-    ("config", po::value<string>(&config_path), "Read options from a configuration file. ")
+    ("config", po::value(&config_path), "Read options from a configuration file. ")
     ("help,h", "Produce help message. Combine with -v or -V for additional commands.")
     ("version", "Print out the version. Also show git SHA1 with -v.")
     ("verbose,v", "Be verbose about the progress.")
@@ -209,7 +209,7 @@ int main(int argc, const char **argv) {
     ;
 
   basic_options.add_options()
-    ("fasta,f", po::value<vector<Specification::Set>>(&options.paths)->required(),
+    ("fasta,f", po::value(&options.paths)->required(),
      "FASTA file definition. "
      "May be given multiple times. "
      "Syntax as follows:\n"
@@ -230,7 +230,7 @@ int main(int argc, const char **argv) {
      "\n"
      // TODO note usage of the 'control' motif name
      )
-    ("motif,m", po::value<vector<Specification::Motif>>(&options.motif_specifications),
+    ("motif,m", po::value(&options.motif_specifications),
      "Motif definition. "
      "May be given multiple times. "
      "Syntax as follows:\n"
@@ -262,7 +262,7 @@ int main(int argc, const char **argv) {
   default_objective.measure = Measure::MutualInformation;
 
   basic_options_optional.add_options()
-    ("score", po::value<Training::Objectives>(&options.objectives)->default_value(Training::Objectives(1,default_objective), "mi"),
+    ("score", po::value(&options.objectives)->default_value(Training::Objectives(1,default_objective), "mi"),
      "Score definition. "
      "May be given multiple times. "
      "Syntax as follows:\n"
@@ -297,7 +297,7 @@ int main(int argc, const char **argv) {
     ;
 
   advanced_options.add_options()
-    ("output,o", po::value<string>(&options.label), (
+    ("output,o", po::value(&options.label), (
       "Output file names are generated from this label. If not given, the output label will be '" + options.exec_info.program_name + "_XXX' where XXX is a string to make the label unique. The output files comprise:\n"
       ".hmm     \tParameter of the trained HMM. May be loaded later with --learn.\n"
       ".summary \tSummary information with number of occurrences of the motifs in each sample, and various generative and discriminative statistics.\n"
@@ -306,24 +306,24 @@ int main(int argc, const char **argv) {
       "Note that, depending on the argument of --compress, the latter two files may be compressed, and require decompression for inspection.\n"
       "Also, sequence logos of the found motifs are generated with file names based on this output label."
      ).c_str())
-    ("threads", po::value<size_t>(&options.n_threads), "Number of threads. If not given, as many are used as there are CPU cores on this machine.")
+    ("threads", po::value(&options.n_threads), "Number of threads. If not given, as many are used as there are CPU cores on this machine.")
     ("time", po::bool_switch(&options.timing_information), "Output information about how long certain parts take to execute.")
-    ("cv", po::value<size_t>(&options.cross_validation_iterations)->default_value(0), "Number of cross validation iterations to do.")
-    ("cv_freq", po::value<double>(&options.cross_validation_freq)->default_value(0.9, "0.9"), "Fraction of data samples for training in cross validation.")
-    ("nseq", po::value<size_t>(&options.n_seq)->default_value(0), "Use only the first N sequences of each file. Use 0 to indicate all sequences.")
-    ("iter", po::value<size_t>(&options.termination.max_iter)->default_value(1000), "Maximal number of iterations to perform in training. A value of 0 means no limit, and that the training is only terminated by the tolerance.")
-    ("salt", po::value<unsigned int>(&options.random_salt), "Seed for the pseudo random number generator (used e.g. for sequence shuffle generation and MCMC sampling). Set this to get reproducible results.")
+    ("cv", po::value(&options.cross_validation_iterations)->default_value(0), "Number of cross validation iterations to do.")
+    ("cv_freq", po::value(&options.cross_validation_freq)->default_value(0.9, "0.9"), "Fraction of data samples for training in cross validation.")
+    ("nseq", po::value(&options.n_seq)->default_value(0), "Use only the first N sequences of each file. Use 0 to indicate all sequences.")
+    ("iter", po::value(&options.termination.max_iter)->default_value(1000), "Maximal number of iterations to perform in training. A value of 0 means no limit, and that the training is only terminated by the tolerance.")
+    ("salt", po::value(&options.random_salt), "Seed for the pseudo random number generator (used e.g. for sequence shuffle generation and MCMC sampling). Set this to get reproducible results.")
     ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
     ;
 
   init_options.add_options()
-    ("load,l", po::value<vector<string>>(&options.load_paths), "Load HMM parameters from a .hmm file produced by an earlier run. Can be specified multiple times; then the first parameter file will be loaded, and motifs of the following parameter files are added.")
-    ("alpha", po::value<double>(&options.alpha)->default_value(0.03, "0.03"), "Probability of alternative nucleotides. The nucleotides not included in the IUPAC character will have this probability.")
-    ("lambda", po::value<double>(&options.lambda)->default_value(1), "Initial value for prior with which a motif is expected.")
-    ("wiggle", po::value<size_t>(&options.wiggle)->default_value(0), "For automatically determined seeds, consider variants shifted up- and downstream by up to the specified number of positions.")
-    ("extend", po::value<size_t>(&options.extend)->default_value(0), "Extend seeds by this many Ns up- and downstream before HMM training.")
-    ("padl", po::value<size_t>(&options.left_padding)->default_value(0), "Add this many Ns upstream (to the left) of the seed.")
-    ("padr", po::value<size_t>(&options.right_padding)->default_value(0), "Add this many Ns downstream (to the right) of the seed.")
+    ("load,l", po::value(&options.load_paths), "Load HMM parameters from a .hmm file produced by an earlier run. Can be specified multiple times; then the first parameter file will be loaded, and motifs of the following parameter files are added.")
+    ("alpha", po::value(&options.alpha)->default_value(0.03, "0.03"), "Probability of alternative nucleotides. The nucleotides not included in the IUPAC character will have this probability.")
+    ("lambda", po::value(&options.lambda)->default_value(1), "Initial value for prior with which a motif is expected.")
+    ("wiggle", po::value(&options.wiggle)->default_value(0), "For automatically determined seeds, consider variants shifted up- and downstream by up to the specified number of positions.")
+    ("extend", po::value(&options.extend)->default_value(0), "Extend seeds by this many Ns up- and downstream before HMM training.")
+    ("padl", po::value(&options.left_padding)->default_value(0), "Add this many Ns upstream (to the left) of the seed.")
+    ("padr", po::value(&options.right_padding)->default_value(0), "Add this many Ns downstream (to the right) of the seed.")
     ;
 
   eval_options.add_options()
@@ -337,16 +337,16 @@ int main(int argc, const char **argv) {
 
   multi_motif_options.add_options()
     ("multiple", po::bool_switch(&options.multi_motif.accept_multiple), "Accept multiple motifs as long as the score increases. This can only be used with the objective function MICO.")
-    ("relearn", po::value<Options::MultiMotif::Relearning>(&options.multi_motif.relearning)->default_value(Options::MultiMotif::Relearning::Full, "full"), "When accepting multiple motifs, whether and how to re-learn the model after a new motif is added. Choices: 'none', 'reest', 'full'.")
-    ("resratio", po::value<double>(&options.multi_motif.residual_ratio)->default_value(5.0), "Cutoff to discard new motifs in multi motif mode. The cutoff is applied on the ratio of conditional mutual information of the new motif and the conditions given the previous motifs. Must be non-negative. High values discard more motifs, and lead to less redundant motifs.")
+    ("relearn", po::value(&options.multi_motif.relearning)->default_value(Options::MultiMotif::Relearning::Full, "full"), "When accepting multiple motifs, whether and how to re-learn the model after a new motif is added. Choices: 'none', 'reest', 'full'.")
+    ("resratio", po::value(&options.multi_motif.residual_ratio)->default_value(5.0), "Cutoff to discard new motifs in multi motif mode. The cutoff is applied on the ratio of conditional mutual information of the new motif and the conditions given the previous motifs. Must be non-negative. High values discard more motifs, and lead to less redundant motifs.")
     ;
 
   mmie_options.add_options()
-    ("classp", po::value<double>(&options.class_prior)->default_value(0.5),
+    ("classp", po::value(&options.class_prior)->default_value(0.5),
      "Initial class prior.")
-    ("motifp1", po::value<double>(&options.conditional_motif_prior1)->default_value(0.6, "0.6"),
+    ("motifp1", po::value(&options.conditional_motif_prior1)->default_value(0.6, "0.6"),
      "Initial conditional motif prior for the signal class.")
-    ("motifp2", po::value<double>(&options.conditional_motif_prior2)->default_value(0.03, "0.03"),
+    ("motifp2", po::value(&options.conditional_motif_prior2)->default_value(0.03, "0.03"),
      "Initial conditional motif prior for the control class.")
     ("noclassp", po::bool_switch(&options.dont_learn_class_prior),
      "Don't learn the class prior.")
@@ -356,36 +356,36 @@ int main(int argc, const char **argv) {
 
 
   linesearching_options.add_options()
-    ("LSmu", po::value<double>(&options.line_search.mu)->default_value(0.1, "0.1"), "The parameter µ for the Moré-Thuente line search algorithm.")
-    ("LSeta", po::value<double>(&options.line_search.eta)->default_value(0.5, "0.5"), "The parameter η for the Moré-Thuente line search algorithm.")
-    ("LSdelta", po::value<double>(&options.line_search.delta)->default_value(0.66, "0.66"), "The parameter delta for the Moré-Thuente line search algorithm.")
-    ("LSnum", po::value<size_t>(&options.line_search.max_steps)->default_value(10, "10"), "How many gradient and function evaluation to perform maximally per line search.")
+    ("LSmu", po::value(&options.line_search.mu)->default_value(0.1, "0.1"), "The parameter µ for the Moré-Thuente line search algorithm.")
+    ("LSeta", po::value(&options.line_search.eta)->default_value(0.5, "0.5"), "The parameter η for the Moré-Thuente line search algorithm.")
+    ("LSdelta", po::value(&options.line_search.delta)->default_value(0.66, "0.66"), "The parameter delta for the Moré-Thuente line search algorithm.")
+    ("LSnum", po::value(&options.line_search.max_steps)->default_value(10, "10"), "How many gradient and function evaluation to perform maximally per line search.")
     ;
 
   termination_options.add_options()
-    ("gamma", po::value<double>(&options.termination.gamma_tolerance)->default_value(1e-4, "1e-4"), "Tolerance for the reestimation type learning methods. Training stops when the L1 norm of the parameter change between iterations is less than this value.")
-    ("delta", po::value<double>(&options.termination.delta_tolerance)->default_value(1e-4, "1e-4"), "Relative score difference criterion tolerance for training algorithm termination: stops iterations when (f - f') / f < delta, where f' is the objective value of the past iteration, and f is the objective value of the current iteration.")
-    ("epsilon", po::value<double>(&options.termination.epsilon_tolerance)->default_value(0), "Gradient norm criterion tolerance for training algorithm termination: stops when ||g|| < epsilon * max(1, ||g||), where ||.|| denotes the Euclidean (L2) norm.")
-    ("past", po::value<size_t>(&options.termination.past)->default_value(1), "Distance for delta-based convergence test. This parameter determines the distance, in iterations, to compute the rate of decrease of the objective function.")
+    ("gamma", po::value(&options.termination.gamma_tolerance)->default_value(1e-4, "1e-4"), "Tolerance for the reestimation type learning methods. Training stops when the L1 norm of the parameter change between iterations is less than this value.")
+    ("delta", po::value(&options.termination.delta_tolerance)->default_value(1e-4, "1e-4"), "Relative score difference criterion tolerance for training algorithm termination: stops iterations when (f - f') / f < delta, where f' is the objective value of the past iteration, and f is the objective value of the current iteration.")
+    ("epsilon", po::value(&options.termination.epsilon_tolerance)->default_value(0), "Gradient norm criterion tolerance for training algorithm termination: stops when ||g|| < epsilon * max(1, ||g||), where ||.|| denotes the Euclidean (L2) norm.")
+    ("past", po::value(&options.termination.past)->default_value(1), "Distance for delta-based convergence test. This parameter determines the distance, in iterations, to compute the rate of decrease of the objective function.")
     ;
 
   sampling_options.add_options()
     ("sampling", po::bool_switch(&options.sampling.do_sampling), "Perform Monte-Carlo Markov chain (MCMC) sampling for parameter inference instead of re-estimation or gradient learning.")
-    ("temp", po::value<double>(&options.sampling.temperature)->default_value(1e-3), "When performing MCMC sampling use this temperature. The temperatures of parallel chains is decreasing by factors of two.")
-    ("smin", po::value<int>(&options.sampling.min_size), "Minimal motif length for MCMC sampling. When unspecified defaults to initial motif length.")
-    ("smax", po::value<int>(&options.sampling.max_size), "Maximal motif length for MCMC sampling. When unspecified defaults to initial motif length.")
-    ("nindel", po::value<size_t>(&options.sampling.n_indels)->default_value(5), "Maximal number of positions that may be added or removed at a time. Adding and removing of happens at and from the ends of the motif.")
-    ("nshift", po::value<size_t>(&options.sampling.n_shift)->default_value(5), "Maximal number of positions that the motif may be shifted by.")
-    ("partemp", po::value<size_t>(&options.sampling.n_parallel)->default_value(6), "Number of chains in parallel tempering.")
+    ("temp", po::value(&options.sampling.temperature)->default_value(1e-3), "When performing MCMC sampling use this temperature. The temperatures of parallel chains is decreasing by factors of two.")
+    ("smin", po::value(&options.sampling.min_size), "Minimal motif length for MCMC sampling. When unspecified defaults to initial motif length.")
+    ("smax", po::value(&options.sampling.max_size), "Maximal motif length for MCMC sampling. When unspecified defaults to initial motif length.")
+    ("nindel", po::value(&options.sampling.n_indels)->default_value(5), "Maximal number of positions that may be added or removed at a time. Adding and removing of happens at and from the ends of the motif.")
+    ("nshift", po::value(&options.sampling.n_shift)->default_value(5), "Maximal number of positions that the motif may be shifted by.")
+    ("partemp", po::value(&options.sampling.n_parallel)->default_value(6), "Number of chains in parallel tempering.")
     ;
 
   hidden_options.add_options()
     ("nosave", po::bool_switch(&options.dont_save_shuffle_sequences), "Do not save generated shuffle sequences.")
-    ("bglearn", po::value<Training::Method>(&options.bg_learning)->default_value(Training::Method::Reestimation, "em"), "How to learn the background. Available are 'fixed', 'em', 'gradient', where the 'em' uses re-estimation to maximize the likelihood contribution of the background parameters, while 'gradient' uses the discriminative objective function.")
-    ("pscnt", po::value<double>(&options.contingency_pseudo_count)->default_value(1.0, "1"), "The pseudo count to be added to the contingency tables in the discriminative algorithms.")
-    ("pscntE", po::value<double>(&options.emission_pseudo_count)->default_value(1.0, "1"), "The pseudo count to be added to the expected emission probabilities before normalization in the Baum-Welch algorithm.")
-    ("pscntT", po::value<double>(&options.transition_pseudo_count)->default_value(0.0, "0"), "The pseudo count to be added to the expected transition probabilities before normalization in the Baum-Welch algorithm.")
-    ("compress", po::value<Options::Compression>(&options.output_compression)->default_value(Options::Compression::gzip, "gz"), "Compression method for larger output files. Available are: 'none', 'gz' or 'gzip', 'bz2' or 'bzip2'.") // TODO make the code conditional on the presence of zlib
+    ("bglearn", po::value(&options.bg_learning)->default_value(Training::Method::Reestimation, "em"), "How to learn the background. Available are 'fixed', 'em', 'gradient', where the 'em' uses re-estimation to maximize the likelihood contribution of the background parameters, while 'gradient' uses the discriminative objective function.")
+    ("pscnt", po::value(&options.contingency_pseudo_count)->default_value(1.0, "1"), "The pseudo count to be added to the contingency tables in the discriminative algorithms.")
+    ("pscntE", po::value(&options.emission_pseudo_count)->default_value(1.0, "1"), "The pseudo count to be added to the expected emission probabilities before normalization in the Baum-Welch algorithm.")
+    ("pscntT", po::value(&options.transition_pseudo_count)->default_value(0.0, "0"), "The pseudo count to be added to the expected transition probabilities before normalization in the Baum-Welch algorithm.")
+    ("compress", po::value(&options.output_compression)->default_value(Options::Compression::gzip, "gz"), "Compression method for larger output files. Available are: 'none', 'gz' or 'gzip', 'bz2' or 'bzip2'.") // TODO make the code conditional on the presence of zlib
     ("miseeding", po::bool_switch(&options.use_mi_to_seed), "Disregard automatic seeding choice and use MICO for seeding.")
     ("absthresh", po::bool_switch(&options.termination.absolute_improvement), "Whether improvement should be gauged by absolute value. Default is relative to the current score.")
     ("intermediate", po::bool_switch(&options.store_intermediate), "Write out intermediate parameters during training.")
