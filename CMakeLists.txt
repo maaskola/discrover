@@ -296,7 +296,20 @@ ADD_SUBDIRECTORY(src build)
 ADD_SUBDIRECTORY(scripts)
 
 IF(BUILD_MANUAL)
-  ADD_SUBDIRECTORY(doc build/doc)
+  ADD_CUSTOM_COMMAND(
+     OUTPUT plasma-cli-help.txt discrover-cli-help.txt
+     COMMAND plasma -hv > plasma-cli-help.txt
+     COMMAND discrover-bin -hv > discrover-cli-help.txt
+     DEPENDS plasma discrover-bin
+   )
+
+ ADD_CUSTOM_TARGET(generate-cli-help-files ALL
+   DEPENDS plasma-cli-help.txt discrover-cli-help.txt
+ )
+
+ ADD_SUBDIRECTORY(doc build/doc)
+
+ ADD_DEPENDENCIES(pdf generate-cli-help-files)
 ENDIF()
 
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/README.md

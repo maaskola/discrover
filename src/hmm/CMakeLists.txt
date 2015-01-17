@@ -19,4 +19,3 @@ IF(GOOGLEPERFTOOLS_FOUND)
 ENDIF()
 
 INSTALL(TARGETS discrover-bin DESTINATION bin)
-EXPORT(TARGETS discrover-bin APPEND FILE ${CMAKE_BINARY_DIR}/discrover-targets.cmake)
