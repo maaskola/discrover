@@ -44,6 +44,7 @@
 #include "../mcmc/montecarlo.hpp"
 #include "../timer.hpp"
 #include <git_config.hpp>
+#include <discrover_paths.hpp>
 
 using namespace std;
 
@@ -101,7 +102,10 @@ string gen_usage_string(const string &program_name) {
     "In particular, the manual explains\n"
     "a) how sets of sequences can be grouped into multiple contrasts (useful e.g. when repeat experiments are available),\n"
     "b) how motifs can be discovered that are discriminative for one contrast but not for another, and\n"
-    "c) how composite models of multiple motifs can be built, which is useful to discover co-factor motifs e.g. in ChIP-Seq analysis (in brief: by discovering many seeds and then building composite HMMs using the --multiple switch)."
+    "c) how composite models of multiple motifs can be built, which is useful to discover co-factor motifs e.g. in ChIP-Seq analysis (in brief: by discovering many seeds and then building composite HMMs using the --multiple switch).\n"
+    "\n"
+    "Manual: "
+    DISCROVER_MANUAL_PATH
     ;
   return usage;
 }

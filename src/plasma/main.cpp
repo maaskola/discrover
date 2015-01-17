@@ -27,6 +27,7 @@
 #include "../executioninformation.hpp"
 #include "../mcmc/montecarlo.hpp"
 #include <git_config.hpp>
+#include <discrover_paths.hpp>
 
 const std::string header = "# How to interpret this file:\n"
 "# The program proceeds iteratively, at each step determining the single most discriminative word.";
@@ -47,7 +48,10 @@ std::string gen_usage_string() {
     program_name + " signal.fa control.fa -m 4-12 --score freq -d 2 > analysis.txt\n" +
     program_name + " signal.fa control.fa -m 4-12 -d 2 > analysis.txt\n" +
     program_name + " signal.fa control.fa -m 4-12 --rdeg 0.2 > analysis.txt\n" +
-    program_name + " signal:signal.fa control.fa -m signal:8 > analysis.txt\n";
+    program_name + " signal:signal.fa control.fa -m signal:8 > analysis.txt\n" +
+    "\n"
+    "Manual: "
+    DISCROVER_MANUAL_PATH + "\n";
   return usage;
 }
 

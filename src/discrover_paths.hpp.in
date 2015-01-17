@@ -1,0 +1,6 @@
+#ifndef DISCROVER_PATHS_HPP
+#define DISCROVER_PATHS_HPP
+
+#define DISCROVER_MANUAL_PATH "@CMAKE_INSTALL_PREFIX@/share/doc/discrover/discrover-manual.pdf"
+
+#endif
