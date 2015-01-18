@@ -58,9 +58,9 @@ A Ubuntu [PPA](https://launchpad.net/~maaskola/+archive/ubuntu/discrover) has be
 You can add this PPA to your system and install Discrover with the following commands (you might have to replace `trusty` with your Ubuntu system's release name):
 
 ```sh
-deb http://ppa.launchpad.net/maaskola/discrover/ubuntu trusty main
-deb-src http://ppa.launchpad.net/maaskola/discrover/ubuntu trusty main
-apt-get install discrover
+sudo add-apt-repository ppa:maaskola/discrover  # fetch and install the PPA's key.
+sudo apt-get update                             # synchronize APT package list
+sudo apt-get install discrover                  # install Discrover
 ```
 
 Aside from using this PPA, you can also directly download and install a Discrover release package.
