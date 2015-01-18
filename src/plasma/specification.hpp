@@ -61,6 +61,7 @@ struct Set {
   Set(const std::string &s, bool shuffled = false);
   Set(const Set &spec);
   Set();
+  std::string name() const;
 };
 
 using Sets = std::vector<Set>;

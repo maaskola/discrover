@@ -162,7 +162,7 @@ void report(ostream &os, const Result &res, const Collection &collection,
     for (auto &dataset : contrast) {
       double x = res.counts[i++];
       double z = options.word_stats ? dataset.seq_size : dataset.set_size;
-      os << "Occurrence statistics             " << dataset.path << " " << x
+      os << "Occurrence statistics             " << dataset.name() << " " << x
          << " / " << z << " = " << (x / z) << endl;
     }
   if (options.dump_viterbi) {

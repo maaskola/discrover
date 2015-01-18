@@ -52,7 +52,7 @@ void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast,
                  size_t width, size_t prec) {
   size_t w = 0;
   for (size_t i = 0; i < m.size1(); i++)
-    w = max(w, contrast.sets[i].path.size());
+    w = max(w, contrast.sets[i].name().size());
 
   ofs << left << setw(w) << "" << right << setw(width) << "Present" << right
       << setw(width) << "Absent";
@@ -62,7 +62,7 @@ void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast,
 
   const streamsize prev_prec = ofs.precision();
   for (size_t i = 0; i < m.size1(); i++) {
-    ofs << left << setw(w) << contrast.sets[i].path;
+    ofs << left << setw(w) << contrast.sets[i].name();
     for (size_t j = 0; j < m.size2(); j++)
       ofs << right << fixed << setprecision(prec) << setw(width) << m(i, j);
     if (m.size2() == 2)
@@ -307,9 +307,9 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
   if (not options.evaluate.skip_summary) {
     // TODO EVALUATION
     double log_likelihood = hmm.log_likelihood(dataset);
-    // out << endl << "Summary of " << dataset.path << endl;
+    // out << endl << "Summary of " << dataset.name() << endl;
     // out << "Total sequences = " << dataset.sequences.size() << endl;
-    out << "Log-likelihood of " << dataset.path << " = " << log_likelihood
+    out << "Log-likelihood of " << dataset.name() << " = " << log_likelihood
         << endl;
     // out << "Akaike information criterion AIC = " << 2 * hmm.n_parameters() -
     // 2 * log_likelihood << endl;
@@ -319,7 +319,7 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
   }
 
   if (not options.evaluate.skip_viterbi_path)
-    v_out << "# " << dataset.path << " details following" << endl;
+    v_out << "# " << dataset.name() << " details following" << endl;
 
   const size_t n_groups = hmm.get_ngroups();
   const size_t n = dataset.sequences.size();
@@ -413,10 +413,10 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
     }
 
     if (not options.evaluate.skip_bed)
-      hmm.print_occurrence_table(dataset.path, dataset.sequences[i],
+      hmm.print_occurrence_table(dataset.name(), dataset.sequences[i],
                                  viterbi_path, bed_out, true);
     if (not options.evaluate.skip_occurrence_table)
-      hmm.print_occurrence_table(dataset.path, dataset.sequences[i],
+      hmm.print_occurrence_table(dataset.name(), dataset.sequences[i],
                                  viterbi_path, occ_out, false);
   }
 
@@ -444,7 +444,7 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
 
   double time = timer.tock();
   if (options.timing_information)
-    cerr << "Evaluation for " + dataset.path + ": " + to_pretty_string(time)
+    cerr << "Evaluation for " + dataset.name()+ ": " + to_pretty_string(time)
             + " µs" << endl;
   ResultsCounts results
       = {n_sites, n_motifs, n_viterbi_sites, n_viterbi_motifs};

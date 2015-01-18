@@ -75,6 +75,10 @@ Set::Set(const string &token, bool is_shuffle_) : Set() {
   }
 }
 
+string Set::name() const {
+  return (is_shuffle ? "shuffle(" : "") + path + (is_shuffle ? ")" : "");
+}
+
 Motif::Motif(const Motif &s)
     : kind(s.kind),
       specification(s.specification),
