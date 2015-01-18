@@ -621,7 +621,11 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
 
             string exp_motif_tag = "Posterior decoded motif counts - " + name
                                    + ":" + consensus;
-            summary_out << endl << exp_motif_tag << endl;
+            summary_out << endl
+                        << "# Posterior decoded motif count = probabilistic "
+                           "count (expected number) of motif occurrence in the "
+                           "sequences" << endl
+                        << exp_motif_tag << endl;
             matrix_t em(counts.size(), 2);
             for (size_t j = 0; j < counts.size(); j++) {
               em(j, 0) = counts[j].exp_motifs[i];
@@ -633,7 +637,11 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
 
             string vit_motif_tag = "Viterbi decoded motif counts - " + name
                                    + ":" + consensus;
-            summary_out << endl << vit_motif_tag << endl;
+            summary_out << endl
+                        << "# Viterbi decoded motif count = number of motif "
+                           "occurrences in the Viterbi paths of the sequences"
+                        << endl
+                        << vit_motif_tag << endl;
             matrix_t vm(counts.size(), 2);
             for (size_t j = 0; j < counts.size(); j++) {
               vm(j, 0) = counts[j].viterbi_motifs[i];
@@ -645,7 +653,11 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
 
             string exp_tag = "Posterior decoded site counts - " + name + ":"
                              + consensus;
-            summary_out << endl << exp_tag << endl;
+            summary_out << endl
+                        << "# Posterior decoded motif count = probabilistic "
+                           "count (expected number) of sequences with at least "
+                           "one motif occurrence" << endl
+                        << exp_tag << endl;
             matrix_t e(counts.size(), 2);
             for (size_t j = 0; j < counts.size(); j++) {
               e(j, 0) = counts[j].exp_sites[i];
@@ -657,7 +669,11 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
 
             string vit_tag = "Viterbi decoded site counts - " + name + ":"
                              + consensus;
-            summary_out << endl << vit_tag << endl;
+            summary_out << endl
+                        << "# Viterbi decoded site count = number of sequences "
+                           "for which the Viterbi path has at least one motif "
+                           "occurrence" << endl
+                        << vit_tag << endl;
             matrix_t v(counts.size(), 2);
             for (size_t j = 0; j < counts.size(); j++) {
               v(j, 0) = counts[j].viterbi_sites[i];
