@@ -14,6 +14,7 @@
 \newcommand{\version}[0]{@GIT_DESCRIPTION@}
 \newcommand{\theurl}[0]{\url{https://github.com/maaskola/discrover}}
 \newcommand{\TikZ}{Ti\emph{k}Z}
+\newcommand{\ignore}[1]{}
 
 \hypersetup{%
   pdfauthor=Jonas Maaskola,
@@ -101,10 +102,15 @@ In particular the following objective functions are available:
   \item Mutual information of condition and motif occurrence (MICO)
 \end{itemize}
 The publication describing this method, \cite{Maaskola2014}, presents experiments based on synthetic data that suggest that the objective functions MCC, MICO, and MMIE have higher motif discovery performance than the other objective functions analyzed.
+Among these MICO is the most versatile, as it is compatible with the multiple motif discovery mode implemented in \discrover{}.
+Hence, MICO is the recommended objective function.
+
+\ignore{%
 \subsection{Seeding}
 To be written.
 \subsection{Binding site HMM optimization}
 To be written.
+}
 
 \section{Tutorial}
 This tutorial demonstrates the basic usage of the motif discovery tools in this package.
