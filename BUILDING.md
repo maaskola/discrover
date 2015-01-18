@@ -42,7 +42,7 @@ At the time of writing `clang++` from the LLVM project does not yet have full Op
 
 
 ### Cairo
-As of version 1.4.0 [Cairo](http://cairographics.org/) is used to generate sequence logos in PDF and PNG format.
+As of Discrover version 1.4.0 [Cairo](http://cairographics.org/) is used to generate sequence logos in PDF and PNG format.
 
 
 ### R library
