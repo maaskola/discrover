@@ -55,9 +55,11 @@ yum update discrover-X.Y.Z-R.fc20.x86_64.rpm
 ## Ubuntu
 
 A Ubuntu [PPA](https://launchpad.net/~maaskola/+archive/ubuntu/discrover) has been set up that can be used for installing Discrover.
-After adding this PPA to your system following [these instructions](https://launchpad.net/+help-soyuz/ppa-sources-list.html), you can simply install Discrover with the following command:
+You can add this PPA to your system and install Discrover with the following commands (you might have to replace `trusty` with your Ubuntu system's release name):
 
 ```sh
+deb http://ppa.launchpad.net/maaskola/discrover/ubuntu trusty main
+deb-src http://ppa.launchpad.net/maaskola/discrover/ubuntu trusty main
 apt-get install discrover
 ```
 
