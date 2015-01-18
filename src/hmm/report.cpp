@@ -292,7 +292,7 @@ void Evaluator::print_posterior(ostream &os, const vector_t &scale,
 
 Evaluator::ResultsCounts Evaluator::evaluate_dataset(
     const Data::Set &dataset, ostream &out, ostream &v_out, ostream &occ_out,
-    ostream &motif_out, ostream &bed_out, const Options::HMM &options) const { // TODO motif_out
+    ostream &bed_out, const Options::HMM &options) const {
   const size_t width = 12;
   const size_t prec = 5;
   Timer timer;
@@ -561,19 +561,17 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
       occurrence_file.open(result.files.table.c_str(), flags);
 
     boost::iostreams::filtering_stream<boost::iostreams::output> v_out, bed_out,
-        occ_out, motif_out; // TODO motif_out
+        occ_out;
     switch (options.output_compression) {
       case Options::Compression::gzip:
         v_out.push(boost::iostreams::gzip_compressor());
         bed_out.push(boost::iostreams::gzip_compressor());
         occ_out.push(boost::iostreams::gzip_compressor());
-        motif_out.push(boost::iostreams::gzip_compressor()); // TODO motif_out
         break;
       case Options::Compression::bzip2:
         v_out.push(boost::iostreams::bzip2_compressor());
         bed_out.push(boost::iostreams::bzip2_compressor());
         occ_out.push(boost::iostreams::bzip2_compressor());
-        motif_out.push(boost::iostreams::bzip2_compressor()); // TODO motif_out
         break;
       default:
         break;
@@ -581,7 +579,6 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
     v_out.push(viterbi_file);
     bed_out.push(viterbi_file);
     occ_out.push(occurrence_file);
-    motif_out.push(occurrence_file); // TODO motif_out
 
     hmm.print_occurrence_table_header(occ_out);
 
@@ -607,7 +604,7 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
       vector<ResultsCounts> counts;
       for (auto &dataset : contrast) {
         ResultsCounts c = evaluate_dataset(dataset, summary_out, v_out, occ_out,
-                                           motif_out, bed_out, options); // TODO motif_out
+                                           bed_out, options);
         counts.push_back(c);
       }
 
