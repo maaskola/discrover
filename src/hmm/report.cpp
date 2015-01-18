@@ -577,7 +577,7 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
         break;
     }
     v_out.push(viterbi_file);
-    bed_out.push(viterbi_file);
+    bed_out.push(bed_file);
     occ_out.push(occurrence_file);
 
     hmm.print_occurrence_table_header(occ_out);
