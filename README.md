@@ -70,3 +70,7 @@ Even more obscure options are available by adding the very verbose switch: ```di
 ### Sequence logos
 Both ```plasma``` and ```discrover``` can generate sequence logos (and ```discrover``` does so by default).
 The same sequence logo creation routines are also available in the separate program ```discrover-logo```.
+
+### Sequence shuffling
+When ```plasma``` and ```discrover``` are given just a single FASTA file for analysis, they will automatically shuffle the sequences to create control sequences.
+You can use the same sequence shuffling routines via the separate program ```discrover-shuffle```.
