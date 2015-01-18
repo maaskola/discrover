@@ -306,7 +306,8 @@ int main(int argc, const char **argv) {
       ".hmm     \tParameter of the trained HMM. May be loaded later with --learn.\n"
       ".summary \tSummary information with number of occurrences of the motifs in each sample, and various generative and discriminative statistics.\n"
       ".viterbi \tFASTA sequences annotated with the Viterbi path, and sequence level statistics.\n"
-      ".table   \tCoordinates and sequences of matches to the motifs in all sequences.\n"
+      ".bed     \tBED file of coordinates of matches to the motifs in all sequences.\n"
+      ".table   \tCoordinates and sequences of matches to the motifs in all sequences (extends the .bed output file).\n"
       "Note that, depending on the argument of --compress, the latter two files may be compressed, and require decompression for inspection.\n"
       "Also, sequence logos of the found motifs are generated with file names based on this output label."
      ).c_str())
