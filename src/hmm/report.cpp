@@ -48,6 +48,16 @@ vector<string> Evaluator::generate_logos(const string &path_stem,
 }
 #endif
 
+string contrast_name_tag(const Data::Contrast &contrast) {
+  string tag = contrast.name + ":";
+  bool first = true;
+  for (auto &dataset : contrast) {
+    tag += (first ? "" : ",") + dataset.name();
+    first = false;
+  }
+  return tag;
+}
+
 void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast,
                  size_t width, size_t prec) {
   size_t w = 0;
@@ -153,10 +163,8 @@ void Evaluator::eval_contrast(ostream &ofs, const Data::Contrast &contrast,
       string name = hmm.get_group_name(group_idx);
       string consensus = hmm.get_group_consensus(group_idx);
 
-      ofs << endl;
-      print(ofs, tag,
-            "Expected occurrence statistics for motif \"" + name + "\"",
-            consensus);
+      ofs << tag << "Expected count of sequences with at least one occurrence "
+                    "of motif '" + name + ":" + consensus << "'" << endl;
       count_report(ofs, counts, motif_len, contrast, hmm.get_pseudo_count(),
                    limit_logp, name, tag);
       print(ofs, tag, "Matthews correlation coefficient", mcc);
@@ -421,23 +429,24 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
   }
 
   if (not options.evaluate.skip_summary) {
-    out << setw(30) << left << "Rank analysis";
+    const size_t label_col_width = 17;
+    out << setw(label_col_width) << left << "Rank analysis";
     out << setw(width) << right << "Rho" << setw(width) << right << "Z"
         << setw(width) << right << "log P(Z)" << setw(4) << right << ""
         << setw(width) << right << "t" << setw(width) << right << "log P(t)"
         << setw(4) << right << "" << endl;
     // TODO: write out the motif name
     for (size_t group_idx = 0; group_idx < number_motifs; group_idx++) {
-      out << setw(30) << left << "Posterior decoded site";
+      out << setw(label_col_width) << left << "Expected sites";
       correlation_report(atl_counts[group_idx], out, width, prec);
-      out << setw(30) << left << "Posterior number motif";
+      out << setw(label_col_width) << left << "Expected motifs";
       correlation_report(exp_counts[group_idx], out, width, prec);
       vector<size_t> vit(n);
       for (size_t i = 0; i < n; i++)
         vit[i] = vit_counts[group_idx][i] > 0;
-      out << setw(30) << left << "Viterbi site";
+      out << setw(label_col_width) << left << "Viterbi sites";
       correlation_report(vit, out, width, prec);
-      out << setw(30) << left << "Viterbi number motif";
+      out << setw(label_col_width) << left << "Viterbi motifs";
       correlation_report(vit_counts[group_idx], out, width, prec);
     }
   }
@@ -533,8 +542,11 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
     summary_out << endl;
 
     Timer eval_timer;
-    for (auto &contrast : collection)
+    for (auto &contrast : collection) {
+      summary_out << endl << "Discriminative statistics for contrast '"
+                  << contrast_name_tag(contrast) << "'" << endl;
       eval_contrast(summary_out, contrast, options.limit_logp, tag);
+    }
     double time = eval_timer.tock();
 
     if (options.timing_information)
@@ -601,6 +613,8 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
     }
 
     for (auto &contrast : collection) {
+      summary_out << endl << endl << "Summary statistics for contrast '"
+                  << contrast_name_tag(contrast) << "'" << endl;
       vector<ResultsCounts> counts;
       for (auto &dataset : contrast) {
         ResultsCounts c = evaluate_dataset(dataset, summary_out, v_out, occ_out,
@@ -619,12 +633,11 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
             string name = hmm.get_group_name(i);
             string consensus = hmm.get_group_consensus(i);
 
-            string exp_motif_tag = "Posterior decoded motif counts - " + name
+            string exp_motif_tag = "Expected motif counts - " + name
                                    + ":" + consensus;
             summary_out << endl
-                        << "# Posterior decoded motif count = probabilistic "
-                           "count (expected number) of motif occurrence in the "
-                           "sequences" << endl
+                        << "# Expected motif count = probabilistic count of "
+                           "motif occurrences in the sequences" << endl
                         << exp_motif_tag << endl;
             matrix_t em(counts.size(), 2);
             for (size_t j = 0; j < counts.size(); j++) {
@@ -635,10 +648,10 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
                          hmm.get_pseudo_count(), options.limit_logp, name,
                          tag + exp_motif_tag + " ");
 
-            string vit_motif_tag = "Viterbi decoded motif counts - " + name
+            string vit_motif_tag = "Viterbi motif counts - " + name
                                    + ":" + consensus;
             summary_out << endl
-                        << "# Viterbi decoded motif count = number of motif "
+                        << "# Viterbi motif count = number of motif "
                            "occurrences in the Viterbi paths of the sequences"
                         << endl
                         << vit_motif_tag << endl;
@@ -651,12 +664,11 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
                          hmm.get_pseudo_count(), options.limit_logp, name,
                          tag + vit_motif_tag + " ");
 
-            string exp_tag = "Posterior decoded site counts - " + name + ":"
+            string exp_tag = "Expected site counts - " + name + ":"
                              + consensus;
             summary_out << endl
-                        << "# Posterior decoded motif count = probabilistic "
-                           "count (expected number) of sequences with at least "
-                           "one motif occurrence" << endl
+                        << "# Expected site count = probabilistic count of "
+                           "sequences with at least one motif occurrence" << endl
                         << exp_tag << endl;
             matrix_t e(counts.size(), 2);
             for (size_t j = 0; j < counts.size(); j++) {
@@ -667,10 +679,10 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
                          hmm.get_pseudo_count(), options.limit_logp, name,
                          tag + exp_tag + " ");
 
-            string vit_tag = "Viterbi decoded site counts - " + name + ":"
+            string vit_tag = "Viterbi site counts - " + name + ":"
                              + consensus;
             summary_out << endl
-                        << "# Viterbi decoded site count = number of sequences "
+                        << "# Viterbi site count = number of sequences "
                            "for which the Viterbi path has at least one motif "
                            "occurrence" << endl
                         << vit_tag << endl;
