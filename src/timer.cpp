@@ -30,22 +30,15 @@
 #include <sys/time.h>
 #include "timer.hpp"
 
-Timer::Timer()
-{
-  tick();
-}
+Timer::Timer() { tick(); }
 
-void Timer::tick()
-{
-  gettimeofday(&start,NULL);
-}
+void Timer::tick() { gettimeofday(&start, NULL); }
 
 /** Return time in micro seconds since tick(). */
-double Timer::tock() const
-{
+double Timer::tock() const {
   struct timeval end;
-  gettimeofday(&end,NULL);
-  double time = (end.tv_sec - start.tv_sec)*1000000+end.tv_usec-start.tv_usec;
-  return(time);
+  gettimeofday(&end, NULL);
+  double time = (end.tv_sec - start.tv_sec) * 1000000 + end.tv_usec
+                - start.tv_usec;
+  return time;
 }
-

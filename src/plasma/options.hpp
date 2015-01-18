@@ -35,7 +35,7 @@
 #include "measure.hpp"
 #include "specification.hpp"
 #include "../verbosity.hpp"
-#include "../logo_config.hpp"
+#include <discrover_config.hpp>
 #include "../logo/options.hpp"
 
 namespace Seeding {
@@ -45,9 +45,9 @@ std::istream &operator>>(std::istream &in, OccurrenceFilter &filter);
 std::ostream &operator<<(std::ostream &os, const OccurrenceFilter &filter);
 
 enum class Algorithm {
-  Plasma = (1u << 1),
+  Plasma        = (1u << 1),
   ExternalDREME = (1u << 2),
-  MCMC = (1u << 3)
+  MCMC          = (1u << 3)
 };
 
 inline Algorithm operator|(Algorithm a, Algorithm b) {
@@ -110,12 +110,25 @@ struct Options {
   bool only_best;
   Verbosity verbosity;
   bool dump_viterbi;
+  bool dump_bed;
   bool no_enrichment_filter;
   bool fixed_motif_space_mode;
   bool allow_iupac_wildcards;
 
   std::string label;
 };
+
+namespace Exception {
+struct InvalidOccurrenceFilter : public std::runtime_error {
+  InvalidOccurrenceFilter(const std::string &token);
+};
+struct InvalidAlgorithm : public std::runtime_error {
+  InvalidAlgorithm(const std::string &token);
+};
+struct NoMatchingObjectiveFound : public std::runtime_error {
+  NoMatchingObjectiveFound(const std::string &motif);
+};
+}
 }
 
 #endif /* ----- #ifndef OPTIONS_HPP  ----- */

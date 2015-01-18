@@ -1,9 +1,0 @@
-
-#define _GIT_SHA1 "@GIT_SHA1@"
-const char * GIT_SHA1 = _GIT_SHA1;
-
-#define _GIT_DESCRIPTION "@GIT_DESCRIPTION@"
-const char * GIT_DESCRIPTION = _GIT_DESCRIPTION;
-
-#define _GIT_BRANCH "@GIT_BRANCH@"
-const char * GIT_BRANCH = _GIT_BRANCH;

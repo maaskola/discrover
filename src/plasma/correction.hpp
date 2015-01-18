@@ -32,5 +32,4 @@
 
 double compute_correction(size_t length, size_t degeneracy);
 
-#endif   /* ----- #ifndef SCORE_HPP  ----- */
-
+#endif /* ----- #ifndef SCORE_HPP  ----- */

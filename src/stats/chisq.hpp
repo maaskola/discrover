@@ -6,4 +6,3 @@ double dgamma(double x, double shape, double scale, int give_log);
 double dchisq(double x, double df, int give_log);
 
 #endif
-

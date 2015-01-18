@@ -35,6 +35,21 @@
 
 namespace Logo {
 enum class CLI { HMM, IUPAC, Full };
+
+namespace Exception {
+struct InvalidType : public std::runtime_error {
+  InvalidType(const std::string &token);
+};
+struct InvalidAlphabet : public std::runtime_error {
+  InvalidAlphabet(const std::string &token);
+};
+struct InvalidOrder : public std::runtime_error {
+  InvalidOrder(const std::string &token);
+};
+struct InvalidPalette : public std::runtime_error {
+  InvalidPalette(const std::string &token);
+};
+}
 }
 
 boost::program_options::options_description gen_logo_options_description(

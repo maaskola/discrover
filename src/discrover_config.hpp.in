@@ -1,0 +1,9 @@
+#ifndef DISCROVER_CONFIG_HPP
+#define DISCROVER_CONFIG_HPP
+
+#define DREME_PATH "@DREME_DIR@/dreme"
+#cmakedefine01 DREME_FOUND
+#cmakedefine01 CAIRO_FOUND
+#define LIBR_FOUND @HAVE_LIBR@
+
+#endif

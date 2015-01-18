@@ -1,3 +1,6 @@
+#ifndef LOGO_HPP
+#define LOGO_HPP
+
 #include <string>
 #include <vector>
 #include "options.hpp"
@@ -9,4 +12,6 @@ using matrix_t = std::vector<column_t>;
 std::vector<std::string> draw_logo(const matrix_t &matrix,
                                    const std::string &path,
                                    const Logo::Options &options);
-};
+}
+
+#endif

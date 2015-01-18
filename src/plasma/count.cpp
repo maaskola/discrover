@@ -3,7 +3,7 @@
  *
  *       Filename:  count.cpp
  *
- *    Description:  
+ *    Description:
  *
  *        Created:  31.05.2012 06:47:48
  *         Author:  Jonas Maaskola <jonas@maaskola.de>
@@ -26,26 +26,27 @@ hash_map_t get_word_counts(const Collection &collection, size_t length,
   Timer t;
 
   size_t n_samples = 0;
-  for (auto &contrast : collection) n_samples += contrast.sets.size();
+  for (auto &contrast : collection)
+    n_samples += contrast.sets.size();
 
   if (options.verbosity >= Verbosity::debug)
     cout << "Getting word counts for " << n_samples << " samples." << endl;
 
   hash_map_t counts;
   count_vector_t default_stats(n_samples);
-  for (auto &x : default_stats) x = 0;
+  for (auto &x : default_stats)
+    x = 0;
 
   size_t idx = 0;
   for (auto &contrast : collection)
     for (auto &dataset : contrast)
       add_counts(dataset, length, counts, idx++, default_stats, options);
 
-  double time = t.tock() * 1e-6;
   if (options.measure_runtime)
-    cerr << "Getting word counts of length " << length << " took " << time
-         << " seconds." << endl;
+    cerr << "Getting word counts of length " + to_string(length) + " took "
+            + to_pretty_string(t.tock()) + " µs." << endl;
 
-  return (counts);
+  return counts;
 }
 
 size_t count_motif(const string &seq, const string &motif,
@@ -57,7 +58,8 @@ size_t count_motif(const string &seq, const string &motif,
   auto rend = end(seq);
   while ((riter = search(riter, rend, qiter, qend, iupac_included)) != rend) {
     cnt++;
-    if (not options.word_stats) return (1);
+    if (not options.word_stats)
+      return 1;
     riter++;
   }
   if (options.revcomp and (options.word_stats or cnt == 0)) {
@@ -67,19 +69,22 @@ size_t count_motif(const string &seq, const string &motif,
     riter = begin(seq);
     while ((riter = search(riter, rend, qiter, qend, iupac_included)) != rend) {
       cnt++;
-      if (not options.word_stats) return (1);
+      if (not options.word_stats)
+        return 1;
       riter++;
     }
   }
-  return (cnt);
+  return cnt;
 }
 
 count_vector_t count_motif(const Collection &collection, const string &motif,
                            const Options &options) {
   size_t n_samples = 0;
-  for (auto &contrast : collection) n_samples += contrast.sets.size();
+  for (auto &contrast : collection)
+    n_samples += contrast.sets.size();
   count_vector_t stats(n_samples);
-  for (auto &x : stats) x = 0;
+  for (auto &x : stats)
+    x = 0;
 
   size_t idx = 0;
   for (auto &contrast : collection)
@@ -88,13 +93,14 @@ count_vector_t count_motif(const Collection &collection, const string &motif,
         stats[idx] += count_motif(seq.sequence, motif, options);
       idx++;
     }
-  return (stats);
+  return stats;
 }
 
 void print_counts(const hash_map_t &counts) {
   for (auto &iter : counts) {
     cout << decode(iter.first);
-    for (auto &x : iter.second) cout << "\t" << x;
+    for (auto &x : iter.second)
+      cout << "\t" << x;
     cout << endl;
   }
 }
@@ -104,7 +110,8 @@ void add_counts(const string &seq_, size_t length, hash_map_t &counts,
                 const Options &options) {
   if (options.verbosity >= Verbosity::debug)
     cout << "Adding counts for sequence " << seq_ << endl;
-  if (seq_.size() < length) return;
+  if (seq_.size() < length)
+    return;
 
   vector<hash_map_t::key_type> words;
 

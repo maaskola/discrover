@@ -20,7 +20,8 @@ ConditionalDecoder::ConditionalDecoder(const HMM &hmm_) : hmm(hmm_) {
   if (false) {
     cerr << "Conditional Decoder" << endl;
     for (auto &x : emission_matrices)
-      for (auto &y : x.second) cerr << x.first << endl << y << endl;
+      for (auto &y : x.second)
+        cerr << x.first << endl << y << endl;
   }
 };
 
@@ -34,10 +35,12 @@ void ConditionalDecoder::decode(std::ostream &os, const Data::Seq &seq) const {
       const size_t w = matrix.size1();
       for (size_t i = 0; i < n - w + 1; ++i) {
         double p = 1;
-        for (size_t j = 0; j < w; ++j) p *= matrix(j, seq.isequence(i + j));
+        for (size_t j = 0; j < w; ++j)
+          p *= matrix(j, seq.isequence(i + j));
         os << " " << p;
       }
-      for (size_t i = 1; i < w; ++i) os << " " << 0;
+      for (size_t i = 1; i < w; ++i)
+        os << " " << 0;
       os << endl;
     }
 }

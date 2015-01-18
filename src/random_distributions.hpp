@@ -1,5 +1,5 @@
 /* =====================================================================================
- * Copyright (c) 2012, Jonas Maaskola
+ * Copyright (c) 2015, Jonas Maaskola
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,33 +16,27 @@
  *
  * =====================================================================================
  *
- *       Filename:  results.hpp
+ *       Filename:  random_distributions.cpp
  *
- *    Description:  Data structures to store Plasma results
+ *    Description:  Shared random distriubtions
  *
- *        Created:  Thu May 31 06:47:48 2012 +0200
+ *        Created:  Thu Jan 15 06:44:43 2015 +0200
  *
  *         Author:  Jonas Maaskola <jonas@maaskola.de>
  *
  * =====================================================================================
  */
 
-#ifndef RESULTS_HPP
-#define RESULTS_HPP
+#ifndef RANDOM_DISTRIBUTIONS_HPP
+#define RANDOM_DISTRIBUTIONS_HPP
 
-#include <string>
-#include "../matrix.hpp"
-#include "options.hpp"
+#include <random>
 
-namespace Seeding {
-struct Result : public Objective {
-  std::string motif;
-  double score;
-  double log_p;
-  count_vector_t counts;
-  Result(const Objective &objective);
+struct RandomDistribution {
+  static std::uniform_int_distribution<size_t> Uniform;
+  static std::uniform_int_distribution<size_t> Binary;
+  static std::uniform_int_distribution<size_t> Nucleotide;
+  static std::uniform_real_distribution<double> Probability;
 };
-using Results = std::vector<Result>;
-}
 
-#endif /* ----- #ifndef RESULTS_HPP  ----- */
+#endif

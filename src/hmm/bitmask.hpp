@@ -11,18 +11,26 @@
  * =====================================================================================
  */
 
-
 #ifndef BITMASK_HPP
 #define BITMASK_HPP
 
+#include <stdexcept>
 #include <bitset>
 #include <vector>
+#include <climits>
 
-const static size_t max_motifs = 32;
+static const size_t max_motifs = sizeof(size_t) * CHAR_BIT;
 using bitmask_t = std::bitset<max_motifs>;
 
 bitmask_t make_mask(const std::vector<size_t> &v);
 std::vector<size_t> unpack_mask(const bitmask_t x);
 
-#endif
+namespace Exception {
+namespace BitMask {
+struct TooManyMotifs : public std::runtime_error {
+  TooManyMotifs(size_t num_motifs);
+};
+}
+}
 
+#endif

@@ -3,7 +3,6 @@
 #include <fstream>
 #include <vector>
 #include <numeric>
-#include <boost/lexical_cast.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
@@ -14,11 +13,19 @@
 #include "conditional_decoder.hpp"
 #include "../timer.hpp"
 #include "../plasma/plasma.hpp"
-#include "../stats_config.hpp"
+
+#if LIBR_FOUND
+  #define MATHLIB_STANDALONE
+  #include <Rmath.h>
+#else
+  #include "../stats/pgamma.hpp"
+#endif
 
 using namespace std;
 
 #if CAIRO_FOUND
+#include "../logo/logo.hpp"
+
 vector<string> Evaluator::generate_logos(const string &path_stem,
                                          const Options::HMM &options) const {
   vector<string> paths;
@@ -41,11 +48,21 @@ vector<string> Evaluator::generate_logos(const string &path_stem,
 }
 #endif
 
+string contrast_name_tag(const Data::Contrast &contrast) {
+  string tag = contrast.name + ":";
+  bool first = true;
+  for (auto &dataset : contrast) {
+    tag += (first ? "" : ",") + dataset.name();
+    first = false;
+  }
+  return tag;
+}
+
 void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast,
                  size_t width, size_t prec) {
   size_t w = 0;
   for (size_t i = 0; i < m.size1(); i++)
-    w = max(w, contrast.sets[i].path.size());
+    w = max(w, contrast.sets[i].name().size());
 
   ofs << left << setw(w) << "" << right << setw(width) << "Present" << right
       << setw(width) << "Absent";
@@ -53,9 +70,9 @@ void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast,
     ofs << right << setw(width) << "Percent";
   ofs << endl;
 
-  size_t prev_prec = ofs.precision();
+  const streamsize prev_prec = ofs.precision();
   for (size_t i = 0; i < m.size1(); i++) {
-    ofs << left << setw(w) << contrast.sets[i].path;
+    ofs << left << setw(w) << contrast.sets[i].name();
     for (size_t j = 0; j < m.size2(); j++)
       ofs << right << fixed << setprecision(prec) << setw(width) << m(i, j);
     if (m.size2() == 2)
@@ -146,10 +163,8 @@ void Evaluator::eval_contrast(ostream &ofs, const Data::Contrast &contrast,
       string name = hmm.get_group_name(group_idx);
       string consensus = hmm.get_group_consensus(group_idx);
 
-      ofs << endl;
-      print(ofs, tag,
-            "Expected occurrence statistics for motif \"" + name + "\"",
-            consensus);
+      ofs << tag << "Expected count of sequences with at least one occurrence "
+                    "of motif '" + name + ":" + consensus << "'" << endl;
       count_report(ofs, counts, motif_len, contrast, hmm.get_pseudo_count(),
                    limit_logp, name, tag);
       print(ofs, tag, "Matthews correlation coefficient", mcc);
@@ -184,9 +199,9 @@ double cor_pearson(const vector<X> &x, const vector<Y> &y) {
     denom_y += b * b;
   }
   if (num == 0)
-    return (0);
+    return 0;
   double r = num / sqrt(denom_x) / sqrt(denom_y);
-  return (r);
+  return r;
 }
 
 template <class X>
@@ -205,36 +220,36 @@ vector<double> tied_ranking(const vector<X> &x) {
   }
   for (size_t i = 0; i < n; i++)
     r[i] = counts[x[i]];
-  return (r);
+  return r;
 }
 
 template <class X, class Y>
 double cor_spearman(const vector<X> &x, const vector<Y> &y) {
-  return (cor_pearson(tied_ranking(x), tied_ranking(y)));
+  return cor_pearson(tied_ranking(x), tied_ranking(y));
 }
 
 template <class X>
 double cor_rank(const vector<X> &x) {
   vector<X> y(x.size());
   iota(y.begin(), y.end(), 0);
-  return (cor_pearson(tied_ranking(x), y));
+  return cor_pearson(tied_ranking(x), y);
 }
 
 double cor_fisher_z(double x, size_t n) {
   double z = sqrt((n - 3) / 1.06) * atanh(x);
-  return (z);
+  return z;
 }
 
 double cor_student_t(double x, size_t n) {
   double t = x * sqrt((n - 2) / (1 - x * x));
-  return (t);
+  return t;
 }
 
 string stars(double x) {
-  if (x < 0.001) return ("***");
-  if (x < 0.01) return ("**");
-  if (x < 0.05) return ("*");
-  return ("");
+  if (x < 0.001) return "***";
+  if (x < 0.01)  return "**";
+  if (x < 0.05)  return "*";
+  return "";
 }
 
 const boost::math::normal_distribution<double> standard_normal_distribution;
@@ -246,8 +261,6 @@ void correlation_report(const vector<T> &x, ostream &out, size_t width = 12,
   size_t n = x.size();
   double z = cor_fisher_z(rho, n);
   double t = cor_student_t(rho, n);
-  // out << "Rank correlation: rho = " << rho << " z = " << z << " t = " << t <<
-  // endl;
   double p_norm = 0, p_t = 0;
   {
     using namespace boost::math;
@@ -260,7 +273,7 @@ void correlation_report(const vector<T> &x, ostream &out, size_t width = 12,
       p_t = cdf(complement(students_t_dist, t));
     }
   }
-  size_t prev_prec = out.precision();
+  const streamsize prev_prec = out.precision();
   out << setw(width) << fixed << right << setprecision(prec) << rho
       << setw(width) << fixed << right << setprecision(2) << z << setw(width)
       << fixed << right << setprecision(2) << log(p_norm) << setw(4) << right
@@ -287,7 +300,7 @@ void Evaluator::print_posterior(ostream &os, const vector_t &scale,
 
 Evaluator::ResultsCounts Evaluator::evaluate_dataset(
     const Data::Set &dataset, ostream &out, ostream &v_out, ostream &occ_out,
-    ostream &motif_out, const Options::HMM &options) const {
+    ostream &bed_out, const Options::HMM &options) const {
   const size_t width = 12;
   const size_t prec = 5;
   Timer timer;
@@ -302,9 +315,9 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
   if (not options.evaluate.skip_summary) {
     // TODO EVALUATION
     double log_likelihood = hmm.log_likelihood(dataset);
-    // out << endl << "Summary of " << dataset.path << endl;
+    // out << endl << "Summary of " << dataset.name() << endl;
     // out << "Total sequences = " << dataset.sequences.size() << endl;
-    out << "Log-likelihood of " << dataset.path << " = " << log_likelihood
+    out << "Log-likelihood of " << dataset.name() << " = " << log_likelihood
         << endl;
     // out << "Akaike information criterion AIC = " << 2 * hmm.n_parameters() -
     // 2 * log_likelihood << endl;
@@ -314,7 +327,7 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
   }
 
   if (not options.evaluate.skip_viterbi_path)
-    v_out << "# " << dataset.path << " details following" << endl;
+    v_out << "# " << dataset.name() << " details following" << endl;
 
   const size_t n_groups = hmm.get_ngroups();
   const size_t n = dataset.sequences.size();
@@ -346,7 +359,8 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
     double lp = hmm.viterbi(dataset.sequences[i], viterbi_path);
 
     if (not(options.evaluate.skip_viterbi_path
-            and options.evaluate.skip_summary)) {
+            and options.evaluate.skip_summary
+            and options.evaluate.skip_bed)) {
       stringstream viterbi_str, exp_str, atl_str;
 
       bool first = true;
@@ -406,40 +420,44 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
         conditional_decoder.decode(v_out, dataset.sequences[i]);
     }
 
+    if (not options.evaluate.skip_bed)
+      hmm.print_occurrence_table(dataset.name(), dataset.sequences[i],
+                                 viterbi_path, bed_out, true);
     if (not options.evaluate.skip_occurrence_table)
-      hmm.print_occurrence_table(dataset.path, dataset.sequences[i],
-                                 viterbi_path, occ_out);
+      hmm.print_occurrence_table(dataset.name(), dataset.sequences[i],
+                                 viterbi_path, occ_out, false);
   }
 
   if (not options.evaluate.skip_summary) {
-    out << setw(30) << left << "Rank analysis";
+    const size_t label_col_width = 17;
+    out << setw(label_col_width) << left << "Rank analysis";
     out << setw(width) << right << "Rho" << setw(width) << right << "Z"
         << setw(width) << right << "log P(Z)" << setw(4) << right << ""
         << setw(width) << right << "t" << setw(width) << right << "log P(t)"
         << setw(4) << right << "" << endl;
     // TODO: write out the motif name
     for (size_t group_idx = 0; group_idx < number_motifs; group_idx++) {
-      out << setw(30) << left << "Posterior decoded site";
+      out << setw(label_col_width) << left << "Expected sites";
       correlation_report(atl_counts[group_idx], out, width, prec);
-      out << setw(30) << left << "Posterior number motif";
+      out << setw(label_col_width) << left << "Expected motifs";
       correlation_report(exp_counts[group_idx], out, width, prec);
       vector<size_t> vit(n);
       for (size_t i = 0; i < n; i++)
         vit[i] = vit_counts[group_idx][i] > 0;
-      out << setw(30) << left << "Viterbi site";
+      out << setw(label_col_width) << left << "Viterbi sites";
       correlation_report(vit, out, width, prec);
-      out << setw(30) << left << "Viterbi number motif";
+      out << setw(label_col_width) << left << "Viterbi motifs";
       correlation_report(vit_counts[group_idx], out, width, prec);
     }
   }
 
   double time = timer.tock();
   if (options.timing_information)
-    cerr << "Evaluation for " << dataset.path << ": " << time
-         << " micro-seconds" << endl;
+    cerr << "Evaluation for " + dataset.name()+ ": " + to_pretty_string(time)
+            + " µs" << endl;
   ResultsCounts results
       = {n_sites, n_motifs, n_viterbi_sites, n_viterbi_motifs};
-  return (results);
+  return results;
 }
 
 Evaluator::Result Evaluator::report(const Data::Collection &collection,
@@ -484,12 +502,14 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
                        + compression2ending(options.output_compression);
   result.files.viterbi = options.label + file_tag + ".viterbi"
                          + compression2ending(options.output_compression);
+  result.files.bed = options.label + file_tag + ".bed"
+                     + compression2ending(options.output_compression);
 
 #if CAIRO_FOUND
   result.files.logos = generate_logos(options.label + file_tag, options);
 #endif
 
-  ofstream summary_out, occurrence_file, viterbi_file;
+  ofstream summary_out, occurrence_file, viterbi_file, bed_file;
   summary_out.open(result.files.summary.c_str());
 
   if (not options.evaluate.skip_summary) {
@@ -522,13 +542,16 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
     summary_out << endl;
 
     Timer eval_timer;
-    for (auto &contrast : collection)
+    for (auto &contrast : collection) {
+      summary_out << endl << "Discriminative statistics for contrast '"
+                  << contrast_name_tag(contrast) << "'" << endl;
       eval_contrast(summary_out, contrast, options.limit_logp, tag);
+    }
     double time = eval_timer.tock();
 
     if (options.timing_information)
-      cerr << "Evaluation of contrast for " << (tag == "" ? "" : tag + " ")
-           << "data: " << time << " micro-seconds" << endl;
+      cerr << "Evaluation of contrast for " + (tag == "" ? "" : tag + " ")
+              + "data: " + to_pretty_string(time) + " µs" << endl;
   }
 
   if (collection.set_size != 0) {
@@ -536,32 +559,37 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
       cout << "Performance summary in " << result.files.summary << endl;
       if (not options.evaluate.skip_viterbi_path)
         cout << "Viterbi path in " << result.files.viterbi << endl;
+      if (not options.evaluate.skip_bed)
+        cout << "Motif occurrence BED in " << result.files.bed << endl;
       if (not options.evaluate.skip_occurrence_table)
         cout << "Motif occurrence table in " << result.files.table << endl;
     }
 
     if (not options.evaluate.skip_viterbi_path)
       viterbi_file.open(result.files.viterbi.c_str(), flags);
+    if (not options.evaluate.skip_bed)
+      bed_file.open(result.files.bed.c_str(), flags);
     if (not options.evaluate.skip_occurrence_table)
-      occurrence_file.open(result.files.table.c_str());
+      occurrence_file.open(result.files.table.c_str(), flags);
 
-    boost::iostreams::filtering_stream<boost::iostreams::output> v_out, occ_out,
-        motif_out;
+    boost::iostreams::filtering_stream<boost::iostreams::output> v_out, bed_out,
+        occ_out;
     switch (options.output_compression) {
       case Options::Compression::gzip:
         v_out.push(boost::iostreams::gzip_compressor());
+        bed_out.push(boost::iostreams::gzip_compressor());
         occ_out.push(boost::iostreams::gzip_compressor());
-        motif_out.push(boost::iostreams::gzip_compressor());
         break;
       case Options::Compression::bzip2:
         v_out.push(boost::iostreams::bzip2_compressor());
+        bed_out.push(boost::iostreams::bzip2_compressor());
         occ_out.push(boost::iostreams::bzip2_compressor());
-        motif_out.push(boost::iostreams::bzip2_compressor());
         break;
       default:
         break;
     }
     v_out.push(viterbi_file);
+    bed_out.push(bed_file);
     occ_out.push(occurrence_file);
 
     hmm.print_occurrence_table_header(occ_out);
@@ -585,10 +613,12 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
     }
 
     for (auto &contrast : collection) {
+      summary_out << endl << endl << "Summary statistics for contrast '"
+                  << contrast_name_tag(contrast) << "'" << endl;
       vector<ResultsCounts> counts;
       for (auto &dataset : contrast) {
         ResultsCounts c = evaluate_dataset(dataset, summary_out, v_out, occ_out,
-                                           motif_out, options);
+                                           bed_out, options);
         counts.push_back(c);
       }
 
@@ -603,9 +633,12 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
             string name = hmm.get_group_name(i);
             string consensus = hmm.get_group_consensus(i);
 
-            string exp_motif_tag = "Posterior decoded motif counts - " + name
+            string exp_motif_tag = "Expected motif counts - " + name
                                    + ":" + consensus;
-            summary_out << endl << exp_motif_tag << endl;
+            summary_out << endl
+                        << "# Expected motif count = probabilistic count of "
+                           "motif occurrences in the sequences" << endl
+                        << exp_motif_tag << endl;
             matrix_t em(counts.size(), 2);
             for (size_t j = 0; j < counts.size(); j++) {
               em(j, 0) = counts[j].exp_motifs[i];
@@ -615,9 +648,13 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
                          hmm.get_pseudo_count(), options.limit_logp, name,
                          tag + exp_motif_tag + " ");
 
-            string vit_motif_tag = "Viterbi decoded motif counts - " + name
+            string vit_motif_tag = "Viterbi motif counts - " + name
                                    + ":" + consensus;
-            summary_out << endl << vit_motif_tag << endl;
+            summary_out << endl
+                        << "# Viterbi motif count = number of motif "
+                           "occurrences in the Viterbi paths of the sequences"
+                        << endl
+                        << vit_motif_tag << endl;
             matrix_t vm(counts.size(), 2);
             for (size_t j = 0; j < counts.size(); j++) {
               vm(j, 0) = counts[j].viterbi_motifs[i];
@@ -627,9 +664,12 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
                          hmm.get_pseudo_count(), options.limit_logp, name,
                          tag + vit_motif_tag + " ");
 
-            string exp_tag = "Posterior decoded site counts - " + name + ":"
+            string exp_tag = "Expected site counts - " + name + ":"
                              + consensus;
-            summary_out << endl << exp_tag << endl;
+            summary_out << endl
+                        << "# Expected site count = probabilistic count of "
+                           "sequences with at least one motif occurrence" << endl
+                        << exp_tag << endl;
             matrix_t e(counts.size(), 2);
             for (size_t j = 0; j < counts.size(); j++) {
               e(j, 0) = counts[j].exp_sites[i];
@@ -639,9 +679,13 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
                          hmm.get_pseudo_count(), options.limit_logp, name,
                          tag + exp_tag + " ");
 
-            string vit_tag = "Viterbi decoded site counts - " + name + ":"
+            string vit_tag = "Viterbi site counts - " + name + ":"
                              + consensus;
-            summary_out << endl << vit_tag << endl;
+            summary_out << endl
+                        << "# Viterbi site count = number of sequences "
+                           "for which the Viterbi path has at least one motif "
+                           "occurrence" << endl
+                        << vit_tag << endl;
             matrix_t v(counts.size(), 2);
             for (size_t j = 0; j < counts.size(); j++) {
               v(j, 0) = counts[j].viterbi_sites[i];
@@ -655,5 +699,5 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
       }
     }
   }
-  return (result);
+  return result;
 }

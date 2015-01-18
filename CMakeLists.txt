@@ -1,10 +1,13 @@
 
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
 
-IF(COMMAND cmake_policy)
-  CMAKE_POLICY(SET CMP0003 NEW)
-ENDIF(COMMAND cmake_policy)
+IF("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+  MESSAGE(FATAL_ERROR "Do not build in-source. "
+    "Please remove CMakeCache.txt and the CMakeFiles/ directory. "
+    "Then build out-of-source. "
+    "For instructions, please refer to BUILDING.md.")
+ENDIF()
 
 PROJECT(discrover)
 
@@ -59,6 +62,40 @@ SET(DISCROVER_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MI
 INCLUDE(CheckCXX11Features)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX11_FLAGS}")
 
+# Check whether the compiler supports position-independent code
+
+CHECK_CXX_COMPILER_FLAG("-fPIC" COMPILER_SUPPORTS_PIC)
+IF(COMPILER_SUPPORTS_PIC)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+ENDIF()
+
+# Check whether the compiler supports link-time optimization
+IF(NOT(DEFINED WITH_LTO) OR WITH_LTO)
+  INCLUDE(CheckCXXCompilerFlag)
+  CHECK_CXX_COMPILER_FLAG("-flto" COMPILER_SUPPORTS_LTO)
+  IF(COMPILER_SUPPORTS_LTO)
+    INCLUDE(CheckGCCVersion)
+    IF(GCC_SUPPORTS_LTO)
+      MESSAGE(STATUS "Enabled: link-time optimization")
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
+    ELSE()
+      IF(WITH_LTO)
+        MESSAGE(FATAL_ERROR "Disabled: link-time optimization - LTO support in GCC version < 4.8 is unreliable")
+      ELSE()
+        MESSAGE(STATUS "Disabled: link-time optimization - LTO support in GCC version < 4.8 is unreliable")
+      ENDIF()
+    ENDIF()
+  ELSE()
+    IF(WITH_LTO)
+      MESSAGE(FATAL_ERROR "Disabled: link-time optimization - no compiler support")
+    ELSE()
+      MESSAGE(STATUS "Disabled: link-time optimization - no compiler support")
+    ENDIF()
+  ENDIF()
+ELSE()
+  MESSAGE(STATUS "Disabled: link-time optimization (use -DWITH_LTO=ON to enable)")
+ENDIF()
+
 
 # Boost configuration
 # You may try uncommenting some of the commented options below if you have
@@ -91,8 +128,11 @@ IF(Boost_FOUND)
 ENDIF()
 
 FIND_PACKAGE(OpenMP)
-FIND_PACKAGE(Ctags)
-FIND_PACKAGE(Ruby)
+IF(OPENMP_FOUND)
+  MESSAGE(STATUS "Enabled: OpenMP support")
+ELSE()
+  MESSAGE(FATAL_ERROR "Compiler does not support OpenMP. See http://openmp.org/wp/openmp-compilers/ for a list of OpenMP supporting compilers.")
+ENDIF()
 
 IF(NOT(DEFINED WITH_CAIRO) OR WITH_CAIRO)
   FIND_PACKAGE(Cairo)
@@ -108,11 +148,6 @@ IF(NOT(DEFINED WITH_CAIRO) OR WITH_CAIRO)
   ENDIF()
 ELSE()
   MESSAGE(STATUS "Disabled: logo plotting capabilities (use -DWITH_CAIRO=ON to enable)")
-ENDIF()
-
-INCLUDE(UseLATEX)
-IF(NOT(PDFLATEX_COMPILER STREQUAL "PDFLATEX_COMPILER-NOTFOUND"))
-  MESSAGE(STATUS "Found pdflatex: ${PDFLATEX_COMPILER}")
 ENDIF()
 
 IF(NOT(DEFINED WITH_TCMALLOC) OR WITH_TCMALLOC)
@@ -163,9 +198,28 @@ ELSE()
   MESSAGE(STATUS "Disabled: DREME seeding method (use -DWITH_DREME=ON to enable)")
 ENDIF()
 
+SET(BUILD_MANUAL OFF)
+IF(NOT(DEFINED WITH_DOC) OR WITH_DOC)
+  FIND_PACKAGE(LaTeX)
+  IF(LaTeX_FOUND)
+    MESSAGE(STATUS "Enabled: building user manual")
+    SET(BUILD_MANUAL ON)
+  ELSE()
+    IF(WITH_DOC)
+      MESSAGE(FATAL_ERROR "PDFlatex not found! Building manual requires PDFlatex")
+    ELSE()
+      MESSAGE(WARNING "Disabled: building user manual - PDFlatex not found")
+    ENDIF()
+  ENDIF()
+ELSE()
+  MESSAGE(STATUS "Disabled: building user manual (use -DWITH_DOC=ON to enable)")
+ENDIF()
+
 SET(INSTALL_LOGO_SCRIPT OFF)
 IF(WITH_TIKZLOGO)
-  IF(NOT(PDFLATEX_COMPILER STREQUAL "PDFLATEX_COMPILER-NOTFOUND"))
+  FIND_PACKAGE(LaTeX)
+  IF(LaTeX_FOUND)
+    FIND_PACKAGE(Ruby)
     IF(RUBY_FOUND)
       MESSAGE(STATUS "Enabled: sequence logo drawing script")
       SET(INSTALL_LOGO_SCRIPT ON)
@@ -189,7 +243,10 @@ ENDIF()
 
 SET(INSTALL_MISC_SCRIPTS OFF)
 IF(WITH_MISC_SCRIPTS)
-  IF(NOT RUBY_FOUND)
+  IF(NOT(DEFINED RUBY_FOUND))
+    FIND_PACKAGE(Ruby)
+  ENDIF()
+  IF(RUBY_FOUND)
     MESSAGE(STATUS "Enabled: miscellaneous scripts")
     SET(INSTALL_MISC_SCRIPTS ON)
   ELSE()
@@ -215,13 +272,6 @@ ELSE()
   git_branch(GIT_BRANCH)
 ENDIF()
 
-IF(CTAGS_FOUND AND NOT(APPLE))
-  ADD_CUSTOM_TARGET(ctags ALL
-    COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q src/
-    COMMENT "Creating Ctags."
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} )
-ENDIF()
-
 # Set LIB_SUFFIX if you want to install libraries into a specific directory.
 # By default, lib is used.
 # This is useful if your distribution prefers 64bit to go into lib64.
@@ -237,22 +287,24 @@ ELSE()
 ENDIF()
 MESSAGE(STATUS "Libraries will be installed into ${CMAKE_INSTALL_PREFIX}/${LIBDIR}")
 
-ADD_SUBDIRECTORY(src build)
+ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(scripts)
 
-IF(NOT(DEFINED WITH_DOC) OR WITH_DOC)
-  IF(NOT(PDFLATEX_COMPILER STREQUAL "PDFLATEX_COMPILER-NOTFOUND"))
-    MESSAGE(STATUS "Enabled: building user manual")
-    ADD_SUBDIRECTORY(doc build/doc)
-  ELSE()
-    IF(WITH_DOC)
-      MESSAGE(FATAL_ERROR "PDFlatex not found! Building manual requires PDFlatex")
-    ELSE()
-      MESSAGE(WARNING "Disabled: building user manual - PDFlatex not found")
-    ENDIF()
-  ENDIF()
-ELSE()
-  MESSAGE(STATUS "Disabled: building user manual (use -DWITH_DOC=ON to enable)")
+IF(BUILD_MANUAL)
+  ADD_CUSTOM_COMMAND(
+     OUTPUT plasma-cli-help.txt discrover-cli-help.txt
+     COMMAND plasma -h > plasma-cli-help.txt
+     COMMAND discrover-bin -hV > discrover-cli-help.txt
+     DEPENDS plasma discrover-bin
+   )
+
+ ADD_CUSTOM_TARGET(generate-cli-help-files ALL
+   DEPENDS plasma-cli-help.txt discrover-cli-help.txt
+ )
+
+ ADD_SUBDIRECTORY(doc)
+
+ ADD_DEPENDENCIES(pdf generate-cli-help-files)
 ENDIF()
 
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/README.md

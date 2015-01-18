@@ -41,8 +41,7 @@ using seq_t = boost::numeric::ublas::vector<alphabet_idx_t>;
 const size_t empty_symbol = 5;
 std::string seq2string(const seq_t &s);
 
-std::vector<std::string> extract_seq_ids(const std::string &path, size_t nseq, Verbosity verbosity);
-
+std::vector<std::string> extract_seq_ids(const std::string &path, size_t nseq,
+                                         Verbosity verbosity);
 
 #endif
-

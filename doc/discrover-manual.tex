@@ -14,6 +14,7 @@
 \newcommand{\version}[0]{@GIT_DESCRIPTION@}
 \newcommand{\theurl}[0]{\url{https://github.com/maaskola/discrover}}
 \newcommand{\TikZ}{Ti\emph{k}Z}
+\newcommand{\ignore}[1]{}
 
 \hypersetup{%
   pdfauthor=Jonas Maaskola,
@@ -35,7 +36,10 @@
   The package provides programs for discriminative motif discovery of protein binding sites in nucleic acid sequences.
   It is available as free software under the GNU General Public License v3 from \theurl{}.
 
-  This document briefly describes the purpose of this motif finding package, explains important concepts, and details usage of the programs that are part of this package.
+  This document briefly describes the purpose of this motif finding package and discusses important concepts.
+  A tutorial explains the basic usage of the programs that are part of this package.
+  Then, recipes are given that can be used to perform motif analysis for CLIP-Seq and ChIP-Seq data.
+  Finally, some further details of the program usage are given.
 \end{abstract}
 
 \tableofcontents
@@ -47,13 +51,13 @@ Aside from structural cues, binding of regulators is guided by sequence informat
 
 Motif discovery is the problem of unraveling motifs recognized by a given nucleic acid binding protein from sequences known to harbor occurrences of the motif.
 Classically, motif finding was marked by scarcity of data when only few sequences were available.
-The introduction of microarray based technologies like ChIP-chip \cite{Ren2000,Iyer2001} and RIP-Chip \cite{Tenenbaum2000,Keene2006} allowed to assay \textit{in vivo} sequence binding specificity on a genome-wide scale.
+The introduction of microarray based technologies like ChIP-chip \cite{Ren2000,Iyer2001} and RIP-Chip \cite{Tenenbaum2000,Keene2006} made it possible to assay \textit{in vivo} sequence binding specificity on a genome-wide scale.
 More recently sequencing based technologies, such as ChIP-Seq \cite{Robertson2007, Johnson2007} and CLIP-Seq \cite{Licatalosi2008,Sanford2009,Hafner2010} further increased the amounts of data yielded by single experiments and simultaneously improved the spatial resolution, reducing uncertainty about the exact location of \textit{in vivo} binding sites.
 SELEX \cite{Ellington1990,Tuerk1990} and related sequencing based technologies \cite{Jolma2010}, and protein-binding microarrays (PBMs) \cite{Bulyk2001,Berger2006a} are targeted assays for the \textit{in vitro} sequence binding specificity of nucleic acid binding proteins.
 
 Due to the central importance of the motif discovery problem in computational biology many algorithms addressing it have been developed over the last two decades \cite{Das2007}.
 These algorithms employ  a variety of models for the sequence binding specificity of nucleic acid binding proteins, including discrete word-based models, as well as probabilistic models such as position weight matrices (PWM) \cite{Stormo1998}, and hidden Markov models (HMM) \cite{Rabiner1989}.
-Word based approaches tend to be computationally efficient and allow fast global optimization, but may fail for motifs that include weak positions \cite{Das2007}.
+Word based approaches tend to be computationally efficient and allow for fast global optimization, but may fail for motifs that include weak positions \cite{Das2007}.
 PWMs can be motivated from biophysical principles \cite{Berg1987,Stormo2000,Foat2006}.
 General inference methods for HMMs offer a unified framework for biological sequence modeling \cite{Durbin1998}.
 HMMs flexibly model both binding sites and their surrounding sequence context, may account for dependence of neighboring positions via higher order emissions, and length variability of motifs is idiomatically realized via non-constitutive states in the HMM topology.
@@ -98,8 +102,15 @@ In particular the following objective functions are available:
   \item Mutual information of condition and motif occurrence (MICO)
 \end{itemize}
 The publication describing this method, \cite{Maaskola2014}, presents experiments based on synthetic data that suggest that the objective functions MCC, MICO, and MMIE have higher motif discovery performance than the other objective functions analyzed.
+Among these MICO is the most versatile, as it is compatible with the multiple motif discovery mode implemented in \discrover{}.
+Hence, MICO is the recommended objective function.
+
+\ignore{%
 \subsection{Seeding}
+To be written.
 \subsection{Binding site HMM optimization}
+To be written.
+}
 
 \section{Tutorial}
 This tutorial demonstrates the basic usage of the motif discovery tools in this package.
@@ -160,7 +171,7 @@ discrover signal.fa control.fa -m tgtanatw
 
 \subsection{Finding multiple motifs}
 For some applications it is interesting to discover multiple motifs in a datasets.
-This allows to reveal motifs of co-factors of the assayed factor.
+This may reveal motifs of co-factors of the assayed factor.
 This is for example of relevance in analyzing ChIP-Seq data, where a given IP'ed transcription factor often acts in conjunction with other factors, whose binding sites are often found nearby, and thus are also frequently enriched in ChIP-Seq sequences.
 
 Discrover has two ways of dealing with multiple motifs, depending on whether or not the switch \verb|--multiple| is used, as described next.
@@ -251,6 +262,90 @@ In both cases, dinucleotide shuffles will be generated using the same routines a
 Note that also in this case for the purpose of reproducibility, you can provide a seed (\verb|--salt|) for the random shuffle generation.
 
 
+\section{Recipes}
+The following section gives some recipes for the analysis of RNA-binding protein data and of ChIP-Seq data.
+While the recipes are written for \discrover{}, they can be easily modified to work for \plasma{}:
+simply leave out the options \verb|--multiple| and \verb|--wiggle|, which are not supported by \plasma{}.
+
+\subsection{Analysing RNA-binding proteins}
+First, let us find a motif that is differential between a simple analysis of set of PAR-CLIP signal sequences \verb|rbm10.signal.fa| and a set of matching control sequences \verb|rbm10.control.fa|.
+\\
+\begin{verbbox}
+discrover \
+RBM10:rbm10.signal.fa \
+control:rbm10.control.fa \
+-m RBM10:5-10x3 --multiple --wiggle 1
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+\subsubsection{Using repeat experiments}
+If a repeat experiment is available, we can define two contrasts \verb|Exp1| and \verb|Exp2|.
+Notice how we modify the sequence set definitions to group the sets of sequences into these two contrasts.
+\\
+\begin{verbbox}
+discrover \
+RBM10:Exp1:rbm10-experiment1.signal.fa \
+control:Exp1:rbm10-experiment1.control.fa \
+RBM10:Exp2:rbm10-experiment2.signal.fa \
+control:Exp2:rbm10-experiment2.control.fa \
+-m RBM10:5-10x3 --multiple --wiggle 1
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+
+\subsection{Analysing ChIP-Seq data}
+The first ChIP-Seq recipe finds multiple motifs in a pair sequence sets, a set of Nanog ChIP-Seq signal sequences \verb|nanog-chen.signal.fa| and a set of matching control sequences \verb|nanog-chen.control.fa|.
+It uses the best three seeds for each length between 5 and 16 nucleotides.
+We also consider one-nucleotide-shifted variants of each seed.
+Thus, in total $11\times3\times3=108$ HMMs will be initialized and individually trained, before the \verb|--multiple| mode begins to build HMMs consisting of multiple motifs.
+\\
+\begin{verbbox}
+discrover -r \
+Nanog:nanog-chen.signal.fa \
+control:nanog-chen.control.fa \
+-m Nanog:5-16x3 --multiple --wiggle 1
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+\subsubsection{Using repeat experiments}
+In the following recipe we make use of a set of repeat experiments, a set of Nanog ChIP-Seq signal sequences \verb|nanog-marson.signal.fa| produced by a different group, as well as matching control sequences \verb|nanog-marson.control.fa|.
+Notice, that the sequence sets used above are grouped into the contrast \verb|Nanog-Chen|, while the second of sequence sets are grouped into the contrast \verb|Nanog-Marson|.
+\\
+\begin{verbbox}
+discrover -r \
+Nanog:Nanog-Chen:nanog-chen.signal.fa \
+control:Nanog-Chen:nanog-chen.control.fa \
+Nanog:Nanog-Marson:nanog-marson.signal.fa \
+control:Nanog-Marson:nanog-marson.control.fa \
+-m Nanog:5-16x3 --multiple --wiggle 1
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+\subsubsection{Using repeat experiments}
+Aside from repeat experiments, we can also search for motifs that are differential in one contrast (or in multiple contrasts if data of repeat experiments are available) but that are not differential in other contrasts.
+The following recipe demonstrates this.
+
+In addition to the two contrasts defined in the preceding recipes, it defines two further contrasts of sets of sequences coming from ChIP-Seq experiments for another protein.
+Notice how the argument for the \verb|--score| command line switch defines the prior two contrasts to act positively, while the latter two contrasts are taken to act negatively.
+\\
+\begin{verbbox}
+discrover -r \
+Nanog:Nanog_Chen:nanog-chen.signal.fa \
+control:Nanog_Chen:nanog-chen.control.fa \
+Nanog:Nanog_Marson:nanog-marson.signal.fa \
+control:Nanog_Marson:nanog-marson.control.fa
+Oct4:Oct4_Chen:oct4-chen.signal.fa \
+control:Oct4_Chen:oct4-chen.control.fa \
+Oct4:Oct4_Marson:oct4-marson.signal.fa \
+control:Oct4_Marson:oct4-marson.control.fa \
+-m Nanog:5-16x3 --multiple --wiggle 1 --score \
+Nanog:+Nanog_Chen+Nanog_Marson-Oct4_Chen-Oct4_Marson:mi
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+Notice also that the preceding recipe mentions a motif named \verb|Oct4| to be enriched in the Oct4 signal sequence sets, but does not actually define or train it!
+A slight modification of this recipe (replace the motif \verb|Nanog| by \verb|Oct4| in the arguments of \verb|-m| and \verb|--score|, and swap the signs in front of the contrasts in the argument of \verb|--score|) would search for motifs that are differential in the Oct4 contrasts but not differential in the Nanog contrasts.
+
 
 \section{Usage}
 There are two main programs that are part of this package, a seed discovery program, \plasma{}, and one for optimizing binding site HMMs, \discrover{}.
@@ -269,7 +364,8 @@ The command line switch \verb|--version| displays the version of \plasma{}.
 If additionally the switch \verb|-v| or its long variant \verb|--verbose| is given, then additionally the full SHA1-string of the version is displayed.
 
 \subsubsection{Seed discovery algorithms}
-There are multiple algorithms implemented in \plasma{} that allow to find IUPAC regular expression type seeds.
+\label{section:plasma-MCMC}
+There are multiple algorithms implemented in \plasma{} that allow you to find IUPAC regular expression type seeds.
 You can select between them with the switch \verb|--algo|.
 It takes one argument, which specifies which algorithm to use.
 The following algorithms are provided:
@@ -277,7 +373,7 @@ The following algorithms are provided:
   \item[Plasma]
     The default and fast algorithm.
     It can be used with the command line switch \verb|--algo plasma|.
-    It uses progressive algorithm that maintains a pool of candidates.
+    It uses a progressive algorithm that maintains a pool of candidates.
   \item[DREME]
     DREME \cite{Bailey2011}, which is part of the MEME motif discovery package, can be used for motif finding if it is installed on the system.
     It can be used by specifying \verb|--algo dreme|.
@@ -294,7 +390,7 @@ An overview of the available command line options is available with the switch \
 See section~\ref{appendix:discrover-cli-help} for a listing of the output of this command with \discrover{} in version \version{}.
 
 Note that by default not all options are shown.
-To display some infrequently used options please specify \verb|-hv| or \verb|--help --verbose|.
+To display more comprehensive usage options please specify \verb|-hv| or \verb|--help --verbose|.
 
 In addition, some advanced options are only shown when the option \verb|-V| or \verb|--noisy| is used.
 Thus, to display all options please specify \verb|-hV| or their long variants \verb|--help --noisy|.
@@ -303,20 +399,44 @@ Thus, to display all options please specify \verb|-hV| or their long variants \v
 The command line switch \verb|--version| displays the version of \discrover{}.
 If additionally the switch \verb|-v| or its long variant \verb|--verbose| is given, then additionally the full SHA1-string of the version is displayed.
 
+\subsubsection{Hybrid learning and alternative learning modes}
+\label{section:hybrid-learning}
+By default, \discrover{} the hybrid learning mode that is described in the paper.
+Here, we refer to the emission parameters of the motif states as signal parameters.
+All other parameters, including the transition parameters and the emission parameters of the background states, are referred to as context parameters.
+In short, hybrid learning optimizes the emission parameters of the motifs so as to increase the chosen objective function, while the context parameters are optimized for the likelihood.
+
+Aside from the hybrid learning mode, \discrover{} offers two other modes, determined by the \verb|--bglearn| command line switch.
+With \verb|--bglearn fixed| the context parameters are left in their initial state and not optimized, while with \verb|--bglearn gradient| the context parameters are optimized for the same chosen objective function.
+Although the hybrid learning mode is used by default, you may explicitly specify its usage with \verb|--bglearn em|.
+
+This option is only shown in the full command line help, available with \verb|discrover -hV|.
+
+\subsubsection{Gradient and Monte-Carlo Markov chain optimization}
+Gradient optimization is the default learning mode for \discrover{}.
+Aside from gradient learning, it is also possible to use Monte-Carlo Markov chain optimization to learn HMM parameters.
+This is done with the command line switch \verb|--sampling|.
+Like the MCMC optimization mode of \plasma{} (see section~\ref{section:plasma-MCMC}), also that of \discrover{} uses parallel tempering.
+
+The MCMC learning mode of \discrover{} does not support multiple objective learning as in the hybrid learning mode.
+For this reason, MCMC learning in \discrover{} optimizes all parameters, including the context parameters\footnote{Transition parameters and the emission parameters of the background states, see section~\ref{section:hybrid-learning}.}, for the chosen objective function.
+
+There are several options available to determine the way \discrover{} performs MCMC
+For these, please refer to the \emph{MCMC optimization options} section of the extended command line help, available via \verb|discrover --help --verbose|.
 
 \section{Appendix}
 \subsection{Command line help of \plasma{}}
 \label{appendix:plasma-cli-help}
 {%
   \footnotesize
-  \verbatiminput{plasma-cli-help.txt}
+  \verbatiminput{../plasma-cli-help.txt}
 }
 
 \subsection{Command line help of \discrover{}}
 \label{appendix:discrover-cli-help}
 {%
   \footnotesize
-  \verbatiminput{discrover-cli-help.txt}
+  \verbatiminput{../discrover-cli-help.txt}
 }
 
 
@@ -325,7 +445,7 @@ If additionally the switch \verb|-v| or its long variant \verb|--verbose| is giv
 \phantomsection
 \addcontentsline{toc}{section}{References}
 \bibliographystyle{plainnat}
-\bibliography{documentation}
+\bibliography{references}
 
 
 \end{document}

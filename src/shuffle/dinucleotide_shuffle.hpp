@@ -6,4 +6,3 @@
 std::string dinucleotideShuffle(const std::string &s, size_t seed);
 
 #endif
-

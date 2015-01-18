@@ -3,12 +3,12 @@
 #include <unistd.h>
 
 void get_terminal_size(size_t &cols, size_t &rows) {
-  /*
-  struct winsize w;
-  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-  columns = w.ws_col;
-  rows = w.ws_row;
-  */
+/*
+struct winsize w;
+ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+columns = w.ws_col;
+rows = w.ws_row;
+*/
 #ifdef TIOCGSIZE
   struct ttysize ts;
   ioctl(STDIN_FILENO, TIOCGSIZE, &ts);
@@ -23,14 +23,13 @@ void get_terminal_size(size_t &cols, size_t &rows) {
 }
 
 size_t get_terminal_width() {
-  size_t c,r;
-  get_terminal_size(c,r);
-  return(c);
+  size_t c, r;
+  get_terminal_size(c, r);
+  return c;
 }
 
 size_t get_terminal_height() {
-  size_t c,r;
-  get_terminal_size(c,r);
-  return(r);
+  size_t c, r;
+  get_terminal_size(c, r);
+  return r;
 }
-

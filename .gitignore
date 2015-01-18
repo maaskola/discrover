@@ -1,11 +1,13 @@
 CMakeCache.txt
 CMakeFiles
+CPackConfig.cmake
+CPackSourceConfig.cmake
+cmake_install.cmake
 Makefile
 build
 *~
 data
 _CPack_Packages
-*cmake
 *swp
 *swo
 install_manifest.txt

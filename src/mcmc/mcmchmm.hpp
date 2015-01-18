@@ -34,46 +34,43 @@
 #include "montecarlo.hpp"
 
 namespace MCMC {
-  template <>
-    class Generator<HMM> {
-      private:
-        Options::HMM options;
-      public:
-        Generator(const Options::HMM &opt, size_t w) :
-          options(opt)
-        {
-          if(options.sampling.min_size == -1)
-            options.sampling.min_size = w;
-          if(options.sampling.max_size == -1)
-            options.sampling.max_size = w;
-        };
-        HMM generate(const HMM &hmm) const {
-          return(hmm.random_variant(options, EntropySource::rng));
-        };
-    };
-  template <>
-    class Evaluator<HMM> {
-      private:
-        Data::Collection collection;
-        Training::Task task;
-        Training::State ts;
-        Options::HMM options;
-      public:
-        Evaluator(const Data::Collection &col,
-            const Training::Task &obj,
-            const Options::HMM &opt) :
-          collection(col),
-          task(obj),
-          ts(1), // TODO make this work with multiple tasks
-          options(opt) {
-          };
+template <>
+class Generator<HMM> {
+private:
+  Options::HMM options;
 
-        double evaluate(const HMM &hmm) const {
-          // TODO consider using compute_score instead of compute_score_all_motifs
-          return(hmm.compute_score_all_motifs(collection, task.measure, options));
-        };
-    };
+public:
+  Generator(const Options::HMM &opt, size_t w) : options(opt) {
+    if (options.sampling.min_size == -1)
+      options.sampling.min_size = w;
+    if (options.sampling.max_size == -1)
+      options.sampling.max_size = w;
+  };
+  HMM generate(const HMM &hmm) const {
+    return hmm.random_variant(options, EntropySource::rng);
+  };
+};
+template <>
+class Evaluator<HMM> {
+private:
+  Data::Collection collection;
+  Training::Task task;
+  Training::State ts;
+  Options::HMM options;
+
+public:
+  Evaluator(const Data::Collection &col, const Training::Task &obj,
+            const Options::HMM &opt)
+      : collection(col),
+        task(obj),
+        ts(1),  // TODO make this work with multiple tasks
+        options(opt){};
+
+  double evaluate(const HMM &hmm) const {
+    // TODO consider using compute_score instead of compute_score_all_motifs
+    return hmm.compute_score_all_motifs(collection, task.measure, options);
+  };
+};
 }
 
- 
 #endif

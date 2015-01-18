@@ -1,6 +1,5 @@
 #include "montecarlo.hpp"
 
 namespace MCMC {
-  std::mt19937 EntropySource::rng;
+std::mt19937 EntropySource::rng;
 };
-

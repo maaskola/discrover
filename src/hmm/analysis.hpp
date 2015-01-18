@@ -30,8 +30,20 @@
 #ifndef ANALYSIS_HPP
 #define ANALYSIS_HPP
 
+#include <random>
 #include "hmm.hpp"
 
-int perform_analysis(Options::HMM &options);
+void perform_analysis(Options::HMM &options, std::mt19937 &rng);
+
+namespace Exception {
+namespace Analysis {
+struct NotASymlink : public std::runtime_error {
+  NotASymlink(const std::string &path);
+};
+struct MeasureNotForMultiple : public std::runtime_error {
+  MeasureNotForMultiple(Measures::Continuous::Measure measure);
+};
+}
+}
 
 #endif

@@ -39,38 +39,44 @@
 using Measure = Measures::Continuous::Measure;
 
 namespace Training {
-  enum class Method {
-    None,
-    Reestimation,
-    Gradient
-  };
-  std::string method2string(Method method);
-  std::istream& operator>>(std::istream& in, Method& method);
-  std::ostream& operator<<(std::ostream& out, Method method);
+enum class Method { None, Reestimation, Gradient };
+std::string method2string(Method method);
+std::istream& operator>>(std::istream& in, Method& method);
+std::ostream& operator<<(std::ostream& out, Method method);
 
-  Method measure2method(Measure measure);
+Method measure2method(Measure measure);
 
-  /** A Range represents a set of state indices */
-  using Range = std::vector<size_t>;
+/** A Range represents a set of state indices */
+using Range = std::vector<size_t>;
 
-  /** Targets represent a set of indices of states whose transition or emission probabilities are to respected */
-  struct Targets {
-    Range transition;
-    Range emission;
-  };
-
-  using Objective = Specification::Objective<Measure>;
-  using Objectives = std::vector<Objective>;
-
-  Seeding::Objective corresponding_objective(const Objective &x, bool use_mi_to_seed);
-  Seeding::Objectives corresponding_objectives(const Objectives &x, bool use_mi_to_seed);
-
-  struct Task : public Objective {
-    Targets targets;
-  };
-
-  using Tasks = std::vector<Task>;
+/** Targets represent a set of indices of states whose transition or emission
+ * probabilities are to respected */
+struct Targets {
+  Range transition;
+  Range emission;
 };
 
-#endif
+using Objective = Specification::Objective<Measure>;
+using Objectives = std::vector<Objective>;
 
+Seeding::Objective corresponding_objective(const Objective& x,
+                                           bool use_mi_to_seed);
+Seeding::Objectives corresponding_objectives(const Objectives& x,
+                                             bool use_mi_to_seed);
+
+struct Task : public Objective {
+  Targets targets;
+};
+
+using Tasks = std::vector<Task>;
+};
+
+namespace Exception {
+namespace HMM {
+struct InvalidTrainingMethod : public std::runtime_error {
+  InvalidTrainingMethod(const std::string& token);
+};
+}
+}
+
+#endif

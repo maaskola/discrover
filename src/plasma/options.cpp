@@ -3,7 +3,7 @@
  *
  *       Filename:  options.cpp
  *
- *    Description:  
+ *    Description:
  *
  *        Created:  31.05.2012 06:47:48
  *         Author:  Jonas Maaskola <jonas@maaskola.de>
@@ -38,6 +38,7 @@ Options::Options()
       only_best(false),
       verbosity(Verbosity::info),
       dump_viterbi(false),
+      dump_bed(false),
       no_enrichment_filter(false),
       fixed_motif_space_mode(false),
       allow_iupac_wildcards(false),
@@ -62,10 +63,8 @@ istream &operator>>(istream &in, OccurrenceFilter &filter) {
     filter = OccurrenceFilter::RemoveSequences;
   else if (token == "mask")
     filter = OccurrenceFilter::MaskOccurrences;
-  else {
-    cout << "Couldn't parse occurrence filter type '" << token << "'." << endl;
-    exit(-1);
-  }
+  else
+    throw Exception::InvalidOccurrenceFilter(token);
   return in;
 }
 
@@ -92,13 +91,8 @@ Algorithm parse_algorithm(const string &token_) {
     return Algorithm::MCMC;
   else if (token == "all")
     return Algorithm::Plasma | Algorithm::ExternalDREME | Algorithm::MCMC;
-  else {
-    cout << "Seeding algorithm '" << token_ << "' unknown." << endl
-         << "Please use one of 'plasma', 'dreme', 'mcmc', or 'all'." << endl
-         << "It is also possible to use multiple algorithms by separating them "
-            "by comma." << endl;
-    exit(-1);
-  }
+  else
+    throw Exception::InvalidAlgorithm(token);
 }
 
 istream &operator>>(istream &in, Algorithm &algorithm) {
@@ -114,13 +108,9 @@ istream &operator>>(istream &in, Algorithm &algorithm) {
       algorithm = algo;
     } else
       algorithm = algorithm | algo;
-    algorithms = algorithms.substr(pos + 1);
+    if (pos != string::npos)
+      algorithms = algorithms.substr(pos + 1);
   } while (pos != string::npos);
-  Algorithm algo = parse_algorithm(algorithms);
-  if (first)
-    algorithm = algo;
-  else
-    algorithm = algorithm | algo;
   return in;
 }
 ostream &operator<<(ostream &os, const Algorithm &algorithm) {
@@ -148,6 +138,17 @@ Objective objective_for_motif(const Objectives &objectives,
   for (auto objective : objectives)
     if (objective.motif_name == motif.name)
       return objective;
-  throw("bla");
+  throw Exception::NoMatchingObjectiveFound(motif.name);
+}
+
+namespace Exception {
+InvalidOccurrenceFilter::InvalidOccurrenceFilter(const string &token)
+    : runtime_error("Error: invalid occurrence filter type '" + token + "'."){};
+InvalidAlgorithm::InvalidAlgorithm(const string &token)
+    : runtime_error( "Error: invalid seeding algorithm '" + token + "'.\n"
+     + "Please use one of 'plasma', 'dreme', 'mcmc', or 'all'.\n"
+     + "It is also possible to use multiple algorithms by separating them by comma."){};
+NoMatchingObjectiveFound::NoMatchingObjectiveFound(const string &motif)
+    : runtime_error("Error: no objective found for motif '" + motif + "'."){};
 }
 }

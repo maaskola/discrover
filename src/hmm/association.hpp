@@ -18,7 +18,7 @@
  *
  *       Filename:  association.hpp
  *
- *    Description:  Header for routines to calculate various measures of association
+ *    Description:  Routines to calculate various measures of association
  *
  *        Created:  Thu Aug 4 22:12:31 2011 +0200
  *
@@ -37,24 +37,28 @@
 /** Computes mutual information of a contingency table
  * a,b,c,d are assumed to be non-negative
  */
-double calc_mutual_information(double A, double B, double C, double D, bool normalize);
+double calc_mutual_information(double A, double B, double C, double D,
+                               bool normalize);
 double calc_mutual_information(const confusion_matrix &m, bool normalize);
-double calc_mutual_information(const matrix_t &matrix, double pseudo_count, bool normalize, bool correction, bool variance);
+double calc_mutual_information(const matrix_t &matrix, double pseudo_count,
+                               bool normalize, bool correction, bool variance);
 
 double calc_g_test_from_mi(double mi, double n);
-double calc_g_test(const matrix_t &matrix, double pseudo_count=1.0);
-double calc_log_likelihood_ratio(const matrix_t &matrix, double pseudo_count=1.0);
-double corrected_pvalue(double score, double n, double df, double motif_len, Verbosity verbosity);
+double calc_g_test(const matrix_t &matrix, double pseudo_count = 1.0);
+double calc_log_likelihood_ratio(const matrix_t &matrix,
+                                 double pseudo_count = 1.0);
+double corrected_pvalue(double score, double n, double df, double motif_len,
+                        Verbosity verbosity);
 
 /** Computes mutual information of a contingency table
  * a,b,c,d are assumed to be non-negative
  */
-double calc_matthews_correlation_coefficient(double tp, double fp, double fn, double tn);
+double calc_matthews_correlation_coefficient(double tp, double fp, double fn,
+                                             double tn);
 double calc_matthews_correlation_coefficient(const confusion_matrix &m);
 
 double calc_rank_information(vector_t posterior, double pseudo_count);
 
-//TODO add: Cramer's V, Phi coefficient MCC, chi-square, DIPS
+// TODO add: Cramer's V, Phi coefficient MCC, chi-square, DIPS
 
 #endif
-

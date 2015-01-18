@@ -27,26 +27,25 @@
  * =====================================================================================
  */
 
-#ifndef  TIMER_HPP
-#define  TIMER_HPP
+#ifndef TIMER_HPP
+#define TIMER_HPP
 
 #include <ctime>
 #include <sys/time.h>
 
 class Timer {
-  private:
-    struct timeval start;
+private:
+  struct timeval start;
 
-  public:
-    /** Initialize and start timer. */
-    Timer();
+public:
+  /** Initialize and start timer. */
+  Timer();
 
-    /** (Re-)Start the timer. */
-    void tick();
+  /** (Re-)Start the timer. */
+  void tick();
 
-    /** Time in micro seconds since tick(). */
-    double tock() const;
+  /** Time in micro seconds since tick(). */
+  double tock() const;
 };
 
-#endif   /* ----- #ifndef TIMER_HPP  ----- */
-
+#endif /* ----- #ifndef TIMER_HPP  ----- */

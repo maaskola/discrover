@@ -3,13 +3,12 @@
 #include <iomanip>
 #include <fstream>
 #include <vector>
-#include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
 #include "../aux.hpp"
-#include "hmm.hpp"
+#include "analysis.hpp"
 #include "report.hpp"
 #include "../timer.hpp"
 #include "../plasma/plasma.hpp"
@@ -28,11 +27,8 @@ void recreate_symlink(const string &source, const string &target) {
   if (exists(target)) {
     if (is_symlink(target))
       remove(target);
-    else {
-      cout << "Error: file " << target << " exists and is not a symlink. "
-           << "File will not be overwritten; aborting." << endl;
-      exit(-1);
-    }
+    else
+      throw Exception::Analysis::NotASymlink(target);
   }
   create_symlink(absolute(source), target);
 }
@@ -60,11 +56,14 @@ struct AnalysisResult {
                         + compression2ending(options.output_compression);
     string viterbi_path = accepted_label + ".viterbi"
                           + compression2ending(options.output_compression);
+    string bed_path = accepted_label + ".bed"
+                          + compression2ending(options.output_compression);
 
     recreate_symlink(training.parameter_file, parameter_path);
     recreate_symlink(full_evaluation.files.summary, summary_path);
     recreate_symlink(full_evaluation.files.table, table_path);
     recreate_symlink(full_evaluation.files.viterbi, viterbi_path);
+    recreate_symlink(full_evaluation.files.bed, bed_path);
 
     vector<string> logo_paths;
     for (auto orig_path : full_evaluation.files.logos) {
@@ -80,9 +79,14 @@ struct AnalysisResult {
     if (options.verbosity >= Verbosity::info) {
       cout << "The results of the accepted model can be found in" << endl;
       cout << parameter_path << endl;
-      cout << summary_path << endl;
-      cout << table_path << endl;
-      cout << viterbi_path << endl;
+      if (not options.evaluate.skip_summary)
+        cout << summary_path << endl;
+      if (not options.evaluate.skip_occurrence_table)
+        cout << table_path << endl;
+      if (not options.evaluate.skip_bed)
+        cout << bed_path << endl;
+      if (not options.evaluate.skip_viterbi_path)
+        cout << viterbi_path << endl;
       for (auto path : logo_paths)
         cout << path << endl;
     }
@@ -131,19 +135,6 @@ void check_data(const Data::Collection &collection,
             cout << ">" << seq.definition << endl << seq.sequence << endl;
       }
     }
-
-  // TODO re-enable warning
-  //  if(options.training_method != Training::Method::none and not
-  //  is_generative(options.objective.measure) and options.objective.measure !=
-  //  Measure::rank_information) {
-  //    for(auto &contrast: collection) {
-  //      if(contrast.sets.size() < 2) {
-  //        cout << "Please note that for discriminative training you need to
-  //        specify multiple sequence sets using -f." << endl;
-  //        exit(-1);
-  //      }
-  //    }
-  //  }
 }
 
 AnalysisResult train_evaluate(HMM &hmm, const Data::Collection &all_data,
@@ -318,10 +309,7 @@ bool check_pairwise_with_previous_motifs(
           ok = log_pvalue <= log_pvalue_threshold;
         } break;
         default:
-          cout << "Error: measure " << measure
-               << " is not implemented for filtering in multiple motif mode."
-               << endl;
-          exit(-1);
+        throw Exception::Analysis::MeasureNotForMultiple(filtering_measure);
       }
 
       if (not ok) {
@@ -621,10 +609,7 @@ HMM doit(const Data::Collection &all_data,
                         scoring_present_groups, scoring_previous_groups);
                     break;
                   default:
-                    cout << "Error: measure " << filtering_measure
-                         << " is not implemented for filtering in multiple "
-                            "motif mode." << endl;
-                    exit(-1);
+                    throw Exception::Analysis::MeasureNotForMultiple(filtering_measure);
                 }
 
                 if (options.verbosity >= Verbosity::info)
@@ -707,8 +692,8 @@ HMM doit(const Data::Collection &all_data,
 
           auto is_below_threshold =
               [&below_threshold](const pair<string, HMM> &x) {
-            return (find(begin(below_threshold), end(below_threshold), x.first)
-                    != end(below_threshold));
+            return find(begin(below_threshold), end(below_threshold), x.first)
+                   != end(below_threshold);
           };
 
           if (options.verbosity >= Verbosity::info) {
@@ -755,7 +740,7 @@ HMM doit(const Data::Collection &all_data,
 }
 
 vector<HMM> cross_validation(const Data::Collection &all_data,
-                             const Options::HMM &options) {
+                             const Options::HMM &options, mt19937 &rng) {
   vector<HMM> hmms;
   for (size_t cross_validation_iteration = 0;
        cross_validation_iteration < options.cross_validation_iterations;
@@ -768,19 +753,19 @@ vector<HMM> cross_validation(const Data::Collection &all_data,
     Options::HMM opt = options;
 
     if (options.cross_validation_freq < 1)
-      opt.label += ".cv"
-                   + boost::lexical_cast<string>(cross_validation_iteration);
+      opt.label += ".cv" + to_string(cross_validation_iteration);
 
     Data::Collection training_data, test_data;
     prepare_cross_validation(all_data, training_data, test_data,
-                             options.cross_validation_freq, options.verbosity);
+                             options.cross_validation_freq, rng,
+                             options.verbosity);
     HMM hmm = doit(all_data, training_data, test_data, opt);
     hmms.push_back(hmm);
   }
   return hmms;
 }
 
-void perform_analysis(Options::HMM &options) {
+void perform_analysis(Options::HMM &options, mt19937 &rng) {
   if (options.verbosity >= Verbosity::verbose)
     cout << "Loading sequences." << endl;
 
@@ -799,5 +784,18 @@ void perform_analysis(Options::HMM &options) {
     options.cross_validation_freq = 1;
     options.cross_validation_iterations = 1;
   }
-  vector<HMM> hmms = cross_validation(collection, options);
+  vector<HMM> hmms = cross_validation(collection, options, rng);
+}
+
+namespace Exception {
+namespace Analysis {
+NotASymlink::NotASymlink(const string &path)
+    : runtime_error("Error: file " + path + " exists and is not a symlink.\n"
+                    + "File will not be overwritten; aborting.") {}
+MeasureNotForMultiple::MeasureNotForMultiple(
+    Measures::Continuous::Measure measure)
+    : runtime_error(
+          "Error: measure " + measure2string(filtering_measure)
+          + " is not implemented for filtering in multiple motif mode.") {}
+}
 }

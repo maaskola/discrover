@@ -35,18 +35,17 @@
 #include "hmm.hpp"
 
 class SubHMM : public HMM {
-  public:
-    SubHMM(const HMM &hmm, const Training::Range &states);
-    size_t n_original_states;
-    std::vector<int> reduce;
-    std::vector<size_t> lift;
-    Training::Range map_down(const Training::Range &range) const;
-    Training::Targets map_down(const Training::Targets &targets) const;
-    matrix_t lift_emission(const matrix_t &m) const;
-    matrix_t lift_transition(const matrix_t &m) const;
-    // std::vector<size_t> reduce(const std::vector<size_t> &v) const;
-    // std::vector<size_t> lift(const std::vector<size_t> &v) const;
+public:
+  SubHMM(const HMM &hmm, const Training::Range &states);
+  size_t n_original_states;
+  std::vector<int> reduce;
+  std::vector<size_t> lift;
+  Training::Range map_down(const Training::Range &range) const;
+  Training::Targets map_down(const Training::Targets &targets) const;
+  matrix_t lift_emission(const matrix_t &m) const;
+  matrix_t lift_transition(const matrix_t &m) const;
+  // std::vector<size_t> reduce(const std::vector<size_t> &v) const;
+  // std::vector<size_t> lift(const std::vector<size_t> &v) const;
 };
 
 #endif
-

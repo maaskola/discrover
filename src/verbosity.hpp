@@ -18,7 +18,7 @@
  *
  *       Filename:  verbosity.hpp
  *
- *    Description:  An enumeration to represent different levels of output noisyness
+ *    Description:  Represent different levels of output noisyness
  *
  *        Created:  Thu Aug 4 22:12:31 2011 +0200
  *
@@ -30,7 +30,13 @@
 #ifndef VERBOSITY_HPP
 #define VERBOSITY_HPP
 
-enum class Verbosity { nothing=0, error=1, info=2, verbose=3, debug=4, everything=5 };
+enum class Verbosity {
+  nothing = 0,
+  error = 1,
+  info = 2,
+  verbose = 3,
+  debug = 4,
+  everything = 5
+};
 
 #endif
-

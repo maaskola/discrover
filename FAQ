@@ -72,3 +72,19 @@ training are typically smaller than those reported after seeding.
 Note that, importantly, the scores computed for the learned HMM parameters from
 the Viterbi parses of the sequences are in turn typically greater than those
 reported after seeding.
+
+
+Q: I observed that using Monte-Carlo Markov chain sampling to learn HMM
+parameters (with the `--sampling` command line switch) seems to yield higher
+scores than when using gradient learning. Why is that?
+
+A: Gradient learning uses the hybrid learning mode described in the publication.
+In the hybrid mode only the emission parameters are optimized so as to increase
+the objective function, while the transition parameters are optimized for the
+likelihood.
+The MCMC mode of Discrover on the other hand does not support such multiple-
+objective learning modes, and instead optimizes all parameters for the chosen
+objective function.
+If you want to have a fair comparison, you can use the `--bglearn gradient`
+command line switch with the gradient-based approaches to optimize all
+parameters, including the transition parameters, for the chosen objective.

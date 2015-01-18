@@ -43,6 +43,7 @@ public:
     struct Files {
       std::string summary;
       std::string viterbi;
+      std::string bed;
       std::string table;
       std::vector<std::string> logos;
     };
@@ -75,7 +76,7 @@ private:
    */
   ResultsCounts evaluate_dataset(const Data::Set &dataset, std::ostream &out,
                                  std::ostream &v_out, std::ostream &occ_out,
-                                 std::ostream &motif_out,
+                                 std::ostream &bed_out,
                                  const Options::HMM &options) const;
 
 #if CAIRO_FOUND

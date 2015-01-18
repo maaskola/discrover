@@ -30,7 +30,6 @@
 #include <iomanip>
 #include <set>
 #include "../aux.hpp"
-#include "../GitSHA1.hpp"
 #include "hmm.hpp"
 
 using namespace std;
@@ -38,15 +37,16 @@ using namespace std;
 bitmask_t HMM::compute_bitmask(const Training::Task &task) const {
   bitmask_t present = 0;
   for (size_t group_idx = 0; group_idx < groups.size(); group_idx++)
-    if (task.motif_name == groups[group_idx].name) present[group_idx] = 1;
-  return (present);
+    if (task.motif_name == groups[group_idx].name)
+      present[group_idx] = 1;
+  return present;
 }
 
 void HMM::shift_forward(size_t group_idx, size_t n) {
   for (size_t i = 0; i < groups[group_idx].states.size() - 1; i++)
     for (size_t j = 0; j < n_emissions; j++)
-      emission(groups[group_idx].states[i], j) =
-          emission(groups[group_idx].states[i + 1], j);
+      emission(groups[group_idx].states[i], j)
+          = emission(groups[group_idx].states[i + 1], j);
   for (size_t j = 0; j < n_emissions; j++)
     emission(*groups[group_idx].states.rbegin(), j) = 1.0 / n_emissions;
   normalize_emission(emission);
@@ -55,8 +55,8 @@ void HMM::shift_forward(size_t group_idx, size_t n) {
 void HMM::shift_backward(size_t group_idx, size_t n) {
   for (size_t i = groups[group_idx].states.size() - 1; i > 0; i--)
     for (size_t j = 0; j < n_emissions; j++)
-      emission(groups[group_idx].states[i - 1], j) =
-          emission(groups[group_idx].states[i], j);
+      emission(groups[group_idx].states[i - 1], j)
+          = emission(groups[group_idx].states[i], j);
   for (size_t j = 0; j < n_emissions; j++)
     emission(*groups[group_idx].states.begin(), j) = 1.0 / n_emissions;
   normalize_emission(emission);
@@ -67,13 +67,14 @@ void HMM::serialize(ostream &os, const ExecutionInformation &exec_info,
   const string param_format_string = "# HMM parameter format version ";
   const string transition_matrix_string = "Transition matrix";
   const string emission_matrix_string = "Emission matrix";
-  const size_t output_precision = 15;
+  const streamsize output_precision = 15;
+  const streamsize prev_precision = os.precision();
   switch (format_version) {
     // TODO bump version because no order is stored?
     case 6:
       os << param_format_string << format_version << endl;
       os << "# " << exec_info.program_name << " " << exec_info.hmm_version
-         << " [" << GIT_BRANCH << " branch]" << endl;
+         << " [" << exec_info.git_branch << " branch]" << endl;
       os << "# Run on " << exec_info.datetime << endl;
       os << "# Run in " << exec_info.directory << endl;
       os << "# Command = " << exec_info.cmdline << endl;
@@ -81,18 +82,21 @@ void HMM::serialize(ostream &os, const ExecutionInformation &exec_info,
         os << "Dataset " << x.second.spec.path << " " << x.first
            << " class = " << x.second.class_prior << " motif = ";
         for (auto &y : x.second.motif_prior)
-          if (y.first != 0) os << " " << y.first << "/" << y.second;
+          if (y.first != 0)
+            os << " " << y.first << "/" << y.second;
         os << endl;
       }
       os << n_states << " states" << endl;
       os << n_emissions << " emissions" << endl;
       for (auto &motif : groups) {
         os << "Motif \"" << motif.name << "\"";
-        for (auto &state : motif.states) os << " " << state;
+        for (auto &state : motif.states)
+          os << " " << state;
         os << endl;
       }
       os << "State class";
-      for (auto &motif : group_ids) os << " " << motif;
+      for (auto &motif : group_ids)
+        os << " " << motif;
       os << endl;
       os << transition_matrix_string << endl;
       os.precision(output_precision);
@@ -111,9 +115,9 @@ void HMM::serialize(ostream &os, const ExecutionInformation &exec_info,
       }
       break;
     default:
-      throw("Format not supported!");
-      break;
+      throw Exception::HMM::ParameterFile::UnsupportedVersion(format_version);
   }
+  os.precision(prev_precision);
 };
 
 void HMM::deserialize(istream &is) {
@@ -123,22 +127,22 @@ void HMM::deserialize(istream &is) {
   const string param_format_string = "# HMM parameter format version ";
   string line;
   safeGetline(is, line);
-  if (line.length() > param_format_string.length() and
-      line.substr(0, param_format_string.length()) == param_format_string) {
-    size_t format_version =
-        atoi(line.substr(param_format_string.length()).c_str());
-    if (format_version < 4) {
-      cout << "Error loading HMM parameters: format version " << format_version
-           << " is not supported." << endl;
-    }
-    while (is.good() and line[0] == '#') safeGetline(is, line);
+  if (line.length() > param_format_string.length()
+      and line.substr(0, param_format_string.length()) == param_format_string) {
+    size_t format_version
+        = atoi(line.substr(param_format_string.length()).c_str());
+    if (format_version < 4)
+      throw Exception::HMM::ParameterFile::UnsupportedVersion(format_version);
+    while (is.good() and line[0] == '#')
+      safeGetline(is, line);
 
     if (format_version >= 5) {
       const string key_a = "Class_prior ";
       const string key_b = "Motif_prior[0] ";
       const string key_c = "Motif_prior[1] ";
       // TODO parse information regarding registered data sets
-      while (line.find(" states") == string::npos) safeGetline(is, line);
+      while (line.find(" states") == string::npos)
+        safeGetline(is, line);
       if (false) {
         // if(line.substr(0, key_a.size()) == key_a)
         //   class_prior = atof(line.substr(key_a.size()).c_str());
@@ -169,14 +173,14 @@ void HMM::deserialize(istream &is) {
     if (verbosity >= Verbosity::debug)
       cerr << "n_states = " << n_states << endl;
     safeGetline(is, line);
-    if (verbosity >= Verbosity::debug) cerr << "line = " << line << endl;
+    if (verbosity >= Verbosity::debug)
+      cerr << "line = " << line << endl;
     size_t n_emis = atoi(line.c_str());
-    if (n_emis != n_emissions) {
-      cout << "Error: this version only works with " << n_emissions
-           << " emissions, while the .hmm file specifies " << n_emis << "."
-           << endl;
-      exit(-1);
-    }
+    if (n_emis != n_emissions)
+      throw Exception::HMM::ParameterFile::SyntaxError(
+          "this version only works with " + to_string(n_emissions)
+          + " emissions, while the .hmm file specifies " + to_string(n_emis)
+          + ".");
 
     if (verbosity >= Verbosity::debug)
       cout << "n_states = " << n_states << " n_emissions " << n_emissions
@@ -219,11 +223,9 @@ void HMM::deserialize(istream &is) {
     }
 
     // safeGetline(is, line);
-    if (line.substr(0, 11) != "State class") {
-      cout << "Error loading HMM parameters: expected \"State class\" but "
-              "found instead: \"" << line << "\"." << endl;
-      exit(-1);
-    }
+    if (line.substr(0, 11) != "State class")
+      throw Exception::HMM::ParameterFile::SyntaxError(
+          "expected \"State class\" but found instead: \"" + line + "\".");
 
     line = line.substr(12);
     while (line != "") {
@@ -248,11 +250,10 @@ void HMM::deserialize(istream &is) {
         size_t start = line.find(" ");
         if (start > 0) {
           size_t o = atoi(line.substr(0, start).c_str());
-          if (o != 0) {
-            cout << "Error: Found a non-zero state order. This version version "
-                    "only works for zeroth order." << endl;
-            exit(-1);
-          }
+          if (o != 0)
+            throw Exception::HMM::ParameterFile::SyntaxError(
+                "found a non-zero state order. This version version only works "
+                "for zeroth order.");
         }
         if (start == string::npos)
           break;
@@ -267,37 +268,35 @@ void HMM::deserialize(istream &is) {
     transition.resize(n_states, n_states);
     emission.resize(n_states, n_emissions);
 
-    if (line != "Transition matrix") {
-      cout << "Error: expecting line \"Transition matrix\", but got instead \""
-           << line << "\"." << endl;
-      exit(-1);
-    }
+    if (line != "Transition matrix")
+      throw Exception::HMM::ParameterFile::SyntaxError(
+                                 "expecting line \"Transition matrix\", "
+                                 "but got instead \"" + line + "\".");
     for (size_t i = 0; i < n_states; i++) {
       size_t tmp;
       is >> tmp;
-      for (size_t j = 0; j < n_states; j++) is >> transition(i, j);
+      for (size_t j = 0; j < n_states; j++)
+        is >> transition(i, j);
     }
     safeGetline(is, line);
     safeGetline(is, line);
-    if (line != "Emission matrix") {
-      cout << "Error: expecting line \"Emission matrix\", but got instead \""
-           << line << "\"." << endl;
-      exit(-1);
-    }
+    if (line != "Emission matrix")
+      throw Exception::HMM::ParameterFile::SyntaxError(
+          "expecting line \"Emission matrix\", but got instead \"" + line
+          + "\".");
     for (size_t i = 0; i < n_states; i++) {
       size_t tmp;
       is >> tmp;
-      for (size_t j = 0; j < n_emissions; j++) is >> emission(i, j);
+      for (size_t j = 0; j < n_emissions; j++)
+        is >> emission(i, j);
     }
   } else {
     is >> transition;
     is >> emission;
     last_state = transition.size1() - 1;
   }
-  if (n_states != transition.size1()) {
-    cout << "Inconsistent number of states." << endl;
-    exit(-1);
-  }
+  if (n_states != transition.size1())
+      throw Exception::HMM::ParameterFile::SyntaxError("inconsistent number of states.");
 
   finalize_initialization();
 };
@@ -306,7 +305,8 @@ string HMM::path2string_state(const HMM::StatePath &path) const {
   const char start_symb = '^';
   const char bg_symb = '0';
   string p;
-  for (size_t j = 0; j < path.size(); j++) switch (path[j]) {
+  for (size_t j = 0; j < path.size(); j++)
+    switch (path[j]) {
       case start_state:
         p += start_symb;
         break;
@@ -326,16 +326,18 @@ string HMM::path2string_state(const HMM::StatePath &path) const {
         p += c;
         break;
     };
-  return (p);
+  return p;
 };
 
 string HMM::path2string_group(const HMM::StatePath &path) const {
   const char start_symb = '^';
   const char bg_symb = '-';
   char first_symb = '0';
-  if (groups.size() - 2 > 10) first_symb = 'A';
+  if (groups.size() - 2 > 10)
+    first_symb = 'A';
   string p;
-  for (size_t j = 0; j < path.size(); j++) switch (path[j]) {
+  for (size_t j = 0; j < path.size(); j++)
+    switch (path[j]) {
       case start_state:
         p += start_symb;
         break;
@@ -347,7 +349,7 @@ string HMM::path2string_group(const HMM::StatePath &path) const {
         p += c;
         break;
     };
-  return (p);
+  return p;
 };
 
 void HMM::to_dot(ostream &os, double minimum_transition) const {
@@ -390,19 +392,23 @@ void HMM::to_dot(ostream &os, double minimum_transition) const {
 bool HMM::check_consistency_transitions(double eps) const {
   for (size_t k = 0; k < n_states; k++) {
     double p = 0;
-    for (size_t l = 0; l < n_states; l++) p += transition(k, l);
-    if (fabs(1 - p) > eps) return (false);
+    for (size_t l = 0; l < n_states; l++)
+      p += transition(k, l);
+    if (fabs(1 - p) > eps)
+      return false;
   }
-  return (true);
+  return true;
 }
 
 bool HMM::check_consistency_emissions(double eps) const {
   for (size_t k = 0; k < n_states; k++) {
     double p = 0;
-    for (size_t l = 0; l < n_emissions; l++) p += emission(k, l);
-    if (fabs(1 - p) > eps) return (false);
+    for (size_t l = 0; l < n_emissions; l++)
+      p += emission(k, l);
+    if (fabs(1 - p) > eps)
+      return false;
   }
-  return (true);
+  return true;
 }
 
 bool HMM::check_consistency(double eps) const {
@@ -412,10 +418,12 @@ bool HMM::check_consistency(double eps) const {
   ok = ok and group_ids.size() == n_states;
   for (auto &m : groups)
     for (auto &state : m.states)
-      if (state > n_states) ok = false;
+      if (state > n_states)
+        ok = false;
   for (auto &d : group_ids)
-    if (d > groups.size()) ok = false;
-  return (ok);
+    if (d > groups.size())
+      ok = false;
+  return ok;
 }
 
 ostream &operator<<(ostream &os, const HMM &hmm) {
@@ -423,7 +431,7 @@ ostream &operator<<(ostream &os, const HMM &hmm) {
      << hmm.n_emissions << " emissions." << endl
      << "Transition probability matrix: " << hmm.transition << endl
      << "Emission probability matrix: " << hmm.emission << endl;
-  return (os);
+  return os;
 }
 
 /** Set the emissions according to the desired matrix.
@@ -467,8 +475,8 @@ void HMM::set_motif_emissions(const matrix_t &e, size_t first_padded,
   // set the emissions of the insert states to uniform
   for (size_t i = 0; i < n_insertions; i++) {
     for (size_t j = 0; j < e.size2(); j++)
-      emission(first_padded + pad_left + n + pad_right + i, j) =
-          1.0 / e.size2();
+      emission(first_padded + pad_left + n + pad_right + i, j) = 1.0
+                                                                 / e.size2();
     for (size_t j = e.size2(); j < n_emissions; j++)
       emission(first_padded + pad_left + n + pad_right + i, j) = 0;
   }
@@ -477,27 +485,35 @@ void HMM::set_motif_emissions(const matrix_t &e, size_t first_padded,
 void HMM::normalize_transition(matrix_t &m) const {
   for (size_t k = 0; k < m.size1(); k++) {
     double z = 0;
-    for (size_t l = 0; l < m.size2(); l++) z += m(k, l);
+    for (size_t l = 0; l < m.size2(); l++)
+      z += m(k, l);
     if (z > 0)
-      for (size_t l = 0; l < m.size2(); l++) m(k, l) = m(k, l) / z;
+      for (size_t l = 0; l < m.size2(); l++)
+        m(k, l) = m(k, l) / z;
     else
-      for (size_t l = 0; l < m.size2(); l++) m(k, l) = 0;
+      for (size_t l = 0; l < m.size2(); l++)
+        m(k, l) = 0;
   }
 }
 
 void HMM::normalize_emission(matrix_t &m) const {
   for (size_t k = bg_state; k < m.size1(); k++) {
-    if (verbosity >= Verbosity::debug) cout << "k = " << k << endl;
+    if (verbosity >= Verbosity::debug)
+      cout << "k = " << k << endl;
     double z = 0;
-    for (size_t b = 0; b < n_emissions; b++) z += m(k, b);
+    for (size_t b = 0; b < n_emissions; b++)
+      z += m(k, b);
     if (z > 0)
-      for (size_t b = 0; b < n_emissions; b++) m(k, b) /= z;
+      for (size_t b = 0; b < n_emissions; b++)
+        m(k, b) /= z;
     else
-      for (size_t b = 0; b < n_emissions; b++) m(k, b) = 0;
+      for (size_t b = 0; b < n_emissions; b++)
+        m(k, b) = 0;
   }
 
   // enforce emissions of start state
-  for (size_t b = 0; b < n_emissions; b++) m(start_state, b) = 0;
+  for (size_t b = 0; b < n_emissions; b++)
+    m(start_state, b) = 0;
 }
 
 Training::Tasks HMM::define_training_tasks(const Options::HMM &options) const {
@@ -505,10 +521,11 @@ Training::Tasks HMM::define_training_tasks(const Options::HMM &options) const {
 
   // First the (mostly) discriminative tasks
   bool atleast_one_discriminative_task = false;
-  bool do_transition = options.bg_learning == Training::Method::Gradient and
-                       options.objectives.size() == 1;
+  bool do_transition = options.bg_learning == Training::Method::Gradient
+                       and options.objectives.size() == 1;
   for (auto &objective : options.objectives) {
-    if (not Measures::is_discriminative(objective.measure)) continue;
+    if (not Measures::is_discriminative(objective.measure))
+      continue;
     atleast_one_discriminative_task = true;
     Training::Task task;
     task.motif_name = objective.motif_name;
@@ -536,10 +553,12 @@ Training::Tasks HMM::define_training_tasks(const Options::HMM &options) const {
 
       if (options.verbosity >= Verbosity::verbose) {
         cout << "Generated primary training targets." << endl << "Emissions:";
-        for (auto e : task.targets.emission) cout << " " << e;
+        for (auto e : task.targets.emission)
+          cout << " " << e;
         cout << endl;
         cout << "Transitions:";
-        for (auto t : task.targets.transition) cout << " " << t;
+        for (auto t : task.targets.transition)
+          cout << " " << t;
         cout << endl;
       }
     }
@@ -551,26 +570,21 @@ Training::Tasks HMM::define_training_tasks(const Options::HMM &options) const {
   for (auto &task : tasks) {
     for (auto &e_state : task.targets.emission) {
       auto pair = e_states.insert(e_state);
-      if (not pair.second) {
-        cout << "Error: some emission parameters are supposed to be "
-                "simultaneously subjected to multiple learning tasks." << endl;
-        exit(-1);
-      }
+      if (not pair.second)
+        throw Exception::HMM::Learning::MultipleTasks("emission");
     }
     for (auto &t_state : task.targets.transition) {
       auto pair = t_states.insert(t_state);
-      if (not pair.second) {
-        cout << "Error: some transition parameters are supposed to be "
-                "simultaneously subjected to multiple learning tasks." << endl;
-        exit(-1);
-      }
+      if (not pair.second)
+        throw Exception::HMM::Learning::MultipleTasks("transition");
     }
   }
 
   // get all contrast names
   set<string> contrast_names;
   for (auto &task : tasks)
-    for (auto &expr : task) contrast_names.insert(expr.contrast);
+    for (auto &expr : task)
+      contrast_names.insert(expr.contrast);
 
   // And then the generative part
   if (options.bg_learning != Training::Method::None) {
@@ -587,7 +601,8 @@ Training::Tasks HMM::define_training_tasks(const Options::HMM &options) const {
       task.contrast_expression.push_back({+1, contrast_name});
     for (size_t i = 0; i < n_states; i++) {
       if (e_states.find(i) == end(e_states))
-        if (i > start_state) task.targets.emission.push_back(i);
+        if (i > start_state)
+          task.targets.emission.push_back(i);
       if (t_states.find(i) == end(t_states))
         task.targets.transition.push_back(i);
     }
@@ -596,14 +611,16 @@ Training::Tasks HMM::define_training_tasks(const Options::HMM &options) const {
 
     if (options.verbosity >= Verbosity::verbose) {
       cout << "Generated secondary training targets." << endl << "Emissions:";
-      for (auto e : task.targets.emission) cout << " " << e;
+      for (auto e : task.targets.emission)
+        cout << " " << e;
       cout << endl;
       cout << "Transitions:";
-      for (auto t : task.targets.transition) cout << " " << t;
+      for (auto t : task.targets.transition)
+        cout << " " << t;
       cout << endl;
     }
   }
-  return (tasks);
+  return tasks;
 }
 
 size_t HMM::non_zero_parameters(
@@ -611,37 +628,42 @@ size_t HMM::non_zero_parameters(
   size_t z = 0;
   for (auto i : training_targets.transition)
     for (size_t j = 0; j < n_states; j++)
-      if (transition(i, j) > 0) z++;
+      if (transition(i, j) > 0)
+        z++;
   for (auto i : training_targets.emission)
     for (size_t j = 0; j < n_emissions; j++)
-      if (emission(i, j) > 0) z++;
+      if (emission(i, j) > 0)
+        z++;
   if (verbosity >= Verbosity::verbose)
     cout << "non_zero_parameters = " << z << endl;
-  return (z);
+  return z;
 }
 
 size_t HMM::n_parameters() const {
   size_t n = n_states * (n_states - 1) + n_states * (n_emissions - 1);
-  if (verbosity >= Verbosity::verbose) cout << "n_parameters = " << n << endl;
-  return (n);
+  if (verbosity >= Verbosity::verbose)
+    cout << "n_parameters = " << n << endl;
+  return n;
 }
 
 size_t HMM::count_motif(const HMM::StatePath &path, size_t motif) const {
-  if (motif >= groups.size()) return (0);
-  size_t first_state =
-      *groups[motif].states.begin();  // TODO make this more flexible
+  if (motif >= groups.size())
+    return 0;
+  size_t first_state
+      = *groups[motif].states.begin();  // TODO make this more flexible
   size_t n = 0;
   for (auto x : path)
-    if (x == first_state) n++;
-  return (n);
+    if (x == first_state)
+      n++;
+  return n;
 }
 
 bool HMM::is_motif_group(size_t group_idx) const {
-  return (groups[group_idx].kind == Group::Kind::Motif);
+  return groups[group_idx].kind == Group::Kind::Motif;
 }
 
 bool HMM::is_motif_state(size_t state_idx) const {
-  return (is_motif_group(group_ids[state_idx]));
+  return is_motif_group(group_ids[state_idx]);
 }
 
 HMM::mask_t HMM::compute_mask(const Data::Collection &collection) const {
@@ -664,38 +686,44 @@ HMM::mask_t HMM::compute_mask(const Data::Collection &collection) const {
           // the sequence length
           idx++;
         }
-        if (not v.empty()) m[seq.definition] = v;
+        if (not v.empty())
+          m[seq.definition] = v;
       }
-      if (not m.empty()) mask[dataset.path] = m;
+      if (not m.empty())
+        mask[dataset.path] = m;
     }
-  return (mask);
+  return mask;
 }
 
 Training::Range HMM::complementary_states(size_t group_idx) const {
   Training::Range range;
   for (size_t i = start_state; i < n_states; i++)
-    if (not is_motif_state(i) or group_ids[i] != group_idx) range.push_back(i);
+    if (not is_motif_state(i) or group_ids[i] != group_idx)
+      range.push_back(i);
   if (verbosity >= Verbosity::debug) {
     cout << "Complementary states =";
-    for (auto &x : range) cout << " " << x;
+    for (auto &x : range)
+      cout << " " << x;
     cout << endl;
   }
-  return (range);
+  return range;
 }
 
 Training::Range HMM::complementary_states_mask(bitmask_t present_mask) const {
   Training::Range range;
-  for (size_t i = start_state; i < n_states; i++) range.push_back(i);
+  for (size_t i = start_state; i < n_states; i++)
+    range.push_back(i);
   auto in_mask = [&](size_t state) {
-    return ((present_mask & bitmask_t(1 << group_ids[state])) != 0);
+    return (present_mask & bitmask_t(1 << group_ids[state])) != 0;
   };
   range.erase(remove_if(begin(range), end(range), in_mask), end(range));
   if (verbosity >= Verbosity::debug) {
     cout << "Complementary states =";
-    for (auto &x : range) cout << " " << x;
+    for (auto &x : range)
+      cout << " " << x;
     cout << endl;
   }
-  return (range);
+  return range;
 }
 
 string HMM::get_group_consensus(size_t idx, double threshold) const {
@@ -704,30 +732,32 @@ string HMM::get_group_consensus(size_t idx, double threshold) const {
   for (auto &i : groups[idx].states) {
     char present = 0;
     for (size_t j = 0; j < 4; j++)
-      if (emission(i, j) >= threshold) present |= (1 << j);
+      if (emission(i, j) >= threshold)
+        present |= (1 << j);
     consensus += iupac[present];
   }
-  return (consensus);
+  return consensus;
 }
 
-string HMM::get_group_name(size_t idx) const { return (groups[idx].name); }
+string HMM::get_group_name(size_t idx) const { return groups[idx].name; }
 
-size_t HMM::get_nstates() const { return (n_states); }
+size_t HMM::get_nstates() const { return n_states; }
 
-size_t HMM::get_ngroups() const { return (groups.size()); }
+size_t HMM::get_ngroups() const { return groups.size(); }
 
 size_t HMM::get_nmotifs() const {
   size_t x = 0;
   for (size_t group_idx = 0; group_idx < groups.size(); group_idx++)
-    if (is_motif_group(group_idx)) x++;
-  return (x);
+    if (is_motif_group(group_idx))
+      x++;
+  return x;
 }
 
-double HMM::get_pseudo_count() const { return (pseudo_count); }
+double HMM::get_pseudo_count() const { return pseudo_count; }
 
 size_t HMM::get_motif_len(size_t motif_idx) const {
   size_t len = groups[motif_idx].states.size();
-  return (len);
+  return len;
 }
 
 void HMM::print_occurrence_table_header(ostream &out) const {
@@ -736,13 +766,15 @@ void HMM::print_occurrence_table_header(ostream &out) const {
 }
 
 void HMM::print_occurrence_table(const string &file_path, const Data::Seq &seq,
-                                 const StatePath &path, ostream &out) const {
+                                 const StatePath &path, ostream &out,
+                                 bool bed) const {
   size_t seqlen = seq.sequence.size();
   size_t midpoint = seqlen / 2;
   bool revcomp = false;
   // reverse-complementary sequences look like this: xxx$xxx
   // so their length is 2n + 1, and the middle nucleotide is $
-  if (seqlen % 2 == 1 and seq.sequence[midpoint] == '$') revcomp = true;
+  if (seqlen % 2 == 1 and seq.sequence[midpoint] == '$')
+    revcomp = true;
 
   double center;
   if (revcomp)
@@ -752,22 +784,29 @@ void HMM::print_occurrence_table(const string &file_path, const Data::Seq &seq,
 
   for (size_t pos = 0; pos < path.size(); pos++)
     for (size_t group_idx = 0; group_idx < groups.size(); group_idx++)
-      if (is_motif_group(group_idx) and
-          path[pos] == groups[group_idx].states[0]) {
+      if (is_motif_group(group_idx)
+          and path[pos] == groups[group_idx].states[0]) {
         size_t end = pos + 1;
-        while (end != path.size() and path[end] > path[pos]) end++;
+        while (end != path.size() and path[end] > path[pos])
+          end++;
         string motif = seq.sequence.substr(pos, end - pos);
 
         bool strand = (not revcomp) or (pos < midpoint);
         // forward_pos is the position relative to the forward strand
         long forward_pos = pos;
-        if (strand == false) forward_pos = seqlen - end;
+        if (strand == false)
+          forward_pos = seqlen - end;
         double rel_pos = forward_pos - center;
         double motif_center_pos = rel_pos + (end - pos - 1) / 2.0;
-        out << file_path << "\t" << seq.definition << "\t" << pos << "\t"
-            << group_idx << "\t" << groups[group_idx].name << "\t" << motif
-            << "\t" << (strand ? "+" : "-") << "\t" << forward_pos << "\t"
-            << motif_center_pos << endl;
+        if (bed)
+          out << seq.definition << "\t" << pos << "\t" << end << "\t"
+              << groups[group_idx].name << "\t" << 0 << "\t"
+              << (strand ? "+" : "-") << endl;
+        else
+          out << file_path << "\t" << seq.definition << "\t" << pos << "\t"
+              << group_idx << "\t" << groups[group_idx].name << "\t" << motif
+              << "\t" << (strand ? "+" : "-") << "\t" << forward_pos << "\t"
+              << motif_center_pos << endl;
       }
 }
 
@@ -778,13 +817,13 @@ pair<HMM, map<size_t, size_t>> HMM::add_revcomp_motifs() const {
     if (groups[i].kind == Group::Kind::Motif)
       for (size_t j = 0; j < groups[i].states.size(); j++)
         for (size_t k = 0; k < n_emissions; k++)
-          rc.emission(groups[i].states[j], k) =
-              emission(groups[i].states[groups[i].states.size() - j - 1],
-                       n_emissions - k - 1);
+          rc.emission(groups[i].states[j], k)
+              = emission(groups[i].states[groups[i].states.size() - j - 1],
+                         n_emissions - k - 1);
 
   for (size_t i = 0; i < first_state; i++) {
-    rc.transition(start_state, start_state) += rc.transition(start_state, i) /=
-        2;
+    rc.transition(start_state, start_state) += rc.transition(start_state, i)
+        /= 2;
     rc.transition(bg_state, bg_state) += rc.transition(bg_state, i) /= 2;
   }
 
@@ -794,7 +833,25 @@ pair<HMM, map<size_t, size_t>> HMM::add_revcomp_motifs() const {
   map<size_t, size_t> assoc;
   size_t idx = 0;
   for (size_t i = 0; i < groups.size(); i++)
-    if (groups[i].kind == Group::Kind::Motif) assoc[i] = groups.size() + idx++;
+    if (groups[i].kind == Group::Kind::Motif)
+      assoc[i] = groups.size() + idx++;
 
-  return (make_pair(hmm, assoc));
+  return make_pair(hmm, assoc);
+}
+
+namespace Exception {
+namespace HMM {
+namespace ParameterFile {
+SyntaxError::SyntaxError(const string &token)
+    : runtime_error("Syntax error: " + token) {}
+UnsupportedVersion::UnsupportedVersion(size_t version)
+    : runtime_error("Error: parameter file format version " + to_string(version)
+                    + " not supported!") {}
+}
+namespace Learning {
+MultipleTasks::MultipleTasks(const string &which)
+    : runtime_error("Error: some " + which + " parameters are simultaneously "
+                    + "assigned to multiple learning tasks.") {}
+}
+}
 }

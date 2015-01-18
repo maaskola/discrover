@@ -27,16 +27,16 @@
  * =====================================================================================
  */
 
-#ifndef  CODE_HPP
-#define  CODE_HPP
+#ifndef CODE_HPP
+#define CODE_HPP
 
 #include <string>
 #include <vector>
 
 namespace Seeding {
-  const std::string Symbol = "-acmgrsvtwyhkdbn";
-  std::string iupac2regex(const std::string &s);
-  bool iupac_included(char r, char q);
+const std::string Symbol = "-acmgrsvtwyhkdbn";
+std::string iupac2regex(const std::string &s);
+bool iupac_included(char r, char q);
 };
 
 using symbol_t = uint8_t;
@@ -55,10 +55,12 @@ std::string decode(const seq_type &seq);
  * Optionally, IUPAC wildcards are faithfully encoded.
  * Otherwise, they and all non-IUPAC symbols are encoded by non-matching symbols
  */
-void add_sequence(seq_type &s, const std::string &seq, bool allow_iupac_wildcards);
+void add_sequence(seq_type &s, const std::string &seq,
+                  bool allow_iupac_wildcards);
 
 bool pure_nucleotide(symbol_t s);
 bool degenerate_nucleotide(symbol_t s);
 
-#endif   /* ----- #ifndef CODE_HPP ----- */
+seq_type iupac_reverse_complement(const seq_type &s);
 
+#endif /* ----- #ifndef CODE_HPP ----- */
