@@ -21,7 +21,7 @@ This software package uses routines from Mathlib to compute Chi-Square distribut
 
 ## Publication
 
-The tool is described in the following [open-access article](nar.oxfordjournals.org/content/42/21/12995.full):<br/>
+The tool is described in the following [open-access article](http://nar.oxfordjournals.org/content/42/21/12995.full):<br/>
 Jonas Maaskola and Nikolaus Rajewsky.
 Binding site discovery from nucleic acid sequences by discriminative learning of hidden Markov models<br/>
 Nucleic Acid Research, 42(21):12995-13011, Dec 2014. doi:10.1093/nar/gku1083
