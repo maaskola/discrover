@@ -42,8 +42,8 @@ You can find it [here](https://github.com/maaskola/discrover-galaxy).
 ## Obtaining Discover
 
 [Binary packages of Discrover](https://github.com/maaskola/discrover/releases) are available for select Linux distributions.
-Instructions on how to [install](INSTALL.md) those or how to [manually build](BUILDING.md) Discrover are available in separate files.
 Notice that for Ubuntu a [PPA](https://launchpad.net/~maaskola/+archive/ubuntu/discrover) has been set up that can also be used for installing Discrover.
+Instructions on how to [install](INSTALL.md) the packages (and how to use the PPA) or how to [manually build](BUILDING.md) Discrover are available in separate files.
 
 
 ## Sequence data
