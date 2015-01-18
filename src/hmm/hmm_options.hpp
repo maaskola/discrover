@@ -74,6 +74,7 @@ struct Evaluation {
   bool skip_occurrence_table;
   bool skip_summary;
   bool skip_viterbi_path;
+  bool skip_bed;
   bool perform_ric;
   bool print_posterior;
 };

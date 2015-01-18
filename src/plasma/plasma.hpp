@@ -86,6 +86,8 @@ void report(std::ostream &os, const Result &result,
             const Collection &collection, const Options &options);
 void viterbi_dump(const std::string &motif, const Collection &collection,
                   std::ostream &out, const Options &options);
+void bed_dump(const std::string &motif, const Collection &collection,
+              std::ostream &out, const Options &options);
 
 namespace Exception {
 namespace Dreme {

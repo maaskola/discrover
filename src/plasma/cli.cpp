@@ -153,6 +153,7 @@ boost::program_options::options_description gen_plasma_options_description(
       ("word,w", po::bool_switch(&options.word_stats), "Perform nucleotide level statistics instead of on sequence level.")
       ("time", po::bool_switch(&options.measure_runtime), "Output information about how long certain parts take to execute.")
       ("print", po::bool_switch(&options.dump_viterbi), "Print out sequences annotated with motif occurrences.")
+      ("bed", po::bool_switch(&options.dump_bed), "Generate a BED file with positions of motif occurrence.")
       ("threads", po::value(&options.n_threads), "Number of threads. If not given, as many are used as there are CPU cores on this machine.")
       ("output,o", po::value(&options.label),
        "Output file names are generated from this label. If not given, the output label will be 'plasma_XXX' where XXX is a string to make the label unique. The output files comprise:\n"
@@ -164,6 +165,7 @@ boost::program_options::options_description gen_plasma_options_description(
     options.word_stats = false;
     options.measure_runtime = false;
     options.dump_viterbi = false;
+    options.dump_bed = false;
     options.label = generate_random_label("plasma", 0, options.verbosity);
     options.mcmc.random_salt = generate_rng_seed();
   }

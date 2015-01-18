@@ -56,11 +56,14 @@ struct AnalysisResult {
                         + compression2ending(options.output_compression);
     string viterbi_path = accepted_label + ".viterbi"
                           + compression2ending(options.output_compression);
+    string bed_path = accepted_label + ".bed"
+                          + compression2ending(options.output_compression);
 
     recreate_symlink(training.parameter_file, parameter_path);
     recreate_symlink(full_evaluation.files.summary, summary_path);
     recreate_symlink(full_evaluation.files.table, table_path);
     recreate_symlink(full_evaluation.files.viterbi, viterbi_path);
+    recreate_symlink(full_evaluation.files.bed, bed_path);
 
     vector<string> logo_paths;
     for (auto orig_path : full_evaluation.files.logos) {
@@ -76,9 +79,14 @@ struct AnalysisResult {
     if (options.verbosity >= Verbosity::info) {
       cout << "The results of the accepted model can be found in" << endl;
       cout << parameter_path << endl;
-      cout << summary_path << endl;
-      cout << table_path << endl;
-      cout << viterbi_path << endl;
+      if (not options.evaluate.skip_summary)
+        cout << summary_path << endl;
+      if (not options.evaluate.skip_occurrence_table)
+        cout << table_path << endl;
+      if (not options.evaluate.skip_bed)
+        cout << bed_path << endl;
+      if (not options.evaluate.skip_viterbi_path)
+        cout << viterbi_path << endl;
       for (auto path : logo_paths)
         cout << path << endl;
     }

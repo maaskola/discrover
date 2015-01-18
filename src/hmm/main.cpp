@@ -335,6 +335,7 @@ int main(int argc, const char **argv) {
     ("condmotif", po::bool_switch(&options.evaluate.conditional_motif_probability), "During evaluation compute for every position the conditional motif likelihood considering only the motif emissions.")
     ("nosummary", po::bool_switch(&options.evaluate.skip_summary), "Do not print summary information.")
     ("noviterbi", po::bool_switch(&options.evaluate.skip_viterbi_path), "Do not print the Viterbi path.")
+    ("nobed", po::bool_switch(&options.evaluate.skip_bed), "Do not generate BED file with positions of motif occurrences.")
     ("notable", po::bool_switch(&options.evaluate.skip_occurrence_table), "Do not print the occurrence table.")
     ("ric", po::bool_switch(&options.evaluate.perform_ric), "Perform a rank information coefficient analysis.")
     ;

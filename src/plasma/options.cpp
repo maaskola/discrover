@@ -38,6 +38,7 @@ Options::Options()
       only_best(false),
       verbosity(Verbosity::info),
       dump_viterbi(false),
+      dump_bed(false),
       no_enrichment_filter(false),
       fixed_motif_space_mode(false),
       allow_iupac_wildcards(false),

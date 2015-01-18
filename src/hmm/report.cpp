@@ -292,7 +292,7 @@ void Evaluator::print_posterior(ostream &os, const vector_t &scale,
 
 Evaluator::ResultsCounts Evaluator::evaluate_dataset(
     const Data::Set &dataset, ostream &out, ostream &v_out, ostream &occ_out,
-    ostream &motif_out, const Options::HMM &options) const {
+    ostream &motif_out, ostream &bed_out, const Options::HMM &options) const { // TODO motif_out
   const size_t width = 12;
   const size_t prec = 5;
   Timer timer;
@@ -351,7 +351,8 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
     double lp = hmm.viterbi(dataset.sequences[i], viterbi_path);
 
     if (not(options.evaluate.skip_viterbi_path
-            and options.evaluate.skip_summary)) {
+            and options.evaluate.skip_summary
+            and options.evaluate.skip_bed)) {
       stringstream viterbi_str, exp_str, atl_str;
 
       bool first = true;
@@ -411,9 +412,12 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
         conditional_decoder.decode(v_out, dataset.sequences[i]);
     }
 
+    if (not options.evaluate.skip_bed)
+      hmm.print_occurrence_table(dataset.path, dataset.sequences[i],
+                                 viterbi_path, bed_out, true);
     if (not options.evaluate.skip_occurrence_table)
       hmm.print_occurrence_table(dataset.path, dataset.sequences[i],
-                                 viterbi_path, occ_out);
+                                 viterbi_path, occ_out, false);
   }
 
   if (not options.evaluate.skip_summary) {
@@ -489,12 +493,14 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
                        + compression2ending(options.output_compression);
   result.files.viterbi = options.label + file_tag + ".viterbi"
                          + compression2ending(options.output_compression);
+  result.files.bed = options.label + file_tag + ".bed"
+                     + compression2ending(options.output_compression);
 
 #if CAIRO_FOUND
   result.files.logos = generate_logos(options.label + file_tag, options);
 #endif
 
-  ofstream summary_out, occurrence_file, viterbi_file;
+  ofstream summary_out, occurrence_file, viterbi_file, bed_file;
   summary_out.open(result.files.summary.c_str());
 
   if (not options.evaluate.skip_summary) {
@@ -541,33 +547,41 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
       cout << "Performance summary in " << result.files.summary << endl;
       if (not options.evaluate.skip_viterbi_path)
         cout << "Viterbi path in " << result.files.viterbi << endl;
+      if (not options.evaluate.skip_bed)
+        cout << "Motif occurrence BED in " << result.files.bed << endl;
       if (not options.evaluate.skip_occurrence_table)
         cout << "Motif occurrence table in " << result.files.table << endl;
     }
 
     if (not options.evaluate.skip_viterbi_path)
       viterbi_file.open(result.files.viterbi.c_str(), flags);
+    if (not options.evaluate.skip_bed)
+      bed_file.open(result.files.bed.c_str(), flags);
     if (not options.evaluate.skip_occurrence_table)
-      occurrence_file.open(result.files.table.c_str());
+      occurrence_file.open(result.files.table.c_str(), flags);
 
-    boost::iostreams::filtering_stream<boost::iostreams::output> v_out, occ_out,
-        motif_out;
+    boost::iostreams::filtering_stream<boost::iostreams::output> v_out, bed_out,
+        occ_out, motif_out; // TODO motif_out
     switch (options.output_compression) {
       case Options::Compression::gzip:
         v_out.push(boost::iostreams::gzip_compressor());
+        bed_out.push(boost::iostreams::gzip_compressor());
         occ_out.push(boost::iostreams::gzip_compressor());
-        motif_out.push(boost::iostreams::gzip_compressor());
+        motif_out.push(boost::iostreams::gzip_compressor()); // TODO motif_out
         break;
       case Options::Compression::bzip2:
         v_out.push(boost::iostreams::bzip2_compressor());
+        bed_out.push(boost::iostreams::bzip2_compressor());
         occ_out.push(boost::iostreams::bzip2_compressor());
-        motif_out.push(boost::iostreams::bzip2_compressor());
+        motif_out.push(boost::iostreams::bzip2_compressor()); // TODO motif_out
         break;
       default:
         break;
     }
     v_out.push(viterbi_file);
+    bed_out.push(viterbi_file);
     occ_out.push(occurrence_file);
+    motif_out.push(occurrence_file); // TODO motif_out
 
     hmm.print_occurrence_table_header(occ_out);
 
@@ -593,7 +607,7 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
       vector<ResultsCounts> counts;
       for (auto &dataset : contrast) {
         ResultsCounts c = evaluate_dataset(dataset, summary_out, v_out, occ_out,
-                                           motif_out, options);
+                                           motif_out, bed_out, options); // TODO motif_out
         counts.push_back(c);
       }
 

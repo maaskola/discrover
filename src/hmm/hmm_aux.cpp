@@ -766,7 +766,8 @@ void HMM::print_occurrence_table_header(ostream &out) const {
 }
 
 void HMM::print_occurrence_table(const string &file_path, const Data::Seq &seq,
-                                 const StatePath &path, ostream &out) const {
+                                 const StatePath &path, ostream &out,
+                                 bool bed) const {
   size_t seqlen = seq.sequence.size();
   size_t midpoint = seqlen / 2;
   bool revcomp = false;
@@ -797,10 +798,15 @@ void HMM::print_occurrence_table(const string &file_path, const Data::Seq &seq,
           forward_pos = seqlen - end;
         double rel_pos = forward_pos - center;
         double motif_center_pos = rel_pos + (end - pos - 1) / 2.0;
-        out << file_path << "\t" << seq.definition << "\t" << pos << "\t"
-            << group_idx << "\t" << groups[group_idx].name << "\t" << motif
-            << "\t" << (strand ? "+" : "-") << "\t" << forward_pos << "\t"
-            << motif_center_pos << endl;
+        if (bed)
+          out << seq.definition << "\t" << pos << "\t" << end << "\t"
+              << groups[group_idx].name << "\t" << 0 << "\t"
+              << (strand ? "+" : "-") << endl;
+        else
+          out << file_path << "\t" << seq.definition << "\t" << pos << "\t"
+              << group_idx << "\t" << groups[group_idx].name << "\t" << motif
+              << "\t" << (strand ? "+" : "-") << "\t" << forward_pos << "\t"
+              << motif_center_pos << endl;
       }
 }
 

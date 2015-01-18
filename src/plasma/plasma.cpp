@@ -170,6 +170,11 @@ void report(ostream &os, const Result &res, const Collection &collection,
     ofstream ofs(viterbi_output.c_str());
     viterbi_dump(res.motif, collection, ofs, options);
   }
+  if (options.dump_bed) {
+    string bed_output = options.label + ".bed";
+    ofstream ofs(bed_output.c_str());
+    bed_dump(res.motif, collection, ofs, options);
+  }
 }
 
 Results Plasma::find_seeds(size_t length, const Objective &objective,
@@ -801,6 +806,46 @@ void viterbi_dump(const string &motif, const Collection &collection,
   for (auto &contrast : collection)
     for (auto &dataset : contrast)
       viterbi_dump(motif, dataset, out, options);
+}
+
+void bed_dump(const string &motif, const Set &dataset, ostream &out,
+              const Options &options, size_t &occ_idx) {
+  const size_t motif_length = motif.size();
+  const string name = "site_";
+  const size_t score = 0;
+  for (auto &seq : dataset) {
+    auto match_iter = begin(seq.sequence);
+    while ((match_iter = search(match_iter, end(seq.sequence), begin(motif),
+                                end(motif), iupac_included))
+           != end(seq.sequence)) {
+      size_t pos = std::distance(begin(seq.sequence), match_iter);
+      out << seq.definition << "\t" << pos << "\t" << (pos + motif_length)
+          << "\t" << name << (occ_idx++) << "\t" << score << "\t"
+          << "+" << endl;
+      match_iter++;
+    }
+    if (options.revcomp) {
+      string rc_motif = reverse_complement(motif);
+      match_iter = begin(seq.sequence);
+      while ((match_iter
+              = search(match_iter, end(seq.sequence), begin(rc_motif),
+                       end(rc_motif), iupac_included)) != end(seq.sequence)) {
+        size_t pos = std::distance(begin(seq.sequence), match_iter);
+        out << seq.definition << "\t" << pos << "\t" << (pos + motif_length)
+            << "\t" << name << (occ_idx++) << "\t" << score << "\t"
+            << "-" << endl;
+        match_iter++;
+      }
+    }
+  }
+}
+
+void bed_dump(const string &motif, const Collection &collection, ostream &out,
+              const Options &options) {
+  size_t occ_idx = 0;
+  for (auto &contrast : collection)
+    for (auto &dataset : contrast)
+      bed_dump(motif, dataset, out, options, occ_idx);
 }
 
 namespace Exception {

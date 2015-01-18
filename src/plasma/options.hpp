@@ -110,6 +110,7 @@ struct Options {
   bool only_best;
   Verbosity verbosity;
   bool dump_viterbi;
+  bool dump_bed;
   bool no_enrichment_filter;
   bool fixed_motif_space_mode;
   bool allow_iupac_wildcards;
