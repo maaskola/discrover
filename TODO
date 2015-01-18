@@ -45,6 +45,8 @@ TODO 2015-01-15 Patch UseLaTeX.cmake to not depend on imagemagick
 TODO 2015-01-16 Deprecate -f switches
 TODO 2015-01-16 Is the plasma CLI switch help on allowIUPAC correct?
 TODO 2015-01-16 Logos: insertion positions
+TODO 2015-01-18 Plasma: implement a specializing mode
+TODO 2015-01-18 Documentation: explain multiple motif mode
 
 Less important:
 TODO 2015-01-05 Travis CI: don't require tex and don't build documentation?
