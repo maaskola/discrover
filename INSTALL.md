@@ -70,7 +70,7 @@ Ubuntu being a Debian-derivative, you can use ``dpkg`` to install the package:
 dpkg -i discrover-X.Y.Z_amd64_ubuntu_trusty.deb
 ```
 
-Note that, an advantage of using the PPA is that when future Discrover releases happen your system's Discrover installation will be automatically updated, while you manually have to retreive and install packages if you opt for the latter solution.
+Note the following advantage of using the PPA: when future Discrover releases happen your system's Discrover installation will be automatically updated, while you manually have to retreive and install packages if you opt for the latter solution.
 Further, the PPA also includes packages for 32-bit architectures, as well as older Ubuntu releases.
 It is thus recommended to use the PPA-based installation for Ubuntu.
 
