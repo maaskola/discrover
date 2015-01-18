@@ -9,8 +9,10 @@ There are multiple ways how you can install Discrover.
 
 1. We provide [binary packages](#binary-packages) for various Linux distributions.
    If your Linux distribution is supported, this is the easiest way to install Discrover.
-2. For other Linux distributions we provide [source-based packages](#source-based-packages) scripts that automatically build Discrover for you.
-3. Should none of the above steps work for, we also have instructions on [how to build](BUILDING.md) Discrover.
+2. For Ubuntu, aside from packages, we also offer a [personal package archive (PPA)](#personal-package-archive).
+   Usage of the PPA is recommended over manually installing packages.
+3. For other Linux distributions we provide [source-based packages](#source-based-packages) scripts that automatically build Discrover for you.
+4. Should none of the above steps work for, we also have instructions on [how to build](BUILDING.md) Discrover.
 
 Note that below, we frequently write ``X.Y.Z`` to indicate the version number (and sometimes ``X.Y.Z-R`` for version number and package release number).
 You have to replace it with whatever version of Discrover that you want to install.
@@ -54,6 +56,7 @@ yum update discrover-X.Y.Z-R.fc20.x86_64.rpm
 
 ## Ubuntu
 
+### Personal Package Archive
 A Ubuntu [PPA](https://launchpad.net/~maaskola/+archive/ubuntu/discrover) has been set up that can be used for installing Discrover.
 You can add this PPA to your system and install Discrover with the following commands (you might have to replace `trusty` with your Ubuntu system's release name):
 
@@ -63,6 +66,7 @@ sudo apt-get update                             # synchronize APT package list
 sudo apt-get install discrover                  # install Discrover
 ```
 
+### Manual package installation
 Aside from using this PPA, you can also directly download and install a Discrover release package.
 Ubuntu being a Debian-derivative, you can use ``dpkg`` to install the package:
 
@@ -70,6 +74,7 @@ Ubuntu being a Debian-derivative, you can use ``dpkg`` to install the package:
 dpkg -i discrover-X.Y.Z_amd64_ubuntu_trusty.deb
 ```
 
+### Comparison of PPA and manual package installation
 Note the following advantage of using the PPA: when future Discrover releases happen your system's Discrover installation will be automatically updated, while you manually have to retreive and install packages if you opt for the latter solution.
 Further, the PPA also includes packages for 32-bit architectures, as well as older Ubuntu releases.
 It is thus recommended to use the PPA-based installation for Ubuntu.
