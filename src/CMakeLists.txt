@@ -1,5 +1,5 @@
 # add definitions, compiler switches, etc.
-ADD_DEFINITIONS(-Wall -funroll-loops -march=native -Wno-unused-local-typedefs)
+ADD_DEFINITIONS(-Wall -funroll-loops -Wno-unused-local-typedefs)
 
 # Allow to #include <discrover_config.hpp>, if doing out-of-source build.
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
