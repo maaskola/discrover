@@ -112,8 +112,8 @@ int main(int argc, const char **argv) {
   desc.add_options()
     ("help,h", "produce help message")
     ("version", "Print out the version. Also show git SHA1 with -v.")
-    ("verbose,v", "Be verbose about the progress")
-    ("noisy,V", "Be very verbose about the progress")
+    ("verbose,v", "Be verbose about the progress.")
+    ("noisy,V", "Be very verbose about the progress.")
     ;
   po::options_description ext_options = gen_plasma_options_description(options);
 

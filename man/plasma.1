@@ -139,6 +139,11 @@ Log\-likelihood difference, like in the motif discovery method DME, see doi: 10.
 .TP
 dfreq
 Difference of frequency of sequences with motif occurrences, similar to the motif discovery methods DIPS and DECOD, see doi: 10.1093/bioinformatics/btl227 and 10.1093/bioinformatics/btr412
+.\"
+.\"
+.\"
+.\"
+.\"
 .SS "Basic options:"
 .TP
 \fB\-h\fR [ \fB\-\-help\fR ]
@@ -148,10 +153,10 @@ produce help message
 Print out the version. Also show git SHA1 with \fB\-v\fR.
 .TP
 \fB\-v\fR [ \fB\-\-verbose\fR ]
-Be verbose about the progress
+Be verbose about the progress.
 .TP
 \fB\-V\fR [ \fB\-\-noisy\fR ]
-Be very verbose about the progress
+Be very verbose about the progress.
 .SS "IUPAC regular expression finding options:"
 .TP
 \fB\-f\fR [ \fB\-\-fasta\fR ] \fIfilespec
@@ -198,13 +203,13 @@ How many candidates to maintain.
 \fB\-d\fR [ \fB\-\-deg\fR ] \fInum\fR
 Which degrees of degeneracy to consider.
 May be given multiple times.
-A sequence of length N has a maximal degeneracy of 3*N.
+A sequence of length \fIN\fR has a maximal degeneracy of 3*\fIN\fR.
 Unlimited if unspecified.
 .TP
 \fB\-\-rdeg\fR \fIfloat\fR (=1)
 Limit relative degeneracy.
 1 corresponds to full degeneracy, and 0 to no degeneracy.
-For a sequence of length N the degeneracy is maximally 3*N.
+For a sequence of length \fIN\fR the degeneracy is maximally 3*\fIN\fR.
 Thus for a motif of length 8 a maximal relative degeneracy of 0.2 allows (rounded down) 4 degrees of degeneracy.
 .TP
 \fB\-g\fR [ \fB\-\-generalize\fR ]
@@ -300,26 +305,35 @@ Height in pixels of the nucleotide stacks in the sequence logos.
 .TP
 \fB\-\-absent\fR \fIfloat\fR (=0.03)
 Use this frequency for absent nucleotides when creating logos for IUPAC regular expression motifs.
-.SH EXAMPLE
+.SH EXAMPLES
 Some example calls:
 .IP
-plasma signal.fa \fB\-m\fR 8 > analysis.txt
+.B plasma
+signal.fa \fB\-m\fR 8 > analysis.txt
 .IP
-plasma signal.fa control.fa \fB\-m\fR 8 > analysis.txt
+.B plasma
+signal.fa control.fa \fB\-m\fR 8 > analysis.txt
 .IP
-plasma signal.fa control.fa \fB\-m\fR 4\-12 > analysis.txt
+.B plasma
+signal.fa control.fa \fB\-m\fR 4\-12 > analysis.txt
 .IP
-plasma signal.fa control.fa \fB\-m\fR 4\-12 \fB\-d\fR 0 > analysis.txt
+.B plasma
+signal.fa control.fa \fB\-m\fR 4\-12 \fB\-d\fR 0 > analysis.txt
 .IP
-plasma signal.fa control.fa \fB\-m\fR 4\-12 \fB\-\-score\fR freq \fB\-d\fR 0 > analysis.txt
+.B plasma
+signal.fa control.fa \fB\-m\fR 4\-12 \fB\-\-score\fR freq \fB\-d\fR 0 > analysis.txt
 .IP
-plasma signal.fa control.fa \fB\-m\fR 4\-12 \fB\-\-score\fR freq \fB\-d\fR 2 > analysis.txt
+.B plasma
+signal.fa control.fa \fB\-m\fR 4\-12 \fB\-\-score\fR freq \fB\-d\fR 2 > analysis.txt
 .IP
-plasma signal.fa control.fa \fB\-m\fR 4\-12 \fB\-d\fR 2 > analysis.txt
+.B plasma
+signal.fa control.fa \fB\-m\fR 4\-12 \fB\-d\fR 2 > analysis.txt
 .IP
-plasma signal.fa control.fa \fB\-m\fR 4\-12 \fB\-\-rdeg\fR 0.2 > analysis.txt
+.B plasma
+signal.fa control.fa \fB\-m\fR 4\-12 \fB\-\-rdeg\fR 0.2 > analysis.txt
 .IP
-plasma signal:signal.fa control.fa \fB\-m\fR signal:8 > analysis.txt
+.B plasma
+signal:signal.fa control.fa \fB\-m\fR signal:8 > analysis.txt
 .SH "SEE ALSO"
 As part of the Discrover package a PDF manual should have been installed on your system.
 You should find it at:
