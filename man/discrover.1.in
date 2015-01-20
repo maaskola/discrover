@@ -49,7 +49,8 @@ how motifs can be discovered that are discriminative for one contrast but not fo
 .IP *
 how composite models of multiple motifs can be built, which is useful to discover co\-factor motifs e.g. in ChIP\-Seq analysis (in brief: by discovering many seeds and then building composite HMMs using the \fB\-\-multiple\fR switch).
 .PP
-Manual: \fI\,/home/maaskola/local/share/doc/discrover/discrover\-manual.pdf\/\fP
+Manual:
+.I /usr/share/doc/discrover/discrover-manual.pdf
 .\"
 .\"
 .\"
@@ -567,5 +568,5 @@ Here, A and B are arbitrary labels given to motifs of length 8 and 6 that are to
 As part of the Discrover package a PDF manual should have been installed on your system.
 You should find it at:
 .IP
-.I /usr/share/doc/discrover/discrover-manual.pdf
+.I @MANUAL_LOCATION@
 .PP

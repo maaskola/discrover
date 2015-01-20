@@ -339,5 +339,5 @@ signal:signal.fa control.fa \fB\-m\fR signal:8 > analysis.txt
 As part of the Discrover package a PDF manual should have been installed on your system.
 You should find it at:
 .IP
-.I /usr/share/doc/discrover/discrover-manual.pdf
+.I @MANUAL_LOCATION@
 .PP
