@@ -117,6 +117,8 @@ boost::program_options::options_description gen_plasma_options_description(
         "mcc     \tMatthews correlation coefficient\n"
         "dlogl   \tLog-likelihood difference, like DME, see doi: 10.1073/pnas.0406123102\n"
         "dfreq   \tDifference of frequency of sequences with motif occurrences, similar to DIPS and DECOD, see doi: 10.1093/bioinformatics/btl227 and 10.1093/bioinformatics/btr412"
+        "\n"
+        "Note: contrasts for score specifications that use discriminative significance measures have to comprise at least two FASTA file specifications, otherwise these contrasts will be extended into binary contrasts by generating sequence shuffles to be used as control sequences."
         "\n")
       ("revcomp,r", po::bool_switch(&options.revcomp), "Respect motif occurrences on the reverse complementary strand. Useful for DNA sequence motif analysis. Default is to consider only occurrence on the forward strand.")
       ("nseq", po::value(&options.n_seq)->default_value(0), "Use only the first N sequences of each file. Use 0 to indicate all sequences.")
