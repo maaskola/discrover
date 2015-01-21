@@ -295,8 +295,8 @@ int main(int argc, const char **argv) {
      "ri      \tRank mutual information\n"
      "mmie    \tMaximum mutual information estimation (MMIE), a.k.a. posterior classification probability\n"
      "mcc     \tMatthews correlation coefficient\n"
-     "dlogl   \tLog-likelihood difference, like DME, see doi: 10.1073/pnas.0406123102\n"
-     "dfreq   \tDifference of frequency of sequences with motif occurrences, similar to DIPS and DECOD, see doi: 10.1093/bioinformatics/btl227 and 10.1093/bioinformatics/btr412"
+     "dlogl   \tLog-likelihood difference, like in the motif discovery method DME, see doi: 10.1073/pnas.0406123102\n"
+     "dfreq   \tDifference of frequency of sequences with motif occurrences, similar to the motif discovery methods DIPS and DECOD, see doi: 10.1093/bioinformatics/btl227 and 10.1093/bioinformatics/btr412"
      "\n"
      "Note: contrasts for score specifications that use discriminative significance measures have to comprise at least two FASTA file specifications, otherwise these contrasts will be extended into binary contrasts by generating sequence shuffles to be used as control sequences."
      "\n")
