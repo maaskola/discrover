@@ -269,8 +269,8 @@ Generate a BED file with positions of motif occurrence.
 Number of threads.
 If not given, as many are used as there are CPU cores on this machine.
 .TP
-.B \-o\fR [ \fB\-\-output\fR ] \fIarg
-Output file names are generated from this label.
+.B \-o\fR [ \fB\-\-output\fR ] \fIlabel
+Output file names are generated from \fIlabel\fR.
 If not given, the output label will be 'plasma_\fIXXX\fR' where \fIXXX\fR is a string to make the label unique.
 If \fB\-\-pdf\fR or \fB\-png\fR are used, sequence logos of the found motifs are generated with file names based on this output label.
 .TP
