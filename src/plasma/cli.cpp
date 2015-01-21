@@ -108,15 +108,15 @@ boost::program_options::options_description gen_plasma_options_description(
         "If no contrast specification is given, the score definition uses all contrasts, counting each one positively.\n"
         "\n"
         "The following significance measures are available:\n"
-        "none    \tDo not perform learning\n"
-        "bw      \tLikelihood using Baum-Welch\n"
-        "viterbi \tViterbi learning\n"
-        "mi      \tMutual information of condition and motif occurrence (MICO)\n"
-        "ri      \tRank mutual information\n"
-        "mmie    \tMaximum mutual information estimation (MMIE), a.k.a. posterior classification probability\n"
-        "mcc     \tMatthews correlation coefficient\n"
-        "dlogl   \tLog-likelihood difference, like DME, see doi: 10.1073/pnas.0406123102\n"
-        "dfreq   \tDifference of frequency of sequences with motif occurrences, similar to DIPS and DECOD, see doi: 10.1093/bioinformatics/btl227 and 10.1093/bioinformatics/btr412"
+        "signal_freq  \tRelative occurrence frequency in the signal sequences\n"
+        "control_freq \tRelative occurrence frequency in the control sequences\n"
+        "mi           \tMutual information of condition and motif occurrence (MICO)\n"
+        // "ri           \tRank mutual information\n"
+        "mcc          \tMatthews correlation coefficient\n"
+        "dfreq        \tDifference of frequency of sequences with motif occurrences, similar to DIPS and DECOD, see doi: 10.1093/bioinformatics/btl227 and 10.1093/bioinformatics/btr412"
+        "gtest        \tG-test for association\n"
+        "gtest_logp   \tlog-P value of G-test for association, corrected for multiple testing\n"
+        // "gtest_logp_raw \tlog-P value of G-test for association, not corrected for multiple testing\n"
         "\n"
         "Note: contrasts for score specifications that use discriminative significance measures have to comprise at least two FASTA file specifications, otherwise these contrasts will be extended into binary contrasts by generating sequence shuffles to be used as control sequences."
         "\n")
@@ -133,7 +133,7 @@ boost::program_options::options_description gen_plasma_options_description(
 
   if (not include_all)
     desc.add_options()
-      (form_switch(prefix, "seedscore", allow_short).c_str(), po::value(&options.objectives)->default_value(Seeding::Objectives(1,Seeding::Objective("mi")), "mi"), "Which objective function to evaluate. TODO: documentation needs updating to reflect more advanced options for this argument. Available are 'signal_freq', 'control_freq', 'mi', 'mcc', 'delta_freq', 'gtest', 'gtest_logp', 'gtest_logp_raw'.")
+      (form_switch(prefix, "seedscore", allow_short).c_str(), po::value(&options.objectives)->default_value(Seeding::Objectives(1,Seeding::Objective("mi")), "mi"), "Which objective function to evaluate. TODO: documentation needs updating to reflect more advanced options for this argument. Available are 'signal_freq', 'control_freq', 'mi', 'mcc', 'dfreq', 'gtest', 'gtest_logp', 'gtest_logp_raw'.")
       ;
 
   desc.add_options()

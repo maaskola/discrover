@@ -53,7 +53,7 @@ See the description of the \fB\-\-output\fR option below for details.
 .\"
 .\"
 .SS "FASTA file specification"
-FASTA file specification consist of up to three colon-separated terms, with the following syntax:
+FASTA file specifications consist of up to three colon-separated terms, with the following syntax:
 .IP
 [\fInames\fR:[\fIcontrast\fR:]]\fIpath
 .PP

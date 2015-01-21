@@ -31,7 +31,7 @@ otherwise sequence shuffles will be generated as control sequences.
 .\"
 .\"
 .SS "FASTA file specification"
-FASTA file specification consist of up to three colon-separated terms, with the following syntax:
+FASTA file specifications consist of up to three colon-separated terms, with the following syntax:
 .IP
 [\fInames\fR:[\fIcontrast\fR:]]\fIpath
 .PP
@@ -113,32 +113,29 @@ If no contrast specification is given, the score definition uses all contrasts, 
 .PP
 The following significance \fImeasure\fRs are available:
 .TP
-none
-Do not perform learning
+signal_freq
+Relative occurrence frequency in the signal sequences
 .TP
-bw
-Likelihood maximization with the Baum\-Welch algorithm; this measure is not discriminative
-.TP
-viterbi
-Viterbi learning; this measure is not discriminative
+control_freq
+Relative occurrence frequency in the control sequences
 .TP
 mi
 Mutual information of condition and motif occurrence (MICO)
-.TP
-ri
-Rank mutual information
-.TP
-mmie
-Maximum mutual information estimation (MMIE), also known as posterior classification probability
+.\" .TP
+.\" ri
+.\" Rank mutual information
 .TP
 mcc
 Matthews correlation coefficient
 .TP
-dlogl
-Log\-likelihood difference, like in the motif discovery method DME, see doi: 10.1073/pnas.0406123102
-.TP
 dfreq
 Difference of frequency of sequences with motif occurrences, similar to the motif discovery methods DIPS and DECOD, see doi: 10.1093/bioinformatics/btl227 and 10.1093/bioinformatics/btr412
+.TP
+gtest
+G-test for association
+.TP
+gtest_logp
+log-P value of G-test for association, corrected for multiple testing
 .\"
 .\"
 .\"
