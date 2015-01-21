@@ -69,6 +69,8 @@ name of a contrast this file belongs to
 .IR path
 path of FASTA file with sequences
 .PP
+All FASTA files for which no \fIcontrast\fR is given are associated with a common, automatically named contrast.
+.PP
 Using \fIcontrast\fRs, FASTA files can be grouped into contrasts on which
 .B score specifications
 can act.
@@ -82,6 +84,10 @@ If the path contains at least one colon, please prepend with colons to disambigu
 Motif specifications consist of up to three colon-separated terms, with the following syntax:
 .IP
 [\fIname\fR:[\fIinsert\fR:]]\fImotifdef
+.PP
+The square brackets indicate that \fIname\fR and \fIinsert\fR are optional.
+.PP
+The meaning of \fIname\fR, \fIindel\fR, and \fImotifdef\fR are as follows:
 .TP
 .I name
 name of the motif
@@ -93,7 +99,7 @@ positions are 1\-indexed; 1 <= position < motif length must hold for each positi
 .I motifdef
 motif definition; see below
 .PP
-The square brackets indicate that \fIname\fR and \fIinsert\fR are optional.
+If \fIname\fR is not given, a name of the form 'motif\fIN\fR' is generated, where \fIN\fR are numbers increasing from 0.
 .PP
 There are three ways in which a \fImotifdef\fR can be given:
 .TP
@@ -117,6 +123,10 @@ If the path contains at least one colon, please prepend colons to disambiguate.
 Score specifications consist of up to three colon-separated terms, with the following syntax:
 .IP
 [\fImotif\fR:[\fIcontrasts\fR:]]\fImeasure\fR
+.PP
+The square brackets indicate that \fImotif\fR and \fIcontrasts\fR are optional.
+.PP
+The meaning of \fImotif\fR, \fIcontrasts\fR, and \fImeasure\fR are as follows:
 .TP
 \fImotif\fR
 name of the motif to optimize
@@ -127,14 +137,12 @@ contrast specification; see below
 \fImeasure\fR
 significance measure to use
 .PP
-The square brackets indicate that \fImotif\fR and \fIcontrasts\fR are optional.
-.PP
-If no motif \fIname\fR is given, all motifs are optimized with this score specification.
+If \fIname\fR is not given given, all motifs are optimized with this score specification.
 It is an error when more than one score specification is given for any motif.
 .PP
 The contrast specification \fIcontrasts\fR is a set of contrast names prefixed by '+' or '\-' to indicate whether the score on the contrast is to count positively or negatively.
 The first contrast name, if lacking a '+' or '\-', is taken to count positively.
-If no contrast specification is given, the score definition uses all contrasts, counting each one positively.
+If \fIcontrasts\fR is not given, the score definition uses all contrasts, counting each one positively.
 .PP
 The following significance \fImeasure\fRs are available:
 .TP
@@ -181,6 +189,7 @@ Summary information with number of occurrences of the motifs in each sample, and
 .TP
 \&.viterbi
 FASTA sequences annotated with the Viterbi path, and sequence level statistics.
+.TP
 \&.bed
 BED file of coordinates of matches to the motifs in all sequences.
 .TP
