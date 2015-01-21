@@ -330,7 +330,7 @@ When unspecified defaults to initial motif length.
 .TP
 .B \-\-nindel \fInum\fR (=5)
 Maximal number of positions that may be added or removed at a time.
-Adding and removing of happens at and from the ends of the motif.
+Adding and removing of nucleotides happens in front of and at the ends of the motif.
 .TP
 .B \-\-nshift \fInum\fR (=5)
 Maximal number of positions that the motif may be shifted by.
