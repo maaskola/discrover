@@ -31,7 +31,7 @@ otherwise sequence shuffles will be generated as control sequences.
 .\"
 .\"
 .SS "FASTA file specification"
-The syntax of a FASTA file specification is as follows:
+FASTA file specification consist of up to three colon-separated terms, with the following syntax:
 .IP
 [\fInames\fR:[\fIcontrast\fR:]]\fIpath
 .PP
@@ -58,7 +58,7 @@ If the path contains at least one colon, please prepend with colons to disambigu
 .\"
 .\"
 .SS "Motif specification"
-The syntax of a motif specification is as follows:
+Motif specifications consist of up to two colon-separated terms, with the following syntax:
 .IP
 [\fIname\fR:]\fImotifdef
 .TP
@@ -89,7 +89,7 @@ If the path contains at least one colon, please prepend colons to disambiguate.
 .\"
 .\"
 .SS "Score specification"
-The syntax of a score specification is as follows:
+Score specifications consist of up to three colon-separated terms, with the following syntax:
 .IP
 [\fImotif\fR:[\fIcontrasts\fR:]]\fImeasure\fR
 .TP

@@ -44,7 +44,7 @@ boost::program_options::options_description gen_plasma_options_description(
   if (include_all)
     desc.add_options()
       ("fasta,f", po::value(&options.paths)->required(),
-       "FASTA file definition. "
+       "FASTA file definition consisting of up to three colon-separated terms. "
        "May be given multiple times. "
        "Syntax as follows:\n"
        "\n"
@@ -65,7 +65,7 @@ boost::program_options::options_description gen_plasma_options_description(
        // TODO note usage of the 'control' motif name
       )
       ("motif,m", po::value(&options.motif_specifications),
-       "Motif definition. "
+       "Motif definition consisting of up to two colon-separated terms. "
        "May be given multiple times. "
        "Syntax as follows:\n"
        "\n"
@@ -87,7 +87,7 @@ boost::program_options::options_description gen_plasma_options_description(
        "3. \tBy specifying the path to a file with a PWM. "
        "If the path contains at least one colon, please prepend colons to disambiguate.")
        ("score", po::value(&options.objectives)->default_value(Seeding::Objectives(1,default_objective), "mi"),
-        "Score definition. "
+        "Score definition consisting of up to three colon-separated terms. "
         "May be given multiple times. "
         "Syntax as follows:\n"
         "\n"
