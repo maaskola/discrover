@@ -316,6 +316,9 @@ Don't learn the conditional motif prior.
 .B \-\-sampling
 Perform Monte\-Carlo Markov chain (MCMC) sampling for parameter inference instead of re\-estimation or gradient learning.
 .TP
+.B \-\-partemp \fInum\fR (=6)
+Number of chains in parallel tempering.
+.TP
 .B \-\-temp \fIfloat\fR (=0.001)
 When performing MCMC sampling use this temperature.
 The temperatures of parallel chains is decreasing by factors of two.
@@ -334,9 +337,6 @@ Adding and removing of nucleotides happens in front of and at the ends of the mo
 .TP
 .B \-\-nshift \fInum\fR (=5)
 Maximal number of positions that the motif may be shifted by.
-.TP
-.B \-\-partemp \fInum\fR (=6)
-Number of chains in parallel tempering.
 .SS "Seeding options for IUPAC regular expression finding:"
 .TP
 .B \-\-seedscore \fIarg\fR (=mi)

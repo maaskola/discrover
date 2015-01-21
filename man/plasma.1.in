@@ -279,15 +279,15 @@ Seed for the pseudo random number generator (used for example for sequence shuff
 Set this to get reproducible results.
 .SS "MCMC optimization options:"
 .TP
-.B \-\-temp \fIfloat\fR (=0.001)
-When performing MCMC sampling use this temperature.
-The temperatures of parallel chains is decreasing by factors of two.
+.B \-\-partemp \fInum\fR (=6)
+Parallel chains to run for parallel tempering.
 .TP
 .B \-\-maxiter \fInum\fR (=1000)
 Maximal number of iterations to perform during MCMC seeding.
 .TP
-.B \-\-partemp \fInum\fR (=6)
-Parallel chains to run for parallel tempering.
+.B \-\-temp \fIfloat\fR (=0.001)
+When performing MCMC sampling use this temperature.
+The temperatures of parallel chains is decreasing by factors of two.
 .SS "Sequence logo creation options:"
 .TP
 .B \-\-pdf

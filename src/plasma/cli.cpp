@@ -179,9 +179,9 @@ boost::program_options::options_description gen_plasma_options_description(
     po::options_description mcmc_desc("MCMC optimization options", cols);
     string mcmc_prefix = "mcmc_";
     mcmc_desc.add_options()
-      ("temp", po::value(&options.mcmc.temperature)->default_value(1e-3), "When performing MCMC sampling use this temperature. The temperatures of parallel chains is decreasing by factors of two.")
-      ("maxiter", po::value(&options.mcmc.max_iter)->default_value(1000), "Maximal number of iterations to perform during MCMC seeding.")
       ("partemp", po::value(&options.mcmc.n_parallel)->default_value(6), "Parallel chains to run for parallel tempering.")
+      ("maxiter", po::value(&options.mcmc.max_iter)->default_value(1000), "Maximal number of iterations to perform during MCMC seeding.")
+      ("temp", po::value(&options.mcmc.temperature)->default_value(1e-3), "When performing MCMC sampling use this temperature. The temperatures of parallel chains is decreasing by factors of two.")
       ;
     desc.add(mcmc_desc);
 
