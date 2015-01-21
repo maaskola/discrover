@@ -276,7 +276,7 @@ Maximal number of iterations to perform in training.
 A value of 0 means no limit, and that the training is only terminated by the tolerance.
 .TP
 .B \-\-salt \fInum
-Seed for the pseudo random number generator (used e.g.  for sequence shuffle generation and MCMC sampling).
+Seed for the pseudo random number generator (used for example for sequence shuffle generation and MCMC sampling).
 Set this to get reproducible results.
 .TP
 .B \-\-weight

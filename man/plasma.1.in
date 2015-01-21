@@ -275,7 +275,7 @@ If not given, the output label will be 'plasma_\fIXXX\fR' where \fIXXX\fR is a s
 If \fB\-\-pdf\fR or \fB\-png\fR are used, sequence logos of the found motifs are generated with file names based on this output label.
 .TP
 .B \-\-salt \fInum
-Seed for the pseudo random number generator (used e.g. for sequence shuffle generation and MCMC sampling).
+Seed for the pseudo random number generator (used for example for sequence shuffle generation and MCMC sampling).
 Set this to get reproducible results.
 .SS "MCMC optimization options:"
 .TP
