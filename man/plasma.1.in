@@ -25,6 +25,13 @@ Contrasts for
 that use discriminative significance measures have to comprise at least two
 .B FASTA file specifications\fr,
 otherwise sequence shuffles will be generated as control sequences.
+.TP
+This program is part of the Discrover package described in an open-access publication:
+Jonas Maaskola and Nikolaus Rajewsky.
+.br
+Binding site discovery from nucleic acid sequences by discriminative learning of hidden Markov models.
+.br
+Nucleic Acid Research, 42(21):12995\-13011, Dec 2014. doi:10.1093/nar/gku1083
 .\"
 .\"
 .\"

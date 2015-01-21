@@ -40,6 +40,11 @@ std::string gen_usage_string() {
     "sequences, accepts it, and masks all occurrences or removes all sequences in\n"
     "which it occurs, before proceeding.\n"
     "\n"
+    "Plasma is part of the Discrover package described in an open-access publication:\n"
+    "Jonas Maaskola and Nikolaus Rajewsky. "
+    "Binding site discovery from nucleic acid sequences by discriminative learning of hidden Markov models\n"
+    "Nucleic Acid Research, 42(21):12995-13011, Dec 2014. doi:10.1093/nar/gku1083\n"
+    "\n"
     "Some example calls:\n" +
     program_name + " signal.fa control.fa -m 8 > analysis.txt\n" +
     program_name + " signal.fa control.fa -m 4-12 > analysis.txt\n" +
