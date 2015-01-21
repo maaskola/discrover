@@ -341,7 +341,6 @@ Number of chains in parallel tempering.
 .TP
 .B \-\-seedscore \fIarg\fR (=mi)
 Which objective function to evaluate.
-TODO: documentation needs updating to reflect more advanced options for this argument.
 Available are 'signal_freq', 'control_freq', 'mi', 'mcc', 'delta_freq', 'gtest', 'gtest_logp', 'gtest_logp_raw'.
 .TP
 .B \-\-algo \fIarg\fR (=plasma)

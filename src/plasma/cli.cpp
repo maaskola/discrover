@@ -135,7 +135,7 @@ boost::program_options::options_description gen_plasma_options_description(
 
   if (not include_all)
     desc.add_options()
-      (form_switch(prefix, "seedscore", allow_short).c_str(), po::value(&options.objectives)->default_value(Seeding::Objectives(1,Seeding::Objective("mi")), "mi"), "Which objective function to evaluate. TODO: documentation needs updating to reflect more advanced options for this argument. Available are 'signal_freq', 'control_freq', 'mi', 'mcc', 'dfreq', 'gtest', 'gtest_logp', 'gtest_logp_raw'.")
+      (form_switch(prefix, "seedscore", allow_short).c_str(), po::value(&options.objectives)->default_value(Seeding::Objectives(1,Seeding::Objective("mi")), "mi"), "Which objective function to evaluate. Available are 'signal_freq', 'control_freq', 'mi', 'mcc', 'dfreq', 'gtest', 'gtest_logp', 'gtest_logp_raw'.")
       ;
 
   desc.add_options()
