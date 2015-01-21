@@ -29,6 +29,9 @@ const std::string program_name = "discrover-shuffle";
 
 std::string gen_usage_string() {
   const std::string usage = "Generates dinucleotide frequency preserving shuffles of FASTA files.\n"
+    "\n"
+    "If no paths are given, sequences are read from standard input.\n"
+    "\n"
     "The code is based on altschulEriksonDinuclShuffle.py by P. Clote, from Oct 2003.\n";
   return usage;
 }

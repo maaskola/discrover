@@ -11,7 +11,9 @@ discrover-shuffle \- generate sequence shuffles preserving dinucleotide frequenc
 .B discrover\-shuffle
 reads one or more FASTA
 .IR file\^ s
-and genarates dinucleotide frequency preserving shuffles which are output to stdout.
+and genarates dinucleotide frequency preserving shuffles which are output to standard output.
+.PP
+If no paths are given, sequences are read from standard input.
 .PP
 The routines are based on code by P. Clote from Oct 2003 in the Python script
 altschulEriksonDinuclShuffle.py.
