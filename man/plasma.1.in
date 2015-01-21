@@ -150,164 +150,164 @@ log-P value of G-test for association, corrected for multiple testing
 .SH OPTIONS
 .SS "Basic options:"
 .TP
-\fB\-h\fR [ \fB\-\-help\fR ]
+.B \-h\fR [ \fB\-\-help\fR ]
 produce help message
 .TP
-\fB\-\-version\fR
+.B \-\-version
 Print out the version. Also show git SHA1 with \fB\-v\fR.
 .TP
-\fB\-v\fR [ \fB\-\-verbose\fR ]
+.B \-v\fR [ \fB\-\-verbose\fR ]
 Be verbose about the progress.
 .TP
-\fB\-V\fR [ \fB\-\-noisy\fR ]
+.B \-V\fR [ \fB\-\-noisy\fR ]
 Be very verbose about the progress.
 .SS "IUPAC regular expression finding options:"
 .TP
-\fB\-f\fR [ \fB\-\-fasta\fR ] \fIfilespec
+.B \-f\fR [ \fB\-\-fasta\fR ] \fIfilespec
 .B FASTA file specification\fR.
 May be given multiple times.
 See the section above for the allowed syntax.
 Note: usage of \fB\-f\fR / \fB\-\-fasta\fR is optional;
 all free arguments are taken to be paths of FASTA file specifications.
 .TP
-\fB\-m\fR [ \fB\-\-motif\fR ] \fImotifspec
+.B \-m\fR [ \fB\-\-motif\fR ] \fImotifspec
 .B Motif specification\fR.
 May be given multiple times.
 See the section above for the allowed syntax.
 .TP
-\fB\-\-score\fR \fIscorespec\fR (=mi)
+.B \-\-score \fIscorespec\fR (=mi)
 .B Score specification\fR.
 May be given multiple times.
 See the section above for the allowed syntax.
 .TP
-\fB\-r\fR [ \fB\-\-revcomp\fR ]
+.B \-r\fR [ \fB\-\-revcomp\fR ]
 Respect motif occurrences on the reverse complementary strand.
 Useful for DNA sequence motif analysis.
 Default is to consider only occurrence on the forward strand.
 .TP
-\fB\-\-nseq\fR \fInum\fR (=0)
+.B \-\-nseq \fInum\fR (=0)
 Use only the first \fInum\fR sequences of each file.
 Use 0 to indicate all sequences.
 .TP
-\fB\-\-algo\fR \fIarg\fR (=plasma)
+.B \-\-algo \fIarg\fR (=plasma)
 Seeding algorithm.
 Available are 'plasma', 'mcmc', 'dreme', and 'all'.
 Multiple algorithms can be used by separating them by comma.
 .TP
-\fB\-\-any\fR
+.B \-\-any
 Whether to allow motifs enriched in the opposite direction.
 .TP
-\fB\-\-filter\fR \fIarg\fR (=mask)
+.B \-\-filter \fIarg\fR (=mask)
 How to filter motif occurrences upon identifying a motif.
 Available are 'remove' and 'mask'.
 .TP
-\fB\-\-cand\fR \fInum\fR (=100)
+.B \-\-cand \fInum\fR (=100)
 How many candidates to maintain.
 .TP
-\fB\-d\fR [ \fB\-\-deg\fR ] \fInum\fR
+.B \-d\fR [ \fB\-\-deg\fR ] \fInum
 Which degrees of degeneracy to consider.
 May be given multiple times.
 A sequence of length \fIN\fR has a maximal degeneracy of 3*\fIN\fR.
 Unlimited if unspecified.
 .TP
-\fB\-\-rdeg\fR \fIfloat\fR (=1)
+.B \-\-rdeg \fIfloat\fR (=1)
 Limit relative degeneracy.
 1 corresponds to full degeneracy, and 0 to no degeneracy.
 For a sequence of length \fIN\fR the degeneracy is maximally 3*\fIN\fR.
 Thus for a motif of length 8 a maximal relative degeneracy of 0.2 allows (rounded down) 4 degrees of degeneracy.
 .TP
-\fB\-g\fR [ \fB\-\-generalize\fR ]
+.B \-g\fR [ \fB\-\-generalize\fR ]
 Whether to report the best motifs at each level of degeneracy.
 Default is to report only the best motif across all levels of degeneracy.
 In addition, the best motifs of levels of degeneracy given by \fB\-\-deg\fR will be reported.
 .TP
-\fB\-\-best\fR
+.B \-\-best
 Whether to report only the single best motif for each motif specification.
 Default is to report for each motif specification the best result for each length.
 .TP
-\fB\-\-strict\fR
+.B \-\-strict
 Do not allow insignificant seeds.
 .TP
-\fB\-\-fix_mspace\fR
+.B \-\-fix_mspace
 Deactivate dynamic motif space mode.
 Influences how the multiple\-testing correction for the log\-p value of the G\-test is calculated.
 .TP
-\fB\-\-allowIUPAC\fR
+.B \-\-allowIUPAC
 Interpret IUPAC wildcard symbols in FASTA files.
 When this option is used e.g. S (strong) matches C and G, and so on.
 Importantly, N matches any character!
 Use non\-IUPAC characters for positions where the sequence is unknown or masked, e.g. you could use '\-' for this.
 By default, only A, C, G, and T characters (and their lower case variants) are encoded while all other characters are interpreted as masked.
 .TP
-\fB\-\-weight\fR
+.B \-\-weight
 When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.
 .TP
-\fB\-\-pcount\fR \fIfloat\fR (=1)
+.B \-\-pcount \fIfloat\fR (=1)
 The number of pseudo counts to add to each cell of contingency tables.
 .TP
-\fB\-w\fR [ \fB\-\-word\fR ]
+.B \-w\fR [ \fB\-\-word\fR ]
 Perform nucleotide level statistics instead of on sequence level.
 .TP
-\fB\-\-time\fR
+.B \-\-time
 Output information about how long certain parts take to execute.
 .TP
-\fB\-\-print\fR
+.B \-\-print
 Print out sequences annotated with motif occurrences.
 .TP
-\fB\-\-bed\fR
+.B \-\-bed
 Generate a BED file with positions of motif occurrence.
 .TP
-\fB\-\-threads\fR \fInum\fR
+.B \-\-threads \fInum
 Number of threads.
 If not given, as many are used as there are CPU cores on this machine.
 .TP
-\fB\-o\fR [ \fB\-\-output\fR ] \fIarg\fR
+.B \-o\fR [ \fB\-\-output\fR ] \fIarg
 Output file names are generated from this label.
 If not given, the output label will be 'plasma_XXX' where XXX is a string to make the label unique.
 If \fB\-\-pdf\fR or \fB\-png\fR are used, sequence logos of the found motifs are generated with file names based on this output label.
 .TP
-\fB\-\-salt\fR \fInum\fR
+.B \-\-salt \fInum
 Seed for the pseudo random number generator (used e.g. for sequence shuffle generation and MCMC sampling).
 Set this to get reproducible results.
 .SS "MCMC optimization options:"
 .TP
-\fB\-\-temp\fR \fIfloat\fR (=0.001)
+.B \-\-temp \fIfloat\fR (=0.001)
 When performing MCMC sampling use this temperature.
 The temperatures of parallel chains is decreasing by factors of two.
 .TP
-\fB\-\-maxiter\fR \fInum\fR (=1000)
+.B \-\-maxiter \fInum\fR (=1000)
 Maximal number of iterations to perform during MCMC seeding.
 .TP
-\fB\-\-partemp\fR \fInum\fR (=6)
+.B \-\-partemp \fInum\fR (=6)
 Parallel chains to run for parallel tempering.
 .SS "Sequence logo creation options:"
 .TP
-\fB\-\-pdf\fR
+.B \-\-pdf
 Generate PDF files with sequence logos of the found motifs.
 .TP
-\fB\-\-png\fR
+.B \-\-png
 Generate PDF files with sequence logos of the found motifs.
 .TP
-\fB\-\-axes\fR
+.B \-\-axes
 Include axes in sequence logos.
 .TP
-\fB\-\-logo\fR \fIarg\fR (=info)
+.B \-\-logo \fIarg\fR (=info)
 Which kind of logo to create; 'info' for information\-type sequence logo (position height scaled by information content), 'freq' for frequency logo.
 .TP
-\fB\-\-alphabet\fR \fIarg\fR
+.B \-\-alphabet \fIarg
 Which alphabet to use; can be either 'RNA' or 'DNA'.
 If left unspecified, 'DNA' is chosen if \fB\-\-revcomp\fR is used, and 'RNA' otherwise.
 .TP
-\fB\-\-order\fR \fIarg\fR (=freq)
+.B \-\-order \fIarg\fR (=freq)
 How to vertically order the nucleotides; can be either \&'alpha' for alphabetic order or 'freq' for most frequent at top.
 .TP
-\fB\-\-pal\fR \fIarg\fR (=default)
+.B \-\-pal \fIarg\fR (=default)
 Color palette to use; available are 'default', \&'solarized', 'tetrad'.
 .TP
-\fB\-\-scale\fR \fInum\fR (=100)
+.B \-\-scale \fInum\fR (=100)
 Height in pixels of the nucleotide stacks in the sequence logos.
 .TP
-\fB\-\-absent\fR \fIfloat\fR (=0.03)
+.B \-\-absent \fIfloat\fR (=0.03)
 Use this frequency for absent nucleotides when creating logos for IUPAC regular expression motifs.
 .SH EXAMPLES
 Some example calls:

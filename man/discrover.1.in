@@ -197,188 +197,188 @@ Also, sequence logos of the found motifs are generated with file names based on 
 .SH OPTIONS
 .SS "Generic options:"
 .TP
-\fB\-\-config\fR \fIarg\fR
+.B \-\-config \fIarg
 Read options from a configuration file.
 .TP
-\fB\-h\fR [ \fB\-\-help\fR ]
+.B \-h\fR [ \fB\-\-help\fR ]
 Produce help message. Combine with \fB\-v\fR or \fB\-V\fR for
 additional commands.
 .TP
-\fB\-\-version\fR
+.B \-\-version
 Print out the version. Also show git SHA1 with \fB\-v\fR.
 .TP
-\fB\-v\fR [ \fB\-\-verbose\fR ]
+.B \-v\fR [ \fB\-\-verbose\fR ]
 Be verbose about the progress.
 .TP
-\fB\-V\fR [ \fB\-\-noisy\fR ]
+.B \-V\fR [ \fB\-\-noisy\fR ]
 Be very verbose about the progress.
 .SS "Basic options, required:"
 .TP
-\fB\-f\fR [ \fB\-\-fasta\fR ] \fIfilespec
+.B \-f\fR [ \fB\-\-fasta\fR ] \fIfilespec
 .B FASTA file specification\fR.
 May be given multiple times.
 See the section above for the allowed syntax.
 Note: usage of \fB\-f\fR / \fB\-\-fasta\fR is optional;
 all free arguments are taken to be paths of FASTA file specifications.
 .TP
-\fB\-m\fR [ \fB\-\-motif\fR ] \fImotifspec
+.B \-m\fR [ \fB\-\-motif\fR ] \fImotifspec
 .B Motif specification\fR.
 May be given multiple times.
 See the section above for the allowed syntax.
 .SS "Basic options:"
 .TP
-\fB\-\-score\fR \fIscorespec\fR (=mi)
+.B \-\-score \fIscorespec\fR (=mi)
 .B Score specification\fR.
 May be given multiple times.
 See the section above for the allowed syntax.
 .TP
-\fB\-r\fR [ \fB\-\-revcomp\fR ]
+.B \-r\fR [ \fB\-\-revcomp\fR ]
 Respect motif occurrences on the reverse complementary strand.
 Useful for DNA sequence motif analysis.
 Default is to consider only occurrence on the forward strand.
 .SS "Advanced options:"
 .TP
-\fB\-o\fR [ \fB\-\-output\fR ] \fIlabel\fR
+.B \-o\fR [ \fB\-\-output\fR ] \fIlabel
 Output file names are generated from \fIlabel\fR.
 If not given, the output label will be 'discrover_XXX' where XXX is a string to make the label unique.
 The generated
 .B output files
 are described in the section above.
 .TP
-\fB\-\-threads\fR \fInum\fR
+.B \-\-threads \fInum
 Number of threads.
 If not given, as many are used as there are CPU cores on this machine.
 .TP
-\fB\-\-time\fR
+.B \-\-time
 Output information about how long certain parts take to execute.
 .TP
-\fB\-\-cv\fR \fInum\fR (=0)
+.B \-\-cv \fInum\fR (=0)
 Number of cross validation iterations to do.
 .TP
-\fB\-\-cv_freq\fR \fIfloat\fR (=0.9)
+.B \-\-cv_freq \fIfloat\fR (=0.9)
 Fraction of data samples for training in cross validation.
 .TP
-\fB\-\-nseq\fR \fInum\fR (=0)
+.B \-\-nseq \fInum\fR (=0)
 Use only the first \fInum\fR sequences of each file.
 Use 0 to indicate all sequences.
 .TP
-\fB\-\-iter\fR \fInum\fR (=1000)
+.B \-\-iter \fInum\fR (=1000)
 Maximal number of iterations to perform in training.
 A value of 0 means no limit, and that the training is only terminated by the tolerance.
 .TP
-\fB\-\-salt\fR \fInum\fR
+.B \-\-salt \fInum
 Seed for the pseudo random number generator (used e.g.  for sequence shuffle generation and MCMC sampling).
 Set this to get reproducible results.
 .TP
-\fB\-\-weight\fR
+.B \-\-weight
 When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.
 .SS "Multiple motif mode options:"
 .TP
-\fB\-\-multiple\fR
+.B \-\-multiple
 Accept multiple motifs as long as the score increases.
 This can only be used with the objective function MICO.
 .TP
-\fB\-\-relearn\fR \fIarg\fR (=full) When accepting multiple motifs, whether and how to re\-learn the model after a new motif is added.
+.B \-\-relearn \fIarg\fR (=full) When accepting multiple motifs, whether and how to re\-learn the model after a new motif is added.
 Choices: 'none', 'reest', 'full'.
 .TP
-\fB\-\-resratio\fR \fIfloat\fR (=5)
+.B \-\-resratio \fIfloat\fR (=5)
 Cutoff to discard new motifs in multi motif mode.
 The cutoff is applied on the ratio of conditional mutual information of the new motif and the conditions given the previous motifs.
 Must be non\-negative.
 High values discard more motifs, and lead to less redundant motifs.
 .SS "MMIE options:"
 .TP
-\fB\-\-classp\fR \fIfloat\fR (=0.5)
+.B \-\-classp \fIfloat\fR (=0.5)
 Initial class prior.
 .TP
-\fB\-\-motifp1\fR \fIfloat\fR (=0.6)
+.B \-\-motifp1 \fIfloat\fR (=0.6)
 Initial conditional motif prior for the signal class.
 .HP
-\fB\-\-motifp2\fR \fIfloat\fR (=0.03)
+.B \-\-motifp2 \fIfloat\fR (=0.03)
 Initial conditional motif prior for the control class.
 .TP
-\fB\-\-noclassp\fR
+.B \-\-noclassp
 Don't learn the class prior.
 .TP
-\fB\-\-nomotifp\fR
+.B \-\-nomotifp
 Don't learn the conditional motif prior.
 .SS "MCMC optimization options:"
 .TP
-\fB\-\-sampling\fR
+.B \-\-sampling
 Perform Monte\-Carlo Markov chain (MCMC) sampling for parameter inference instead of re\-estimation or gradient learning.
 .TP
-\fB\-\-temp\fR \fIfloat\fR (=0.001)
+.B \-\-temp \fIfloat\fR (=0.001)
 When performing MCMC sampling use this temperature.
 The temperatures of parallel chains is decreasing by factors of two.
 .TP
-\fB\-\-smin\fR \fInum\fR
+.B \-\-smin \fInum
 Minimal motif length for MCMC sampling.
 When unspecified defaults to initial motif length.
 .TP
-\fB\-\-smax\fR \fInum\fR
+.B \-\-smax \fInum
 Maximal motif length for MCMC sampling.
 When unspecified defaults to initial motif length.
 .TP
-\fB\-\-nindel\fR \fInum\fR (=5)
+.B \-\-nindel \fInum\fR (=5)
 Maximal number of positions that may be added or removed at a time.
 Adding and removing of happens at and from the ends of the motif.
 .TP
-\fB\-\-nshift\fR \fInum\fR (=5)
+.B \-\-nshift \fInum\fR (=5)
 Maximal number of positions that the motif may be shifted by.
 .TP
-\fB\-\-partemp\fR \fInum\fR (=6)
+.B \-\-partemp \fInum\fR (=6)
 Number of chains in parallel tempering.
 .SS "Seeding options for IUPAC regular expression finding:"
 .TP
-\fB\-\-seedscore\fR \fIarg\fR (=mi)
+.B \-\-seedscore \fIarg\fR (=mi)
 Which objective function to evaluate.
 TODO: documentation needs updating to reflect more advanced options for this argument.
 Available are 'signal_freq', 'control_freq', 'mi', 'mcc', 'delta_freq', 'gtest', 'gtest_logp', 'gtest_logp_raw'.
 .TP
-\fB\-\-algo\fR \fIarg\fR (=plasma)
+.B \-\-algo \fIarg\fR (=plasma)
 Seeding algorithm.
 Available are 'plasma', 'mcmc', 'dreme', and 'all'.
 Multiple algorithms can be used by separating them by comma.
 .TP
-\fB\-\-any\fR
+.B \-\-any
 Whether to allow motifs enriched in the opposite direction.
 .TP
-\fB\-\-filter\fR \fIarg\fR (=mask)
+.B \-\-filter \fIarg\fR (=mask)
 How to filter motif occurrences upon identifying a motif.
 Available are 'remove' and 'mask'.
 .TP
-\fB\-\-cand\fR \fInum\fR (=100)
+.B \-\-cand \fInum\fR (=100)
 How many candidates to maintain.
 .TP
-\fB\-\-deg\fR \fInum\fR
+.B \-\-deg \fInum
 Which degrees of degeneracy to consider.
 May be given multiple times.
 A sequence of length \fIN\fR has a maximal degeneracy of 3*\fIN\fR.
 Unlimited if unspecified.
 .TP
-\fB\-\-rdeg\fR \fIfloat\fR (=1)
+.B \-\-rdeg \fIfloat\fR (=1)
 Limit relative degeneracy.
 1 corresponds to full degeneracy, and 0 to no degeneracy.
 For a sequence of length \fIN\fR the degeneracy is maximally 3*\fIN\fR.
 Thus for a motif of length 8 a maximal relative degeneracy of 0.2 allows (rounded down) 4 degrees of degeneracy.
 .TP
-\fB\-\-generalize\fR
+.B \-\-generalize
 Whether to report the best motifs at each level of degeneracy.
 Default is to report only the best motif across all levels of degeneracy.
 In addition, the best motifs of levels of degeneracy given by \fB\-\-deg\fR will be reported.
 .TP
-\fB\-\-best\fR
+.B \-\-best
 Whether to report only the single best motif for each motif specification.
 Default is to report for each motif specification the best result for each length.
 .TP
-\fB\-\-strict\fR
+.B \-\-strict
 Do not allow insignificant seeds.
 .TP
-\fB\-\-fix_mspace\fR
+.B \-\-fix_mspace
 Deactivate dynamic motif space mode.
 Influences how the multiple\-testing correction for the log\-p value of the G\-test is calculated.
 .TP
-\fB\-\-allowIUPAC\fR
+.B \-\-allowIUPAC
 Interpret IUPAC wildcard symbols in FASTA files.
 When this option is used e.g. S (strong) matches C and G, and so on.
 Importantly, N matches any character!
@@ -386,141 +386,141 @@ Use non\-IUPAC characters for positions where the sequence is unknown or masked,
 By default, only A, C, G, and T characters (and their lower case variants) are encoded while all other characters are interpreted as masked.
 .SS "Initialization options:"
 .TP
-\fB\-l\fR [ \fB\-\-load\fR ] \fIarg\fR
+.B \-l\fR [ \fB\-\-load\fR ] \fIarg
 Load HMM parameters from a .hmm file produced by an earlier run.
 Can be specified multiple times; then the first parameter file will be loaded, and motifs of the following parameter files are added.
 .TP
-\fB\-\-alpha\fR \fIfloat\fR (=0.03)
+.B \-\-alpha \fIfloat\fR (=0.03)
 Probability of alternative nucleotides.
 The nucleotides not included in the IUPAC character will have this probability.
 .TP
-\fB\-\-lambda\fR \fIfloat\fR (=1)
+.B \-\-lambda \fIfloat\fR (=1)
 Initial value for prior with which a motif is expected.
 .TP
-\fB\-\-wiggle\fR \fInum\fR (=0)
+.B \-\-wiggle \fInum\fR (=0)
 For automatically determined seeds, consider variants shifted up\- and downstream by up to \fInum\fR positions.
 .TP
-\fB\-\-extend\fR \fInum\fR (=0)
+.B \-\-extend \fInum\fR (=0)
 Extend seeds by \fInum\fR Ns up\- and downstream before HMM training.
 .TP
-\fB\-\-padl\fR \fInum\fR (=0)
+.B \-\-padl \fInum\fR (=0)
 Add \fInum\fR Ns upstream (to the left) of the seed.
 .TP
-\fB\-\-padr\fR \fInum\fR (=0)
+.B \-\-padr \fInum\fR (=0)
 Add \fInum\fR Ns downstream (to the right) of the seed.
 .SS "Sequence logo creation options:"
 .TP
-\fB\-\-nopdf\fR
+.B \-\-nopdf
 Do not generate PDF files with sequence logos of the found motifs.
 .TP
-\fB\-\-nopng\fR
+.B \-\-nopng
 Do not generate PNG files with sequence logos of the found motifs.
 .TP
-\fB\-\-axes\fR
+.B \-\-axes
 Include axes in sequence logos.
 .TP
-\fB\-\-logo\fR \fIarg\fR (=info)
+.B \-\-logo \fIarg\fR (=info)
 Which kind of logo to create; 'info' for information\-type sequence logo (position height scaled by information content), 'freq' for frequency logo.
 .TP
-\fB\-\-alphabet\fR \fIarg\fR
+.B \-\-alphabet \fIarg
 Which alphabet to use; can be either 'RNA' or 'DNA'.
 If left unspecified, 'DNA' is chosen if \fB\-\-revcomp\fR is used, and 'RNA' otherwise.
 .TP
-\fB\-\-order\fR \fIarg\fR (=freq)
+.B \-\-order \fIarg\fR (=freq)
 How to vertically order the nucleotides; can be either \&'alpha' for alphabetic order or 'freq' for most frequent at top.
 .TP
-\fB\-\-pal\fR \fIarg\fR (=default)
+.B \-\-pal \fIarg\fR (=default)
 Color palette to use; available are 'default', \&'solarized', 'tetrad'.
 .TP
-\fB\-\-scale\fR \fInum\fR (=100)
+.B \-\-scale \fInum\fR (=100)
 Height in pixels of the nucleotide stacks in the sequence logos.
 .SS "Hidden options:"
 .TP
-\fB\-\-nosave\fR
+.B \-\-nosave
 Do not save generated shuffle sequences.
 .TP
-\fB\-\-bglearn\fR \fIarg\fR (=em)
+.B \-\-bglearn \fIarg\fR (=em)
 How to learn the background.
 Available are 'fixed', \&'em', 'gradient', where the 'em' uses re\-estimation to maximize the likelihood contribution of the background parameters, while 'gradient' uses the discriminative objective function.
 .TP
-\fB\-\-pscnt\fR \fIfloat\fR (=1)
+.B \-\-pscnt \fIfloat\fR (=1)
 The pseudo count to be added to the contingency tables in the discriminative algorithms.
 .TP
-\fB\-\-pscntE\fR \fIfloat\fR (=1)
+.B \-\-pscntE \fIfloat\fR (=1)
 The pseudo count to be added to the expected emission probabilities before normalization in the Baum\-Welch algorithm.
 .TP
-\fB\-\-pscntT\fR \fIfloat\fR (=0)
+.B \-\-pscntT \fIfloat\fR (=0)
 The pseudo count to be added to the expected transition probabilities before normalization in the Baum\-Welch algorithm.
 .TP
-\fB\-\-compress\fR \fIarg\fR (=gz)
+.B \-\-compress \fIarg\fR (=gz)
 Compression method for larger output files.
 Available are: 'none', 'gz' or 'gzip', 'bz2' or 'bzip2'.
 .TP
-\fB\-\-miseeding\fR
+.B \-\-miseeding
 Disregard automatic seeding choice and use MICO for seeding.
 .TP
-\fB\-\-absthresh\fR
+.B \-\-absthresh
 Whether improvement should be gauged by absolute value.
 Default is relative to the current score.
 .TP
-\fB\-\-intermediate\fR
+.B \-\-intermediate
 Write out intermediate parameters during training.
 .TP
-\fB\-\-limitlogp\fR
+.B \-\-limitlogp
 Do not report corrected log\-P values greater 0 but report 0 in this case.
 .TP
-\fB\-\-longnames\fR
+.B \-\-longnames
 Form longer output file names that contain some information about the parameters.
 .SS "Line searching options:"
 .TP
-\fB\-\-LSmu\fR \fIfloat\fR (=0.1)
+.B \-\-LSmu \fIfloat\fR (=0.1)
 The parameter mu for the More\-Thuente line search algorithm.
 .TP
-\fB\-\-LSeta\fR \fIfloat\fR (=0.5)
+.B \-\-LSeta \fIfloat\fR (=0.5)
 The parameter eta for the More\-Thuente line search algorithm.
 .TP
-\fB\-\-LSdelta\fR \fIfloat\fR (=0.66)
+.B \-\-LSdelta \fIfloat\fR (=0.66)
 The parameter delta for the More\-Thuente line search algorithm.
 .TP
-\fB\-\-LSnum\fR \fInum\fR (=10)
+.B \-\-LSnum \fInum\fR (=10)
 How many gradient and function evaluation to perform maximally per line search.
 .SS "Evaluation options:"
 .TP
-\fB\-\-posterior\fR
+.B \-\-posterior
 During evaluation also print out the motif posterior probability.
 .TP
-\fB\-\-condmotif\fR
+.B \-\-condmotif
 During evaluation compute for every position the conditional motif likelihood considering only the motif emissions.
 .TP
-\fB\-\-nosummary\fR
+.B \-\-nosummary
 Do not print summary information.
 .TP
-\fB\-\-noviterbi\fR
+.B \-\-noviterbi
 Do not print the Viterbi path.
 .TP
-\fB\-\-nobed\fR
+.B \-\-nobed
 Do not generate BED file with positions of motif occurrences.
 .TP
-\fB\-\-notable\fR
+.B \-\-notable
 Do not print the occurrence table.
 .TP
-\fB\-\-ric\fR
+.B \-\-ric
 Perform a rank information coefficient analysis.
 .SS "Termination options:"
 .TP
-\fB\-\-gamma\fR \fIfloat\fR (=1e\-4)
+.B \-\-gamma \fIfloat\fR (=1e\-4)
 Tolerance for the reestimation type learning methods.
 Training stops when the L1 norm of the parameter change between iterations is less than this value.
 .TP
-\fB\-\-delta\fR \fIfloat\fR (=1e\-4)
+.B \-\-delta \fIfloat\fR (=1e\-4)
 Relative score difference criterion tolerance for training algorithm termination:
 stops iterations when (f \- f') / f < delta, where f' is the objective value of the past iteration, and f is the objective value of the current iteration.
 .TP
-\fB\-\-epsilon\fR \fIfloat\fR (=0)
+.B \-\-epsilon \fIfloat\fR (=0)
 Gradient norm criterion tolerance for training algorithm termination:
 stops when ||g|| < epsilon * max(1, ||g||), where ||.|| denotes the Euclidean (L2) norm.
 .TP
-\fB\-\-past\fR \fInum\fR (=1)
+.B \-\-past \fInum\fR (=1)
 Distance for delta\-based convergence test.
 This parameter determines the distance, in iterations, to compute the rate of decrease of the objective function.
 .\"

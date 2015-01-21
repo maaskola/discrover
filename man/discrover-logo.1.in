@@ -19,26 +19,24 @@ files with motifs in matrix form
 .SH OPTIONS
 .SS "Basic options:"
 .TP
-\fB\-\-hmm \fIpath
+.B \-\-hmm \fIpath
 Path to .hmm file.
 May be given multiple times.
 Note: free arguments are also interpreted as .hmm files.
 .TP
-\fB\-i\fR [ \fB\-\-iupac\fR ]\fI motif
+.B \-i\fR [ \fB\-\-iupac\fR ] \fImotif
 A \fImotif\fR in the form of a IUPAC regular expression.
 May be given multiple times.
 .TP
-\fB\-m\fR [ \fB\-\-matrix\fR ]\fI path
+.B \-m\fR [ \fB\-\-matrix\fR ] \fIpath
 Path to a file with a motif in matrix form.
 May be given multiple times.
 .TP
-\fB\-o\fR [ \fB\-\-output\fR ]\fI label
+.B \-o\fR [ \fB\-\-output\fR ] \fIlabel
 Output file names are generated from this label.
-If this option is not specified the output label will be
-\&'discrover\-logo_XXX' where XXX is a string to make the
-label unique.
+If this option is not specified the output label will be \&'discrover\-logo_XXX' where XXX is a string to make the label unique.
 .TP
-\fB\-h\fR [ \fB\-\-help\fR ]
+.B \-h\fR [ \fB\-\-help\fR ]
 Produce help message.
 .TP
 .B \-\-version
@@ -46,43 +44,35 @@ Print out the version.
 .SS "Sequence logo creation options:"
 .TP
 .B \-\-nopdf
-Do not generate PDF files with sequence logos of the
-found motifs.
+Do not generate PDF files with sequence logos of the found motifs.
 .TP
 .B \-\-nopng
-Do not generate PNG files with sequence logos of the
-found motifs.
+Do not generate PNG files with sequence logos of the found motifs.
 .TP
 .B \-\-axes
 Include axes in sequence logos.
 .TP
-.B \-\-logo\fI arg\fR (=info)
+.B \-\-logo \fIarg\fR (=info)
 Which kind of logo to create; 'info' for information\-type sequence logo (position height scaled by information content), 'freq' for frequency logo.
 .TP
-\fB\-\-alphabet\fI arg
+.B \-\-alphabet \fIarg
 Which alphabet to use; can be either 'RNA' or 'DNA'.
 If left unspecified, 'DNA' is chosen if \fB\-\-revcomp\fR is used, and 'RNA' otherwise.
 .TP
-\fB\-\-order\fI arg\fR (=freq)
-How to vertically order the nucleotides; can be either
-\&'alpha' for alphabetic order or 'freq' for most
-frequent at top.
+.B \-\-order \fIarg\fR (=freq)
+How to vertically order the nucleotides; can be either \&'alpha' for alphabetic order or 'freq' for most frequent at top.
 .TP
-\fB\-\-pal\fI arg\fR (=default)
-Color palette to use; available are 'default',
-\&'solarized', 'tetrad'.
+.B \-\-pal \fIarg\fR (=default)
+Color palette to use; available are 'default', \&'solarized', 'tetrad'.
 .TP
-\fB\-\-scale\fI num\fR (=100)
-Height in pixels of the nucleotide stacks in the
-sequence logos.
+.B \-\-scale \fInum\fR (=100)
+Height in pixels of the nucleotide stacks in the sequence logos.
 .TP
-\fB\-\-absent\fI float\fR (=0.03)
-Use this frequency for absent nucleotides when creating
-logos for IUPAC regular expression motifs.
+.B \-\-absent \fIfloat\fR (=0.03)
+Use this frequency for absent nucleotides when creating logos for IUPAC regular expression motifs.
 .TP
-\fB\-r\fR [ \fB\-\-revcomp\fR ]
-Generate sequence logos for forward and reverse
-complementary strand.
+.B \-r\fR [ \fB\-\-revcomp\fR ]
+Generate sequence logos for forward and reverse complementary strand.
 .PP
 .SH "SEE ALSO"
 As part of the Discrover package a PDF manual should have been installed on your system.

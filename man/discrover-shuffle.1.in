@@ -17,24 +17,24 @@ The routines are based on code by P. Clote from Oct 2003 in the Python script
 altschulEriksonDinuclShuffle.py.
 .SH OPTIONS
 .TP
-\fB\-h\fR [ \fB\-\-help\fR ]
+.B \-h\fR [ \fB\-\-help\fR ]
 produce help message
 .TP
-\fB\-\-version\fR
+.B \-\-version
 Print out the version. Also show git SHA1 with \fB\-v\fR.
 .TP
-\fB\-f\fR [ \fB\-\-fasta\fR ] \fIpath
+.B \-f\fR [ \fB\-\-fasta\fR ] \fIpath
 Path of a FASTA file. May be given multiple times.
 Note: usage of \fB\-f\fR / \fB\-\-fasta\fR is optional;
 all free arguments are taken to be paths of FASTA files.
 .TP
-\fB\-n\fR [ \fB\-\-number\fR ] \fInum\fR (=1)
+.B \-n\fR [ \fB\-\-number\fR ] \fInum\fR (=1)
 Generate \fInum\fR shuffles per sequence.
 .TP
-\fB\-s\fR [ \fB\-\-seed\fR ] \fInum
+.B \-s\fR [ \fB\-\-seed\fR ] \fInum
 Use \fInum\fR as a seed to initialize the random number generator.
 .TP
-\fB\-v\fR [ \fB\-\-verbose\fR ]
+.B \-v\fR [ \fB\-\-verbose\fR ]
 Be verbose about the progress
 .SH "SEE ALSO"
 As part of the Discrover package a PDF manual should have been installed on your system.
