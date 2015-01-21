@@ -113,7 +113,7 @@ boost::program_options::options_description gen_plasma_options_description(
         "mi           \tMutual information of condition and motif occurrence (MICO)\n"
         // "ri           \tRank mutual information\n"
         "mcc          \tMatthews correlation coefficient\n"
-        "dfreq        \tDifference of frequency of sequences with motif occurrences, similar to DIPS and DECOD, see doi: 10.1093/bioinformatics/btl227 and 10.1093/bioinformatics/btr412"
+        "dfreq        \tDifference of frequency of sequences with motif occurrences, similar to DIPS and DECOD, see doi: 10.1093/bioinformatics/btl227 and 10.1093/bioinformatics/btr412\n"
         "gtest        \tG-test for association\n"
         "gtest_logp   \tlog-P value of G-test for association, corrected for multiple testing\n"
         // "gtest_logp_raw \tlog-P value of G-test for association, not corrected for multiple testing\n"
