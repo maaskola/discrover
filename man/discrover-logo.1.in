@@ -1,4 +1,4 @@
-.TH discrover-logo "1" "January 2015" "discrover-logo 1.5.0 [master branch]" "User Commands"
+.TH discrover-logo "1" "January 2015" "discrover-logo @GIT_DESCRIPTION@ [@GIT_BRANCH@ branch]" "User Commands"
 .SH NAME
 discrover-logo \- generate sequence logos of HMM motifs
 .SH SYNOPSIS

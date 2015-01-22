@@ -1,4 +1,4 @@
-.TH discrover "1" "January 2015" "discrover 1.5.0 [master branch]" "User Commands"
+.TH discrover "1" "January 2015" "discrover @GIT_DESCRIPTION@ [@GIT_BRANCH@ branch]" "User Commands"
 .SH NAME
 discrover \- discriminative motif discovery using hidden Markov models
 .SH SYNPOSIS

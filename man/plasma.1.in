@@ -1,4 +1,4 @@
-.TH plasma "1" "January 2015" "plasma 1.5.0 [master branch]" "User Commands"
+.TH plasma "1" "January 2015" "plasma @GIT_DESCRIPTION@ [@GIT_BRANCH@ branch]" "User Commands"
 .SH NAME
 plasma \- motif discovery for discriminative IUPAC regular expressions
 .SH SYNPOSIS
@@ -40,7 +40,7 @@ Binding site discovery from nucleic acid sequences by discriminative learning of
 Nucleic Acid Research, 42(21):12995\-13011, Dec 2014. doi:10.1093/nar/gku1083
 .PP
 Please note that the software is accompanied by a manual in PDF format which includes recipes for motif discovery for ChIP\-Seq and PAR\-CLIP data.
-Refer to the section 
+Refer to the section
 .B SEE ALSO
 at the bottom of this man page for the location of the manual.
 .PP
