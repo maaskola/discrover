@@ -34,8 +34,8 @@
 #include "options.hpp"
 
 boost::program_options::options_description gen_plasma_options_description(
-    Seeding::Options &options, const std::string &prefix = "",
+    Seeding::Options &options, size_t cols = 80, const std::string &prefix = "",
     const std::string &name = "IUPAC regular expression finding options",
-    size_t cols = 80, bool include_all = true, bool allow_short = true);
+    bool include_all = true, bool allow_short = true);
 
 #endif /* ----- #ifndef PLASMA_CLI_HPP  ----- */

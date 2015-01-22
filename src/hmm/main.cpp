@@ -195,8 +195,8 @@ int main(int argc, const char **argv) {
   po::options_description hidden_options("Hidden options", cols);
 
   po::options_description seeding_options = gen_plasma_options_description(
-      options.seeding, "",
-      "Seeding options for IUPAC regular expression finding", cols, false,
+      options.seeding, cols, "",
+      "Seeding options for IUPAC regular expression finding", false,
       false);
 
 #if CAIRO_FOUND

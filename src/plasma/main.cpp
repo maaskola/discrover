@@ -22,6 +22,7 @@
 #include "count.hpp"
 #include "mask.hpp"
 #include "plasma.hpp"
+#include "../terminal.hpp"
 #include "../timer.hpp"
 #include "cli.hpp"
 #include "../executioninformation.hpp"
@@ -121,15 +122,23 @@ int main(int argc, const char **argv) {
 
   namespace po = boost::program_options;
 
+  static const size_t MIN_COLS = 60;
+  static const size_t MAX_COLS = 80;
+  size_t cols = get_terminal_width();
+  if (cols < MIN_COLS)
+    cols = MIN_COLS;
+  if (cols > MAX_COLS)
+    cols = MAX_COLS;
+
   // Declare the supported options.
-  po::options_description desc("Basic options");
+  po::options_description desc("Basic options", cols);
   desc.add_options()
     ("help,h", "produce help message")
     ("version", "Print out the version. Also show git SHA1 with -v.")
     ("verbose,v", "Be verbose about the progress.")
     ("noisy,V", "Be very verbose about the progress.")
     ;
-  po::options_description ext_options = gen_plasma_options_description(options);
+  po::options_description ext_options = gen_plasma_options_description(options, cols);
 
   desc.add(ext_options);
 
@@ -225,7 +234,7 @@ int main(int argc, const char **argv) {
             "Provided under GNU General Public License Version 3 or later.\n"
             "See the file COPYING provided with this software for details of "
             "the license.\n" << endl;
-    cout << gen_usage_string() << endl;
+    cout << limit_line_length(gen_usage_string(), cols) << endl;
     cout << desc << "\n";
     return EXIT_SUCCESS;
   }

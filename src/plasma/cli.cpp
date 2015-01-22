@@ -33,8 +33,8 @@ string form_switch(const string &prefix, const string &s,
 }
 
 boost::program_options::options_description gen_plasma_options_description(
-    Seeding::Options &options, const string &prefix, const string &name,
-    size_t cols, bool include_all, bool allow_short) {
+    Seeding::Options &options, size_t cols, const string &prefix,
+    const string &name, bool include_all, bool allow_short) {
   namespace po = boost::program_options;
   po::options_description desc(name, cols);
 
