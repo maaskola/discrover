@@ -529,7 +529,7 @@ Perform a rank information coefficient analysis.
 .SS "Termination options:"
 .TP
 .B \-\-gamma \fIfloat\fR (=1e\-4)
-Tolerance for the reestimation type learning methods.
+Tolerance for the reestimation-type learning methods.
 Training stops when the L1 norm of the parameter change between iterations is less than this value.
 .TP
 .B \-\-delta \fIfloat\fR (=1e\-4)

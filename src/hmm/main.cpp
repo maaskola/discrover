@@ -374,7 +374,7 @@ int main(int argc, const char **argv) {
     ;
 
   termination_options.add_options()
-    ("gamma", po::value(&options.termination.gamma_tolerance)->default_value(1e-4, "1e-4"), "Tolerance for the reestimation type learning methods. Training stops when the L1 norm of the parameter change between iterations is less than this value.")
+    ("gamma", po::value(&options.termination.gamma_tolerance)->default_value(1e-4, "1e-4"), "Tolerance for the reestimation-type learning methods. Training stops when the L1 norm of the parameter change between iterations is less than this value.")
     ("delta", po::value(&options.termination.delta_tolerance)->default_value(1e-4, "1e-4"), "Relative score difference criterion tolerance for training algorithm termination: stops iterations when (f - f') / f < delta, where f' is the objective value of the past iteration, and f is the objective value of the current iteration.")
     ("epsilon", po::value(&options.termination.epsilon_tolerance)->default_value(0), "Gradient norm criterion tolerance for training algorithm termination: stops when ||g|| < epsilon * max(1, ||g||), where ||.|| denotes the Euclidean (L2) norm.")
     ("past", po::value(&options.termination.past)->default_value(1), "Distance for delta-based convergence test. This parameter determines the distance, in iterations, to compute the rate of decrease of the objective function.")
