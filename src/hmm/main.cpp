@@ -229,7 +229,7 @@ int main(int argc, const char **argv) {
      "\n"
      "FASTA files can be grouped into contrasts on which the --score definitions (see below) can act.\n"
      "\n"
-     "If the path contains at least one colon, please prepend with colons to disambiguate.\n"
+     "If PATH contains at least one colon, please prepend colons to disambiguate.\n"
      "\n"
      "Note: usage of -f / --fasta is optional; all free arguments are taken to be paths of FASTA files."
      "\n"

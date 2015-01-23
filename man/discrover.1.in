@@ -86,7 +86,7 @@ All FASTA files for which no \fIcontrast\fR is given are associated with a commo
 Using \fIcontrast\fRs, FASTA files can be grouped into contrasts on which
 .B score specifications
 can act.
-If the path contains at least one colon, please prepend with colons to disambiguate.
+If \fIpath\fR contains at least one colon, please prepend colons to disambiguate.
 .\"
 .\"
 .\"
