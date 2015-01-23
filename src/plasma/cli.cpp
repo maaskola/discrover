@@ -83,7 +83,7 @@ boost::program_options::options_description gen_plasma_options_description(
        "2. \tA length specification. "
        "Motifs of the indicated lengths are sought. "
        "A length specification is a comma separated list of length ranges, "
-       "where a length range is either a single length, or an expression of the form 'x-y' to indicate lengths x up to y. "
+       "where a length range is either a single length, or an expression of the form 'M-N' to indicate lengths M up to N. "
        "A length specification also allows to specify a multiplicity separated by an 'x'. "
        "Thus examples are '8' for just length 8, '5-7' for lengths 5, 6, and 7, '5-8x2' for two motifs of lengths 5 to 8, '5-8,10x3' for three motifs of lengths 5, 6, 7, 8, and 10.\n"
        "3. \tBy specifying the path to a file with a PWM. "
