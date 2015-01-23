@@ -7,6 +7,9 @@
 \usepackage{doi,hyperref,verbatimbox,verbatim,url}
 \usepackage[numbers]{natbib}
 
+\usepackage[Q=yes]{examplep}
+\usepackage{amsmath}
+
 \newcommand{\plasma}[0]{\texttt{plasma}}
 \newcommand{\discrover}[0]{\texttt{discrover}}
 \newcommand{\dinuclshuffle}[0]{\texttt{discrover-shuffle}}
@@ -267,6 +270,9 @@ The following section gives some recipes for the analysis of RNA-binding protein
 While the recipes are written for \discrover{}, they can be easily modified to work for \plasma{}:
 simply leave out the options \verb|--multiple| and \verb|--wiggle|, which are not supported by \plasma{}.
 
+The recipes use advanced syntax to specify motifs, scores, and sequences in contrasts.
+The syntax is explained in detail in section~\ref{section:specification}.
+
 \subsection{Analysing RNA-binding proteins}
 First, let us find a motif that is differential between a simple analysis of set of PAR-CLIP signal sequences \verb|rbm10.signal.fa| and a set of matching control sequences \verb|rbm10.control.fa|.
 \\
@@ -388,6 +394,11 @@ The following algorithms are provided:
     By default, six parallel chains are used.
 \end{description}
 
+\subsection{Specifying input files, motifs, and scores}
+Please refer to the section~\ref{section:specification} which details the syntax to specify input files, motifs, and scores for \discrover{}.
+The syntax for \plasma{} is nearly identical, except that motif specifications (section~\ref{section:motif-specification}) do not take \Q{insert} terms for \plasma{}.
+
+
 \subsection{Binding site HMM optimization with \discrover{}}
 \label{subsection:running-discrover}
 \subsubsection{Getting help on command line options}
@@ -432,6 +443,147 @@ For this reason, MCMC learning in \discrover{} optimizes all parameters, includi
 
 There are several options available to determine the way \discrover{} performs MCMC
 For these, please refer to the \emph{MCMC optimization options} section of the extended command line help, available via \verb|discrover --help --verbose|.
+
+\subsection{Specifying input files, motifs, and scores}
+\label{section:specification}
+The following section details the syntax to specify input files, motifs, and scores for \discrover{}.
+
+\newcommand{\Item}[1]{\item[#1] \hfill \\}
+
+\subsubsection{FASTA file specification}
+FASTA file specifications consist of up to three colon-separated terms, with the following syntax:
+
+\begin{verbbox}
+[names:[contrast:]]path
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+The square brackets indicate that \Q{names} and \Q{contrast} are optional.
+The meaning of \Q{names}, \Q{contrast}, and \Q{path} are as follows:
+
+\begin{description}
+ \Item{\Q{names}}
+  comma-separated list of names of motifs enriched in this file
+ \Item{\Q{contrast}}
+  name of a contrast this file belongs to
+ \Item{\Q{path}}
+  path of FASTA file with sequences
+\end{description}
+
+All FASTA files for which no \Q{contrast} is given are associated with a common, automatically named contrast.
+
+Using contrasts, FASTA files can be grouped into contrasts on which score specifications can act.
+If \Q{path} contains at least one colon, please prepend with colons to disambiguate.
+
+\subsubsection{Motif specification}
+\label{section:motif-specification}
+Motif specifications consist of up to three colon-separated terms, with the following syntax:
+
+\begin{verbbox}
+[name:[insert:]]motifdef
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+The square brackets indicate that \Q{name} and \Q{insert} are optional.
+The meaning of \Q{name}, \Q{indel}, and \Q{motifdef} are as follows:
+
+\begin{description}
+  \Item{\Q{name}}
+    name of the motif
+  \Item{\Q{insert}}
+    comma-separated list of positions after which to add an insertion state; positions are 1-indexed; $1 \leq \text{position} < \text{motif length}$ must hold for each position
+  \Item{\Q{motifdef}}
+    motif definition; see below
+\end{description}
+
+If \Q{name} is not given, a name of the form \Q{motifN} is generated, where \Q{N} are numbers increasing from 0.
+
+There are three ways in which a \Q{motifdef} can be given:
+
+\begin{description}
+  \Item{IUPAC regular expression}
+    Using the IUPAC code for nucleic acids.
+  \Item{Length specification}
+    Motifs of the indicated lengths are sought.
+    A length specification is a comma separated list of length ranges, where a length range is either a single length, or an expression of the form \Q{M-N} to indicate lengths \Q{M} up to \Q{N}.
+    A length specification also allows to specify a multiplicity separated by an \Q{x}.
+    Thus examples are \Q{8} for just length 8, \Q{5-7} for lengths 5, 6, and 7, \Q{5-8x2} for two motifs of lengths 5 to 8, \Q{5-8,10x3} for three motifs of lengths 5, 6, 7, 8, and 10.
+  \Item{Path to a file with a PWM}
+    If the path contains at least one colon, please prepend colons to disambiguate.
+\end{description}
+
+
+\subsubsection{Score specification}
+Score specifications consist of up to three colon-separated terms, with the following syntax:
+
+\begin{verbbox}
+[motif:[contrasts:]]measure
+\end{verbbox}
+\fbox{\theverbbox[t]}
+
+The square brackets indicate that \Q{motif} and \Q{contrasts} are optional.
+The meaning of \Q{motif}, \Q{contrasts}, and \Q{measure} are as follows:
+
+\begin{description}
+  \Item{\Q{motif}}
+    name of the motif to optimize
+  \Item{\Q{contrasts}}
+    contrast specification; see below
+  \Item{\Q{measure}}
+    significance measure to use
+\end{description}
+
+If \Q{name} is not given given, all motifs are optimized with this score specification.
+It is an error when more than one score specification is given for any motif.
+
+The contrast specification \Q{contrasts} is a set of contrast names prefixed by \Q{+} or \Q{-} to indicate whether the score on the contrast is to count positively or negatively.
+The first contrast name, if lacking a \Q{+} or \Q{-}, is taken to count positively.
+If \Q{contrasts} is not given, the score definition uses all contrasts, counting each one positively.
+
+The following significance measures are available:
+
+\begin{description}
+  \Item{\Q{none}}
+    Do not perform learning
+  \Item{\Q{bw}}
+    Likelihood maximization with the Baum-Welch algorithm; this measure is not discriminative
+  \Item{\Q{viterbi}}
+    Viterbi learning; this measure is not discriminative
+  \Item{\Q{mi}}
+    Mutual information of condition and motif occurrence (MICO)
+  \Item{\Q{ri}}
+    Rank mutual information
+  \Item{\Q{mmie}}
+    Maximum mutual information estimation (MMIE), also known as posterior classification probability
+  \Item{\Q{mcc}}
+    Matthews correlation coefficient
+  \Item{\Q{dlogl}}
+    Log-likelihood difference, like in the motif discovery method DME, see doi: 10.1073/pnas.0406123102
+  \Item{\Q{dfreq}}
+    Difference of frequency of sequences with motif occurrences, similar to the motif discovery methods DIPS and DECOD, see doi: 10.1093/bioinformatics/btl227 and 10.1093/bioinformatics/btr412
+\end{description}
+
+\subsection{Output files}
+The output files produced by \discrover{} comprise:
+
+\begin{description}
+  \Item{\Q{.hmm}}
+    Parameter of the trained HMM\@.
+    May be loaded later with --learn.
+  \Item{\Q{.summary}}
+    Summary information with number of occurrences of the motifs in each sample, and various generative and discriminative statistics.
+  \Item{\Q{.viterbi}}
+    FASTA sequences annotated with the Viterbi path, and sequence level statistics.
+  \Item{\Q{.bed}}
+    BED file of coordinates of matches to the motifs in all sequences.
+  \Item{\Q{.table}}
+    Coordinates and sequences of matches to the motifs in all sequences (extends the \Q{.bed} output file).
+  \Item{\Q{.pdf} / \Q{.png}}
+    Sequence logos of the found motifs in PDF / PNG format.
+\end{description}
+
+Note that, depending on the argument of \Q{--compress}, the \Q{.viterbi}, \Q{.bed}, and \Q{.table} files may be compressed, and require decompression for inspection.
+
 
 \section{Appendix}
 \subsection{Command line help of \plasma{}}
