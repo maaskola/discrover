@@ -1,1 +1,2 @@
 ADD_LIBRARY(discrover-stats OBJECT pgamma.cpp chisq.cpp)
+SET_TARGET_PROPERTIES(discrover-stats PROPERTIES POSITION_INDEPENDENT_CODE TRUE)

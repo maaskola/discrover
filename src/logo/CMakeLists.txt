@@ -1,7 +1,12 @@
 ADD_LIBRARY(discrover-logo OBJECT logo.cpp options.cpp cli.cpp)
 
+SET_TARGET_PROPERTIES(discrover-logo
+   PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+
 ADD_EXECUTABLE(discrover-logo-bin main.cpp)
 SET_TARGET_PROPERTIES(discrover-logo-bin PROPERTIES OUTPUT_NAME discrover-logo)
+SET_TARGET_PROPERTIES(discrover-logo-bin
+  PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 TARGET_LINK_LIBRARIES(discrover-logo-bin discrover)
 
 IF(GOOGLEPERFTOOLS_FOUND)

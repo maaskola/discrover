@@ -12,6 +12,9 @@ ADD_LIBRARY(discrover-common OBJECT aux.cpp executioninformation.cpp matrix.cpp
   random_distributions.cpp random_seed.cpp sha1.cpp terminal.cpp timer.cpp
   mcmc/montecarlo.cpp)
 
+SET_TARGET_PROPERTIES(discrover-common
+   PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+
 LIST(APPEND DISCROVER_OBJECTS
   $<TARGET_OBJECTS:discrover-common>
   $<TARGET_OBJECTS:discrover-hmm>

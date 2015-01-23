@@ -7,8 +7,13 @@ ADD_LIBRARY(discrover-hmm OBJECT association.cpp basedefs.cpp
   polyfit.cpp registration.cpp report.cpp results.cpp
   sequence.cpp subhmm.cpp trainingmode.cpp )
 
+SET_TARGET_PROPERTIES(discrover-hmm
+   PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+
 ADD_EXECUTABLE(discrover-bin main.cpp)
 SET_TARGET_PROPERTIES(discrover-bin PROPERTIES OUTPUT_NAME discrover)
+SET_TARGET_PROPERTIES(discrover-bin
+  PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 TARGET_LINK_LIBRARIES(discrover-bin discrover)
 
 # ADD_EXECUTABLE(mcmc mcmc/montecarlo.cpp) # this is a test program for the Gibbs sampling code
