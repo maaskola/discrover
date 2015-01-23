@@ -26,8 +26,6 @@
 
 Update INSTALL and README.md regarding the default installation directory
 
-In the manual explain syntax of motif and contrast specification
-
 CMake Warning (dev) at doc/CMakeLists.txt:19 (GET_PROPERTY):
   Policy CMP0026 is not set: Disallow use of the LOCATION target property.
   Run "cmake --help-policy CMP0026" for policy details.  Use the cmake_policy

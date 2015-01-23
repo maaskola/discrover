@@ -1,7 +1,3 @@
-
-SET(MANUAL_LOCATION
-  "${CMAKE_INSTALL_PREFIX}/share/doc/discrover/discrover-manual.pdf")
-
 CONFIGURE_FILE(discrover.1.in discrover.1)
 CONFIGURE_FILE(discrover-logo.1.in discrover-logo.1)
 CONFIGURE_FILE(discrover-shuffle.1.in discrover-shuffle.1)
