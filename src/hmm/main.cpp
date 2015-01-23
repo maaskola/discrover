@@ -313,8 +313,9 @@ int main(int argc, const char **argv) {
       ".viterbi \tFASTA sequences annotated with the Viterbi path, and sequence level statistics.\n"
       ".bed     \tBED file of coordinates of matches to the motifs in all sequences.\n"
       ".table   \tCoordinates and sequences of matches to the motifs in all sequences (extends the .bed output file).\n"
-      "Note that, depending on the argument of --compress, the latter three files may be compressed, and require decompression for inspection.\n"
-      "Also, sequence logos of the found motifs are generated with file names based on this output label."
+      ".pdf     \tSequence logos of the found motifs in PDF format.\n"
+      ".png     \tSequence logos of the found motifs in PNG format.\n"
+      "Note that, depending on the argument of --compress, the .viterbi, .bed, and .table files may be compressed, and require decompression for inspection.\n"
      ).c_str())
     ("threads", po::value(&options.n_threads), "Number of threads. If not given, as many are used as there are CPU cores on this machine.")
     ("time", po::bool_switch(&options.timing_information), "Output information about how long certain parts take to execute.")

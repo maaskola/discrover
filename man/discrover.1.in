@@ -207,9 +207,11 @@ BED file of coordinates of matches to the motifs in all sequences.
 .TP
 \&.table
 Coordinates and sequences of matches to the motifs in all sequences (extends the .bed output file).
+.TP
+\&.pdf / .png
+Sequence logos of the found motifs in PDF / PNG format.
 .PP
-Note that, depending on the argument of \fB\-\-compress\fR, the latter three files may be compressed, and require decompression for inspection.
-Also, sequence logos of the found motifs are generated with file names based on this output label.
+Note that, depending on the argument of \fB\-\-compress\fR, the \fI.viterbi\fR, \fI.bed\fR, and \fI.table\fR files may be compressed, and require decompression for inspection.
 .\"
 .\"
 .\"
