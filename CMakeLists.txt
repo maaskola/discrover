@@ -287,14 +287,16 @@ ELSE()
 ENDIF()
 MESSAGE(STATUS "Libraries will be installed into ${CMAKE_INSTALL_PREFIX}/${LIBDIR}")
 
-ADD_SUBDIRECTORY(src)
-ADD_SUBDIRECTORY(scripts)
-
 SET(MANUAL_LOCATION "not installed")
 IF(BUILD_MANUAL)
   SET(MANUAL_DIR "${CMAKE_INSTALL_PREFIX}/share/doc/${PROJECT_NAME}")
   SET(MANUAL_LOCATION "${MANUAL_DIR}/discrover-manual.pdf")
+ENDIF()
 
+ADD_SUBDIRECTORY(src)
+ADD_SUBDIRECTORY(scripts)
+
+IF(BUILD_MANUAL)
   ADD_CUSTOM_COMMAND(
      OUTPUT plasma-cli-help.txt discrover-cli-help.txt
      COMMAND plasma -h > plasma-cli-help.txt
