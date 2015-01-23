@@ -45,6 +45,7 @@ TODO 2015-01-16 Is the plasma CLI switch help on allowIUPAC correct?
 TODO 2015-01-16 Logos: insertion positions
 TODO 2015-01-18 Plasma: implement a specializing mode
 TODO 2015-01-18 Documentation: explain multiple motif mode
+TODO 2015-01-21 Explain usage of motif name 'control'
 
 Less important:
 TODO 2015-01-05 Travis CI: don't require tex and don't build documentation?
@@ -52,3 +53,5 @@ TODO 2015-01-08 Remove check_enrichment
 TODO 2015-01-11 HMM insertions exception: more verbosity
 TODO 2015-01-11 DREME exception non-zero: print return value
 TODO 2015-01-16 Re-enable specifying the number of threads with the environment variable OMP_NUM_THREADS?
+TODO 2015-01-18 Unicode symbols (like the less-or-equal) in the CLI output may not render correctly in the LaTeX manual
+TODO 2015-01-21 Implement rank information for plasma
