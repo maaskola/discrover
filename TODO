@@ -46,6 +46,7 @@ TODO 2015-01-16 Logos: insertion positions
 TODO 2015-01-18 Plasma: implement a specializing mode
 TODO 2015-01-18 Documentation: explain multiple motif mode
 TODO 2015-01-21 Explain usage of motif name 'control'
+TODO 2015-01-24 Write tests for correctness and performance
 
 Less important:
 TODO 2015-01-05 Travis CI: don't require tex and don't build documentation?
