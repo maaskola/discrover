@@ -43,6 +43,7 @@
 #include "../random_seed.hpp"
 #include "../mcmc/montecarlo.hpp"
 #include "../timer.hpp"
+#include "../plasma/harmonization.hpp"
 #include <git_config.hpp>
 #include <discrover_paths.hpp>
 
@@ -640,7 +641,7 @@ int main(int argc, const char **argv) {
   try {
     // check and harmonize specified motifs, paths, and objectives
     Specification::harmonize(options.motif_specifications, options.paths,
-                             options.objectives, false);
+                             options.objectives);
   } catch (runtime_error &e) {
     cout << e.what() << endl;
     return EXIT_FAILURE;
