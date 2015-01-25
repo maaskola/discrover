@@ -41,8 +41,8 @@
 
   This document briefly describes the purpose of this motif finding package and discusses important concepts.
   A tutorial explains the basic usage of the programs that are part of this package.
-  Then, recipes are given that can be used to perform motif analysis for CLIP-Seq and ChIP-Seq data.
-  Finally, some further details of the program usage are given.
+  Recipes are given that can be used to perform motif analysis for CLIP-Seq and ChIP-Seq data.
+  Finally, further details of the program usage are described.
 \end{abstract}
 
 \tableofcontents
@@ -83,7 +83,6 @@ Subsequently HMM parameters are improved with gradient optimization, which is de
 
 Objective functions evaluated on multiple contrast may be combined into meta-objectives that allow for a joint analysis of repeat experiments, or to discover motifs that are differential in one contrast but not, or less so, in another.
 
-\section{Concepts}
 \subsection{Objective functions}
 Motifs are discovered by optimizing an objective function that tries to measure the amount of evidence for the motif.
 There are many possible choices for objective functions for this purpose, and this package lets the user decide which objective function to use.

@@ -68,13 +68,13 @@ struct NameNotUniqueInObjective : public std::runtime_error {
 struct NoSpecfication : public std::runtime_error {
   NoSpecfication(const std::string &name);
 };
-struct WhenOneThenAll : public std::runtime_error {
-  WhenOneThenAll();
-};
 }
 namespace Objective {
 struct MultpleObjectivesWithoutNamedMotifs : public std::runtime_error {
-  MultpleObjectivesWithoutNamedMotifs ();
+  MultpleObjectivesWithoutNamedMotifs();
+};
+struct NoMotif : public std::runtime_error {
+  NoMotif(const std::string &token);
 };
 }
 }
@@ -281,9 +281,9 @@ void harmonize(Motifs &motifs, Sets &sets,
   }
 
   // finally check that no unnamed motifs are referenced in the objectives
-  if (motif_names_in_objectives.find("") != end(motif_names_in_objectives)
-      and motif_names_in_objectives.size() > 1)
-    throw Exception::Motif::WhenOneThenAll();
+  for (auto &objective : objectives)
+    if (objective.motif_name == "")
+      throw Exception::Objective::NoMotif(to_string(objective));
 
   if (debug) {
     cout << "Found motif name in objectives:";
