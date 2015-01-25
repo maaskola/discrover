@@ -221,7 +221,7 @@ int main(int argc, const char **argv) {
      "\n"
      "[NAMES:[CONTRAST:]]PATH\n"
      "\n"
-     "NAMES    \tcomma-separated list of names of motifs enriched in this file\n"
+     "NAMES    \tcomma-separated list of names of motifs enriched in this file, or 'control'\n"
      "CONTRAST \tname of a contrast this file belongs to\n"
      "PATH     \tpath of FASTA file with sequences\n"
      "\n"
@@ -234,6 +234,10 @@ int main(int argc, const char **argv) {
      "\n"
      "Note: usage of -f / --fasta is optional; all free arguments are taken to be paths of FASTA files."
      "\n"
+     "FASTA files tagged 'control' are treated slightly differently: "
+     "they are excluded from the set of sequences on which parameter re-estimation is performed (motif occurrence priors and background emissions will thus not be learned from these).\n"
+     "Note: shuffled sequences are implicitly tagged 'control'.\n"
+     "\n"
      // TODO note usage of the 'control' motif name
      )
     ("motif,m", po::value(&options.motif_specifications),
@@ -243,7 +247,7 @@ int main(int argc, const char **argv) {
      "\n"
      "[NAME:[INSERT:]]MOTIFSPEC\n"
      "\n"
-     "NAME      \tunique name for the motif\n"
+     "NAME      \tunique name for the motif; may not be 'control'\n"
      "INSERT    \tpositions after which insertions are allowed\n"
      "MOTIFSPEC \tmotif specification; see below\n"
      "\n"

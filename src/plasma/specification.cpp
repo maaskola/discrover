@@ -20,21 +20,32 @@
 using namespace std;
 
 namespace Specification {
+namespace Exception {
+MotifNamedControl::MotifNamedControl(const std::string &token)
+    : runtime_error(
+          "Error: motifs may not be named 'control'. Offending motif: '" + token
+          + "'.") {}
+ControlWithMotif::ControlWithMotif(const std::string &token)
+    : runtime_error("Error: control sequence set '" + token
+                    + "' has annoated motifs.") {}
+}
 
-Set::Set() : contrast(""), path(""), is_shuffle(false), motifs() {
+Set::Set()
+    : contrast(""), path(""), is_shuffle(false), is_control(false), motifs() {
   if (false)
     cout << "Specification::Set standard constructor" << endl;
-};
+}
 
 Set::Set(const Set &spec)
     : contrast(spec.contrast),
       path(spec.path),
       is_shuffle(spec.is_shuffle),
+      is_control(spec.is_control),
       motifs(spec.motifs) {
   if (false)
     cout << "Specification::Set copy constructor: '" << spec.path << "'"
          << endl;
-};
+}
 
 Set::Set(const string &token, bool is_shuffle_) : Set() {
   if (false)
@@ -48,8 +59,12 @@ Set::Set(const string &token, bool is_shuffle_) : Set() {
   if ((pos = token.find(":")) != string::npos) {
     string motif_token = token.substr(0, pos);
     string rest = token.substr(pos + 1);
-    for (auto &motif : tokenize(motif_token, ","))
-      motifs.insert(motif);
+    for (auto &motif : tokenize(motif_token, ",")) {
+      if (motif == "control")
+        is_control = true;
+      else
+        motifs.insert(motif);
+    }
     if ((pos = rest.find(":")) != string::npos) {
       contrast = rest.substr(0, pos);
       path = rest.substr(pos + 1);
@@ -57,6 +72,12 @@ Set::Set(const string &token, bool is_shuffle_) : Set() {
       path = rest;
   } else
     path = token;
+
+  if (is_shuffle)
+    is_control = true;
+
+  if(is_control and not motifs.empty())
+    throw Exception::ControlWithMotif(token);
 
   if (not boost::filesystem::exists(path))
     throw ::Exception::File::Existence(path);
@@ -84,7 +105,7 @@ Motif::Motif(const Motif &s)
       name(s.name),
       insertions(s.insertions),
       lengths(s.lengths),
-      multiplicity(s.multiplicity){}
+      multiplicity(s.multiplicity) {}
 
 Motif::Motif(const string &s)
     : kind(Motif::Kind::Seed),
@@ -121,6 +142,10 @@ Motif::Motif(const string &s)
       lengths = parse_list(specification);
     }
   }
+
+  if (name == "control")
+    throw Exception::MotifNamedControl(s);
+
   if (false) {
     cout << "kind = '" << static_cast<int>(kind) << "' name = '" << name
          << "' spec = '" << specification << "' ins =";

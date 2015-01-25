@@ -468,17 +468,21 @@ The meaning of \Q{names}, \Q{contrast}, and \Q{path} are as follows:
 
 \begin{description}
  \Item{\Q{names}}
-  comma-separated list of names of motifs enriched in this file
+   comma-separated list of names of motifs enriched in this file, or \Q{control}
  \Item{\Q{contrast}}
-  name of a contrast this file belongs to
+   name of a contrast this file belongs to
  \Item{\Q{path}}
-  path of FASTA file with sequences
+   path of FASTA file with sequences
 \end{description}
 
 All FASTA files for which no \Q{contrast} is given are associated with a common, automatically named contrast.
 
 Using contrasts, FASTA files can be grouped into contrasts on which score specifications can act.
 If \Q{path} contains at least one colon, please prepend colons to disambiguate.
+
+FASTA files tagged \Q{control} are treated slightly differently:
+they are excluded from the set of sequences on which parameter re-estimation is performed (motif occurrence priors and background emissions will thus not be learned from these).
+Note: shuffled sequences are implicitly tagged \Q{control}.
 
 \subsubsection{Motif specification}
 \label{section:motif-specification}
@@ -494,7 +498,7 @@ The meaning of \Q{name}, \Q{insert}, and \Q{motifdef} are as follows:
 
 \begin{description}
   \Item{\Q{name}}
-    unique name for the motif
+    unique name for the motif; may not be \Q{control}
   \Item{\Q{insert}}
     comma-separated list of positions after which to add an insertion state; positions are 1-indexed; $1 \leq \text{position} < \text{motif length}$ must hold for each position
   \Item{\Q{motifdef}}

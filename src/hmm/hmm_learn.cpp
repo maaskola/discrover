@@ -223,7 +223,7 @@ double HMM::BaumWelchIteration(matrix_t &T, matrix_t &E,
   double log_likel = 0;
   for (auto &contrast : collection)
     for (auto &dataset : contrast)
-      if (dataset.motifs.find("control") == dataset.motifs.end())
+      if (not dataset.is_control)
         log_likel += BaumWelchIteration(T, E, dataset, targets, options);
   if (verbosity >= Verbosity::debug)
     cout << "Done BaumWelchIteration(Collection) log_likel = " << log_likel

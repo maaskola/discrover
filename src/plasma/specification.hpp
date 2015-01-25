@@ -32,6 +32,7 @@
 
 #include <string>
 #include <vector>
+#include <stdexcept>
 #include <set>
 
 namespace Measures {
@@ -42,6 +43,14 @@ bool is_two_by_two(X measure);
 };
 
 namespace Specification {
+namespace Exception {
+struct MotifNamedControl : public std::runtime_error {
+MotifNamedControl(const std::string &token);
+};
+struct ControlWithMotif : public std::runtime_error {
+ControlWithMotif(const std::string &token);
+};
+}
 /** the format is [MIDs[:CONTRAST:]]PATH
  * where
  * MIDs a set of motif ID (optional)
@@ -53,6 +62,7 @@ struct Set {
   std::string contrast;
   std::string path;
   bool is_shuffle;
+  bool is_control;
   std::set<std::string> motifs;
   Set(const std::string &s, bool shuffled = false);
   Set(const Set &spec);

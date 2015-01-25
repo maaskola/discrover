@@ -71,7 +71,7 @@ The square brackets indicate that \fInames\fR and \fIcontrast\fR are optional.
 The meaning of \fInames\fR, \fIcontrast\fR, and \fIpath\fR are as follows:
 .TP
 .IR names
-comma\-separated list of names of motifs enriched in this file
+comma\-separated list of names of motifs enriched in this file, or 'control'
 .TP
 .IR contrast
 name of a contrast this file belongs to
@@ -100,7 +100,7 @@ The square brackets indicate that \fIname\fR is optional.
 The meaning of \fIname\fR and \fImotifdef\fR are as follows:
 .TP
 .I name
-unique name for the motif
+unique name for the motif; may not be 'control'
 .TP
 .I motifdef
 motif definition; see below

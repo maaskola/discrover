@@ -73,7 +73,7 @@ The square brackets indicate that \fInames\fR and \fIcontrast\fR are optional.
 The meaning of \fInames\fR, \fIcontrast\fR, and \fIpath\fR are as follows:
 .TP
 .IR names
-comma\-separated list of names of motifs enriched in this file
+comma\-separated list of names of motifs enriched in this file, or 'control'
 .TP
 .IR contrast
 name of a contrast this file belongs to
@@ -87,6 +87,10 @@ Using \fIcontrast\fRs, FASTA files can be grouped into contrasts on which
 .B score specifications
 can act.
 If \fIpath\fR contains at least one colon, please prepend colons to disambiguate.
+.PP
+FASTA files tagged 'control' are treated slightly differently:
+they are excluded from the set of sequences on which parameter re-estimation is performed (motif occurrence priors and background emissions will thus not be learned from these).
+Note: shuffled sequences are implicitly tagged 'control'.
 .\"
 .\"
 .\"
@@ -102,7 +106,7 @@ The square brackets indicate that \fIname\fR and \fIinsert\fR are optional.
 The meaning of \fIname\fR, \fIinsert\fR, and \fImotifdef\fR are as follows:
 .TP
 .I name
-unique name for the motif
+unique name for the motif; may not be 'control'
 .TP
 .I insert
 comma\-separated list of positions after which to add an insertion state;
