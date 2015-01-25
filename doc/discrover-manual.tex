@@ -33,7 +33,7 @@
 \maketitle
 
 \begin{abstract}
-  This is the documentation for \discrover{} version \version{}.
+  This is the manual of \discrover{} version \version{}.
   Please refer to the publication~\cite{Maaskola2014} for a full description of the method.
 
   The package provides programs for discriminative motif discovery of protein binding sites in nucleic acid sequences.
@@ -485,11 +485,11 @@ Motif specifications consist of up to three colon-separated terms, with the foll
 \fbox{\theverbbox[t]}
 
 The square brackets indicate that \Q{name} and \Q{insert} are optional.
-The meaning of \Q{name}, \Q{indel}, and \Q{motifdef} are as follows:
+The meaning of \Q{name}, \Q{insert}, and \Q{motifdef} are as follows:
 
 \begin{description}
   \Item{\Q{name}}
-    name of the motif
+    unique name for the motif
   \Item{\Q{insert}}
     comma-separated list of positions after which to add an insertion state; positions are 1-indexed; $1 \leq \text{position} < \text{motif length}$ must hold for each position
   \Item{\Q{motifdef}}
@@ -508,7 +508,7 @@ There are three ways in which a \Q{motifdef} can be given:
     A length specification is a comma separated list of length ranges, where a length range is either a single length, or an expression of the form \Q{M-N} to indicate lengths \Q{M} up to \Q{N}.
     A length specification also allows to specify a multiplicity separated by an \Q{x}.
     Thus examples are \Q{8} for just length 8, \Q{5-7} for lengths 5, 6, and 7, \Q{5-8x2} for two motifs of lengths 5 to 8, \Q{5-8,10x3} for three motifs of lengths 5, 6, 7, 8, and 10.
-  \Item{Path to a file with a PWM}
+  \Item{Path to a file with a position weight matrix (PWM)}
     If the path contains at least one colon, please prepend colons to disambiguate.
 \end{description}
 

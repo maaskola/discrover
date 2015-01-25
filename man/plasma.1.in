@@ -100,7 +100,7 @@ The square brackets indicate that \fIname\fR is optional.
 The meaning of \fIname\fR and \fImotifdef\fR are as follows:
 .TP
 .I name
-name of the motif
+unique name for the motif
 .TP
 .I motifdef
 motif definition; see below
@@ -117,9 +117,6 @@ Motifs of the indicated lengths are sought.
 A length specification is a comma separated list of length ranges, where a length range is either a single length, or an expression of the form 'M\-N' to indicate lengths M up to N.
 A length specification also allows to specify a multiplicity separated by an 'x'.
 Thus examples are '8' for just length 8, '5\-7' for lengths 5, 6, and 7, '5\-8x2' for two motifs of lengths 5 to 8, '5\-8,10x3' for three motifs of lengths 5, 6, 7, 8, and 10.
-.TP
-Path to a file with a PWM
-If the path contains at least one colon, please prepend colons to disambiguate.
 .\"
 .\"
 .\"

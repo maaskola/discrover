@@ -72,7 +72,7 @@ boost::program_options::options_description gen_plasma_options_description(
        "\n"
        "[NAME:]MOTIFSPEC\n"
        "\n"
-       "NAME      \tname of the motif\n"
+       "NAME      \tunique name for the motif\n"
        "MOTIFSPEC \tmotif specification; see below\n"
        "\n"
        "NAME is optional. "
@@ -85,9 +85,7 @@ boost::program_options::options_description gen_plasma_options_description(
        "A length specification is a comma separated list of length ranges, "
        "where a length range is either a single length, or an expression of the form 'M-N' to indicate lengths M up to N. "
        "A length specification also allows to specify a multiplicity separated by an 'x'. "
-       "Thus examples are '8' for just length 8, '5-7' for lengths 5, 6, and 7, '5-8x2' for two motifs of lengths 5 to 8, '5-8,10x3' for three motifs of lengths 5, 6, 7, 8, and 10.\n"
-       "3. \tBy specifying the path to a file with a PWM. "
-       "If the path contains at least one colon, please prepend colons to disambiguate.")
+       "Thus examples are '8' for just length 8, '5-7' for lengths 5, 6, and 7, '5-8x2' for two motifs of lengths 5 to 8, '5-8,10x3' for three motifs of lengths 5, 6, 7, 8, and 10.")
        ("score", po::value(&options.objectives)->default_value(Seeding::Objectives(1,default_objective), "mi"),
         "Score definition consisting of up to three colon-separated terms. "
         "May be given multiple times. "

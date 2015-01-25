@@ -242,7 +242,7 @@ int main(int argc, const char **argv) {
      "\n"
      "[NAME:[INSERT:]]MOTIFSPEC\n"
      "\n"
-     "NAME      \tname of the motif\n"
+     "NAME      \tunique name for the motif\n"
      "INSERT    \tpositions after which insertions are allowed\n"
      "MOTIFSPEC \tmotif specification; see below\n"
      "\n"
@@ -260,7 +260,7 @@ int main(int argc, const char **argv) {
      "where a length range is either a single length, or an expression of the form 'M-N' to indicate lengths M up to N. "
      "A length specification also allows to specify a multiplicity separated by an 'x'. "
      "Thus examples are '8' for just length 8, '5-7' for lengths 5, 6, and 7, '5-8x2' for two motifs of lengths 5 to 8, '5-8,10x3' for three motifs of lengths 5, 6, 7, 8, and 10.\n"
-     "3. \tBy specifying the path to a file with a PWM. "
+     "3. \tBy specifying the path to a file with a position weight matrix (PWM). "
      "If the path contains at least one colon, please prepend colons to disambiguate.")
    ;
 

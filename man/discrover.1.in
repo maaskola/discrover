@@ -99,10 +99,10 @@ Motif specifications consist of up to three colon-separated terms, with the foll
 .PP
 The square brackets indicate that \fIname\fR and \fIinsert\fR are optional.
 .PP
-The meaning of \fIname\fR, \fIindel\fR, and \fImotifdef\fR are as follows:
+The meaning of \fIname\fR, \fIinsert\fR, and \fImotifdef\fR are as follows:
 .TP
 .I name
-name of the motif
+unique name for the motif
 .TP
 .I insert
 comma\-separated list of positions after which to add an insertion state;
@@ -124,7 +124,7 @@ A length specification is a comma separated list of length ranges, where a lengt
 A length specification also allows to specify a multiplicity separated by an 'x'.
 Thus examples are '8' for just length 8, '5\-7' for lengths 5, 6, and 7, '5\-8x2' for two motifs of lengths 5 to 8, '5\-8,10x3' for three motifs of lengths 5, 6, 7, 8, and 10.
 .TP
-Path to a file with a PWM
+Path to a file with a position weight matrix (PWM)
 If the path contains at least one colon, please prepend colons to disambiguate.
 .\"
 .\"
