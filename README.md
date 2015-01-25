@@ -55,7 +55,7 @@ The synthetic sequence data used in the [publication](http://nar.oxfordjournals.
 ## Usage
 
 Below is a minimal description on how to use this package.
-Please refer to the UNIX man pages, the [manual](doc/discrover-manual.pdf) and the command line help for more information.
+Please refer to the UNIX man pages, the [manual](doc/discrover-manual.pdf), and the command line help for more information.
 
 The package contains two main programs: ```plasma``` and ```discrover```.
 
