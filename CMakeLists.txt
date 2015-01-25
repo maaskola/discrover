@@ -63,10 +63,12 @@ INCLUDE(CheckCXX11Features)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX11_FLAGS}")
 
 # Check whether the compiler supports position-independent code
-
 CHECK_CXX_COMPILER_FLAG("-fPIC" COMPILER_SUPPORTS_PIC)
-IF(COMPILER_SUPPORTS_PIC)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+# TODO: for checking -fPIE it might be better to use something like
+# CHECK_CXX_LINKER_FLAG; but such a macro does not exist
+CHECK_CXX_COMPILER_FLAG("-fPIE -pie" COMPILER_SUPPORTS_PIE)
+IF(COMPILER_SUPPORTS_PIE)
+  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fPIE -pie")
 ENDIF()
 
 # Check whether the compiler supports link-time optimization
