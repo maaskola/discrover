@@ -85,7 +85,9 @@ boost::program_options::options_description gen_plasma_options_description(
        "A length specification is a comma separated list of length ranges, "
        "where a length range is either a single length, or an expression of the form 'M-N' to indicate lengths M up to N. "
        "A length specification also allows to specify a multiplicity separated by an 'x'. "
-       "Thus examples are '8' for just length 8, '5-7' for lengths 5, 6, and 7, '5-8x2' for two motifs of lengths 5 to 8, '5-8,10x3' for three motifs of lengths 5, 6, 7, 8, and 10.")
+       "Thus examples are '8' for just length 8, '5-7' for lengths 5, 6, and 7, '5-8x2' for two motifs of lengths 5 to 8, '5-8,10x3' for three motifs of lengths 5, 6, 7, 8, and 10."
+       "\n"
+       )
        ("score", po::value(&options.objectives)->default_value(Seeding::Objectives(1,default_objective), "mi"),
         "Score definition consisting of up to three colon-separated terms. "
         "May be given multiple times. "
@@ -119,7 +121,8 @@ boost::program_options::options_description gen_plasma_options_description(
         // "gtest_logp_raw \tlog-P value of G-test for association, not corrected for multiple testing\n"
         "\n"
         "Note: contrasts for score specifications that use discriminative significance measures have to comprise at least two FASTA file specifications, otherwise these contrasts will be extended into binary contrasts by generating sequence shuffles to be used as control sequences."
-        "\n")
+        "\n"
+        )
       ("revcomp,r", po::bool_switch(&options.revcomp), "Respect motif occurrences on the reverse complementary strand. Useful for DNA sequence motif analysis. Default is to consider only occurrence on the forward strand.")
       ("nseq", po::value(&options.n_seq)->default_value(0), "Use only the first N sequences of each file. Use 0 to indicate all sequences.")
       ;
