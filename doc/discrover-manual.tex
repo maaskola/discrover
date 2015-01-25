@@ -172,11 +172,11 @@ discrover signal.fa control.fa -m tgtanatw
 
 
 \subsection{Finding multiple motifs}
-For some applications it is interesting to discover multiple motifs in a datasets.
+For some applications it is interesting to discover multiple motifs in a dataset.
 This may reveal motifs of co-factors of the assayed factor.
-This is for example of relevance in analyzing ChIP-Seq data, where a given IP'ed transcription factor often acts in conjunction with other factors, whose binding sites are often found nearby, and thus are also frequently enriched in ChIP-Seq sequences.
+This is for example of relevance in analyzing ChIP-Seq data, where a given IP'ed transcription factor often acts in conjunction with other factors, whose binding sites are typically found nearby, and thus are also frequently enriched in ChIP-Seq sequences.
 
-Discrover has two ways of dealing with multiple motifs, depending on whether or not the switch \verb|--multiple| is used, as described next.
+\discrover{} has two ways of dealing with multiple motifs, depending on whether or not the switch \verb|--multiple| is used, as described next.
 In both modes, multiple seeds are first determined by giving a length range of interest as well as by looking for possibly multiple seeds of each length.
 The general syntax for such a motif specification is:\\
 \begin{verbbox}
@@ -224,7 +224,7 @@ discrover-logo -m matrix.txt
 \end{verbbox}
 \fbox{\theverbbox[t]}
 
-There is a Ruby script \verb|tikzlogo| that generates a \LaTeX{} document which uses \TikZ{} code to draw a sequence motif, and subsequently compiles the generated \LaTeX{} file into a PDF document.
+The \discrover{} package also includes a Ruby script \verb|tikzlogo| that generates a \LaTeX{} document which uses \TikZ{} code to draw a sequence motif, and subsequently compiles the generated \LaTeX{} file into a PDF document.
 Finally, the PDF document is converted into a PNG image with the help of \verb|convert| from the ImageMagick package.\\
 \begin{verbbox}
 tikzlogo motif.hmm
@@ -273,7 +273,7 @@ The recipes use advanced syntax to specify motifs, scores, and sequences in cont
 The syntax is explained in detail in section~\ref{section:specification}.
 
 \subsection{Analysing RNA-binding proteins}
-First, let us find a motif that is differential between a simple analysis of set of PAR-CLIP signal sequences \verb|rbm10.signal.fa| and a set of matching control sequences \verb|rbm10.control.fa|.
+First, let us perform a simple analysis and find a motif that is differential between a set of PAR-CLIP signal sequences \verb|rbm10.signal.fa| and a set of matching control sequences \verb|rbm10.control.fa|.
 \\
 \begin{verbbox}
 discrover \
@@ -299,7 +299,7 @@ control:Exp2:rbm10-experiment2.control.fa \
 
 
 \subsection{Analysing ChIP-Seq data}
-The first ChIP-Seq recipe finds multiple motifs in a pair sequence sets, a set of Nanog ChIP-Seq signal sequences \verb|nanog-chen.signal.fa| and a set of matching control sequences \verb|nanog-chen.control.fa|.
+The first ChIP-Seq recipe finds multiple motifs in a pair of sequence sets, a set of Nanog ChIP-Seq signal sequences \verb|nanog-chen.signal.fa| and a set of matching control sequences \verb|nanog-chen.control.fa|.
 It uses the best three seeds for each length between 5 and 16 nucleotides.
 We also consider one-nucleotide-shifted variants of each seed.
 Thus, in total $11\times3\times3=108$ HMMs will be initialized and individually trained, before the \verb|--multiple| mode begins to build HMMs consisting of multiple motifs.
@@ -330,7 +330,7 @@ control:Nanog-Marson:nanog-marson.control.fa \
 Aside from repeat experiments, we can also search for motifs that are differential in one contrast (or in multiple contrasts if data of repeat experiments are available) but that are not differential in other contrasts.
 The following recipe demonstrates this.
 
-In addition to the two contrasts defined in the preceding recipes, it defines two further contrasts of sets of sequences coming from ChIP-Seq experiments for another protein.
+In addition to the two contrasts defined in the preceding recipe, it defines two further contrasts of sets of sequences coming from ChIP-Seq experiments for another protein.
 Notice how the argument for the \verb|--score| command line switch defines the prior two contrasts to act positively, while the latter two contrasts are taken to act negatively.
 \\
 \begin{verbbox}
@@ -388,14 +388,20 @@ The following algorithms are provided:
     DREME \cite{Bailey2011}, which is part of the MEME motif discovery package, can be used for motif finding if it is installed on the system.
     It can be used by specifying \verb|--algo dreme|.
   \item[Monte-Carlo Markov Chain optimization]
-    \plasma{} finds seeds with Monte-Carlo Markov Chain (MCMC) sampling with the command line switch \verb|--algo mcmc|.
+    \plasma{} finds seeds with Monte-Carlo Markov chain (MCMC) sampling with the command line switch \verb|--algo mcmc|.
     It uses parallel tempering~\cite{Earl2005}, which is also known as replica-exchange, to increase the efficiency of the sampling.
     By default, six parallel chains are used.
 \end{description}
 
-\subsection{Specifying input files, motifs, and scores}
+\subsubsection{Specifying input files, motifs, and scores}
 Please refer to the section~\ref{section:specification} which details the syntax to specify input files, motifs, and scores for \discrover{}.
-The syntax for \plasma{} is nearly identical, except that motif specifications (section~\ref{section:motif-specification}) do not take \Q{insert} terms for \plasma{}.
+The syntax for \plasma{} is nearly identical, except for two small differences in the syntax of motif specifications (section~\ref{section:motif-specification}):
+\begin{itemize}
+  \item
+    \plasma{} does not take \Q{insert} terms, and
+  \item
+    PWMs can not be used as motif specifications.
+\end{itemize}
 
 
 \subsection{Binding site HMM optimization with \discrover{}}
@@ -420,9 +426,9 @@ If additionally the switch \verb|-v| or its long variant \verb|--verbose| is giv
 
 \subsubsection{Hybrid learning and alternative learning modes}
 \label{section:hybrid-learning}
-By default, \discrover{} the hybrid learning mode that is described in the paper.
+By default, \discrover{} uses the hybrid learning mode that is described in the paper.
 Here, we refer to the emission parameters of the motif states as signal parameters.
-All other parameters, including the transition parameters and the emission parameters of the background states, are referred to as context parameters.
+All other parameters, including the transition parameters and the emission parameters of the background state, are referred to as context parameters.
 In short, hybrid learning optimizes the emission parameters of the motifs so as to increase the chosen objective function, while the context parameters are optimized for the likelihood.
 
 Aside from the hybrid learning mode, \discrover{} offers two other modes, determined by the \verb|--bglearn| command line switch.
@@ -438,9 +444,9 @@ This is done with the command line switch \verb|--sampling|.
 Like the MCMC optimization mode of \plasma{} (see section~\ref{section:plasma-MCMC}), also that of \discrover{} uses parallel tempering.
 
 The MCMC learning mode of \discrover{} does not support multiple objective learning as in the hybrid learning mode.
-For this reason, MCMC learning in \discrover{} optimizes all parameters, including the context parameters\footnote{Transition parameters and the emission parameters of the background states, see section~\ref{section:hybrid-learning}.}, for the chosen objective function.
+For this reason, MCMC learning in \discrover{} optimizes all parameters, including the context parameters\footnote{Transition parameters and the emission parameters of the background state, see section~\ref{section:hybrid-learning}.}, for the chosen objective function.
 
-There are several options available to determine the way \discrover{} performs MCMC
+There are several options available to determine the way \discrover{} performs MCMC\@.
 For these, please refer to the \emph{MCMC optimization options} section of the extended command line help, available via \verb|discrover --help --verbose|.
 
 \subsection{Specifying input files, motifs, and scores}
@@ -472,7 +478,7 @@ The meaning of \Q{names}, \Q{contrast}, and \Q{path} are as follows:
 All FASTA files for which no \Q{contrast} is given are associated with a common, automatically named contrast.
 
 Using contrasts, FASTA files can be grouped into contrasts on which score specifications can act.
-If \Q{path} contains at least one colon, please prepend with colons to disambiguate.
+If \Q{path} contains at least one colon, please prepend colons to disambiguate.
 
 \subsubsection{Motif specification}
 \label{section:motif-specification}
@@ -532,7 +538,7 @@ The meaning of \Q{motif}, \Q{contrasts}, and \Q{measure} are as follows:
     significance measure to use
 \end{description}
 
-If \Q{name} is not given given, all motifs are optimized with this score specification.
+If \Q{name} is not given given, all motifs (that are not named in any other score specification) are optimized with this score specification.
 It is an error when more than one score specification is given for any motif.
 
 The contrast specification \Q{contrasts} is a set of contrast names prefixed by \Q{+} or \Q{-} to indicate whether the score on the contrast is to count positively or negatively.
@@ -568,7 +574,7 @@ The output files produced by \discrover{} comprise:
 \begin{description}
   \Item{\Q{.hmm}}
     Parameter of the trained HMM\@.
-    May be loaded later with --learn.
+    May be loaded later with \Q{--learn}.
   \Item{\Q{.summary}}
     Summary information with number of occurrences of the motifs in each sample, and various generative and discriminative statistics.
   \Item{\Q{.viterbi}}

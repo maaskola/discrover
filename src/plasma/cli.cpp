@@ -102,7 +102,7 @@ boost::program_options::options_description gen_plasma_options_description(
         "\n"
         "MOTIF and CONTRASTS are optional.\n"
         "\n"
-        "If no motif name is given, all motifs are optimized with this score specification. "
+        "If no motif name is given, all motifs (that are not named in any other score specification) are optimized with this score specification. "
         "It is an error when more than one score specification is given for any motif.\n"
         "\n"
         "The contrast specification is a set of contrast names prefixed by '+' or '-' to indicate whether the score on the contrast is to count positively or negatively. "
