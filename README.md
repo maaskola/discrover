@@ -29,6 +29,8 @@ Nucleic Acid Research, 42(21):12995-13011, Dec 2014. doi:10.1093/nar/gku1083
 
 ## Documentation
 
+The package includes UNIX man pages for the programs.
+
 The sub-directory doc contains a manual for this package, written in LaTeX.
 A [PDF version](doc/discrover-manual.pdf) of the manual will be generated during the build process of this package.
 
@@ -53,7 +55,7 @@ The synthetic sequence data used in the [publication](http://nar.oxfordjournals.
 ## Usage
 
 Below is a minimal description on how to use this package.
-Please refer to the [manual](doc/discrover-manual.pdf) and the command line help for more information.
+Please refer to the UNIX man pages, the [manual](doc/discrover-manual.pdf) and the command line help for more information.
 
 The package contains two main programs: ```plasma``` and ```discrover```.
 
