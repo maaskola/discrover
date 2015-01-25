@@ -83,12 +83,12 @@ struct MultpleObjectivesWithoutNamedMotifs : public std::runtime_error {
  * sets, and objectives.
  * Contrasts:
  *   - find all contrast names occurring in data set specifications
- *   - give names to unnamed contrasts, making sure not to overwrite given ones
+ *   - create name for the unnamed contrast, ensuring not to overwrite given ones
  *   - find all contrast names occurring in objective specifications
  *   - find all contrast names given in either data or objective specification
  *   - add all contrasts to those objectives that don't have any contrast
  *     annotated
- *   - check that the contrasts for the 2x2 measures are binary and that all
+ *   - check that the contrasts for the 2x2 measures are binary and those for
  *     discriminative ones are at least binary
  * Motifs:
  *   - get all motif names and check that none are duplicated
@@ -98,7 +98,10 @@ struct MultpleObjectivesWithoutNamedMotifs : public std::runtime_error {
  *     * if more than one such objectives exists, it is an error
  *     * if one such objective exists, then use it for all motifs for which no
  *       objective is given
- *   - more that needs to be documented
+ *   - check that no more than one objective exists for each motif, and that
+ *     each objective refers to an existing motif
+ *     i.e. check that the relation between objective and motifs is one-to-one
+ *   - check at the end that no unnamed motifs are referenced in the objectives
  */
 template <typename measure_t>
 void harmonize(Motifs &motifs, Sets &sets,
@@ -110,20 +113,25 @@ void harmonize(Motifs &motifs, Sets &sets,
 
   // find all contrast names occurring in data set specifications
   set<string> contrast_names_in_data;
+  bool found_unnamed_contrast_in_data;
   for (auto &spec : sets)
     if (spec.contrast != "")
       contrast_names_in_data.insert(spec.contrast);
+    else
+      found_unnamed_contrast_in_data = true;
 
-  // give a name to unnamed contrasts, making sure not to overwrite given ones
-  size_t contrast_idx = 0;
-  string unnamed_name = "contrast" + std::to_string(contrast_idx++);
-  while (contrast_names_in_data.find(unnamed_name)
-         != end(contrast_names_in_data))
-    unnamed_name = "contrast" + std::to_string(contrast_idx++);
-  contrast_names_in_data.insert(unnamed_name);
-  for (auto &spec : sets)
-    if (spec.contrast == "")
-      spec.contrast = unnamed_name;
+  // create name for the unnamed contrast, ensuring not to overwrite given ones
+  if (found_unnamed_contrast_in_data) {
+    size_t contrast_idx = 0;
+    string unnamed_name = "contrast" + std::to_string(contrast_idx++);
+    while (contrast_names_in_data.find(unnamed_name)
+           != end(contrast_names_in_data))
+      unnamed_name = "contrast" + std::to_string(contrast_idx++);
+    contrast_names_in_data.insert(unnamed_name);
+    for (auto &spec : sets)
+      if (spec.contrast == "")
+        spec.contrast = unnamed_name;
+  }
 
   // find all contrast names occurring in objective specifications
   set<string> contrast_names_in_objectives;
@@ -149,15 +157,15 @@ void harmonize(Motifs &motifs, Sets &sets,
   for (auto &s : contrast_names_in_objectives)
     all_contrast_names.insert(s);
 
-  // add all contrasts to those objectives that don't have any contrast
-  // annotated
+  // add all contrasts to objectives that don't have any contrast annotated
   for (auto &objective : objectives)
     if (objective.contrast_expression.empty())
       for (auto &s : all_contrast_names)
         objective.contrast_expression.push_back({+1, s});
 
-  // check that the contrasts for the 2x2 measures are binary and that all
-  // discriminative ones are at least binary
+  // check:
+  //   * contrasts for the 2x2 measures are binary
+  //   * contrasts for discriminative measures are at least binary
   for (auto &objective : objectives)
     for (auto &atom : objective) {
       size_t contrast_size = 0;
@@ -259,22 +267,6 @@ void harmonize(Motifs &motifs, Sets &sets,
       throw Exception::Objective::MultpleObjectivesWithoutNamedMotifs();
   }
 
-  /*
-  // -m mi is given then mi should be used for all motifs;
-  // If only -m mi is given then mi should be used for all motifs;
-  // i.e. objectives need to be constructed for each motif.
-  // Otherwise, if there is -m "":mi and any other -m XYZ:mi statement, then
-  // it is an error.
-  if (objectives.size() == 1 and objectives[0].motif_name == "") {
-    auto original_objective = *begin(objectives);
-    objectives.clear();
-    for (auto &name : motif_names_in_motifs) {
-      Objective<measure_t> objective(original_objective);
-      objective.motif_name = name;
-      objectives.push_back(objective);
-    }
-  } */
-
   // check that no more than one objective exists for each motif, and that each
   // objective refers to an existing motif
   // i.e. check that the relation between objective and motifs is one-to-one
@@ -287,6 +279,8 @@ void harmonize(Motifs &motifs, Sets &sets,
         == end(motif_names_in_motifs))
       throw Exception::Motif::NoSpecfication(objective.motif_name);
   }
+
+  // finally check that no unnamed motifs are referenced in the objectives
   if (motif_names_in_objectives.find("") != end(motif_names_in_objectives)
       and motif_names_in_objectives.size() > 1)
     throw Exception::Motif::WhenOneThenAll();
