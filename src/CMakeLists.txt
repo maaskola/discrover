@@ -1,7 +1,7 @@
 # add definitions, compiler switches, etc.
 ADD_DEFINITIONS(-Wall -funroll-loops -Wno-unused-local-typedefs)
 
-# Allow to #include <discrover_config.hpp>, if doing out-of-source build.
+# Make it possible to #include <discrover_config.hpp> for out-of-source builds
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_SUBDIRECTORY(shuffle)
