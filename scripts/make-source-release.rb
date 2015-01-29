@@ -23,11 +23,20 @@ branch = "master"
   line.strip!
   if line =~ /\* (.*)/
     branch = $1
+    if branch =~ /\(detached from (.*)\)/
+      branch = $1
+    end
   end
 }
 
 version = `git describe`.strip.gsub(/-/,".")
 sha1 = `git rev-parse HEAD`.strip
+
+if $noisy
+  puts "branch = #{branch}"
+  puts "version = #{version}"
+  puts "sha1 = #{sha1}"
+end
 
 rel_path = "discrover-#{version}"
 
