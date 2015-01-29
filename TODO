@@ -57,3 +57,4 @@ TODO 2015-01-18 Unicode symbols (like the less-or-equal) in the CLI output may n
 TODO 2015-01-21 Implement rank information for plasma
 TODO 2015-01-29 Clean up copyright information
 TODO 2015-01-29 Revisit multi-character encoding for plasma
+TODO 2015-01-29 Move package script to discrover-packages
