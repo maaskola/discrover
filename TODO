@@ -55,3 +55,5 @@ TODO 2015-01-11 DREME exception non-zero: print return value
 TODO 2015-01-16 Re-enable specifying the number of threads with the environment variable OMP_NUM_THREADS?
 TODO 2015-01-18 Unicode symbols (like the less-or-equal) in the CLI output may not render correctly in the LaTeX manual
 TODO 2015-01-21 Implement rank information for plasma
+TODO 2015-01-29 Clean up copyright information
+TODO 2015-01-29 Revisit multi-character encoding for plasma
