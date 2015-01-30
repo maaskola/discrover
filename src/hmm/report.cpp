@@ -60,6 +60,7 @@ string contrast_name_tag(const Data::Contrast &contrast) {
 
 void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast,
                  size_t width, size_t prec) {
+  const ios::fmtflags flags(ofs.flags());
   size_t w = 0;
   for (size_t i = 0; i < m.size1(); i++)
     w = max(w, contrast.sets[i].name().size());
@@ -70,7 +71,6 @@ void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast,
     ofs << right << setw(width) << "Percent";
   ofs << endl;
 
-  const streamsize prev_prec = ofs.precision();
   for (size_t i = 0; i < m.size1(); i++) {
     ofs << left << setw(w) << contrast.sets[i].name();
     for (size_t j = 0; j < m.size2(); j++)
@@ -80,8 +80,7 @@ void print_table(ostream &ofs, const matrix_t m, const Data::Contrast &contrast,
           << (m(i, 0) / (m(i, 0) + m(i, 1)) * 100);
     ofs << left << endl;
   }
-  ofs.unsetf(ios_base::fixed);
-  ofs.precision(prev_prec);
+  ofs.flags(flags);
 }
 
 template <typename X>
@@ -257,6 +256,7 @@ const boost::math::normal_distribution<double> standard_normal_distribution;
 template <class T>
 void correlation_report(const vector<T> &x, ostream &out, size_t width = 12,
                         size_t prec = 5) {
+  const ios::fmtflags flags(out.flags());
   double rho = cor_rank(x);
   size_t n = x.size();
   double z = cor_fisher_z(rho, n);
@@ -273,15 +273,13 @@ void correlation_report(const vector<T> &x, ostream &out, size_t width = 12,
       p_t = cdf(complement(students_t_dist, t));
     }
   }
-  const streamsize prev_prec = out.precision();
   out << setw(width) << fixed << right << setprecision(prec) << rho
       << setw(width) << fixed << right << setprecision(2) << z << setw(width)
       << fixed << right << setprecision(2) << log(p_norm) << setw(4) << right
       << stars(p_norm) << setw(width) << fixed << right << setprecision(2) << t
       << setw(width) << fixed << right << setprecision(2) << log(p_t) << setw(4)
       << right << stars(p_t) << endl;
-  out.unsetf(ios_base::fixed);
-  out.precision(prev_prec);
+  out.flags(flags);
 }
 
 void Evaluator::print_posterior(ostream &os, const vector_t &scale,
