@@ -113,7 +113,7 @@ void harmonize(Motifs &motifs, Sets &sets,
 
   // find all contrast names occurring in data set specifications
   set<string> contrast_names_in_data;
-  bool found_unnamed_contrast_in_data;
+  bool found_unnamed_contrast_in_data = false;
   for (auto &spec : sets)
     if (spec.contrast != "")
       contrast_names_in_data.insert(spec.contrast);
