@@ -1,5 +1,5 @@
 ADD_LIBRARY(discrover-hmm OBJECT association.cpp basedefs.cpp
-  analysis.cpp bitmask.cpp
+  analysis.cpp bitmask.cpp cli.cpp
   conditional_mutual_information.cpp
   conditional_decoder.cpp
   hmm.cpp hmm_core.cpp hmm_init.cpp hmm_learn.cpp hmm_linesearch.cpp

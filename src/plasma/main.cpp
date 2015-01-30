@@ -133,15 +133,23 @@ int main(int argc, const char **argv) {
 
   // Declare the supported options.
   po::options_description desc("Basic options", cols);
-  desc.add_options()
-    ("help,h", "produce help message")
-    ("version", "Print out the version. Also show git SHA1 with -v.")
-    ("verbose,v", "Be verbose about the progress.")
-    ("noisy,V", "Be very verbose about the progress.")
-    ;
-  po::options_description ext_options = gen_plasma_options_description(options, cols);
+  try {
+    desc.add_options()
+      ("help,h", "produce help message")
+      ("version", "Print out the version. Also show git SHA1 with -v.")
+      ("verbose,v", "Be verbose about the progress.")
+      ("noisy,V", "Be very verbose about the progress.")
+      ;
 
-  desc.add(ext_options);
+    po::options_description ext_options = gen_plasma_options_description(options, cols);
+    desc.add(ext_options);
+  } catch (...) {
+    cout << "Error while generating command line options." << endl
+         << "Please notify the developers." << endl;
+    return EXIT_FAILURE;
+  }
+
+
 
   po::positional_options_description pos;
   pos.add("fasta", -1);

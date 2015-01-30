@@ -68,18 +68,24 @@ int main(int argc, const char **argv) {
 
   // Declare the supported options.
   po::options_description desc("Options");
-  desc.add_options()
-    ("help,h", "produce help message")
-    ("version", "Print out the version. Also show git SHA1 with -v.")
-    ("fasta,f", po::value(&paths),
-     "Path of a FASTA file. "
-     "May be given multiple times. "
-     "Note: usage of -f / --fasta is optional; all free arguments are taken to be paths of FASTA files."
-    )
-    ("number,n", po::value(&n)->default_value(1), "How many shuffles to generate per sequence.")
-    ("seed,s", po::value(&seed), "Seed to initialize random number generator.")
-    ("verbose,v", "Be verbose about the progress")
-    ;
+  try {
+    desc.add_options()
+      ("help,h", "produce help message")
+      ("version", "Print out the version. Also show git SHA1 with -v.")
+      ("fasta,f", po::value(&paths),
+       "Path of a FASTA file. "
+       "May be given multiple times. "
+       "Note: usage of -f / --fasta is optional; all free arguments are taken to be paths of FASTA files."
+      )
+      ("number,n", po::value(&n)->default_value(1), "How many shuffles to generate per sequence.")
+      ("seed,s", po::value(&seed), "Seed to initialize random number generator.")
+      ("verbose,v", "Be verbose about the progress")
+      ;
+  } catch (...) {
+    cout << "Error while generating command line options." << endl
+         << "Please notify the developers." << endl;
+    return EXIT_FAILURE;
+  }
  
   po::positional_options_description pos;
   pos.add("fasta", -1);
