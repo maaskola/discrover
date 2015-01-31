@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/maaskola/discrover.svg?branch=master)](https://travis-ci.org/maaskola/discrover)
 
 # Discrover
-### Discover discriminative sequence motifs with hidden Markov models
+### Discover discriminative sequence motifs
 
 Copyright 2011, Jonas Maaskola.
 This is free software under the GPL version 3, or later.
