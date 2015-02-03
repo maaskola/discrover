@@ -113,7 +113,6 @@ struct HMM {
   double contingency_pseudo_count, emission_pseudo_count,
       transition_pseudo_count;
   size_t n_simulations;
-  bool long_names;
   bool class_model;
   bool revcomp;
   bool weighting;

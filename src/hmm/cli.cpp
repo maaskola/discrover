@@ -269,7 +269,6 @@ void gen_discrover_cli(size_t cols, string &config_path, Options::HMM &options,
     ("absthresh", po::bool_switch(&options.termination.absolute_improvement), "Whether improvement should be gauged by absolute value. Default is relative to the current score.")
     ("intermediate", po::bool_switch(&options.store_intermediate), "Write out intermediate parameters during training.")
     ("limitlogp", po::bool_switch(&options.limit_logp), "Do not report corrected log-P values greater 0 but report 0 in this case.")
-    ("longnames", po::bool_switch(&options.long_names), "Form longer output file names that contain some information about the parameters.")
     ;
 
   advanced_options

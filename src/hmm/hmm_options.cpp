@@ -176,7 +176,6 @@ ostream &operator<<(ostream &os, const HMM &options) {
      << endl << "emission_pseudo_count = " << options.emission_pseudo_count
      << endl << "transition_pseudo_count = " << options.transition_pseudo_count
      << endl << "n_simulations = " << options.n_simulations << endl
-     << "long_names = " << options.long_names << endl
      << "class_model = " << options.class_model << endl
      << "revcomp = " << options.revcomp << endl
      << "weighting = " << options.weighting << endl

@@ -117,7 +117,7 @@ void check_data(const Data::Collection &collection,
            << " sequences with a total size of " << contrast.seq_size
            << " nucleotides." << endl;
       for (auto &dataset : contrast) {
-        cout << dataset.path << " has " << dataset.set_size
+        cout << dataset.name() << " has " << dataset.set_size
              << " sequences with a total size of " << dataset.seq_size
              << " nucleotides." << endl;
         if (options.verbosity >= Verbosity::verbose) {
@@ -495,8 +495,7 @@ HMM doit(const Data::Collection &all_data,
                           options.right_padding);
 
           Options::HMM options_(options);
-          if (options_.long_names)
-            options_.label += "." + variant;
+          options_.label += "." + variant;
           auto result = train_evaluate(model, all_data, training_data,
                                        test_data, options_, training_necessary);
           results.push_back(result);
@@ -654,8 +653,7 @@ HMM doit(const Data::Collection &all_data,
                    << best_log_pvalue << endl;
 
             Options::HMM options_(options);
-            if (options.long_names)
-              options.label += "." + best_seed;
+            options.label += "." + best_seed;
 
             auto result
                 = train_evaluate(hmm, all_data, training_data, test_data,

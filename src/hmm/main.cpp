@@ -464,19 +464,6 @@ int main(int argc, const char **argv) {
     return EXIT_FAILURE;
   }
 
-  if (not options.long_names) {
-    if (not options.seeding.only_best) {
-      cout << "Warning: you did not specify --best seed selection, but did not "
-              "specify --longnames." << endl << "Adding option --longnames."
-           << endl;
-      options.long_names = true;
-    } else if (options.wiggle > 0) {
-      cout << "Warning: you specified wiggle variants, but did not specify "
-              "--longnames." << endl << "Adding option --longnames." << endl;
-      options.long_names = true;
-    }
-  }
-
   // Ensure that the residual MI ratio cutoff is non-negative
   if (options.multi_motif.residual_ratio < 0) {
     cout << "Warning: negative value provided for residual mutual information "

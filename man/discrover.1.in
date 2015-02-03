@@ -494,9 +494,6 @@ Write out intermediate parameters during training.
 .TP
 .B \-\-limitlogp
 Do not report corrected log\-P values greater 0 but report 0 in this case.
-.TP
-.B \-\-longnames
-Form longer output file names that contain some information about the parameters.
 .SS "Line searching options:"
 .TP
 .B \-\-LSmu \fIfloat\fR (=0.1)
