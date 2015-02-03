@@ -32,7 +32,7 @@ struct Registration {
     double get_motif_prior(bitmask_t present) const;
   };
 
-  Registration(Verbosity verbosity = Verbosity::verbose);
+  Registration(Verbosity verbosity = Verbosity::info);
 
   Verbosity verbosity;
 
