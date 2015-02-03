@@ -414,8 +414,6 @@ HMM doit(const Data::Collection &all_data,
             cerr << " " << m;
           cerr << endl;
         }
-    }
-    if (options.verbosity >= Verbosity::debug) {
       for (auto &contrast : collection)
         for (auto &dataset : contrast) {
           cerr << "Seeding::Contrast " << contrast.name << " set -> motifs:";
