@@ -517,11 +517,23 @@ int main(int argc, const char **argv) {
     double total_time = utime + stime;
     double elapsed_time = timer.tock() * 1e-6;
 
-    cerr << "User time = " << utime << " sec" << endl
-         << "System time = " << stime << " sec" << endl
-         << "CPU time = " << total_time << " sec" << endl
-         << "Elapsed time = " << elapsed_time << " sec" << endl
-         << 100 * total_time / elapsed_time << "\% CPU" << endl;
+    const size_t label_col_width = 15;
+    const size_t value_col_width = 15;
+    cerr << setw(label_col_width) << left << "User time"
+         << setw(value_col_width) << right << utime << " sec"
+         << endl
+         << setw(label_col_width) << left << "System time"
+         << setw(value_col_width) << right << stime << " sec"
+         << endl
+         << setw(label_col_width) << left << "CPU time"
+         << setw(value_col_width) << right << total_time << " sec"
+         << endl
+         << setw(label_col_width) << left << "Elapsed time"
+         << setw(value_col_width) << right << elapsed_time << " sec"
+         << endl
+         << setw(label_col_width) << left << "CPU \%"
+         << setw(value_col_width) << right << 100 * total_time / elapsed_time
+         << endl;
   }
 
   return EXIT_SUCCESS;
