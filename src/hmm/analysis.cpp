@@ -465,8 +465,8 @@ HMM doit(const Data::Collection &all_data,
       for (size_t seed_idx = 0; seed_idx < plasma_results.size(); seed_idx++) {
         string motif = plasma_results[seed_idx].motif;
 
-        cout << "Considering candidate motif " << motif_spec.name << ":"
-             << motif << " and training to determine the HMM score." << endl;
+        cout << endl << "Training HMM for candidate motif " << motif_spec.name
+             << ":" << motif << endl;
 
         plasma_results[seed_idx].score = -numeric_limits<double>::infinity();
 
@@ -475,9 +475,9 @@ HMM doit(const Data::Collection &all_data,
                                                      options.verbosity)) {
           HMM model(hmm);
           if (options.verbosity >= Verbosity::info and options.wiggle > 0)
-            cout << "Considering wiggle variant " << variant
+            cout << "Training HMM for Wiggle variant " << variant
                  << " of candidate motif " << motif_spec.name << ":" << motif
-                 << " and training to determine the HMM score." << endl;
+                 << endl;
 
           if (options.extend > 0) {
             if (options.verbosity >= Verbosity::info)
