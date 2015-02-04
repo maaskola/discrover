@@ -12,6 +12,7 @@
 #include "report.hpp"
 #include "conditional_decoder.hpp"
 #include "../timer.hpp"
+#include "../format_constants.hpp"
 #include "../plasma/plasma.hpp"
 
 #if LIBR_FOUND
@@ -427,24 +428,24 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
   }
 
   if (not options.evaluate.skip_summary) {
-    const size_t label_col_width = 17;
-    out << setw(label_col_width) << left << "Rank analysis";
+    const size_t col_width = 17;
+    out << setw(col_width) << left << "Rank analysis";
     out << setw(width) << right << "Rho" << setw(width) << right << "Z"
         << setw(width) << right << "log P(Z)" << setw(4) << right << ""
         << setw(width) << right << "t" << setw(width) << right << "log P(t)"
         << setw(4) << right << "" << endl;
     // TODO: write out the motif name
     for (size_t group_idx = 0; group_idx < number_motifs; group_idx++) {
-      out << setw(label_col_width) << left << "Expected sites";
+      out << setw(col_width) << left << "Expected sites";
       correlation_report(atl_counts[group_idx], out, width, prec);
-      out << setw(label_col_width) << left << "Expected motifs";
+      out << setw(col_width) << left << "Expected motifs";
       correlation_report(exp_counts[group_idx], out, width, prec);
       vector<size_t> vit(n);
       for (size_t i = 0; i < n; i++)
         vit[i] = vit_counts[group_idx][i] > 0;
-      out << setw(label_col_width) << left << "Viterbi sites";
+      out << setw(col_width) << left << "Viterbi sites";
       correlation_report(vit, out, width, prec);
-      out << setw(label_col_width) << left << "Viterbi motifs";
+      out << setw(col_width) << left << "Viterbi motifs";
       correlation_report(vit_counts[group_idx], out, width, prec);
     }
   }
@@ -554,13 +555,17 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
 
   if (collection.set_size != 0) {
     if (options.verbosity >= Verbosity::info) {
-      cout << "Performance summary in " << result.files.summary << endl;
+      cout << left << setw(report_col_width) << "Performance summary"
+        << result.files.summary << endl;
       if (not options.evaluate.skip_viterbi_path)
-        cout << "Viterbi path in " << result.files.viterbi << endl;
+        cout << left << setw(report_col_width) << "Viterbi path"
+          << result.files.viterbi << endl;
       if (not options.evaluate.skip_bed)
-        cout << "Motif occurrence BED in " << result.files.bed << endl;
+        cout << left << setw(report_col_width) << "Motif occurrences (BED)"
+          << result.files.bed << endl;
       if (not options.evaluate.skip_occurrence_table)
-        cout << "Motif occurrence table in " << result.files.table << endl;
+        cout << left << setw(report_col_width) << "Motif occurrences (table)"
+          << result.files.table << endl;
     }
 
     if (not options.evaluate.skip_viterbi_path)

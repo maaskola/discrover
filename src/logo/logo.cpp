@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <cmath>
 #include <vector>
 #include <algorithm>
@@ -6,6 +7,7 @@
 #include <cairo-pdf.h>
 #include "logo.hpp"
 #include "../aux.hpp"
+#include "../format_constants.hpp"
 
 using namespace std;
 
@@ -335,7 +337,9 @@ string ending(output_t kind) {
 string draw_logo_sub(const matrix_t &matrix, const string &path, output_t kind,
                      const Options &options) {
   string out_path = path + "." + ending(kind);
-  cout << "Sequence logo in " << out_path << endl;
+  cout << left << setw(report_col_width)
+       << (string_toupper(ending(kind)) + " sequence logo") << right << out_path
+       << endl;
 
   dimensions_t dims(options.scale);
   double width = dims.node_width * matrix.size();

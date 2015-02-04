@@ -28,9 +28,11 @@
  */
 
 #include <fstream>
+#include <iomanip>
 #include "../timer.hpp"
 #include "../aux.hpp"
 #include "hmm.hpp"
+#include "../format_constants.hpp"
 
 using namespace std;
 
@@ -170,8 +172,8 @@ Training::Result HMM::train(const Data::Collection &collection,
       result.parameter_file = options.label + ".hmm";
 
       if (options.verbosity >= Verbosity::info)
-        cout << endl << "Parameters stored in " << result.parameter_file
-             << endl;
+        cout << endl << left << setw(report_col_width) << "HMM parameters"
+             << right << result.parameter_file << endl;
 
       ofstream os(result.parameter_file.c_str());
       serialize(os, options.exec_info);
