@@ -77,8 +77,19 @@ void range_tolower(Iter beg, Iter end) {
   }
 }
 
+/** Convert a range of character given by a pair of iterators to upper case */
+template <typename Iter>
+void range_toupper(Iter beg, Iter end) {
+  for (Iter iter = beg; iter != end; ++iter) {
+    *iter = std::toupper(*iter);
+  }
+}
+
+
 /** Convert a string to lower case */
 std::string string_tolower(const std::string &str);
+/** Convert a string to upper case */
+std::string string_toupper(const std::string &str);
 
 /** Break long lines at whitespace to a maximal line length */
 std::string limit_line_length(const std::string &x, size_t line_length);

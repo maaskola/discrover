@@ -211,6 +211,12 @@ string string_tolower(const string &str) {
   return temp;
 }
 
+string string_toupper(const string &str) {
+  string temp = str;
+  range_toupper(temp.begin(), temp.end());
+  return temp;
+}
+
 string break_line(const string &s, size_t line_length) {
   string x = s;
   string y = "";
