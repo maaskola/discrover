@@ -232,6 +232,22 @@ Results Plasma::find_seeds(size_t length, const Objective &objective,
   return results;
 }
 
+Result new_result(const Collection &collection, const string &motif,
+                  double score, const Objective &objective,
+                  const Options &options) {
+  count_vector_t counts = count_motif(collection, motif, options);
+  double log_p
+      = -compute_score(collection, counts, options, objective, motif.length(),
+                       motif_degeneracy(motif),
+                       Measures::Discrete::Measure::CorrectedLogpGtest);
+  Result result(objective);
+  result.motif = motif;
+  result.score = score;
+  result.log_p = log_p;
+  result.counts = counts;
+  return result;
+}
+
 /** Execute MCMC to find discriminative IUPAC motifs.
  */
 Results Plasma::find_mcmc(size_t length, const Objective &objective,
@@ -260,21 +276,12 @@ Results Plasma::find_mcmc(size_t length, const Objective &objective,
 
   Results results;
 
-  count_vector_t best_contrast = count_motif(collection, best_motif, options);
-  double log_p
-      = -compute_score(collection, best_contrast, options, objective, length,
-                       motif_degeneracy(best_motif),
-                       Measures::Discrete::Measure::CorrectedLogpGtest);
-  Result result(objective);
-  result.motif = best_motif;
-  result.score = best_score;
-  result.log_p = log_p;
-  result.counts = best_contrast;
-  results.push_back(result);
+  results.push_back(
+      new_result(collection, best_motif, best_score, objective, options));
 
   if (options.verbosity >= Verbosity::verbose)
-    std::cout << "MCMC found: " << best_motif << " " << best_score << " "
-              << log_p << endl;
+    std::cout << "MCMC found: " + best_motif + " " + to_string(best_score)
+              << endl;
 
   return results;
 }
@@ -328,20 +335,9 @@ rev_map_t Plasma::determine_initial_candidates(
   }
 
   if (degeneracies.find(degeneracy) != end(degeneracies)
-      and max_score > initial_score) {
-    count_vector_t best_contrast
-        = count_motif(collection, decode(best_motif), options);
-    double log_p
-        = -compute_score(collection, best_contrast, options, objective, length,
-                         degeneracy,
-                         Measures::Discrete::Measure::CorrectedLogpGtest);
-    Result result(objective);
-    result.motif = decode(best_motif);
-    result.score = max_score;
-    result.log_p = log_p;
-    result.counts = best_contrast;
-    results.push_back(result);
-  }
+      and max_score > initial_score)
+    results.push_back(new_result(collection, decode(best_motif), max_score,
+                                 objective, options));
 
   if (options.measure_runtime) {
     cerr << "Initial scoring for length " + to_string(length) + " took "
@@ -505,18 +501,8 @@ Results Plasma::find_plasma(size_t length, const Objective &objective,
 
       if (best_motif_changed
           and degeneracies.find(degeneracy) != end(degeneracies)) {
-        count_vector_t best_contrast
-            = count_motif(collection, decode(best_motif), options);
-        double log_p
-            = -compute_score(collection, best_contrast, options, objective,
-                             length, degeneracy,
-                             Measures::Discrete::Measure::CorrectedLogpGtest);
-        Result result(objective);
-        result.motif = decode(best_motif);
-        result.score = max_score;
-        result.log_p = log_p;
-        result.counts = best_contrast;
-        results.push_back(result);
+        results.push_back(new_result(collection, decode(best_motif), max_score,
+                                     objective, options));
         best_motif_changed = false;
       }
       if (options.measure_runtime) {
@@ -528,18 +514,8 @@ Results Plasma::find_plasma(size_t length, const Objective &objective,
 
     if (best_motif_changed and max_score > initial_score
         and degeneracies.find(degeneracy) == end(degeneracies)) {
-      count_vector_t best_contrast
-          = count_motif(collection, decode(best_motif), options);
-      double log_p
-          = -compute_score(collection, best_contrast, options, objective,
-                           length, degeneracy,
-                           Measures::Discrete::Measure::CorrectedLogpGtest);
-      Result result(objective);
-      result.motif = decode(best_motif);
-      result.score = max_score;
-      result.log_p = log_p;
-      result.counts = best_contrast;
-      results.push_back(result);
+      results.push_back(new_result(collection, decode(best_motif), max_score,
+                                   objective, options));
       best_motif_changed = false;
     }
   }
