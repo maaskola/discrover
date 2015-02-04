@@ -428,6 +428,7 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
   }
 
   if (not options.evaluate.skip_summary) {
+    const ios::fmtflags flags(out.flags());
     const size_t col_width = 17;
     out << setw(col_width) << left << "Rank analysis";
     out << setw(width) << right << "Rho" << setw(width) << right << "Z"
@@ -448,6 +449,7 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
       out << setw(col_width) << left << "Viterbi motifs";
       correlation_report(vit_counts[group_idx], out, width, prec);
     }
+    out.flags(flags);
   }
 
   double time = timer.tock();
@@ -555,6 +557,7 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
 
   if (collection.set_size != 0) {
     if (options.verbosity >= Verbosity::info) {
+      const ios::fmtflags flags(cout.flags());
       cout << left << setw(report_col_width) << "Performance summary"
         << result.files.summary << endl;
       if (not options.evaluate.skip_viterbi_path)
@@ -566,6 +569,7 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
       if (not options.evaluate.skip_occurrence_table)
         cout << left << setw(report_col_width) << "Motif occurrences (table)"
           << result.files.table << endl;
+      cout.flags(flags);
     }
 
     if (not options.evaluate.skip_viterbi_path)
