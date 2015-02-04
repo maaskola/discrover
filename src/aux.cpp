@@ -1,4 +1,4 @@
-#include <cstring>
+#include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include "aux.hpp"
 
@@ -247,14 +247,48 @@ vector<string> tokenize(const string &s, const string &delim) {
   return strs;
 }
 
-/** Use to_string and remove trailing zeros.
- * If the number is integral, then also remove the decimal point.
+string to_pretty_string(double x, int width, int num_digits) {
+  stringstream ss;
+  if (num_digits >= 0) {
+    ss.setf(ios_base::fixed, ios_base::floatfield);
+    ss.precision(num_digits);
+  } else
+    ss.precision(10);
+  if (width >= 0)
+    ss << setw(width);
+  ss << right << x;
+  return ss.str();
+}
+
+/** Format a time duration with a time unit separated by a blank
+ * Expects microseconds as argument
+ * if x > 1e6 µs it will print in seconds
+ * if x > 1e3 µs it will print in milliseconds
+ * if x > 1e3 µs it will print in microseconds
  */
-string to_pretty_string(double x) {
-  string s = to_string(x);
-  s.erase(s.find_last_not_of("0.") + 1, string::npos);
-  if(s == "")
-    return "0";
+string time_to_pretty_string(double x, int width, int num_digits) {
+  double y = x;
+  size_t scale = 1;
+  if (y > 1e6)
+    scale = 1000000;
+  else if (y > 1e3)
+    scale = 1000;
+  y /= scale;
+  string s = to_pretty_string(y, width, num_digits);
+  switch (scale) {
+    case 1:
+      s += " µs";
+      break;
+    case 1000:
+      s += " ms";
+      break;
+    case 1000000:
+      s += " s";
+      break;
+    default:
+      // can't happen
+      break;
+  }
   return s;
 }
 

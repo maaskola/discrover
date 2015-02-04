@@ -43,8 +43,8 @@ hash_map_t get_word_counts(const Collection &collection, size_t length,
       add_counts(dataset, length, counts, idx++, default_stats, options);
 
   if (options.measure_runtime)
-    cerr << "Getting word counts of length " + to_string(length) + " took "
-            + to_pretty_string(t.tock()) + " µs." << endl;
+    cerr << "Got word counts of length " + to_string(length) + " in "
+            + time_to_pretty_string(t.tock()) << endl;
 
   return counts;
 }

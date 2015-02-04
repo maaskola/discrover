@@ -55,7 +55,7 @@ std::vector<idx_t> gen_suffix_array_slow(Iter begin, Iter end,
   std::sort(sa.begin(), sa.end(), cmp);
   double time = timer.tock();
   if (verbosity >= Verbosity::verbose)
-    std::cerr << "Building SA took " + to_pretty_string(time) + " µs." << std::endl;
+    std::cerr << "Built SA in " + time_to_pretty_string(time) << std::endl;
   return sa;
 }
 
@@ -87,7 +87,7 @@ std::vector<idx_t> gen_suffix_array(Iter begin, const Iter end,
   suffixArray(v.begin(), v.end(), sa, n, K + (shift ? 1 : 0));
   double time = timer.tock();
   if (verbosity >= Verbosity::verbose)
-    std::cerr << "Building SA took " + to_pretty_string(time) + " µs." << std::endl;
+    std::cerr << "Built SA in " + time_to_pretty_string(time) << std::endl;
   return sa;
 }
 
@@ -107,7 +107,7 @@ std::vector<lcp_t> gen_lcp_slow(Iter begin, Iter end,
   }
   double time = timer.tock();
   if (verbosity >= Verbosity::verbose)
-    std::cerr << "Building LCP took " + to_pretty_string (time) + " µs." << std::endl;
+    std::cerr << "Built LCP in " + time_to_pretty_string (time) << std::endl;
   return lcp;
 }
 
@@ -152,7 +152,7 @@ std::vector<lcp_t> gen_lcp(Iter begin, Iter end, const std::vector<idx_t> &sa,
     }
   double time = timer.tock();
   if (verbosity >= Verbosity::verbose)
-    std::cerr << "Building LCP took " + to_pretty_string(time) + " µs." << std::endl;
+    std::cerr << "Built LCP in " + time_to_pretty_string(time) << std::endl;
   return lcp;
 }
 
@@ -173,7 +173,7 @@ std::vector<idx_t> gen_jmp(const std::vector<lcp_t> &lcp, Verbosity verbosity) {
   }
   double time = timer.tock();
   if (verbosity >= Verbosity::verbose)
-    std::cerr << "Building JMP took " + to_pretty_string(time) + " µs." << std::endl;
+    std::cerr << "Built JMP in " + time_to_pretty_string(time) << std::endl;
   return jmp;
 }
 
@@ -269,7 +269,7 @@ std::vector<idx_t> match(Iter qbegin, Iter qend, Iter begin, Iter end,
   }
   double time = timer.tock();
   if (do_debug) {
-    std::cerr << "Getting matches took " + to_pretty_string(time) + " µs." << std::endl;
+    std::cerr << "Got matches in " + time_to_pretty_string(time) << std::endl;
     std::cerr << "Got " << hits.size() << " results." << std::endl;
   }
   return hits;

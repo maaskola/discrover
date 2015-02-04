@@ -451,8 +451,8 @@ Evaluator::ResultsCounts Evaluator::evaluate_dataset(
 
   double time = timer.tock();
   if (options.timing_information)
-    cerr << "Evaluation for " + dataset.name()+ ": " + to_pretty_string(time)
-            + " µs" << endl;
+    cerr << "Evaluation for " + dataset.name() + ": "
+            + time_to_pretty_string(time) << endl;
   ResultsCounts results
       = {n_sites, n_motifs, n_viterbi_sites, n_viterbi_motifs};
   return results;
@@ -549,7 +549,7 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
 
     if (options.timing_information)
       cerr << "Evaluation of contrast for " + (tag == "" ? "" : tag + " ")
-              + "data: " + to_pretty_string(time) + " µs" << endl;
+              + "data: " + time_to_pretty_string(time) << endl;
   }
 
   if (collection.set_size != 0) {

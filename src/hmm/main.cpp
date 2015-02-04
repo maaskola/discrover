@@ -512,28 +512,24 @@ int main(int argc, const char **argv) {
       return EXIT_FAILURE;
     }
 
-    double utime = usage.ru_utime.tv_sec + 1e-6 * usage.ru_utime.tv_usec;
-    double stime = usage.ru_stime.tv_sec + 1e-6 * usage.ru_stime.tv_usec;
+    double utime = 1e6 * usage.ru_utime.tv_sec + usage.ru_utime.tv_usec;
+    double stime = 1e6 * usage.ru_stime.tv_sec + usage.ru_stime.tv_usec;
     double total_time = utime + stime;
-    double elapsed_time = timer.tock() * 1e-6;
+    double elapsed_time = timer.tock();
 
-    const size_t label_col_width = 15;
-    const size_t value_col_width = 15;
-    cerr << setw(label_col_width) << left << "User time"
-         << setw(value_col_width) << right << utime << " sec"
-         << endl
-         << setw(label_col_width) << left << "System time"
-         << setw(value_col_width) << right << stime << " sec"
-         << endl
-         << setw(label_col_width) << left << "CPU time"
-         << setw(value_col_width) << right << total_time << " sec"
-         << endl
-         << setw(label_col_width) << left << "Elapsed time"
-         << setw(value_col_width) << right << elapsed_time << " sec"
-         << endl
-         << setw(label_col_width) << left << "CPU \%"
-         << setw(value_col_width) << right << 100 * total_time / elapsed_time
-         << endl;
+    const size_t label_col_width = 12;
+    const size_t value_col_width = 10;
+    cerr << setw(label_col_width) << "User time"
+         << time_to_pretty_string(utime, value_col_width) << endl
+         << setw(label_col_width) << "System time"
+         << time_to_pretty_string(stime, value_col_width) << endl
+         << setw(label_col_width) << "CPU time"
+         << time_to_pretty_string(total_time, value_col_width) << endl
+         << setw(label_col_width) << "Elapsed time"
+         << time_to_pretty_string(elapsed_time, value_col_width) << endl
+         << setw(label_col_width) << "CPU \%"
+         << to_pretty_string(100 * total_time / elapsed_time, value_col_width, 3)
+         << " %" << endl;
   }
 
   return EXIT_SUCCESS;

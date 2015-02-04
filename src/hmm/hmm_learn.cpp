@@ -113,7 +113,7 @@ void HMM::initialize_bg_with_bw(const Data::Collection &collection,
   double time = timer.tock();
 
   if (options.timing_information)
-    cerr << "Background learning: " + to_pretty_string(time) + " µs" << endl;
+    cerr << "Background learning: " + time_to_pretty_string(time) << endl;
 }
 
 Training::Result HMM::train(const Data::Collection &collection,
@@ -162,7 +162,7 @@ Training::Result HMM::train(const Data::Collection &collection,
 
       double time = learning_timer.tock();
       if (options.timing_information)
-        cerr << "Learning: " + to_pretty_string(time) + " µs" << endl;
+        cerr << "Learning: " + time_to_pretty_string(time) << endl;
 
       if (options.verbosity >= Verbosity::debug)
         cout << "HMM after training:" << endl << *this << endl;
@@ -891,8 +891,8 @@ bool HMM::perform_training_iteration_gradient(
       = compute_gradient(collection, previous_score, task, options.weighting);
   double gradient_comp_time = timer.tock();
   if (options.timing_information)
-    cerr << "Gradient computation time: " + to_pretty_string(gradient_comp_time)
-            + " µs" << endl;
+    cerr << "Gradient computation time: "
+            + time_to_pretty_string(gradient_comp_time) << endl;
 
   if (verbosity >= Verbosity::info)
     for (size_t group_idx = 0; group_idx < groups.size(); group_idx++)

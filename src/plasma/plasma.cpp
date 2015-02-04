@@ -296,7 +296,7 @@ rev_map_t Plasma::determine_initial_candidates(
   hash_map_t word_counts = get_word_counts(collection, length, options);
   if (options.measure_runtime) {
     cerr << "Got words for length " + to_string(length) + " in "
-            + to_pretty_string(my_timer.tock()) + " µs." << endl;
+            + time_to_pretty_string(my_timer.tock()) << endl;
     my_timer.tick();
   }
 
@@ -345,7 +345,7 @@ rev_map_t Plasma::determine_initial_candidates(
 
   if (options.measure_runtime) {
     cerr << "Initial scoring for length " + to_string(length) + " took "
-            + to_pretty_string(my_timer.tock()) + " µs." << endl;
+            + time_to_pretty_string(my_timer.tock()) << endl;
     my_timer.tick();
   }
 
@@ -531,7 +531,7 @@ Results Plasma::find_plasma(size_t length, const Objective &objective,
       }
       if (options.measure_runtime) {
         cerr << "Degeneracy " + to_string(degeneracy) + " took "
-                + to_pretty_string(my_timer.tock()) + " µs." << endl;
+                + time_to_pretty_string(my_timer.tock()) << endl;
         my_timer.tick();
       }
     }
@@ -728,9 +728,8 @@ Results Plasma::find_motifs(const Specification::Motif &motif_spec,
     cout << "Warning: no IUPAC regular expression motifs found for motif "
             "specification '" << motif_spec << "'." << endl;
 
-  double time = t.tock() * 1e-6;
   if (options.measure_runtime)
-    cerr << "Processing took " + to_pretty_string(time) + " seconds." << endl;
+    cerr << "Processed in " + time_to_pretty_string(t.tock()) << endl;
   return results;
 }
 
@@ -755,7 +754,7 @@ future<void> Plasma::rebuild_index() {
     index = NucleotideIndex<size_t, size_t>(
         collection, options.allow_iupac_wildcards, options.verbosity);
     if (options.measure_runtime)
-      cerr << "Built index in " + to_pretty_string(my_timer.tock()) + " µs."
+      cerr << "Built index in " + time_to_pretty_string(my_timer.tock())
            << endl;
   });
   // get a future

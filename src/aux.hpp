@@ -105,10 +105,21 @@ std::vector<std::string> tokenize(const std::string &s,
                                   const std::string &delim);
 std::string sha1hash(const std::string &s);
 
-/** Use to_string and remove trailing zeros.
- * If the number is integral, then also remove the decimal point.
+/** Pretty print a floating point number
+ * @param width        Output field width; if negative use a dynamic width
+ * @param num_decimals Print exactly this number of decimal digits;
+ *                     if negative show up to 10, and possibly use scientific
+ *                     notation
  */
-std::string to_pretty_string(double x);
+std::string to_pretty_string(double x, int width=-1, int num_decimals=-1);
+
+/** Format a time duration with a time unit separated by a blank
+ * Expects microseconds as argument
+ * if x > 1e6 µs it will print in seconds
+ * if x > 1e3 µs it will print in milliseconds
+ * if x > 1e3 µs it will print in microseconds
+ */
+std::string time_to_pretty_string(double x, int width=-1, int num_decimals=3);
 
 namespace Exception {
 namespace NumberList {

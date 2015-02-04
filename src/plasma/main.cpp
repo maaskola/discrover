@@ -13,6 +13,7 @@
 
 #include <sys/resource.h>  // for getrusage
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <omp.h>
 #include <boost/program_options.hpp>
@@ -410,16 +411,24 @@ int main(int argc, const char **argv) {
         return EXIT_FAILURE;
       }
 
-      double utime = usage.ru_utime.tv_sec + 1e-6 * usage.ru_utime.tv_usec;
-      double stime = usage.ru_stime.tv_sec + 1e-6 * usage.ru_stime.tv_usec;
+      double utime = 1e6 * usage.ru_utime.tv_sec + usage.ru_utime.tv_usec;
+      double stime = 1e6 * usage.ru_stime.tv_sec + usage.ru_stime.tv_usec;
       double total_time = utime + stime;
-      double elapsed_time = timer.tock() * 1e-6;
+      double elapsed_time = timer.tock();
 
-      cerr << "User time = " << utime << " sec" << endl
-           << "System time = " << stime << " sec" << endl
-           << "CPU time = " << total_time << " sec" << endl
-           << "Elapsed time = " << elapsed_time << " sec" << endl
-           << 100 * total_time / elapsed_time << "\% CPU" << endl;
+      const size_t label_col_width = 12;
+      const size_t value_col_width = 10;
+      cerr << setw(label_col_width) << "User time"
+           << time_to_pretty_string(utime, value_col_width) << endl
+           << setw(label_col_width) << "System time"
+           << time_to_pretty_string(stime, value_col_width) << endl
+           << setw(label_col_width) << "CPU time"
+           << time_to_pretty_string(total_time, value_col_width) << endl
+           << setw(label_col_width) << "Elapsed time"
+           << time_to_pretty_string(elapsed_time, value_col_width) << endl
+           << setw(label_col_width) << "CPU \%"
+           << to_pretty_string(100 * total_time / elapsed_time, value_col_width, 3)
+           << " %" << endl;
     }
   } catch (exception &e) {
     cout << e.what() << endl;
