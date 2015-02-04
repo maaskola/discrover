@@ -232,7 +232,7 @@ Results Plasma::find_seeds(size_t length, const Objective &objective,
   return results;
 }
 
-/** This executes MCMC to find discriminative IUPAC motifs.
+/** Execute MCMC to find discriminative IUPAC motifs.
  */
 Results Plasma::find_mcmc(size_t length, const Objective &objective,
                           size_t max_degeneracy) const {
@@ -352,7 +352,7 @@ rev_map_t Plasma::determine_initial_candidates(
   return candidates;
 }
 
-/** This uses the external program DREME to find discriminative IUPAC motifs.
+/** Use the external program DREME to find discriminative IUPAC motifs.
  */
 Results Plasma::find_external_dreme(size_t length, const Objective &objective,
                                     size_t max_degeneracy,
@@ -373,28 +373,18 @@ Results Plasma::find_external_dreme(size_t length, const Objective &objective,
   auto regexes = Dreme::run(path1, path2, length, length, options.revcomp, 1);
 
   for (auto &res : regexes) {
-    string best_motif = res.first;
-    double max_score = res.second;
-    count_vector_t best_contrast = count_motif(collection, best_motif, options);
-    double log_p
-        = -compute_score(collection, best_contrast, options, objective, length,
-                         motif_degeneracy(best_motif),
-                         Measures::Discrete::Measure::CorrectedLogpGtest);
-    Result result(objective);
-    result.motif = best_motif;
-    result.score = max_score;
-    result.log_p = log_p;
-    result.counts = best_contrast;
-    results.push_back(result);
+    string motif = res.first;
+    double score = res.second;
+
+    results.push_back(new_result(collection, motif, score, objective, options));
 
     if (options.verbosity >= Verbosity::verbose)
-      std::cout << "DREME found: " << best_motif << " " << max_score << " "
-                << log_p << endl;
+      std::cout << "DREME found: " + motif + " " + to_string(score) << endl;
   }
   return results;
 }
 
-/** This executes a progressive algorithm to find discriminative IUPAC motifs.
+/** Execute a progressive algorithm to find discriminative IUPAC motifs.
  * It starts with degeneracy 0 and incrementally allows more degeneracy.
  * For each level of degeneracy the top N generalizations of the motifs of the
  * previous level of degeneracy are determined.
