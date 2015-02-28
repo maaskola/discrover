@@ -196,6 +196,7 @@ void gen_discrover_cli(size_t cols, string &config_path, Options::HMM &options,
 
   init_options.add_options()
     ("load,l", po::value(&options.load_paths), "Load HMM parameters from a .hmm file produced by an earlier run. Can be specified multiple times; then the first parameter file will be loaded, and motifs of the following parameter files are added.")
+    ("selftrans", po::bool_switch(&options.self_transition), "Add self-transition edges to insert positions.")
     ("alpha", po::value(&options.alpha)->default_value(0.03, "0.03"), "Probability of alternative nucleotides. The nucleotides not included in the IUPAC character will have this probability.")
     ("lambda", po::value(&options.lambda)->default_value(1), "Initial value for prior with which a motif is expected.")
     ("wiggle", po::value(&options.wiggle)->default_value(0), "For automatically determined seeds, consider variants shifted up- and downstream by up to the specified number of positions.")

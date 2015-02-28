@@ -197,12 +197,12 @@ public:
   /** Add a motif based on a IUPAC string. */
   size_t add_motif(const std::string &seq, double alpha, double exp_seq_len,
                    double lambda, const std::string &name,
-                   const std::vector<size_t> &insertions, size_t pad_left,
-                   size_t pad_right);
+                   const std::vector<size_t> &insertions, bool self_transition,
+                   size_t pad_left, size_t pad_right);
   /** Add a motif based on a matrix. */
   size_t add_motif(const matrix_t &e, double exp_seq_len, double lambda,
                    const std::string &name, std::vector<size_t> insertions,
-                   size_t pad_left, size_t pad_right);
+                   bool self_transition, size_t pad_left, size_t pad_right);
 
   /** Add motifs of another HMM. */
   void add_motifs(const HMM &hmm, bool only_additional = false);

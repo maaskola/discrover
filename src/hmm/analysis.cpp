@@ -378,13 +378,15 @@ HMM doit(const Data::Collection &all_data,
         // load emission matrix and add it.
         hmm.add_motif(read_emission(spec.specification), expected_seq_size,
                       options.lambda, spec.name, spec.insertions,
-                      options.left_padding, options.right_padding);
+                      options.self_transition, options.left_padding,
+                      options.right_padding);
         break;
       case Specification::Motif::Kind::Seed:
         // use IUPAC regular expression
         hmm.add_motif(spec.specification, options.alpha, expected_seq_size,
                       options.lambda, spec.name, spec.insertions,
-                      options.left_padding, options.right_padding);
+                      options.self_transition, options.left_padding,
+                      options.right_padding);
         training_necessary = true;
         break;
       case Specification::Motif::Kind::Plasma:
@@ -489,8 +491,8 @@ HMM doit(const Data::Collection &all_data,
 
           model.add_motif(variant, options.alpha, expected_seq_size,
                           options.lambda, motif_spec.name,
-                          motif_spec.insertions, options.left_padding,
-                          options.right_padding);
+                          motif_spec.insertions, options.self_transition,
+                          options.left_padding, options.right_padding);
 
           Options::HMM options_(options);
           options_.label += "." + variant;

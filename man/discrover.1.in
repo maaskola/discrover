@@ -416,6 +416,9 @@ By default, only A, C, G, and T characters (and their lower case variants) are e
 Load HMM parameters from a .hmm file produced by an earlier run.
 Can be specified multiple times; then the first parameter file will be loaded, and motifs of the following parameter files are added.
 .TP
+.B \-\-selftrans
+Add self-transition edges to insert positions.
+.TP
 .B \-\-alpha \fIfloat\fR (=0.03)
 Probability of alternative nucleotides.
 The nucleotides not included in the IUPAC character will have this probability.

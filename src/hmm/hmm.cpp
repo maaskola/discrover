@@ -130,7 +130,7 @@ HMM::HMM(Verbosity verbosity_, double pseudo_count_)
 
 size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda,
                       const string &name, vector<size_t> insertions,
-                      size_t pad_left, size_t pad_right) {
+                      bool self_transition, size_t pad_left, size_t pad_right) {
   if (verbosity >= Verbosity::verbose)
     cout << "Adding motif " << name << ": " << e << endl;
 
@@ -232,6 +232,10 @@ size_t HMM::add_motif(const matrix_t &e, double exp_seq_len, double lambda,
           = insert_transition_probability;
     }
 
+    if (self_transition)
+      for (size_t i = first_insertion; i <= last_insertion; i++)
+        transition(i, i) = 1;
+
     if (verbosity >= Verbosity::debug)
       cout << transition << endl;
   }
@@ -263,8 +267,8 @@ void set_emissions(size_t i, const vector<size_t> &these, matrix_t &m,
 
 size_t HMM::add_motif(const string &seq, double alpha, double exp_seq_len,
                       double lambda, const string &name,
-                      const vector<size_t> &insertions, size_t pad_left,
-                      size_t pad_right) {
+                      const vector<size_t> &insertions, bool self_transition,
+                      size_t pad_left, size_t pad_right) {
   if (verbosity >= Verbosity::verbose)
     cout << "Adding motif for " << seq << "." << endl;
   matrix_t e = zero_matrix(seq.size(), n_emissions);
@@ -324,7 +328,7 @@ size_t HMM::add_motif(const string &seq, double alpha, double exp_seq_len,
     set_emissions(i, these, e, alpha);
   }
   size_t motif_idx = add_motif(e, exp_seq_len, lambda, name, insertions,
-                               pad_left, pad_right);
+                               self_transition, pad_left, pad_right);
   return motif_idx;
 }
 

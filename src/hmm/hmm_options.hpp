@@ -118,6 +118,7 @@ struct HMM {
   bool weighting;
   MultiMotif multi_motif;
   Compression output_compression;
+  bool self_transition;
   size_t extend;
   size_t left_padding, right_padding;
   bool timing_information;
