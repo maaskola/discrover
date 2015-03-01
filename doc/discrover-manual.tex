@@ -7,7 +7,7 @@
 \usepackage{doi,hyperref,verbatimbox,verbatim,url}
 \usepackage[numbers]{natbib}
 
-\usepackage[Q=yes]{examplep}
+\usepackage[Q=yes,bsdiv=yes]{examplep}
 \usepackage{amsmath}
 
 \newcommand{\plasma}[0]{\texttt{plasma}}
@@ -18,6 +18,182 @@
 \newcommand{\theurl}[0]{\url{https://github.com/maaskola/discrover}}
 \newcommand{\TikZ}{Ti\emph{k}Z}
 \newcommand{\ignore}[1]{}
+
+% Motif topology illustration code
+\usepackage{pgf}
+\usepackage{tikz}
+
+% \usetikzlibrary{backgrounds}
+% \usetikzlibrary{shadows.blur}
+% \usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{positioning}
+\usetikzlibrary{calc}
+% \usetikzlibrary{shapes}
+% \usetikzlibrary{fit,shapes.geometric}
+
+\newcommand{\minCircleSize}[0]{0.8cm}
+
+\tikzset{%
+  var/.style={draw, circle, thick, fill=gray!30, minimum size=\minCircleSize, inner sep=0},
+  myvar/.style={var, minimum size=0.5cm},
+  Var/.style={var, ellipse, align=center},
+  dedge/.style={draw, thick, -latex},
+  edge/.style={draw, thick},
+  note/.style={rectangle callout, fill=mdcblue!25, line join=bevel, text=black},
+  % factor/.style={rectangle, minimum size=0.15cm, minimum height=0.15cm, fill=black, inner sep=0pt}
+  factor/.style={rectangle, fill=black, minimum size=2mm, inner sep=0}
+}
+
+\newcommand{\dist}[0]{0.35cm}
+
+\newcommand{\Core}[0]{%
+  \node[emit] at (0,0) (m1) {$M_1$};
+  \node[emit, right=\dist of m1] (m2) {$M_2$};
+  \node[emit, right=\dist of m2] (m3) {$M_3$};
+  \node[emit, right=\dist of m3] (m4) {$M_4$};
+  \node[emit, right=\dist of m4] (m5) {$M_5$};
+  \node[emit, right=\dist of m5] (m6) {$M_6$};
+  \node[emit, right=\dist of m6] (m7) {$M_7$};
+  \node[emit, right=\dist of m7] (m8) {$M_8$};
+  \coordinate (x1) at ($(m1)!0.5!(m2)$);
+  \coordinate (x2) at ($(m2)!0.5!(m3)$);
+  \coordinate (x3) at ($(m3)!0.5!(m4)$);
+  \coordinate (x4) at ($(m4)!0.5!(m5)$);
+  \coordinate (x5) at ($(m5)!0.5!(m6)$);
+  \coordinate (x6) at ($(m6)!0.5!(m7)$);
+  \coordinate (x7) at ($(m7)!0.5!(m8)$);
+
+  \path[dedge] (m1) to (m2);
+  \path[dedge] (m2) to (m3);
+  \path[dedge] (m3) to (m4);
+  \path[dedge] (m4) to (m5);
+  \path[dedge] (m5) to (m6);
+  \path[dedge] (m6) to (m7);
+  \path[dedge] (m7) to (m8);
+}
+
+\newcommand{\SimpleCore}[0]{%
+  \Core{}
+
+  \node[emit, below=4*\dist of x4] (bg) {$B$};
+  \path[dedge, loop above] (bg) to (bg);
+
+  \path[dedge, bend left=20] (m8) to (bg);
+  \path[dedge, bend left=20] (bg) to (m1);
+}
+
+\newcommand{\ExtendedCore}[0]{%
+  \Core{}
+
+  \node[emit, below=10*\dist of x4] (bg) {$B$};
+  \path[dedge, loop above] (bg) to (bg);
+
+  \node[delete, left=\dist of m1] (m0) {$M_0$};
+  \node[delete, right=\dist of m8] (m9) {$M_9$};
+  \path[dedge] (m0) to (m1);
+  \path[dedge] (m8) to (m9);
+  \path[dedge, bend left=40] (m9) to (bg);
+  \path[dedge, bend left=40] (bg) to (m0);
+}
+
+\newcommand{\Insertions}[0]{%
+  % Insertion states
+  \node[emit, above=2*\dist of x1] (i1) {$I_1$};
+  \node[emit, above=2*\dist of x2] (i2) {$I_2$};
+  \node[emit, above=2*\dist of x3] (i3) {$I_3$};
+  \node[emit, above=2*\dist of x4] (i4) {$I_4$};
+  \node[emit, above=2*\dist of x5] (i5) {$I_5$};
+  \node[emit, above=2*\dist of x6] (i6) {$I_6$};
+  \node[emit, above=2*\dist of x7] (i7) {$I_7$};
+
+  \path[dedge] (m1) to (i1);
+  \path[dedge] (m2) to (i2);
+  \path[dedge] (m3) to (i3);
+  \path[dedge] (m4) to (i4);
+  \path[dedge] (m5) to (i5);
+  \path[dedge] (m6) to (i6);
+  \path[dedge] (m7) to (i7);
+
+  \path[dedge] (i1) to (m2);
+  \path[dedge] (i2) to (m3);
+  \path[dedge] (i3) to (m4);
+  \path[dedge] (i4) to (m5);
+  \path[dedge] (i5) to (m6);
+  \path[dedge] (i6) to (m7);
+  \path[dedge] (i7) to (m8);
+
+}
+
+\newcommand{\InsertionsSelf}[0]{%
+  \path[dedge, loop above] (i1) to (i1);
+  \path[dedge, loop above] (i2) to (i2);
+  \path[dedge, loop above] (i3) to (i3);
+  \path[dedge, loop above] (i4) to (i4);
+  \path[dedge, loop above] (i5) to (i5);
+  \path[dedge, loop above] (i6) to (i6);
+  \path[dedge, loop above] (i7) to (i7);
+}
+
+\newcommand{\Deletions}[0]{%
+  % Deletion states
+
+  \node[delete, below=2*\dist of m1] (d1) {$D_1$};
+  \node[delete, below=2*\dist of m2] (d2) {$D_2$};
+  \node[delete, below=2*\dist of m3] (d3) {$D_3$};
+  \node[delete, below=2*\dist of m4] (d4) {$D_4$};
+  \node[delete, below=2*\dist of m5] (d5) {$D_5$};
+  \node[delete, below=2*\dist of m6] (d6) {$D_6$};
+  \node[delete, below=2*\dist of m7] (d7) {$D_7$};
+  \node[delete, below=2*\dist of m8] (d8) {$D_8$};
+
+  \path[dedge] (m0) to (d1);
+  \path[dedge] (m1) to (d2);
+  \path[dedge] (m2) to (d3);
+  \path[dedge] (m3) to (d4);
+  \path[dedge] (m4) to (d5);
+  \path[dedge] (m5) to (d6);
+  \path[dedge] (m6) to (d7);
+  \path[dedge] (m7) to (d8);
+
+  \path[dedge] (d1) to (d2);
+  \path[dedge] (d2) to (d3);
+  \path[dedge] (d3) to (d4);
+  \path[dedge] (d4) to (d5);
+  \path[dedge] (d5) to (d6);
+  \path[dedge] (d6) to (d7);
+  \path[dedge] (d7) to (d8);
+
+  \path[dedge] (d1) to (m2);
+  \path[dedge] (d2) to (m3);
+  \path[dedge] (d3) to (m4);
+  \path[dedge] (d4) to (m5);
+  \path[dedge] (d5) to (m6);
+  \path[dedge] (d6) to (m7);
+  \path[dedge] (d7) to (m8);
+  \path[dedge] (d8) to (m9);
+}
+
+\newcommand{\InsertionToDeletionEdges}[0]{%
+  \path[dedge] (i1) to (d2);
+  \path[dedge] (i2) to (d3);
+  \path[dedge] (i3) to (d4);
+  \path[dedge] (i4) to (d5);
+  \path[dedge] (i5) to (d6);
+  \path[dedge] (i6) to (d7);
+  \path[dedge] (i7) to (d8);
+}
+
+
+\newcommand{\TikzEnv}[1]{%
+  \begin{tikzpicture}[%
+      genscan/.style={draw, thick, minimum size=\minCircleSize, inner sep=0},
+      delete/.style={genscan, diamond},
+      emit/.style={genscan, circle},
+    ]
+    #1
+  \end{tikzpicture}
+}
+% End of motif topology illustration code
 
 \hypersetup{%
   pdfauthor=Jonas Maaskola,
@@ -521,6 +697,55 @@ There are three ways in which a \Q{motifdef} can be given:
     If the path contains at least one colon, please prepend colons to disambiguate.
 \end{description}
 
+By default, insert states given by an \Q{insert} specification do not have self-transition edges.
+You can add self-transition edges to the insert states by using the command line switch \Q{--selftrans}.
+Please refer to figure~\ref{fig:insert-states} for an illustration.
+
+\begin{figure}
+  \centering
+  \ignore{%
+    \TikzEnv{%
+      \SimpleCore{}
+    }
+    \TikzEnv{%
+      \SimpleCore{}
+      \Insertions{}
+    }
+  }
+  \TikzEnv{%
+    \SimpleCore{}
+    \begin{scope}[color=blue]
+      \Insertions{}
+    \end{scope}
+    \begin{scope}[color=red]
+      \InsertionsSelf{}
+    \end{scope}
+  }
+  \ignore{%
+    \TikzEnv{%
+      \ExtendedCore{}
+      \Insertions{}
+      \InsertionsSelf{}
+      \Deletions{}
+    }
+    \TikzEnv{%
+      \ExtendedCore{}
+      \Insertions{}
+      \InsertionsSelf{}
+      \Deletions{}
+      \InsertionToDeletionEdges{}
+    }
+  }
+  \caption{%
+    \label{fig:insert-states}
+    Insert states.
+    By default, \discrover{} uses motif topologies as indicated by the black states.
+    $B$ denotes the background state, and states $M_1$--$M_8$ denote states 1--8 of a motif of length 8.
+    Such a topology is used for example with the motif specifiction \Q{-m motif:8}.
+    Insert states $I_1$--$I_7$ (shown in blue) are added with a motif specification such as \Q{-m motif:1,2,3,4,5,6,7:8}.
+    If self-transitions (shown in red) are wanted the command line switch \Q{--selftrans} has to be used as in \Q{-m motif:1,2,3,4,5,6,7:8 --selftrans}.
+  }
+\end{figure}
 
 \subsubsection{Score specification}
 Score specifications consist of up to three colon-separated terms, with the following syntax:
