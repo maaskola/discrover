@@ -184,7 +184,7 @@ Note that you would have to issue this every time you configure the package, so 
 
 
 Explanation:
-This will search for the paths to the required headers and libraries, create a directory called build and prepare everything for the subsequent compilation.
+This will create a directory called build, search for the paths to the required headers and libraries, and prepare everything for the subsequent compilation.
 It will also check if your compiler supports the required features (C++11 and OpenMP support).
 
 If anything fails at this step please have a look at [CMakeLists.txt](CMakeLists.txt) and see if some of the commented-out statements may help you.
