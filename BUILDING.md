@@ -228,15 +228,16 @@ make install
 
 Explanation:
 This will copy the libraries and binaries into the default installation path.
-If you did not specify otherwise via [CMakeLists.txt](CMakeLists.txt) in [step 1](#step1), or via the command line in [step 2](#step2), then the installation will go to ```/usr/local/bin```, ```/usr/local/lib```, and ```/usr/local/share/doc```.
-If these locations are part of your ```$PATH``` and ```$LD_LIBRARY_PATH``` environment variables you can then simply run the ```discrover``` program from anywhere.
+If you did not specify otherwise via [CMakeLists.txt](CMakeLists.txt) in [step 1](#step1), or via the command line in [step 2](#step2), then the installation will go to ```/usr/local/bin```, ```/usr/local/lib```, ```/usr/local/share/doc``` and ```/usr/local/share/man```.
+If these locations are part of your ```$PATH```, ```$LD_LIBRARY_PATH```, and ```$MANPATH``` environment variables you can then simply run the ```discrover``` program from anywhere.
 
-Otherwise, you might still have to add the directories you installed to ```$PATH``` and ```$LD_LIBRARY_PATH```.
+Otherwise, you might still have to add the directories you installed to the ```$PATH```, ```$LD_LIBRARY_PATH```, and ```$MANPATH``` variables.
 This can be done with a command like
 
 ```sh
-export PATH=HERE/bin:$PATH
-export LD_LIBRARY_PATH=HERE/lib:$LD_LIBRARY_PATH
+export PATH="HERE/bin:$PATH"
+export LD_LIBRARY_PATH="HERE/lib:$LD_LIBRARY_PATH"
+export MANPATH="HERE/man:$MANPATH"
 ```
 
 where ```HERE``` will have to be the path that you installed to.
