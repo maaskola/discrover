@@ -240,5 +240,5 @@ export LD_LIBRARY_PATH="HERE/lib:$LD_LIBRARY_PATH"
 export MANPATH="HERE/man:$MANPATH"
 ```
 
-where ```HERE``` will have to be the path that you installed to (the value of the ```CMAKE_INSTALL_PREFIX``` that you set above).
+where ```HERE``` will have to be the path that you installed to (the value of the ```CMAKE_INSTALL_PREFIX``` variable that you set above).
 You might consider putting these commands into your ```~/.bashrc``` file or some place similar such that they are executed every time you log into your machine.
