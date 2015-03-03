@@ -59,3 +59,4 @@ TODO 2015-01-21 Implement rank information for plasma
 TODO 2015-01-29 Clean up copyright information
 TODO 2015-01-29 Revisit multi-character encoding for plasma
 TODO 2015-02-03 Improve reporting; produce HTML output
+TODO 2015-02-28 Inform user more clearly when the found HMM motif is not significantly discriminative
