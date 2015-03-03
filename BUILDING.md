@@ -77,7 +77,7 @@ Note that the above-given list of dependencies is required only for BUILDING, no
 On Debian and Ubuntu, you can install all necessary and optional software to build Discrover with the following command:
 
 ```sh
-apt-get install git cmake g++ libboost-all-dev texlive texlive-latex-base latex-xcolor texlive-latex-extra pgf libcairo-dev
+apt-get install git cmake g++ libboost-all-dev texlive texlive-latex-base latex-xcolor texlive-latex-extra pgf libcairo2-dev
 ```
 
 ### Gentoo
