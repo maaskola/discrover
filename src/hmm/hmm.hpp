@@ -271,6 +271,10 @@ public:
   /** A routine that calculates the emission consensus. */
   std::string get_group_consensus(size_t idx, double threshold = 0.1) const;
 
+  /** Calculate a consensus for the given matrix. */
+  std::string get_group_consensus(const matrix_t &m, size_t idx,
+                                  double threshold = 0) const;
+
   /** A getter routine for the group names. */
   std::string get_group_name(size_t idx) const;
 

@@ -814,7 +814,7 @@ vector<size_t> topological_order(const matrix_t &transition,
   return order;
 }
 
-string HMM::get_group_consensus(size_t idx, double threshold) const {
+string HMM::get_group_consensus(const matrix_t &m, size_t idx, double threshold) const {
   const string iupac = "-acmgrsvtwyhkdbn";
   string consensus = "";
   string gapped_consensus = "";
@@ -823,7 +823,7 @@ string HMM::get_group_consensus(size_t idx, double threshold) const {
   for (auto i : topological_order(transition, groups[idx].states)) {
     char present = 0;
     for (size_t j = 0; j < 4; j++)
-      if (emission(i, j) >= threshold)
+      if (m(i, j) >= threshold)
         present |= (1 << j);
     char cons_char = iupac[present];
     consensus += cons_char;
@@ -841,7 +841,7 @@ string HMM::get_group_consensus(size_t idx, double threshold) const {
     for (auto &i : groups[idx].states) {
       char present = 0;
       for (size_t j = 0; j < 4; j++)
-        if (emission(i, j) >= threshold)
+        if (m(i, j) >= threshold)
           present |= (1 << j);
       prev_consensus += iupac[present];
     }
@@ -852,6 +852,10 @@ string HMM::get_group_consensus(size_t idx, double threshold) const {
   }
 
   return gapped_consensus;
+}
+
+string HMM::get_group_consensus(size_t idx, double threshold) const {
+  return get_group_consensus(emission, idx, threshold);
 }
 
 string HMM::get_group_name(size_t idx) const { return groups[idx].name; }
