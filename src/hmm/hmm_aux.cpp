@@ -726,17 +726,132 @@ Training::Range HMM::complementary_states_mask(bitmask_t present_mask) const {
   return range;
 }
 
+// Find those states reachable from the set of states given as argument.
+// NOTE: There's a slight hack in that transitions from the set of final
+// states to the set of initial states are not considered.
+map<size_t, set<size_t>> reachable_states(const matrix_t &transition,
+                                          const vector<size_t> &states,
+                                          const set<size_t> &initial,
+                                          const set<size_t> &final) {
+  map<size_t, set<size_t>> r;
+  for (auto &i : states)
+    for (auto &j : states)
+      if (transition(i, j) > 0)
+        if (final.find(i) == end(final) or initial.find(j) == end(initial))
+          r[i].insert(j);
+  size_t n = states.size();
+  while (n--) {
+    for (auto &p : r) {
+      set<size_t> y;
+      for (auto &z : p.second) {
+        y.insert(z);
+        for (auto &a : r[z])
+          y.insert(a);
+      }
+      p.second = y;
+    }
+  }
+  return r;
+}
+
+set<size_t> reachable_from_state(const matrix_t &transition,
+                                 const size_t &state) {
+  set<size_t> r;
+  for (size_t i = 0; i < transition.size2(); i++)
+    if (transition(state, i) > 0)
+      r.insert(i);
+  return r;
+}
+
+set<size_t> initial_states(const matrix_t &transition,
+                           const vector<size_t> &states) {
+  const size_t bg_state = 1;  // HMM::bg_state is protected
+  auto reachable_from_bg = reachable_from_state(transition, bg_state);
+  set<size_t> initial;
+  for (auto state : states)
+    if (reachable_from_bg.find(state) != end(reachable_from_bg))
+      initial.insert(state);
+  return initial;
+}
+
+set<size_t> final_states(const matrix_t &transition,
+                         const vector<size_t> &states) {
+  const size_t bg_state = 1;  // HMM::bg_state is protected
+  set<size_t> final;
+  for (auto state : states)
+    if (transition(state, bg_state) > 0)
+      final.insert(state);
+  return final;
+}
+
+vector<size_t> topological_order(const matrix_t &transition,
+                                 const vector<size_t> &states) {
+  auto initial = initial_states(transition, states);
+  auto final = final_states(transition, states);
+  auto reachable = reachable_states(transition, states, initial, final);
+  vector<size_t> order = states;
+  sort(begin(order), end(order), [&reachable](size_t x, size_t y) {
+    if (x == y)
+      return true;
+    else if (reachable[x].find(y) != end(reachable[x]))
+      return true;
+    else
+      return false;
+  });
+
+  if (false) {
+    cerr << "states =";
+    for (auto x : states)
+      cerr << " " << x;
+    cerr << endl;
+
+    cerr << "topo order =";
+    for (auto x : order)
+      cerr << " " << x;
+    cerr << endl;
+  }
+
+  return order;
+}
+
 string HMM::get_group_consensus(size_t idx, double threshold) const {
   const string iupac = "-acmgrsvtwyhkdbn";
   string consensus = "";
-  for (auto &i : groups[idx].states) {
+  string gapped_consensus = "";
+
+  size_t prev = 0;
+  for (auto i : topological_order(transition, groups[idx].states)) {
     char present = 0;
     for (size_t j = 0; j < 4; j++)
       if (emission(i, j) >= threshold)
         present |= (1 << j);
-    consensus += iupac[present];
+    char cons_char = iupac[present];
+    consensus += cons_char;
+
+    if (prev != 0 and i > prev + 1)
+      gapped_consensus += "[";
+    if (i < prev)
+      gapped_consensus += "]";
+    gapped_consensus += cons_char;
+    prev = i;
   }
-  return consensus;
+
+  if (false) {
+    string prev_consensus = "";
+    for (auto &i : groups[idx].states) {
+      char present = 0;
+      for (size_t j = 0; j < 4; j++)
+        if (emission(i, j) >= threshold)
+          present |= (1 << j);
+      prev_consensus += iupac[present];
+    }
+
+    cerr << "Consensus = " << consensus << std::endl;
+    cerr << "Previous = " << prev_consensus << std::endl;
+    cerr << "Gapped = " << gapped_consensus << std::endl;
+  }
+
+  return gapped_consensus;
 }
 
 string HMM::get_group_name(size_t idx) const { return groups[idx].name; }
