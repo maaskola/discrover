@@ -858,20 +858,6 @@ bool HMM::perform_training_iteration_reestimation(
   return done;
 }
 
-string consensus(const matrix_t &m, const Training::Range &states,
-                 double threshold = 0) {
-  const string iupac = "-acmgrsvtwyhkdbn";
-  string consensus = "";
-  for (auto &i : states) {
-    char present = 0;
-    for (size_t j = 0; j < 4; j++)
-      if (m(i, j) >= threshold)
-        present |= (1 << j);
-    consensus += iupac[present];
-  }
-  return consensus;
-}
-
 bool HMM::perform_training_iteration_gradient(
     const Data::Collection &collection, const Training::Task &task,
     const Options::HMM &options, int &center, double &score) {
@@ -902,7 +888,7 @@ bool HMM::perform_training_iteration_gradient(
         if (is_motif_group(group_idx))
           cout << "Motif gradient                                 "
                << groups[group_idx].name << ":"
-               << consensus(gradient.emission, groups[group_idx].states)
+               << get_group_consensus(gradient.emission, group_idx)
                << endl;
 
   if (verbosity >= Verbosity::verbose)
