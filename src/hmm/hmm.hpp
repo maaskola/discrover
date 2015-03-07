@@ -268,31 +268,29 @@ public:
   /** The emission information content of the HMM. */
   double information_content(size_t motif_idx) const;
 
-  /** A routine that calculates the emission consensus. */
+  /** Calculate the emission consensus. */
   std::string get_group_consensus(size_t idx, double threshold = 0.1) const;
 
   /** Calculate a consensus for the given matrix. */
   std::string get_group_consensus(const matrix_t &m, size_t idx,
                                   double threshold = 0) const;
 
-  /** A getter routine for the group names. */
+  /** Get the group names. */
   std::string get_group_name(size_t idx) const;
 
-  /** A getter routine for the number of states. */
+  /** Get the number of states. */
   size_t get_nstates() const;
 
-  /** A getter routine for the number of groups, including the constitutive one.
-   */
+  /** Get the number of groups, including the constitutive one. */
   size_t get_ngroups() const;
 
-  /** A getter routine for the number of motifs, excluding the constitutive
-   * group. */
+  /** Get the number of motifs, excluding the constitutive group. */
   size_t get_nmotifs() const;
 
-  /** A getter routine for the length of a motif. */
+  /** Get the length of a motif. */
   size_t get_motif_len(size_t motif_idx) const;
 
-  /** A getter routine for the pseudo count. */
+  /** Get the pseudo count. */
   double get_pseudo_count() const;
 
   /** Count number of occurrences of a given motif in a Viterbi parse */
