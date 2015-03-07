@@ -799,24 +799,11 @@ vector<size_t> topological_order(const matrix_t &transition,
       return false;
   });
 
-  if (false) {
-    cerr << "states =";
-    for (auto x : states)
-      cerr << " " << x;
-    cerr << endl;
-
-    cerr << "topo order =";
-    for (auto x : order)
-      cerr << " " << x;
-    cerr << endl;
-  }
-
   return order;
 }
 
 string HMM::get_group_consensus(const matrix_t &m, size_t idx, double threshold) const {
   const string iupac = "-acmgrsvtwyhkdbn";
-  string consensus = "";
   string gapped_consensus = "";
 
   size_t prev = 0;
@@ -826,29 +813,15 @@ string HMM::get_group_consensus(const matrix_t &m, size_t idx, double threshold)
       if (m(i, j) >= threshold)
         present |= (1 << j);
     char cons_char = iupac[present];
-    consensus += cons_char;
 
     if (prev != 0 and i > prev + 1)
       gapped_consensus += "[";
     if (i < prev)
       gapped_consensus += "]";
+
     gapped_consensus += cons_char;
+
     prev = i;
-  }
-
-  if (false) {
-    string prev_consensus = "";
-    for (auto &i : groups[idx].states) {
-      char present = 0;
-      for (size_t j = 0; j < 4; j++)
-        if (m(i, j) >= threshold)
-          present |= (1 << j);
-      prev_consensus += iupac[present];
-    }
-
-    cerr << "Consensus = " << consensus << std::endl;
-    cerr << "Previous = " << prev_consensus << std::endl;
-    cerr << "Gapped = " << gapped_consensus << std::endl;
   }
 
   return gapped_consensus;
