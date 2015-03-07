@@ -77,7 +77,7 @@ Note that the above-given list of dependencies is required only for BUILDING, no
 On Debian and Ubuntu, you can install all necessary and optional software to build Discrover with the following command:
 
 ```sh
-apt-get install git cmake g++ libboost-all-dev texlive texlive-latex-base latex-xcolor texlive-latex-extra pgf libcairo-dev
+apt-get install git cmake g++ libboost-all-dev texlive texlive-latex-base latex-xcolor texlive-latex-extra pgf libcairo2-dev
 ```
 
 ### Gentoo
@@ -184,7 +184,7 @@ Note that you would have to issue this every time you configure the package, so 
 
 
 Explanation:
-This will search for the paths to the required headers and libraries, create a directory called build and prepare everything for the subsequent compilation.
+This will create a directory called build, search for the paths to the required headers and libraries, and prepare everything for the subsequent compilation.
 It will also check if your compiler supports the required features (C++11 and OpenMP support).
 
 If anything fails at this step please have a look at [CMakeLists.txt](CMakeLists.txt) and see if some of the commented-out statements may help you.
@@ -228,16 +228,17 @@ make install
 
 Explanation:
 This will copy the libraries and binaries into the default installation path.
-If you did not specify otherwise via [CMakeLists.txt](CMakeLists.txt) in [step 1](#step1), or via the command line in [step 2](#step2), then the installation will go to ```/usr/local/bin```, ```/usr/local/lib```, and ```/usr/local/share/doc```.
-If these locations are part of your ```$PATH``` and ```$LD_LIBRARY_PATH``` environment variables you can then simply run the ```discrover``` program from anywhere.
+If you did not specify otherwise via [CMakeLists.txt](CMakeLists.txt) in [step 1](#step1), or via the command line in [step 2](#step2), then the installation will go to ```/usr/local/bin```, ```/usr/local/lib```, ```/usr/local/share/doc``` and ```/usr/local/share/man```.
+If these locations are part of your ```PATH```, ```LD_LIBRARY_PATH```, and ```MANPATH``` environment variables you can then simply run the ```discrover``` program from anywhere.
 
-Otherwise, you might still have to add the directories you installed to ```$PATH``` and ```$LD_LIBRARY_PATH```.
+Otherwise, you might still have to add the directories you installed to the ```PATH```, ```LD_LIBRARY_PATH```, and ```MANPATH``` variables.
 This can be done with a command like
 
 ```sh
-export PATH=HERE/bin:$PATH
-export LD_LIBRARY_PATH=HERE/lib:$LD_LIBRARY_PATH
+export PATH="HERE/bin:$PATH"
+export LD_LIBRARY_PATH="HERE/lib:$LD_LIBRARY_PATH"
+export MANPATH="HERE/man:$MANPATH"
 ```
 
-where ```HERE``` will have to be the path that you installed to.
+where ```HERE``` will have to be the path that you installed to (the value of the ```CMAKE_INSTALL_PREFIX``` variable that you set above).
 You might consider putting these commands into your ```~/.bashrc``` file or some place similar such that they are executed every time you log into your machine.
