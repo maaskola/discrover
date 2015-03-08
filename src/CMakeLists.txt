@@ -10,7 +10,7 @@ ADD_SUBDIRECTORY(hmm)
 
 ADD_LIBRARY(discrover-common OBJECT aux.cpp executioninformation.cpp matrix.cpp
   random_distributions.cpp random_seed.cpp sha1.cpp terminal.cpp timer.cpp
-  mcmc/montecarlo.cpp)
+  topo_order.cpp mcmc/montecarlo.cpp)
 
 IF(COMPILER_SUPPORTS_PIC)
   SET_TARGET_PROPERTIES(discrover-common
