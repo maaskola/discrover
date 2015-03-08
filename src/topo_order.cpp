@@ -61,6 +61,7 @@ map<size_t, set<size_t>> reachable_states(const matrix_t &transition,
   return r;
 }
 
+/** Find states reachable from a given state. */
 set<size_t> reachable_from_state(const matrix_t &transition,
                                  const size_t &state) {
   set<size_t> r;
@@ -70,6 +71,9 @@ set<size_t> reachable_from_state(const matrix_t &transition,
   return r;
 }
 
+/** Determine initial motif states.
+ *  These are those with connections from to the background state.
+ */
 set<size_t> initial_states(const matrix_t &transition,
                            const vector<size_t> &states) {
   const size_t bg_state = 1;  // HMM::bg_state is protected
@@ -81,6 +85,9 @@ set<size_t> initial_states(const matrix_t &transition,
   return initial;
 }
 
+/** Determine final motif states.
+ *  These are those with connections back to the background state.
+ */
 set<size_t> final_states(const matrix_t &transition,
                          const vector<size_t> &states) {
   const size_t bg_state = 1;  // HMM::bg_state is protected

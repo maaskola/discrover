@@ -30,5 +30,6 @@
 #include <vector>
 #include "matrix.hpp"
 
+/** Compute topological order of motif states */
 std::vector<size_t> topological_order(const matrix_t &transition,
                                       const std::vector<size_t> &states);
