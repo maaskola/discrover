@@ -78,11 +78,6 @@ private:
                                  std::ostream &v_out, std::ostream &occ_out,
                                  std::ostream &bed_out,
                                  const Options::HMM &options) const;
-
-#if CAIRO_FOUND
-  std::vector<std::string> generate_logos(const std::string &path_stem,
-                                          const Options::HMM &options) const;
-#endif
 };
 
 #endif
