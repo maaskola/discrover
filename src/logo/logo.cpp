@@ -230,7 +230,8 @@ double information_content(const column_t &col) {
 }
 
 void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
-                          const dimensions_t &dims, const Options &options) {
+                          const dimensions_t &dims, const Options &options,
+                          const vector<double> &widths) {
   cairo_t *cr = cairo_create(surface);
 
   double basecol = 0;
@@ -241,7 +242,9 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
     basecol = dims.axis_horiz_space;
   }
   coord_t current = {basecol, baseline};
+  auto w_iter = begin(widths);
   for (auto &col : matrix) {
+    double col_width = dims.node_width * (*(w_iter++));
     double col_height = 1;
     if (options.type == Type::Sequence)
       col_height = information_content(col) / 2;
@@ -253,11 +256,11 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
 
     for (auto idx : order) {
       double current_height = col[size_t(idx)] * dims.node_height * col_height;
-      draw_letter(cr, idx, current, dims.node_width, current_height, options);
+      draw_letter(cr, idx, current, col_width, current_height, options);
       current.y -= current_height;
     }
 
-    current.x += dims.node_width;
+    current.x += col_width;
     current.y = baseline;
   }
 
@@ -290,7 +293,7 @@ void draw_logo_to_surface(cairo_surface_t *surface, const matrix_t &matrix,
                              CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size(cr, dims.axis_font_size);
       double annot = (1.0 - pos) * (options.type == Type::Sequence ? 2 : 1);
-      string label =  to_pretty_string(annot);
+      string label = to_pretty_string(annot);
       if (annot == 0.5)
         label = "½";
       cairo_text_extents(cr, label.c_str(), &te);
@@ -335,15 +338,24 @@ string ending(output_t kind) {
 }
 
 string draw_logo_sub(const matrix_t &matrix, const string &path, output_t kind,
-                     const Options &options) {
+                     const Options &options, vector<double> widths) {
   string out_path = path + "." + ending(kind);
   cout << left << setw(report_col_width)
        << (string_toupper(ending(kind)) + " sequence logo") << right << out_path
        << endl;
 
+  if (widths.empty())
+    widths = vector<double>(matrix.size(), 1);
+  else if (widths.size() != matrix.size())
+    throw Exception::Logo::InvalidWidthArgument(widths.size(), matrix.size());
+
   dimensions_t dims(options.scale);
-  double width = dims.node_width * matrix.size();
+
   double height = dims.node_height;
+  double width = 0;
+  for (auto w : widths)
+    width += dims.node_width * w;
+
   if (options.axes) {
     width += dims.axis_horiz_space;
     height *= 1.0 + 2 * dims.axis_rel_ext;
@@ -362,7 +374,7 @@ string draw_logo_sub(const matrix_t &matrix, const string &path, output_t kind,
       return "";
   }
 
-  draw_logo_to_surface(surface, matrix, dims, options);
+  draw_logo_to_surface(surface, matrix, dims, options, widths);
 
   switch (kind) {
     case output_t::PDF:
@@ -377,28 +389,49 @@ string draw_logo_sub(const matrix_t &matrix, const string &path, output_t kind,
 }
 
 vector<string> draw_logo_rc(const matrix_t &matrix, const string &path,
-                            const Options &options) {
+                            const Options &options,
+                            const vector<double> &widths) {
   vector<string> paths;
   if (options.pdf_logo)
-    paths.push_back(draw_logo_sub(matrix, path, output_t::PDF, options));
+    paths.push_back(
+        draw_logo_sub(matrix, path, output_t::PDF, options, widths));
   if (options.png_logo)
-    paths.push_back(draw_logo_sub(matrix, path, output_t::PNG, options));
+    paths.push_back(
+        draw_logo_sub(matrix, path, output_t::PNG, options, widths));
   return paths;
 }
 
 vector<string> draw_logo(const matrix_t &matrix, const string &out_path,
-                         const Options &options) {
+                         const Options &options, const vector<double> &widths) {
   if (not options.revcomp)
-    return draw_logo_rc(matrix, out_path, options);
+    return draw_logo_rc(matrix, out_path, options, widths);
   else {
-    vector<string> paths = draw_logo_rc(matrix, out_path + ".forward", options);
+    vector<string> paths
+        = draw_logo_rc(matrix, out_path + ".forward", options, widths);
+
     auto rc_matrix = matrix;
     reverse(begin(rc_matrix), end(rc_matrix));
     for (auto &col : rc_matrix)
       reverse(begin(col), end(col));
-    for (auto path : draw_logo_rc(rc_matrix, out_path + ".revcomp", options))
+
+    auto rc_widths = widths;
+    reverse(begin(rc_widths), end(rc_widths));
+    for (auto path :
+         draw_logo_rc(rc_matrix, out_path + ".revcomp", options, rc_widths))
       paths.push_back(path);
+
     return paths;
   }
 }
 }  //  namespace Logo
+
+namespace Exception {
+namespace Logo {
+InvalidWidthArgument::InvalidWidthArgument(size_t found, size_t expected)
+    : runtime_error(
+          "Error: invalid number of position widths given for drawing motif "
+          "logo.\n"
+          "The number should be either 0 or " + to_string(expected) + " but "
+          + to_string(found) + " was given.") {}
+}
+}
