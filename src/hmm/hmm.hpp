@@ -103,8 +103,13 @@ inline double scalar_product(const Gradient &gradient1,
   return g;
 }
 
-// forward-declaration for a friend function
+// forward-declaration for friend functions
 struct Evaluator;
+namespace Logo {
+std::vector<std::string> draw_logos(const HMM &hmm, const std::string &path,
+                                    const Logo::Options &options,
+                                    size_t &motif_idx);
+}
 
 /** The directional derivate */
 inline double dderiv(const Gradient &direction, const Gradient &gradient) {
@@ -311,8 +316,10 @@ protected:
   friend struct Evaluator;
   friend struct ConditionalDecoder;
 #if CAIRO_FOUND
-  friend void draw_logos(const HMM &hmm, const Logo::Options &options,
-                         const std::string &label, size_t &motif_idx);
+  friend std::vector<std::string> Logo::draw_logos(const HMM &hmm,
+                                                   const std::string &path,
+                                                   const Logo::Options &options,
+                                                   size_t &motif_idx);
 #endif
 
 public:

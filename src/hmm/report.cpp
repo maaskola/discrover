@@ -26,27 +26,6 @@ using namespace std;
 
 #if CAIRO_FOUND
 #include "../logo/logo.hpp"
-
-vector<string> Evaluator::generate_logos(const string &path_stem,
-                                         const Options::HMM &options) const {
-  vector<string> paths;
-  size_t motif_idx = 0;
-  for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
-    if (hmm.is_motif_group(group_idx)) {
-      const string nucls = "acgt";
-      Logo::matrix_t matrix;
-      for (auto state : hmm.groups[group_idx].states) {
-        Logo::column_t col(4, 0);
-        for (size_t i = 0; i < nucls.size(); i++)
-          col[i] = hmm.emission(state, i);
-        matrix.push_back(col);
-      }
-      for (auto path : Logo::draw_logo(matrix, path_stem, options.logo))
-        paths.push_back(path);
-      motif_idx++;
-    }
-  return paths;
-}
 #endif
 
 string contrast_name_tag(const Data::Contrast &contrast) {
@@ -507,7 +486,9 @@ Evaluator::Result Evaluator::report(const Data::Collection &collection,
                      + compression2ending(options.output_compression);
 
 #if CAIRO_FOUND
-  result.files.logos = generate_logos(options.label + file_tag, options);
+  size_t motif_idx = 0;
+  result.files.logos
+      = draw_logos(hmm, options.label + file_tag, options.logo, motif_idx);
 #endif
 
   ofstream summary_out, occurrence_file, viterbi_file, bed_file;
