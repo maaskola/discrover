@@ -433,7 +433,7 @@ vector<string> draw_logos(const HMM &hmm, const string &path_stem,
       const string nucls = "acgt";
       Logo::matrix_t matrix;
       vector<double> widths;
-      int prev_state = hmm.n_states;
+      size_t prev_state = hmm.n_states;
       for (auto state :
            topological_order(hmm.transition, hmm.groups[group_idx].states)) {
         Logo::column_t col(4, 0);
