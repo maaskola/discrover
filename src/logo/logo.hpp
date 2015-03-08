@@ -5,6 +5,7 @@
 #include <vector>
 #include <stdexcept>
 #include "options.hpp"
+#include "../hmm/hmm.hpp"
 
 namespace Logo {
 using column_t = std::vector<double>;
@@ -20,6 +21,10 @@ std::vector<std::string> draw_logo(const matrix_t &matrix,
                                    const Logo::Options &options,
                                    const std::vector<double> &widths
                                    = std::vector<double>());
+
+/** Draw PDF or PNG motif logos. */
+std::vector<std::string> draw_logos(const HMM &hmm, const std::string &path,
+                                    const Logo::Options &options, size_t &motif_idx);
 }
 
 namespace Exception {

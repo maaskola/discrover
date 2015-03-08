@@ -7,6 +7,7 @@
 #include <cairo-pdf.h>
 #include "logo.hpp"
 #include "../aux.hpp"
+#include "../topo_order.hpp"
 #include "../format_constants.hpp"
 
 using namespace std;
@@ -422,6 +423,35 @@ vector<string> draw_logo(const matrix_t &matrix, const string &out_path,
 
     return paths;
   }
+}
+
+vector<string> draw_logos(const HMM &hmm, const string &path_stem,
+                          const Logo::Options &options, size_t &motif_idx) {
+  vector<string> paths;
+  for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
+    if (hmm.is_motif_group(group_idx)) {
+      const string nucls = "acgt";
+      Logo::matrix_t matrix;
+      vector<double> widths;
+      int prev_state = hmm.n_states;
+      for (auto state :
+           topological_order(hmm.transition, hmm.groups[group_idx].states)) {
+        Logo::column_t col(4, 0);
+        for (size_t i = 0; i < nucls.size(); i++)
+          col[i] = hmm.emission(state, i);
+        matrix.push_back(col);
+        if (prev_state == hmm.n_states or state == prev_state + 1)
+          widths.push_back(1);
+        else
+          widths.push_back(hmm.transition(prev_state, state));
+        prev_state = state;
+      }
+      for (auto path : Logo::draw_logo(
+               matrix, path_stem + ".motif" + to_string(motif_idx++), options,
+               widths))
+        paths.push_back(path);
+    }
+  return paths;
 }
 }  //  namespace Logo
 

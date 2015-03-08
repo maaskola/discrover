@@ -67,24 +67,6 @@ Logo::matrix_t build_matrix(const string &motif, double absent) {
   return matrix;
 }
 
-void draw_logos(const HMM &hmm, const Logo::Options &options,
-                const string &label, size_t &motif_idx) {
-  for (size_t group_idx = 0; group_idx < hmm.get_ngroups(); group_idx++)
-    if (hmm.is_motif_group(group_idx)) {
-      const string nucls = "acgt";
-      Logo::matrix_t matrix;
-      for (auto state : hmm.groups[group_idx].states) {
-        Logo::column_t col(4, 0);
-        for (size_t i = 0; i < nucls.size(); i++)
-          col[i] = hmm.emission(state, i);
-        matrix.push_back(col);
-      }
-      Logo::draw_logo(matrix, label + ".motif" + to_string(motif_idx++),
-                      options);
-      motif_idx++;
-    }
-}
-
 int main(int argc, const char **argv) {
   const string default_error_msg
       = "Please inspect the command line help with -h or --help.";
@@ -244,7 +226,7 @@ int main(int argc, const char **argv) {
     cout << "=> .hmm file " << path << endl;
     try {
       HMM hmm(path, Verbosity::info);
-      draw_logos(hmm, options, label, motif_idx);
+      draw_logos(hmm, label, options, motif_idx);
     } catch (runtime_error &e) {
       cout << e.what() << endl;
       return EXIT_FAILURE;
