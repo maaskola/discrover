@@ -210,27 +210,29 @@ int main(int argc, const char **argv) {
   }
 
   size_t motif_idx = 0;
-  for (auto iupac : iupacs) {
-    cout << "=> IUPAC motif " << iupac << endl;
-    Logo::matrix_t matrix = build_matrix(iupac, options.absent);
-    Logo::draw_logo(matrix, label + ".motif" + to_string(motif_idx++), options);
-  }
+  try {
+    for (auto iupac : iupacs) {
+      cout << "=> IUPAC motif " << iupac << endl;
+      Logo::matrix_t matrix = build_matrix(iupac, options.absent);
+      Logo::draw_logo(matrix, label + ".motif" + to_string(motif_idx++),
+                      options);
+    }
 
-  for (auto path : matrix_paths) {
-    cout << "=> matrix file " << path << endl;
-    Logo::matrix_t matrix = read_matrix(path);
-    Logo::draw_logo(matrix, label + ".motif" + to_string(motif_idx++), options);
-  }
+    for (auto path : matrix_paths) {
+      cout << "=> matrix file " << path << endl;
+      Logo::matrix_t matrix = read_matrix(path);
+      Logo::draw_logo(matrix, label + ".motif" + to_string(motif_idx++),
+                      options);
+    }
 
-  for (auto path : hmm_paths) {
-    cout << "=> .hmm file " << path << endl;
-    try {
+    for (auto path : hmm_paths) {
+      cout << "=> .hmm file " << path << endl;
       HMM hmm(path, Verbosity::info);
       draw_logos(hmm, label, options, motif_idx);
-    } catch (runtime_error &e) {
-      cout << e.what() << endl;
-      return EXIT_FAILURE;
     }
+  } catch (runtime_error &e) {
+    cout << e.what() << endl;
+    return EXIT_FAILURE;
   }
 
   if (motif_idx == 0)
