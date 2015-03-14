@@ -1,11 +1,9 @@
-ADD_LIBRARY(discrover-hmm OBJECT association.cpp basedefs.cpp
-  analysis.cpp bitmask.cpp cli.cpp
-  conditional_mutual_information.cpp
-  conditional_decoder.cpp
-  hmm.cpp hmm_core.cpp hmm_init.cpp hmm_learn.cpp hmm_linesearch.cpp
-  hmm_aux.cpp hmm_gradient.cpp hmm_mcmc.cpp hmm_score.cpp hmm_options.cpp
-  polyfit.cpp registration.cpp report.cpp results.cpp
-  sequence.cpp subhmm.cpp trainingmode.cpp )
+ADD_LIBRARY(discrover-hmm OBJECT association.cpp analysis.cpp basedefs.cpp
+  bitmask.cpp cli.cpp conditional_mutual_information.cpp
+  conditional_decoder.cpp hmm.cpp hmm_core.cpp hmm_init.cpp hmm_learn.cpp
+  hmm_linesearch.cpp hmm_aux.cpp hmm_gradient.cpp hmm_mcmc.cpp hmm_score.cpp
+  hmm_options.cpp polyfit.cpp registration.cpp report.cpp results.cpp
+  sequence.cpp subhmm.cpp trainingmode.cpp)
 
 ADD_EXECUTABLE(discrover-bin main.cpp)
 SET_TARGET_PROPERTIES(discrover-bin PROPERTIES OUTPUT_NAME discrover)
