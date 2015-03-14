@@ -400,15 +400,6 @@ discrover-logo -m matrix.txt
 \end{verbbox}
 \fbox{\theverbbox[t]}
 
-The \discrover{} package also includes a Ruby script \verb|tikzlogo| that generates a \LaTeX{} document which uses \TikZ{} code to draw a sequence motif, and subsequently compiles the generated \LaTeX{} file into a PDF document.
-Finally, the PDF document is converted into a PNG image with the help of \verb|convert| from the ImageMagick package.\\
-\begin{verbbox}
-tikzlogo motif.hmm
-\end{verbbox}
-\fbox{\theverbbox[t]}
-
-Note that \verb|tikzlogo| has now been deprecated as it requires a relatively large \LaTeX{} environment to be installed.
-
 \subsection{Using random shuffles as control}
 In case you only have a set of signal sequences and you want to use dinucleotide shuffles as control, you have multiple possibilities.
 \subsubsection{Generating a set of dinucleotide shuffled sequences}
