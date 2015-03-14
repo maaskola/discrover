@@ -179,7 +179,7 @@ Alternatively, you can execute
 mkdir build && cd build && cmake -DCMAKE_INSTALL_PREFIX:PATH=/desired/installation/path ..
 ```
 
-where you would replace ```/desired/installation/path``` by the path to which you to install the package.
+where you would replace ```/desired/installation/path``` by the path to which you want to install the package.
 Note that you would have to issue this every time you configure the package, so it may be preferable to set this permanently as described in [step 1](#step1) above.
 
 
