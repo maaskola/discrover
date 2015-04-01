@@ -189,16 +189,16 @@ void gen_discrover_cli(size_t cols, string &config_path, Options::HMM &options,
     ("cv", po::value(&options.cross_validation_iterations)->default_value(0), "Number of cross validation iterations to do.")
     ("cv_freq", po::value(&options.cross_validation_freq)->default_value(0.9, "0.9"), "Fraction of data samples for training in cross validation.")
     ("nseq", po::value(&options.n_seq)->default_value(0), "Use only the first N sequences of each file. Use 0 to indicate all sequences.")
-    ("iter", po::value(&options.termination.max_iter)->default_value(1000), "Maximal number of iterations to perform in training. A value of 0 means no limit, and that the training is only terminated by the tolerance.")
-    ("salt", po::value(&options.random_salt), "Seed for the pseudo random number generator (used e.g. for sequence shuffle generation and MCMC sampling). Set this to get reproducible results.")
-    ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
-    ("conjugate", po::value(&options.conjugate)->default_value(Options::Conjugate::None, "none"),
-     "Conjugate gradient calculation\n"
-     "none \tNo conjugate gradient (Steepest ascent)\n"
+    ("conj", po::value(&options.conjugate)->default_value(Options::Conjugate::None, "none"),
+     "Conjugate gradient calculation method\n"
+     "none \tNo conjugate gradient (steepest ascent)\n"
      "fr   \tFletcher-Reeves\n"
      "pr   \tPolak-Ribière\n"
      "hs   \tHestenes-Stiefel\n"
      "dy   \tDai–Yuan\n")
+    ("iter", po::value(&options.termination.max_iter)->default_value(1000), "Maximal number of iterations to perform in training. A value of 0 means no limit, and that the training is only terminated by the tolerance.")
+    ("salt", po::value(&options.random_salt), "Seed for the pseudo random number generator (used e.g. for sequence shuffle generation and MCMC sampling). Set this to get reproducible results.")
+    ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
     ;
 
   init_options.add_options()
