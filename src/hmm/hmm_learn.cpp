@@ -623,9 +623,11 @@ Training::State HMM::iterative_training(const Data::Collection &collection,
              << endl;
   }
 
+  Gradient gradient, conjugate;
   while ((iteration++ < options.termination.max_iter
           or options.termination.max_iter == 0)
-         and perform_training_iteration(collection, tasks, options, state))
+         and perform_training_iteration(collection, tasks, options, state,
+                                        gradient, conjugate))
     if (verbosity >= Verbosity::info) {
       cout << endl << "Iteration                                      "
            << iteration << endl;
@@ -657,10 +659,13 @@ Training::State HMM::iterative_training(const Data::Collection &collection,
 bool HMM::perform_training_iteration(const Data::Collection &collection,
                                      const Training::Tasks &tasks,
                                      const Options::HMM &options,
-                                     Training::State &state) {
+                                     Training::State &state,
+                                     Gradient &prev_gradient,
+                                     Gradient &prev_conjugate) {
   bool done = true;
 
   size_t task_idx = 0;
+
   for (auto task : tasks) {
     double score = -numeric_limits<double>::infinity();
     if (task.measure != Measure::Undefined) {
@@ -706,12 +711,13 @@ bool HMM::perform_training_iteration(const Data::Collection &collection,
 
       if (Training::measure2method(task.measure) == Training::Method::Gradient)
         done = perform_training_iteration_gradient(
-                   collection, task, options, state.center, score) and done;
+                   collection, task, options, state.center, score,
+                   prev_gradient, prev_conjugate) and done;
 
       if (Training::measure2method(task.measure)
           == Training::Method::Reestimation)
-        done = perform_training_iteration_reestimation(collection, task,
-                                                       options, score) and done;
+        done = perform_training_iteration_reestimation(
+                   collection, task, options, score) and done;
 
       if ((task.measure == Measure::ClassificationPosterior
            or task.measure == Measure::ClassificationLikelihood)
@@ -858,9 +864,63 @@ bool HMM::perform_training_iteration_reestimation(
   return done;
 }
 
+Gradient compute_conjugate(Gradient gradient, Gradient &prev_gradient,
+                           Gradient &prev_conjugate, Options::Conjugate mode) {
+  double beta = 0;
+  if (gradient.emission.size1() == prev_gradient.emission.size1() and
+      gradient.emission.size2() == prev_gradient.emission.size2() and
+      gradient.transition.size1() == prev_gradient.transition.size1() and
+      gradient.transition.size2() == prev_gradient.transition.size2()) {
+    Gradient diff = gradient;
+    for (size_t i = 0; i < gradient.emission.size1(); i++)
+      for (size_t j = 0; j < gradient.emission.size2(); j++)
+        diff.emission(i, j) -= prev_conjugate.emission(i, j);
+    for (size_t i = 0; i < gradient.transition.size1(); i++)
+      for (size_t j = 0; j < gradient.transition.size2(); j++)
+        diff.transition(i, j) -= prev_conjugate.transition(i, j);
+
+    switch (mode) {
+      case Options::Conjugate::None:
+        break;
+      case Options::Conjugate::FletcherReeves:
+        beta = scalar_product(gradient, gradient)
+               / scalar_product(prev_gradient, prev_gradient);
+        break;
+      case Options::Conjugate::PolakRibiere:
+        beta = scalar_product(gradient, diff)
+               / scalar_product(prev_gradient, prev_gradient);
+        break;
+      case Options::Conjugate::HestenesStiefel:
+        beta = scalar_product(gradient, diff)
+               / scalar_product(prev_conjugate, diff);
+        break;
+      case Options::Conjugate::DaiYuan:
+        beta = scalar_product(gradient, gradient)
+               / scalar_product(prev_conjugate, diff);
+        break;
+    }
+  }
+
+  Gradient conjugate = gradient;
+  if (beta != 0) {
+    for (size_t i = 0; i < gradient.emission.size1(); i++)
+      for (size_t j = 0; j < gradient.emission.size2(); j++)
+        conjugate.emission(i, j) += beta * prev_conjugate.emission(i, j);
+    for (size_t i = 0; i < gradient.transition.size1(); i++)
+      for (size_t j = 0; j < gradient.transition.size2(); j++)
+        conjugate.transition(i, j) += beta * prev_conjugate.transition(i, j);
+  }
+
+  prev_gradient = gradient;
+  prev_conjugate = conjugate;
+
+  return conjugate;
+}
+
 bool HMM::perform_training_iteration_gradient(
     const Data::Collection &collection, const Training::Task &task,
-    const Options::HMM &options, int &center, double &score) {
+    const Options::HMM &options, int &center, double &score,
+    Gradient &prev_gradient, Gradient &prev_conjugate) {
   if (verbosity >= Verbosity::verbose)
     cerr << "HMM::perform_training_iteration_gradient" << endl;
 
@@ -897,6 +957,14 @@ bool HMM::perform_training_iteration_gradient(
   if (verbosity >= Verbosity::verbose)
     cout << "The transition gradient is : " << gradient.transition << endl
          << "The emission gradient is : " << gradient.emission << endl;
+
+  if (options.conjugate != Options::Conjugate::None) {
+    gradient = compute_conjugate(gradient, prev_gradient, prev_conjugate,
+                                 options.conjugate);
+    if (verbosity >= Verbosity::verbose)
+      cout << "The transition conjugate gradient is : " << gradient.transition << endl
+        << "The emission conjugate gradient is : " << gradient.emission << endl;
+  }
 
   double gradient_norm = sqrt(scalar_product(gradient, gradient));
   if (verbosity >= Verbosity::verbose)

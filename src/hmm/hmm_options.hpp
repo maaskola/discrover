@@ -79,6 +79,14 @@ struct Evaluation {
   bool print_posterior;
 };
 
+enum class Conjugate {
+  None,
+  FletcherReeves,
+  PolakRibiere,
+  HestenesStiefel,
+  DaiYuan
+};
+
 struct MultiMotif {
   enum class Relearning {
     None,          // Just add, no relearning
@@ -126,6 +134,7 @@ struct HMM {
   double cross_validation_freq;
   bool store_intermediate;  // to write out intermediate parameterizations
   size_t wiggle;
+  Conjugate conjugate;
   LineSearch line_search;
   unsigned int random_salt;  // seed for the random number generator
 
@@ -154,6 +163,7 @@ struct HMM {
 
 std::istream &operator>>(std::istream &in, Compression &type);
 std::istream &operator>>(std::istream &is, MultiMotif::Relearning &relearning);
+std::istream &operator>>(std::istream &is, Conjugate &conjugate);
 
 std::ostream &operator<<(std::ostream &os, const Compression &type);
 std::ostream &operator<<(std::ostream &os,
@@ -174,6 +184,11 @@ struct InvalidCompression : public std::runtime_error {
 };
 struct InvalidRelearning : public std::runtime_error {
   InvalidRelearning(const std::string &token);
+};
+}
+namespace Optimization {
+struct InvalidConjugate : public std::runtime_error {
+  InvalidConjugate(const std::string &token);
 };
 }
 }

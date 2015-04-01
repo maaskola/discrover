@@ -1,5 +1,6 @@
 #include "hmm_options.hpp"
 #include "trainingmode.hpp"
+#include "../aux.hpp"
 
 using namespace std;
 
@@ -41,6 +42,25 @@ istream &operator>>(istream &in, Compression &compression) {
   else
     throw Exception::HMM::InvalidCompression(token);
   return in;
+}
+
+istream &operator>>(istream &is, Conjugate &conjugate) {
+  string token;
+  is >> token;
+  token = string_tolower(token);
+  if (token == "none")
+    conjugate = Conjugate::None;
+  else if (token == "fr" or token == "fletcher" or token == "fletcherreeves")
+    conjugate = Conjugate::FletcherReeves;
+  else if (token == "pr" or token == "polak" or token == "polakribiere")
+    conjugate = Conjugate::PolakRibiere;
+  else if (token == "hs" or token == "hestenes" or token == "hestenesstiefel")
+    conjugate = Conjugate::HestenesStiefel;
+  else if (token == "dy" or token == "daiyan" or token == "daiyan")
+    conjugate = Conjugate::DaiYuan;
+  else
+    throw Exception::Optimization::InvalidConjugate(token);
+  return is;
 }
 
 istream &operator>>(istream &is, MultiMotif::Relearning &relearning) {
@@ -221,5 +241,9 @@ InvalidCompression::InvalidCompression(const string &token)
                     + "'.") {}
 InvalidRelearning::InvalidRelearning(const string &token)
     : runtime_error("Error: found invalid relearning mode '" + token + "'.") {}
+}
+namespace Optimization {
+InvalidConjugate::InvalidConjugate(const string &token)
+    : runtime_error("Error: found invalid conjugate mode '" + token + "'.") {}
 }
 }

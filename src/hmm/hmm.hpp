@@ -236,12 +236,16 @@ protected:
   bool perform_training_iteration(const Data::Collection &col,
                                   const Training::Tasks &tasks,
                                   const Options::HMM &options,
-                                  Training::State &ts);
+                                  Training::State &ts,
+                                  Gradient &prev_gradient,
+                                  Gradient &prev_conjugate);
   /** Perform one iteration of gradient training. */
   bool perform_training_iteration_gradient(const Data::Collection &col,
                                            const Training::Task &task,
                                            const Options::HMM &options,
-                                           int &center, double &score);
+                                           int &center, double &score,
+                                           Gradient &prev_gradient,
+                                           Gradient &prev_conjugate);
   /** Perform one iteration of re-estimation training. */
   bool perform_training_iteration_reestimation(const Data::Collection &col,
                                                const Training::Task &task,

@@ -192,6 +192,13 @@ void gen_discrover_cli(size_t cols, string &config_path, Options::HMM &options,
     ("iter", po::value(&options.termination.max_iter)->default_value(1000), "Maximal number of iterations to perform in training. A value of 0 means no limit, and that the training is only terminated by the tolerance.")
     ("salt", po::value(&options.random_salt), "Seed for the pseudo random number generator (used e.g. for sequence shuffle generation and MCMC sampling). Set this to get reproducible results.")
     ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
+    ("conjugate", po::value(&options.conjugate)->default_value(Options::Conjugate::None, "none"),
+     "Conjugate gradient calculation\n"
+     "none \tNo conjugate gradient (Steepest ascent)\n"
+     "fr   \tFletcher-Reeves\n"
+     "pr   \tPolak-Ribière\n"
+     "hs   \tHestenes-Stiefel\n"
+     "dy   \tDai–Yuan\n")
     ;
 
   init_options.add_options()
