@@ -605,7 +605,7 @@ Although the hybrid learning mode is used by default, you may explicitly specify
 This option is only shown in the full command line help, available with \verb|discrover -hV|.
 
 \subsubsection{Gradient and Monte-Carlo Markov chain optimization}
-Gradient optimization is the default learning mode for \discrover{}.
+Gradient optimization is the default learning mode for \discrover{}, possibly using conjugate gradients (see paragraph below).
 Aside from gradient learning, it is also possible to use Monte-Carlo Markov chain optimization to learn HMM parameters.
 This is done with the command line switch \verb|--sampling|.
 Like the MCMC optimization mode of \plasma{} (see section~\ref{section:plasma-MCMC}), also that of \discrover{} uses parallel tempering.
@@ -616,11 +616,26 @@ For this reason, MCMC learning in \discrover{} optimizes all parameters, includi
 There are several options available to determine the way \discrover{} performs MCMC\@.
 For these, please refer to the \emph{MCMC optimization options} section of the extended command line help, available via \verb|discrover --help --verbose|.
 
+\newcommand{\Item}[1]{\item[#1] \hfill \\}
+
+\paragraph{Conjugate gradient calculation methods}
+Aside from steepest-ascent gradient optimization, \discrover{} can also utilize four conjugate gradient calculation methods.
+\begin{description}
+  \Item{\Q{none}}
+    no conjugate gradient (steepest-ascent)
+  \Item{\Q{fr}}
+    Fletcher-Reeves
+  \Item{\Q{pr}}
+    Polak-Ribi\`ere
+  \Item{\Q{hs}}
+    Hestenes-Stiefel
+  \Item{\Q{dy}}
+    Dai-Yuan
+\end{description}
+
 \subsection{Specifying input files, motifs, and scores}
 \label{section:specification}
 The following section details the syntax to specify input files, motifs, and scores for \discrover{}.
-
-\newcommand{\Item}[1]{\item[#1] \hfill \\}
 
 \subsubsection{FASTA file specification}
 FASTA file specifications consist of up to three colon-separated terms, with the following syntax:
