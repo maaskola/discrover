@@ -289,6 +289,10 @@ Fraction of data samples for training in cross validation.
 Use only the first \fInum\fR sequences of each file.
 Use 0 to indicate all sequences.
 .TP
+.B \-\-conj \fIarg\fR (=none)
+Conjugate gradient calculation method.
+Available are: no conjugate gradient 'none', Fletcher-Reeves 'fr', Polak-Ribiere 'pr', Hestenes-Stiefel 'hs', Dai-Yuan 'dy'.
+.TP
 .B \-\-iter \fInum\fR (=1000)
 Maximal number of iterations to perform in training.
 A value of 0 means no limit, and that the training is only terminated by the tolerance.
