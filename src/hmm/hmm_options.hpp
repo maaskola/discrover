@@ -161,7 +161,7 @@ struct HMM {
   ExecutionInformation exec_info;
 };
 
-std::istream &operator>>(std::istream &in, Compression &type);
+std::istream &operator>>(std::istream &is, Compression &type);
 std::istream &operator>>(std::istream &is, MultiMotif::Relearning &relearning);
 std::istream &operator>>(std::istream &is, Conjugate &conjugate);
 

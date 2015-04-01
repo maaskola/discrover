@@ -30,9 +30,9 @@ string compression2string(Compression compression) {
   return "";
 }
 
-istream &operator>>(istream &in, Compression &compression) {
+istream &operator>>(istream &is, Compression &compression) {
   string token;
-  in >> token;
+  is >> token;
   if (token == "none")
     compression = Compression::none;
   else if (token == "gzip" or token == "gz")
@@ -41,7 +41,7 @@ istream &operator>>(istream &in, Compression &compression) {
     compression = Compression::bzip2;
   else
     throw Exception::HMM::InvalidCompression(token);
-  return in;
+  return is;
 }
 
 istream &operator>>(istream &is, Conjugate &conjugate) {
