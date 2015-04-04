@@ -624,10 +624,11 @@ Training::State HMM::iterative_training(const Data::Collection &collection,
   }
 
   Gradient gradient, conjugate;
+  size_t cg_niter = 0;
   while ((iteration++ < options.termination.max_iter
           or options.termination.max_iter == 0)
          and perform_training_iteration(collection, tasks, options, state,
-                                        gradient, conjugate))
+                                        gradient, conjugate, cg_niter))
     if (verbosity >= Verbosity::info) {
       cout << endl << "Iteration                                      "
            << iteration << endl;
@@ -656,12 +657,10 @@ Training::State HMM::iterative_training(const Data::Collection &collection,
   return state;
 }
 
-bool HMM::perform_training_iteration(const Data::Collection &collection,
-                                     const Training::Tasks &tasks,
-                                     const Options::HMM &options,
-                                     Training::State &state,
-                                     Gradient &prev_gradient,
-                                     Gradient &prev_conjugate) {
+bool HMM::perform_training_iteration(
+    const Data::Collection &collection, const Training::Tasks &tasks,
+    const Options::HMM &options, Training::State &state,
+    Gradient &prev_gradient, Gradient &prev_conjugate, size_t &cg_niter) {
   bool done = true;
 
   size_t task_idx = 0;
@@ -712,7 +711,7 @@ bool HMM::perform_training_iteration(const Data::Collection &collection,
       if (Training::measure2method(task.measure) == Training::Method::Gradient)
         done = perform_training_iteration_gradient(
                    collection, task, options, state.center, score,
-                   prev_gradient, prev_conjugate) and done;
+                   prev_gradient, prev_conjugate, cg_niter) and done;
 
       if (Training::measure2method(task.measure)
           == Training::Method::Reestimation)
@@ -865,7 +864,9 @@ bool HMM::perform_training_iteration_reestimation(
 }
 
 Gradient compute_conjugate(Gradient gradient, Gradient &prev_gradient,
-                           Gradient &prev_conjugate, Options::Conjugate mode) {
+                           Gradient &prev_conjugate,
+                           const Options::Conjugate &cg_options,
+                           size_t &cg_niter) {
   double beta = 0;
   if (gradient.emission.size1() == prev_gradient.emission.size1() and
       gradient.emission.size2() == prev_gradient.emission.size2() and
@@ -879,25 +880,34 @@ Gradient compute_conjugate(Gradient gradient, Gradient &prev_gradient,
       for (size_t j = 0; j < gradient.transition.size2(); j++)
         diff.transition(i, j) -= prev_conjugate.transition(i, j);
 
-    switch (mode) {
-      case Options::Conjugate::None:
+    switch (cg_options.mode) {
+      case Options::Conjugate::Mode::None:
         break;
-      case Options::Conjugate::FletcherReeves:
+      case Options::Conjugate::Mode::FletcherReeves:
         beta = scalar_product(gradient, gradient)
                / scalar_product(prev_gradient, prev_gradient);
         break;
-      case Options::Conjugate::PolakRibiere:
+      case Options::Conjugate::Mode::PolakRibiere:
         beta = scalar_product(gradient, diff)
                / scalar_product(prev_gradient, prev_gradient);
         break;
-      case Options::Conjugate::HestenesStiefel:
+      case Options::Conjugate::Mode::HestenesStiefel:
         beta = scalar_product(gradient, diff)
                / scalar_product(prev_conjugate, diff);
         break;
-      case Options::Conjugate::DaiYuan:
+      case Options::Conjugate::Mode::DaiYuan:
         beta = scalar_product(gradient, gradient)
                / scalar_product(prev_conjugate, diff);
         break;
+    }
+    if (beta < 0
+        or fabs(scalar_product(gradient, prev_gradient))
+           / scalar_product(gradient, prev_gradient)
+           < cg_options.restart_threshold
+        or (cg_options.restart_iteration > 0
+            and cg_niter >= cg_options.restart_iteration)) {
+      beta = 0;
+      cg_niter = 0;
     }
   }
 
@@ -914,13 +924,15 @@ Gradient compute_conjugate(Gradient gradient, Gradient &prev_gradient,
   prev_gradient = gradient;
   prev_conjugate = conjugate;
 
+  cg_niter++;
+
   return conjugate;
 }
 
 bool HMM::perform_training_iteration_gradient(
     const Data::Collection &collection, const Training::Task &task,
     const Options::HMM &options, int &center, double &score,
-    Gradient &prev_gradient, Gradient &prev_conjugate) {
+    Gradient &prev_gradient, Gradient &prev_conjugate, size_t &cg_niter) {
   if (verbosity >= Verbosity::verbose)
     cerr << "HMM::perform_training_iteration_gradient" << endl;
 
@@ -958,9 +970,9 @@ bool HMM::perform_training_iteration_gradient(
     cout << "The transition gradient is : " << gradient.transition << endl
          << "The emission gradient is : " << gradient.emission << endl;
 
-  if (options.conjugate != Options::Conjugate::None) {
+  if (options.conjugate.mode != Options::Conjugate::Mode::None) {
     gradient = compute_conjugate(gradient, prev_gradient, prev_conjugate,
-                                 options.conjugate);
+                                 options.conjugate, cg_niter);
     if (verbosity >= Verbosity::verbose)
       cout << "The transition conjugate gradient is : " << gradient.transition << endl
         << "The emission conjugate gradient is : " << gradient.emission << endl;

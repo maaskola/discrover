@@ -48,6 +48,7 @@ void gen_discrover_cli(size_t cols, string &config_path, Options::HMM &options,
   po::options_description init_options("Initialization options", cols);
   po::options_description eval_options("Evaluation options", cols);
   po::options_description advanced_options("Advanced options", cols);
+  po::options_description conjugate_options("Conjugate gradient calculation options", cols);
   po::options_description multi_motif_options("Multiple motif mode options", cols);
   po::options_description mmie_options("MMIE options", cols);
   po::options_description linesearching_options("Line searching options", cols);
@@ -189,16 +190,21 @@ void gen_discrover_cli(size_t cols, string &config_path, Options::HMM &options,
     ("cv", po::value(&options.cross_validation_iterations)->default_value(0), "Number of cross validation iterations to do.")
     ("cv_freq", po::value(&options.cross_validation_freq)->default_value(0.9, "0.9"), "Fraction of data samples for training in cross validation.")
     ("nseq", po::value(&options.n_seq)->default_value(0), "Use only the first N sequences of each file. Use 0 to indicate all sequences.")
-    ("conj", po::value(&options.conjugate)->default_value(Options::Conjugate::None, "none"),
+    ("iter", po::value(&options.termination.max_iter)->default_value(1000), "Maximal number of iterations to perform in training. A value of 0 means no limit, and that the training is only terminated by the tolerance.")
+    ("salt", po::value(&options.random_salt), "Seed for the pseudo random number generator (used e.g. for sequence shuffle generation and MCMC sampling). Set this to get reproducible results.")
+    ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
+    ;
+
+  conjugate_options.add_options()
+    ("cg_mode", po::value(&options.conjugate.mode)->default_value(Options::Conjugate::Mode::None, "none"),
      "Conjugate gradient calculation method\n"
      "none \tNo conjugate gradient (steepest ascent)\n"
      "fr   \tFletcher-Reeves\n"
      "pr   \tPolak-Ribière\n"
      "hs   \tHestenes-Stiefel\n"
-     "dy   \tDai-Yuan\n")
-    ("iter", po::value(&options.termination.max_iter)->default_value(1000), "Maximal number of iterations to perform in training. A value of 0 means no limit, and that the training is only terminated by the tolerance.")
-    ("salt", po::value(&options.random_salt), "Seed for the pseudo random number generator (used e.g. for sequence shuffle generation and MCMC sampling). Set this to get reproducible results.")
-    ("weight", po::bool_switch(&options.weighting), "When combining objective functions across multiple contrasts, combine values by weighting with the number of sequences per contrasts.")
+     "dy   \tDai-Yuan")
+    ("cg_iter", po::value(&options.conjugate.restart_iteration)->default_value(0), "Number of iterations after which to reset conjugate gradient. Use 0 to never reset.")
+    ("cg_thresh", po::value(&options.conjugate.restart_threshold)->default_value(0), "Threshold for gradient orthogonality (between 0 and 1) below which the conjugate gradient will be reset. Use 0 to never reset.")
     ;
 
   init_options.add_options()
@@ -280,6 +286,7 @@ void gen_discrover_cli(size_t cols, string &config_path, Options::HMM &options,
     ;
 
   advanced_options
+    .add(conjugate_options)
     .add(multi_motif_options)
     .add(mmie_options)
     .add(sampling_options);

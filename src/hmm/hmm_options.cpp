@@ -44,20 +44,20 @@ istream &operator>>(istream &is, Compression &compression) {
   return is;
 }
 
-istream &operator>>(istream &is, Conjugate &conjugate) {
+istream &operator>>(istream &is, Conjugate::Mode &conjugate) {
   string token;
   is >> token;
   token = string_tolower(token);
   if (token == "none")
-    conjugate = Conjugate::None;
+    conjugate = Conjugate::Mode::None;
   else if (token == "fr" or token == "fletcher" or token == "fletcherreeves")
-    conjugate = Conjugate::FletcherReeves;
+    conjugate = Conjugate::Mode::FletcherReeves;
   else if (token == "pr" or token == "polak" or token == "polakribiere")
-    conjugate = Conjugate::PolakRibiere;
+    conjugate = Conjugate::Mode::PolakRibiere;
   else if (token == "hs" or token == "hestenes" or token == "hestenesstiefel")
-    conjugate = Conjugate::HestenesStiefel;
+    conjugate = Conjugate::Mode::HestenesStiefel;
   else if (token == "dy" or token == "daiyan" or token == "daiyan")
-    conjugate = Conjugate::DaiYuan;
+    conjugate = Conjugate::Mode::DaiYuan;
   else
     throw Exception::Optimization::InvalidConjugate(token);
   return is;

@@ -79,12 +79,17 @@ struct Evaluation {
   bool print_posterior;
 };
 
-enum class Conjugate {
-  None,
-  FletcherReeves,
-  PolakRibiere,
-  HestenesStiefel,
-  DaiYuan
+struct Conjugate {
+  enum class Mode {
+    None,
+    FletcherReeves,
+    PolakRibiere,
+    HestenesStiefel,
+    DaiYuan
+  };
+  Mode mode;
+  size_t restart_iteration;
+  double restart_threshold;
 };
 
 struct MultiMotif {
@@ -163,7 +168,7 @@ struct HMM {
 
 std::istream &operator>>(std::istream &is, Compression &type);
 std::istream &operator>>(std::istream &is, MultiMotif::Relearning &relearning);
-std::istream &operator>>(std::istream &is, Conjugate &conjugate);
+std::istream &operator>>(std::istream &is, Conjugate::Mode &conjugate);
 
 std::ostream &operator<<(std::ostream &os, const Compression &type);
 std::ostream &operator<<(std::ostream &os,
