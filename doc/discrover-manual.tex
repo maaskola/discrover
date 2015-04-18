@@ -638,6 +638,7 @@ Aside from steepest-ascent gradient optimization, \discrover{} can also utilize 
 The following section details the syntax to specify input files, motifs, and scores for \discrover{}.
 
 \subsubsection{FASTA file specification}
+\label{section:fasta-specification}
 FASTA file specifications consist of up to three colon-separated terms, with the following syntax:
 
 \begin{verbbox}
@@ -650,7 +651,9 @@ The meaning of \Q{names}, \Q{contrast}, and \Q{path} are as follows:
 
 \begin{description}
  \Item{\Q{names}}
-   comma-separated list of names of motifs enriched in this file, or \Q{control}
+   comma-separated list of names of motifs enriched in this file, or \Q{control};
+   directional objective functions (see section~\ref{section:score-specification}) need to know which of the FASTA files are to treated as signal sequences;
+   thus for these it is important to name the motifs and specify them in the FASTA file specification
  \Item{\Q{contrast}}
    name of a contrast this file belongs to
  \Item{\Q{path}}
@@ -680,7 +683,9 @@ The meaning of \Q{name}, \Q{insert}, and \Q{motifdef} are as follows:
 
 \begin{description}
   \Item{\Q{name}}
-    unique name for the motif; may not be \Q{control}
+  unique name for the motif; may not be \Q{control};
+  directional objective functions (see section~\ref{section:score-specification}) need to know which of the FASTA files are to treated as signal sequences;
+  thus for these it is important to name the motifs and specify them in the FASTA file specification
   \Item{\Q{insert}}
     comma-separated list of positions after which to add an insertion state; positions are 1-indexed; $1 \leq \text{position} < \text{motif length}$ must hold for each position
   \Item{\Q{motifdef}}
@@ -754,6 +759,7 @@ Please refer to figure~\ref{fig:insert-states} for an illustration.
 \end{figure}
 
 \subsubsection{Score specification}
+\label{section:score-specification}
 Score specifications consist of up to three colon-separated terms, with the following syntax:
 
 \begin{verbbox}
@@ -796,12 +802,14 @@ The following significance measures are available:
   \Item{\Q{mmie}}
     Maximum mutual information estimation (MMIE), also known as posterior classification probability
   \Item{\Q{mcc}}
-    Matthews correlation coefficient
+    Matthews correlation coefficient; directional measure (see note below)
   \Item{\Q{dlogl}}
-    Log-likelihood difference, like in the motif discovery method DME, see doi: 10.1073/pnas.0406123102
+    Log-likelihood difference, like in the motif discovery method DME, see doi: 10.1073/pnas.0406123102; directional measure (see note below)
   \Item{\Q{dfreq}}
-    Difference of frequency of sequences with motif occurrences, similar to the motif discovery methods DIPS and DECOD, see doi: 10.1093/bioinformatics/btl227 and 10.1093/bioinformatics/btr412
+    Difference of frequency of sequences with motif occurrences, similar to the motif discovery methods DIPS and DECOD, see doi: 10.1093/bioinformatics/btl227 and 10.1093/bioinformatics/btr412; directional measure (see note below)
 \end{description}
+Note that the directional measures (\Q{mcc}, \Q{dlogl}, and \Q{dfreq}) require you to specify in which of the samples the motif is expected.
+That is to say: you have to give a \Q{name} to your motif in the motif specification (see section~\ref{section:motif-specification}), and add \Q{name} to the list of \Q{names} given in a FASTA file specification (see section~\ref{section:fasta-specification}).
 
 \subsection{Output files}
 The output files produced by \discrover{} comprise:

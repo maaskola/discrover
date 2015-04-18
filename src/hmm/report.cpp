@@ -148,7 +148,7 @@ void Evaluator::eval_contrast(ostream &ofs, const Data::Contrast &contrast,
                    limit_logp, name, tag);
       print(ofs, tag, "Matthews correlation coefficient", mcc);
       // print(ofs, tag, "DIPS t-score", dips_tscore * 100, "%");
-      print(ofs, tag, "DIPS site-score", dips_sitescore * 100, "%");
+      print(ofs, tag, "Relative frequency difference", dips_sitescore * 100, "%");
       // TODO: reactivate
       // print(ofs, tag, "log P correct classification", correct_class);
       // TODO print a table of the likelihoods

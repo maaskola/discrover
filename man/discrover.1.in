@@ -73,7 +73,12 @@ The square brackets indicate that \fInames\fR and \fIcontrast\fR are optional.
 The meaning of \fInames\fR, \fIcontrast\fR, and \fIpath\fR are as follows:
 .TP
 .IR names
-comma\-separated list of names of motifs enriched in this file, or 'control'
+comma\-separated list of names of motifs enriched in this file, or 'control';
+directional objective functions (see
+.B score specification\fR)
+need to know which of the FASTA files are to be treated as signal sequences;
+thus for these it is important to name the motifs and specify them in the
+.B FASTA file specification\fR
 .TP
 .IR contrast
 name of a contrast this file belongs to
@@ -106,7 +111,12 @@ The square brackets indicate that \fIname\fR and \fIinsert\fR are optional.
 The meaning of \fIname\fR, \fIinsert\fR, and \fImotifdef\fR are as follows:
 .TP
 .I name
-unique name for the motif; may not be 'control'
+unique name for the motif; may not be 'control';
+directional objective functions (see
+.B score specification\fR)
+need to know which of the FASTA files are to be treated as signal sequences;
+thus for these it is important to name the motifs and specify them in the
+.B FASTA file specification\fR
 .TP
 .I insert
 comma\-separated list of positions after which to add an insertion state;
@@ -181,13 +191,18 @@ mmie
 Maximum mutual information estimation (MMIE), also known as posterior classification probability
 .TP
 mcc
-Matthews correlation coefficient
+Matthews correlation coefficient; directional measure (see note below)
 .TP
 dlogl
-Log\-likelihood difference, like in the motif discovery method DME, see doi: 10.1073/pnas.0406123102
+Log\-likelihood difference, like in the motif discovery method DME, see doi: 10.1073/pnas.0406123102; directional measure (see note below)
 .TP
 dfreq
-Difference of frequency of sequences with motif occurrences, similar to the motif discovery methods DIPS and DECOD, see doi: 10.1093/bioinformatics/btl227 and 10.1093/bioinformatics/btr412
+Difference of frequency of sequences with motif occurrences, similar to the motif discovery methods DIPS and DECOD, see doi: 10.1093/bioinformatics/btl227 and 10.1093/bioinformatics/btr412; directional measure (see note below)
+.PP
+Note that the directional measures (mcc, dlogl, and dfreq) require you to specify in which of the samples the motif is expected.
+That is to say: you have to give a \fIname\fR to your motif in the
+.B motif specification\fR, and add \fIname\fR to the list of \fInames\fR given in a
+.B FASTA file specification\fR.
 .\"
 .\"
 .\"
