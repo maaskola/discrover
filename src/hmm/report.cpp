@@ -241,8 +241,8 @@ void correlation_report(const vector<T> &x, ostream &out, size_t width = 12,
   size_t n = x.size();
   double z = cor_fisher_z(rho, n);
   double t = cor_student_t(rho, n);
-  double p_norm = 0, p_t = 0;
-  {
+  double p_norm = 1, p_t = 1;
+  if (n > 2) {
     using namespace boost::math;
     const students_t_distribution<> students_t_dist(n - 2);
     if (rho < 0) {
@@ -254,11 +254,12 @@ void correlation_report(const vector<T> &x, ostream &out, size_t width = 12,
     }
   }
   out << setw(width) << fixed << right << setprecision(prec) << rho
-      << setw(width) << fixed << right << setprecision(2) << z << setw(width)
-      << fixed << right << setprecision(2) << log(p_norm) << setw(4) << right
-      << stars(p_norm) << setw(width) << fixed << right << setprecision(2) << t
-      << setw(width) << fixed << right << setprecision(2) << log(p_t) << setw(4)
-      << right << stars(p_t) << endl;
+      << setw(width) << fixed << right << setprecision(2) << z
+      << setw(width) << fixed << right << setprecision(2) << log(p_norm)
+      << setw(4) << right << stars(p_norm)
+      << setw(width) << fixed << right << setprecision(2) << t
+      << setw(width) << fixed << right << setprecision(2) << log(p_t)
+      << setw(4) << right << stars(p_t) << endl;
   out.flags(flags);
 }
 
