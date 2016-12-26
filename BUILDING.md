@@ -237,7 +237,7 @@ This can be done with a command like
 ```sh
 export PATH="HERE/bin:$PATH"
 export LD_LIBRARY_PATH="HERE/lib:$LD_LIBRARY_PATH"
-export MANPATH="HERE/man:$MANPATH"
+export MANPATH="HERE/share/man:$MANPATH"
 ```
 
 where ```HERE``` will have to be the path that you installed to (the value of the ```CMAKE_INSTALL_PREFIX``` variable that you set above).

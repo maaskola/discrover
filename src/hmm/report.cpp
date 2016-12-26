@@ -228,7 +228,7 @@ string stars(double x) {
   if (x < 0.001) return "***";
   if (x < 0.01)  return "**";
   if (x < 0.05)  return "*";
-  return "";
+  return "n.s.";
 }
 
 const boost::math::normal_distribution<double> standard_normal_distribution;

@@ -96,7 +96,7 @@ std::string limit_line_length(const std::string &x, size_t line_length);
 
 /** Compute the logarithms of the sum of two logarithmic values */
 inline double exp_add(double x, double y) {
-  if (std::isinf(x) == -1 and std::isinf(y) == -1)
+  if (std::isinf(x) and x < 0 and std::isinf(y) and y < 0)
     return -std::numeric_limits<double>::infinity();
   double m = std::max(x, y);
   return log(exp(x - m) + exp(y - m)) + m;
@@ -104,7 +104,7 @@ inline double exp_add(double x, double y) {
 
 /** Compute the logarithms of the difference of two logarithmic values */
 inline double exp_diff(double x, double y) {
-  if (std::isinf(x) == -1 and std::isinf(y) == -1)
+  if (std::isinf(x) and x < 0 and std::isinf(y) and y < 0)
     return -std::numeric_limits<double>::infinity();
   double m = std::max(x, y);
   return log(exp(x - m) - exp(y - m)) + m;
