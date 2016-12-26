@@ -32,6 +32,7 @@
 
 #include <iostream>
 #include <vector>
+#include <random>
 #include <boost/numeric/ublas/vector.hpp>
 
 std::string reverse_complement(const std::string &s);
